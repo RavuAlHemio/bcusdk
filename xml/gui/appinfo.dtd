@@ -120,6 +120,8 @@
 
 <!ELEMENT DPTType %DPTTYPE;>
 <!ELEMENT Abbreviation %STRING;>
+<!ELEMENT GroupTitle %STRING;>
+<!ELEMENT InvisibleIf %STRING;>
 
 <!ELEMENT Reference EMPTY>
 <!ATTLIST Reference
@@ -127,7 +129,7 @@
 >
 
 
-<!ELEMENT Interface (DPTType,Abbreviation,Title?,AddInfo?,Reference+)>
+<!ELEMENT Interface (DPTType,Abbreviation,Title?,AddInfo?,GroupTitle?,InvisibleIf?,Reference+)>
 <!ATTLIST Interface
    id ID #REQUIRED
 >
