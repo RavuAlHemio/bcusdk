@@ -29,6 +29,7 @@ typedef struct
   BCU_LOAD_RESULT error;
   uint8_t obj;
   uint8_t prop;
+  uint16_t start;
   CArray req;
   CArray result;
   uint16_t memaddr;

@@ -20,6 +20,22 @@
 #include "loadimage.h"
 #include "image.h"
 
+static void
+GenAlloc (CArray & req, uint16_t start, uint16_t len, uint8_t access,
+	  uint8_t type, bool check)
+{
+  const uchar zero[10] = { 0 };
+  req.set (zero, 10);
+  req[0] = 0x03;
+  req[2] = (start >> 8) & 0xff;
+  req[3] = (start) & 0xff;
+  req[4] = (len >> 8) & 0xff;
+  req[5] = (len) & 0xff;
+  req[6] = access;
+  req[7] = type;
+  req[8] = check ? 0x80 : 0x00;
+}
+
 BCU_LOAD_RESULT
 PrepareLoadImage (const CArray & im, BCUImage * &img)
 {
@@ -84,8 +100,287 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       img->addr = (c->code[0x17] << 8) | (c->code[0x18]);
       return IMG_IMAGE_LOADABLE;
     }
-  if (b->bcutype == 0x0020)
+  if (b->bcutype == 0x0020 || b->bcutype == 0x0021)
     {
+      STR_BCU2Size *s = (STR_BCU2Size *) i->findStream (S_BCU2Size);
+      if (!s)
+	{
+	  delete i;
+	  return IMG_NO_SIZE;
+	}
+      if (s->lo_datasize + s->lo_bsssize > 18)
+	{
+	  delete i;
+	  return IMG_LODATA_OVERFLOW;
+	}
+      if (s->hi_datasize + s->hi_bsssize > 24)
+	{
+	  delete i;
+	  return IMG_LODATA_OVERFLOW;
+	}
+      if (s->textsize > 0x36f)
+	{
+	  delete i;
+	  return IMG_TEXT_OVERFLOW;
+	}
+
+      if (s->textsize != c->code ())
+	{
+	  delete i;
+	  return IMG_WRONG_SIZE;
+	}
+
+      if (s->textsize < 0x18)
+	{
+	  delete i;
+	  return IMG_NO_ADDRESS;
+	}
+      STR_BCU2Start *s1 = (STR_BCU2Start *) i->findStream (S_BCU2Start);
+      if (!s1)
+	{
+	  delete i;
+	  return IMG_NO_START;
+	}
+      if (s1->addrtab_start != 0x116)
+	{
+	  delete i;
+	  return IMG_WRONG_ADDRTAB;
+	}
+      if (s1->addrtab_size > 0xff)
+	{
+	  delete i;
+	  return IMG_ADDRTAB_OVERFLOW;
+	}
+      if (s1->assoctab_start < s1->addrtab_start + s1->addrtab_size)
+	{
+	  delete i;
+	  return IMG_OVERLAP_ASSOCTAB;
+	}
+      if (s1->assoctab_size > 0xff)
+	{
+	  delete i;
+	  return IMG_ADDRTAB_OVERFLOW;
+	}
+      if (s1->readonly_start < s1->assoctab_start + s1->assoctab_size)
+	{
+	  delete i;
+	  return IMG_OVERLAP_TEXT;
+	}
+      if (s1->readonly_end < s1->readonly_start)
+	{
+	  delete i;
+	  return IMG_NEGATIV_TEXT_SIZE;
+	}
+      if (s1->param_start < s1->readonly_end)
+	{
+	  delete i;
+	  return IMG_OVERLAP_PARAM;
+	}
+      if (s1->param_end < s1->param_start)
+	{
+	  delete i;
+	  return IMG_NEGATIV_TEXT_SIZE;
+	}
+      if (s1->obj_count > 0xff)
+	{
+	  delete i;
+	  return IMG_OBJTAB_OVERFLOW;
+	}
+      if (s1->param_end > c->code () + 0x100)
+	{
+	  delete i;
+	  return IMG_WRONG_LOADCTL;
+	}
+      img = new BCUImage;
+      img->code = c->code;
+      img->BCUType =
+	(b->bcutype == 0x0020 ? BCUImage::B_bcu20 : BCUImage::B_bcu21);
+      img->addr = (c->code[0x17] << 8) | (c->code[0x18]);
+
+      const uchar zero[10] = { 0 };
+      EIBLoadRequest r;
+      /*unload */
+      r.obj = 1;
+      r.prop = 5;
+      r.start = 1;
+      r.memaddr = 0xffff;
+      r.req.set (zero, 10);
+      r.req[0] = 0x04;
+      r.result.resize (1);
+      r.result[0] = 0x00;
+      r.error = IMG_UNLOAD_ADDR;
+      img->load.add (r);
+      r.obj = 2;
+      r.error = IMG_UNLOAD_ASSOC;
+      img->load.add (r);
+      r.obj = 3;
+      r.error = IMG_UNLOAD_PROG;
+      img->load.add (r);
+
+      /* loadaddrtab */
+      r.req.set (zero, 10);
+      r.obj = 1;
+      r.req[0] = 0x01;
+      r.result[0] = 0x02;
+      r.error = IMG_LOAD_ADDR;
+      img->load.add (r);
+
+      GenAlloc (r.req, s1->addrtab_start, s1->addrtab_size, 0x13, 0x03, 1);
+      r.memaddr = s1->addrtab_start;
+      r.len = 1;
+      r.error = IMG_WRITE_ADDR;
+      img->load.add (r);
+
+      r.obj = 0xff;
+      r.memaddr += 3;
+      r.len = s1->addrtab_size - 3;
+      img->load.add (r);
+
+      r.obj = 1;
+      r.memaddr = 0xffff;
+      r.req[0] = 0x03;
+      r.req[1] = 0x02;
+      r.req[2] = (s1->addrtab_start >> 8) & 0xff;
+      r.req[3] = (s1->addrtab_start) & 0xff;
+      r.req[4] = c->code[0x09];
+      r.req.setpart (c->code.array () + 0x03, 5, 5);
+      r.error = IMG_SET_ADDR;
+      img->load.add (r);
+
+      r.req.set (zero, 10);
+      r.req[0] = 0x02;
+      r.result[0] = 0x01;
+      r.error = IMG_FINISH_ADDR;
+      img->load.add (r);
+
+      /* loadassoctab */
+      r.req.set (zero, 10);
+      r.obj = 2;
+      r.req[0] = 0x01;
+      r.result[0] = 0x02;
+      r.error = IMG_LOAD_ASSOC;
+      img->load.add (r);
+
+      GenAlloc (r.req, s1->assoctab_start, s1->assoctab_size, 0x13, 0x03, 1);
+      r.memaddr = s1->addrtab_start;
+      r.len = s1->assoctab_size;
+      r.error = IMG_WRITE_ASSOC;
+      img->load.add (r);
+
+      r.memaddr = 0xffff;
+      r.req[0] = 0x03;
+      r.req[1] = 0x02;
+      r.req[2] = (s1->assoctab_start >> 8) & 0xff;
+      r.req[3] = (s1->assoctab_start) & 0xff;
+      r.req[4] = c->code[0x09];
+      r.req.setpart (c->code.array () + 0x03, 5, 5);
+      r.error = IMG_SET_ASSOC;
+      img->load.add (r);
+
+      r.req.set (zero, 10);
+      r.req[0] = 0x02;
+      r.result[0] = 0x01;
+      r.error = IMG_FINISH_ASSOC;
+      img->load.add (r);
+
+      /* loadproctab */
+      r.req.set (zero, 10);
+      r.obj = 3;
+      r.req[0] = 0x01;
+      r.result[0] = 0x02;
+      r.error = IMG_LOAD_PROG;
+      img->load.add (r);
+
+      GenAlloc (r.req, 0x00C8, 0x0018, 0x23, 0x01, 0);
+      r.error = IMG_ALLOC_LORAM;
+      img->load.add (r);
+
+      GenAlloc (r.req, 0x0972, 0x004A, 0x23, 0x01, 0);
+      r.error = IMG_ALLOC_HIRAM;
+      img->load.add (r);
+
+      GenAlloc (r.req, 0x0100, 0x0016, 0x03, 0x03, 0);
+      r.error = IMG_ALLOC_INIT;
+      r.len = 0x0016;
+      r.memaddr = 0x100;
+      img->load.add (r);
+
+      GenAlloc (r.req, s1->readonly_start,
+		s1->readonly_end - s1->readonly_start, 0x03, 0x03, 1);
+      r.error = IMG_ALLOC_RO;
+      r.len = s1->readonly_end - s1->readonly_start;
+      r.memaddr = s1->readonly_start;
+      if (r.len)
+	img->load.add (r);
+
+      GenAlloc (r.req, s1->readonly_end, s1->param_start - s1->readonly_end,
+		0x13, 0x03, 0);
+      r.error = IMG_ALLOC_EEPROM;
+      r.len = s1->param_start - s1->readonly_end;
+      r.memaddr = s1->readonly_end;
+      if (r.len)
+	img->load.add (r);
+
+      GenAlloc (r.req, s1->param_start, s1->param_end - s1->param_start, 0x03,
+		0x23, 1);
+      r.error = IMG_ALLOC_PARAM;
+      r.len = s1->param_end - s1->param_start;
+      r.memaddr = s1->param_start;
+      if (r.len)
+	img->load.add (r);
+
+      r.memaddr = 0xffff;
+      r.req[0] = 0x03;
+      r.req[1] = 0x02;
+      r.req[2] = (s1->runaddr >> 8) & 0xff;
+      r.req[3] = (s1->runaddr) & 0xff;
+      r.req[4] = c->code[0x09];
+      r.req.setpart (c->code.array () + 0x03, 5, 5);
+      r.error = IMG_SET_PROG;
+      img->load.add (r);
+
+      r.req.set (zero, 10);
+      r.req[0] = 0x03;
+      r.req[1] = 0x03;
+      r.req[2] = (s1->initaddr >> 8) & 0xff;
+      r.req[3] = (s1->initaddr) & 0xff;
+      r.req[4] = (s1->saveaddr >> 8) & 0xff;
+      r.req[5] = (s1->saveaddr) & 0xff;
+      r.req[6] = (s1->sphandler >> 8) & 0xff;
+      r.req[7] = (s1->sphandler) & 0xff;
+      r.error = IMG_SET_TASK_PTR;
+      img->load.add (r);
+
+      r.req.set (zero, 10);
+      r.req[0] = 0x03;
+      r.req[1] = 0x04;
+      r.req[2] = (s1->obj_ptr >> 8) & 0xff;
+      r.req[3] = (s1->obj_ptr) & 0xff;
+      r.req[4] = (s1->obj_count) & 0xff;
+      r.error = IMG_SET_OBJ;
+      img->load.add (r);
+
+      r.req.set (zero, 10);
+      r.req[0] = 0x03;
+      r.req[1] = 0x05;
+      r.req[2] = (s1->appcallback >> 8) & 0xff;
+      r.req[3] = (s1->appcallback) & 0xff;
+      r.req[4] = (s1->groupobj_ptr >> 8) & 0xff;
+      r.req[5] = (s1->groupobj_ptr) & 0xff;
+      r.req[6] = (s1->seg0 >> 8) & 0xff;
+      r.req[7] = (s1->seg0) & 0xff;
+      r.req[8] = (s1->seg1 >> 8) & 0xff;
+      r.req[9] = (s1->seg1) & 0xff;
+      r.error = IMG_SET_TASK2;
+      img->load.add (r);
+
+      r.req.set (zero, 10);
+      r.req[0] = 0x02;
+      r.result[0] = 0x01;
+      r.error = IMG_FINISH_PROC;
+      img->load.add (r);
+
+      return IMG_IMAGE_LOADABLE;
 
 
     }
@@ -174,6 +469,102 @@ decodeBCULoadResult (BCU_LOAD_RESULT r)
       break;
     case IMG_LOADED:
       return _("image successful loaded");
+      break;
+    case IMG_NO_START:
+      return _("no BCU2 load control information present");
+      break;
+    case IMG_WRONG_ADDRTAB:
+      return _("wrong start address of the address table");
+      break;
+    case IMG_ADDRTAB_OVERFLOW:
+      return _("address table too big");
+      break;
+    case IMG_OVERLAP_ASSOCTAB:
+      return _("association table and address table overlap");
+      break;
+    case IMG_OVERLAP_TEXT:
+      return _("text segement overlaps with association table");
+      break;
+    case IMG_NEGATIV_TEXT_SIZE:
+      return _("text segment end < text segment start");
+      break;
+    case IMG_OVERLAP_PARAM:
+      return _("text and param segment overlag");
+      break;
+    case IMG_OBJTAB_OVERFLOW:
+      return _("too many objects");
+      break;
+    case IMG_WRONG_LOADCTL:
+      return _("param end not in the text segment");
+      break;
+    case IMG_UNLOAD_ADDR:
+      return _("error unloading address table");
+      break;
+    case IMG_UNLOAD_ASSOC:
+      return _("error unloading assocation table");
+      break;
+    case IMG_UNLOAD_PROG:
+      return _("error unloading user programm");
+      break;
+    case IMG_LOAD_ADDR:
+      return _("error start loading address table");
+      break;
+    case IMG_WRITE_ADDR:
+      return _("error allocation address table");
+      break;
+    case IMG_SET_ADDR:
+      return _("error setting address table start");
+      break;
+    case IMG_FINISH_ADDR:
+      return _("error finishing address table");
+      break;
+    case IMG_LOAD_ASSOC:
+      return _("error start loading association table");
+      break;
+    case IMG_WRITE_ASSOC:
+      return _("error allocation assocation table");
+      break;
+    case IMG_SET_ASSOC:
+      return _("error setting assocation table start");
+      break;
+    case IMG_FINISH_ASSOC:
+      return _("error finishing assocation table");
+      break;
+    case IMG_LOAD_PROG:
+      return _("error start loading programm");
+      break;
+    case IMG_ALLOC_LORAM:
+      return _("error allocation low ram");
+      break;
+    case IMG_ALLOC_HIRAM:
+      return _("error allocation high ram");
+      break;
+    case IMG_ALLOC_INIT:
+      return _("error allocation config section");
+      break;
+    case IMG_ALLOC_RO:
+      return _("error loading text segment");
+      break;
+    case IMG_ALLOC_EEPROM:
+      return _("error loading eeprom segment");
+      break;
+    case IMG_ALLOC_PARAM:
+      return _("error loading parameter segement");
+      break;
+    case IMG_SET_PROG:
+      return _("error setting programm entry");
+      break;
+    case IMG_SET_TASK_PTR:
+      return _("error setting task pointer");
+      break;
+    case IMG_SET_OBJ:
+      return _("error setting object pointer");
+      break;
+    case IMG_SET_TASK2:
+      return _("error setting group object pointer");
+      break;
+    case IMG_FINISH_PROC:
+      return _("error finishing application programm");
       break;
 
     default:
