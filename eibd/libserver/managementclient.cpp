@@ -511,29 +511,31 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	/* set error flags in BCU (0x10D = 0x00) */
 	r = IMG_CLEAR_ERROR;
 	c = 0;
-	if (m.X_Memory_Write (0x010d, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x010d, CArray (&c, 1)) == -1)
 	  goto out;
 
 	/*set length of the address tab to 1 */
 	r = IMG_RESET_ADDR_TAB;
 	c = 0x01;
-	if (m.X_Memory_Write (0x0116, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x0116, CArray (&c, 1)) == -1)
 	  goto out;
 
 	/*load the data from 0x100 to 0x100 */
 	r = IMG_LOAD_HEADER;
 	c = 0xff;
-	if (m.X_Memory_Write (0x0100, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x0100, CArray (&c, 1)) == -1)
 	  goto out;
 
 	/*load the data from 0x103 to 0x10C */
-	if (m.X_Memory_Write (0x0103, CArray (i->code.array () + 0x04, 10)) ==
-	    -1)
+	if (m.
+	    X_Memory_Write_Block (0x0103,
+				  CArray (i->code.array () + 0x03, 10)) == -1)
 	  goto out;
 
 	/*load the data from 0x10E to 0x115 */
-	if (m.X_Memory_Write (0x010E, CArray (i->code.array () + 0x0E, 8)) ==
-	    -1)
+	if (m.
+	    X_Memory_Write_Block (0x010E,
+				  CArray (i->code.array () + 0x0E, 8)) == -1)
 	  goto out;
 
 	/*load the data from 0x119H to eeprom end */
@@ -544,7 +546,8 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 					  i->code () - 0x19)) == -1)
 	  goto out;
 
-	if (m.X_Memory_Write (0x0100, CArray (i->code.array (), 1)) == -1)
+	if (m.X_Memory_Write_Block (0x0100, CArray (i->code.array (), 1)) ==
+	    -1)
 	  goto out;
 
 	/*erase the user RAM (0x0CE to 0x0DF) */
@@ -563,7 +566,7 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	/* reset all error flags in the BCU (0x10D = 0xFF) */
 	r = IMG_PREPARE_RUN;
 	c = 0xff;
-	if (m.X_Memory_Write (0x010d, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x010d, CArray (&c, 1)) == -1)
 	  goto out;
 
 	r = IMG_RESTART;
@@ -594,10 +597,10 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	      }
 	    if (i->load[j].memaddr != 0xffff)
 	      if (m.
-		  X_Memory_Write (i->load[j].memaddr,
-				  CArray (i->code.array () +
-					  i->load[j].memaddr - 0x100,
-					  i->load[j].len)) == -1)
+		  X_Memory_Write_Block (i->load[j].memaddr,
+					CArray (i->code.array () +
+						i->load[j].memaddr - 0x100,
+						i->load[j].len)) == -1)
 		goto out;
 	  }
 
