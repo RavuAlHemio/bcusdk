@@ -33,4 +33,7 @@ typedef Array < uchar > CArray;
 /** EIB address */
 typedef uint16_t eibaddr_t;
 
+/** EIB key */
+typedef uint32_t eibkey_type;
+
 #endif

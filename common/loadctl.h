@@ -37,6 +37,7 @@ typedef enum
 
   L_BCU_TYPE = 100,
   L_BCU2_INIT,
+  L_BCU2_KEY,
 
   L_STRING_PAR = 500,
   L_INT_PAR,
