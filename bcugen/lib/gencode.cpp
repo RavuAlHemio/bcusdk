@@ -112,17 +112,20 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
     }
   else
     {
-      fprintf (f, "GROUP%d_T %s __attribute__ ((section (\"%s\")));\n",
+      fprintf (f, "%sGROUP%d_T %s __attribute__ ((section (\"%s\")));\n",
+	       o.eeprom ? "const " : "",
 	       o.Type, o.Name (), o.eeprom ? ".eeprom" : ".ram");
       if (o.on_update ())
 	fprintf (f, "void %s();\n", o.on_update ());
 #ifdef PHASE1
       if (o.Sending)
-	fprintf (f, "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
+	fprintf (f,
+		 "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
 		 o.Name (), o.ObjNo);
 #else
       if (o.SendAddress_lineno)
-	fprintf (f, "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
+	fprintf (f,
+		 "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
 		 o.Name (), o.ObjNo);
 #endif
     }
@@ -167,6 +170,17 @@ GenInclude (FILE * f, Device & d)
 }
 
 void
+GenCommonHeader (FILE * f, Device & d)
+{
+  if (d.on_init ())
+    fprintf (f, "void %s();\n", d.on_init ());
+  if (d.on_run ())
+    fprintf (f, "void %s();\n", d.on_run ());
+  if (d.on_save ())
+    fprintf (f, "void %s();\n", d.on_save ());
+}
+
+void
 GenTestHeader (FILE * f, Device & d)
 {
   int i;
@@ -194,6 +208,7 @@ GenTestHeader (FILE * f, Device & d)
     }
   for (i = 0; i < d.GroupObjects (); i++)
     GenGroupObjectHeader (f, d.GroupObjects[i]);
+  GenCommonHeader (f, d);
 }
 
 void
@@ -327,6 +342,7 @@ GenRealHeader (FILE * f, Device & d)
     }
   for (i = 0; i < d.GroupObjects (); i++)
     GenGroupObjectHeader (f, d.GroupObjects[i]);
+  GenCommonHeader (f, d);
 }
 
 void
