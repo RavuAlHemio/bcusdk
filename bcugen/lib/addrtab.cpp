@@ -198,8 +198,8 @@ printPseudoAddrTab (FILE * f, Device & d)
   fprintf (f, "\t.hword 0x0000 # physical address\n");
   for (i = 0; i < d.Test_Addr_Count; i++)
     fprintf (f, "\t.hword 0x0000\n");
-  fprintf (f, "\t.section .assoctab\n");
   fprintf (f, "addrtab_end:\n");
+  fprintf (f, "\t.section .assoctab\n");
   fprintf (f, "assoctab:\n");
   fprintf (f, "\t.byte %d\n", d.Test_Assoc_Count);
   for (i = 0; i < d.Test_Assoc_Count; i++)

@@ -76,8 +76,8 @@ GenGroupObjectASM (FILE * f, GroupObject & o, BCUType b)
     flag |= 0x40;
   if (o.UpdateAddress () || b == BCU_bcu12)
     flag |= 0x80;
-  fprintf (f, "\t.byte lo8(%s),0x%02X,GROUPTYPE_%d\n", o.Name (), flag,
-	   o.Type);
+  fprintf (f, "\t.byte %s(%s),0x%02X,GROUPTYPE_%d\n",
+	   (b == BCU_bcu12 ? "lo8" : "offset8"), o.Name (), flag, o.Type);
 }
 
 void
@@ -356,8 +356,25 @@ GenBCUHeader (FILE * f, Device & d)
   fprintf (f, "\t.hword %d\n", d.BCU);
   if (d.BCU != BCU_bcu12)
     {
-      fprintf (f, "\t.hword %d\n", 8);
+      fprintf (f, "\t.hword %d\n", 38);
       fprintf (f, "\t.hword %d\n", L_BCU2_INIT);
+      fprintf (f, "\t.hword addrtab\n");
+      fprintf (f, "\t.hword addrtab_end-addrtab\n");
+      fprintf (f, "\t.hword assoctab\n");
+      fprintf (f, "\t.hword assoctab_end-assoctab\n");
+
+      fprintf (f, "\t.hword readonly_start\n");
+      fprintf (f, "\t.hword readonly_end\n");
+      fprintf (f, "\t.hword param_start\n");
+      fprintf (f, "\t.hword param_end\n");
+      fprintf (f, "\t.hword eibobjects\n");
+      fprintf (f, "\t.hword %d #ObjCount\n", d.Objects ());
+      fprintf (f, "\t.hword AL_SAPcallback\n");
+      fprintf (f, "\t.hword commobjs\n");
+      fprintf (f, "\t.hword ram_start\n");
+      fprintf (f, "\t.hword eeprom_start\n");
+      fprintf (f, "\t.hword 0x0000 #SPHandler\n");
+
       fprintf (f, "\t.hword _UserInit\n");
       fprintf (f, "\t.hword _UserRun\n");
       fprintf (f, "\t.hword _UserSave\n");
@@ -402,17 +419,19 @@ GenBCUHeader (FILE * f, Device & d)
     i |= 0x40;
 
   fprintf (f, "\t.byte 0x%02X # ConfigDes\n", i);
-  fprintf (f, "\t.byte assoctab-0x100\n");
-  fprintf (f, "\t.byte commobjs-0x100\n");
 
   if (d.BCU == BCU_bcu12)
     {
+      fprintf (f, "\t.byte assoctab-0x100\n");
+      fprintf (f, "\t.byte commobjs-0x100\n");
       fprintf (f, "\t.byte _UserInit-0x100\n");
       fprintf (f, "\t.byte _UserRun-0x100\n");
       fprintf (f, "\t.byte _UserSave-0x100\n");
     }
   else
     {
+      fprintf (f, "\t.byte 0 #BCU1 pointer\n");
+      fprintf (f, "\t.byte 0 #BCU1 pointer\n");
       fprintf (f, "\t.byte %s #RateLimit Pointer\n",
 	       (d.RateLimit_lineno ? "ratelimit+1" : "0"));
       fprintf (f, "\t.byte %s\n", "0");
