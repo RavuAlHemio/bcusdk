@@ -17,29 +17,33 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "image.h"
-#include "common.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include "eibclient.h"
+#include "common.h"
+#include "types.h"
+#include "image.h"
 #include "loadimage.h"
 
 int
 main (int ac, char *ag[])
 {
-  CArray p;
-  uchar buf[200];
-  bool dump = 0;
-  if (ac != 2 && ac != 3)
-    die (_("%s [-d] image"), ag[0]);
+  Array < uint8_t > p;
+  int len;
+  uint8_t buf[200];
+  EIBConnection *con;
 
-  if (ac == 3 && strcmp (ag[1], "-d"))
-    die (_("%s [-d] image"), ag[0]);
-  if (ac == 3)
+  bool dump = 0;
+  if (ac != 3 && ac != 4)
+    die (_("%s [-d] url image"), ag[0]);
+
+  if (ac == 4 && strcmp (ag[1], "-d"))
+    die (_("%s [-d] url image"), ag[0]);
+  if (ac == 4)
     ag++, dump = 1;
 
-  FILE *f = fopen (ag[1], "r");
+  FILE *f = fopen (ag[2], "r");
   if (!f)
-    die (_("open of %s failed"), ag[1]);
+    die (_("open of %s failed"), ag[2]);
 
   while (!feof (f))
     {
@@ -51,20 +55,24 @@ main (int ac, char *ag[])
   if (dump)
     printf ("%s", HexDump (p) ());
 
-  Image *i = Image::fromArray (p);
-  if (!i)
-    die (_("not a image"));
+  BCUImage *i;
 
-  if (!i->isValid ())
-    die (_("not a valid image\n"));
+  BCU_LOAD_RESULT r = PrepareLoadImage (p, i);
 
-  printf ("%s\n", i->decode ()());
+  if (r != IMG_IMAGE_LOADABLE)
+    {
+      printf ("%s\n", decodeBCULoadResult (r) ());
+      return 1;
+    }
 
-  BCUImage *im;
+  con = EIBSocketURL (ag[1]);
+  if (!con)
+    die ("Open failed");
 
-  BCU_LOAD_RESULT r = PrepareLoadImage (p, im);
+  r = EIB_LoadImage (con, p.array (), p ());
 
   printf ("%s\n", decodeBCULoadResult (r) ());
 
+  EIBClose (con);
   return 0;
 }

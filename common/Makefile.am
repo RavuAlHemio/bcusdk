@@ -1,3 +1,5 @@
 noinst_HEADERS=array.h strings.h types.h stack.h
 noinst_LIBRARIES=libcommon.a
-libcommon_a_SOURCES=loadctl.h image.cpp image.h
+libcommon_a_SOURCES=loadctl.h image.cpp image.h loadimage.h loadimage.cpp
+
+dist_include_HEADERS=eibloadresult.h
