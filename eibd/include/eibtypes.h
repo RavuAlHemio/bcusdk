@@ -67,5 +67,6 @@
 #define EIB_MC_PROG_MODE                0x0060
 #define EIB_MC_PROP_DESC                0x0061
 #define EIB_MC_PROP_SCAN                0x0062
+#define EIB_LOAD_IMAGE                  0x0063
 
 #endif

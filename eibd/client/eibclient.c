@@ -1258,3 +1258,36 @@ EIB_MC_PropertyScan (EIBConnection * con, int maxlen, uint8_t * buf)
   memcpy (buf, con->buf + 2, i);
   return i;
 }
+
+BCU_LOAD_RESULT
+EIB_LoadImage (EIBConnection * con, const uint8_t * image, int len)
+{
+  uchar *ibuf;
+  int i;
+  if (!image)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  ibuf = (uchar *) malloc (len + 2);
+  if (!ibuf)
+    {
+      errno = ENOMEM;
+      return -1;
+    }
+  EIBSETTYPE (ibuf, EIB_LOAD_IMAGE);
+  memcpy (ibuf + 2, image, len);
+  i = SendRequest (con, len + 2, ibuf);
+  free (ibuf);
+  if (i == -1)
+    return -1;
+  i = GetRequest (con);
+  if (i == -1)
+    return -1;
+  if (EIBTYPE (con) != EIB_LOAD_IMAGE || con->size < 4)
+    {
+      errno = ECONNRESET;
+      return IMG_UNKNOWN_ERROR;
+    }
+  return (con->buf[2] << 8) | con->buf[3];
+}

@@ -66,4 +66,13 @@ void WriteIndividualAddress (Layer3 * l3, Trace * t, ClientConnection * c,
 void ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 			   pth_event_t stop);
 
+/** Loads an image in a BCU
+ * @param l3 Layer 3 interface
+ * @param t debug output
+ * @param c client connection
+ * @param stop if occurs, function should abort
+ */
+void LoadImage (Layer3 * l3, Trace * t, ClientConnection * c,
+		pth_event_t stop);
+
 #endif

@@ -30,7 +30,9 @@
 #include "sys/cdefs.h"
 #include "stdint.h"
 
-__BEGIN_DECLS; 
+__BEGIN_DECLS;
+
+#include "eibloadresult.h"
 
 /** type represents a connection to eibd */
 typedef struct _EIBConnection EIBConnection;
@@ -330,7 +332,14 @@ int EIB_MC_Authorize (EIBConnection * con, uint8_t key[4]);
  * \return -1 if error, else 0
  */
 int EIB_MC_SetKey (EIBConnection * con, uint8_t key[4], uint8_t level);
-
+/** loads an image over an management connection
+ * \param con eibd connection
+ * \param image pointer to image
+ * \param len legth of the image
+ * \return result
+ */
+BCU_LOAD_RESULT EIB_LoadImage (EIBConnection * con, const uint8_t * image,
+			       int len);
 
 __END_DECLS
 #endif
