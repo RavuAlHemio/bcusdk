@@ -39,16 +39,16 @@ main (int ac, char *ag[])
 
   CheckDevice (*d);
 
-  f = fopen (ag[3], "w");
-  if (!f)
-    die (_("writing to %s failed"), ag[3]);
-  GenRealHeader (f, *d);
-  fclose (f);
-
   f = fopen (ag[4], "w");
   if (!f)
     die (_("writing to %s failed"), ag[4]);
   GenRealAsm (f, *d);
+  fclose (f);
+
+  f = fopen (ag[3], "w");
+  if (!f)
+    die (_("writing to %s failed"), ag[3]);
+  GenRealHeader (f, *d);
   fclose (f);
 
   f = fopen (ag[5], "w");

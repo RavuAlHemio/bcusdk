@@ -42,6 +42,12 @@ main (int ac, char *ag[])
   WriteConfig (ag[2], d);
   WriteAppInfo (d, ag[3]);
 
+  f = fopen (ag[7], "w");
+  if (!f)
+    die (_("writing to %s failed"), ag[7]);
+  GenTestAsm (f, *d);
+  fclose (f);
+
   f = fopen (ag[4], "w");
   if (!f)
     die (_("writing to %s failed"), ag[4]);
@@ -58,12 +64,6 @@ main (int ac, char *ag[])
   if (!f)
     die (_("writing to %s failed"), ag[6]);
   GenTestData (f, *d);
-  fclose (f);
-
-  f = fopen (ag[7], "w");
-  if (!f)
-    die (_("writing to %s failed"), ag[7]);
-  GenTestAsm (f, *d);
   fclose (f);
 
   f = fopen (ag[8], "w");
