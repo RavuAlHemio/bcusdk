@@ -42,7 +42,7 @@ class ClientConnection:public Thread
   /** server */
   Server *s;
   /** buffer length*/
-  int buflen;
+  unsigned buflen;
 
   void Run (pth_sem_t * stop);
 public:
@@ -61,7 +61,7 @@ public:
   /** buffer*/
   uchar *buf;
   /** message length */
-  int size;
+  unsigned size;
 };
 
 #endif

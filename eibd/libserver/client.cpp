@@ -201,7 +201,8 @@ int
 ClientConnection::readmessage (pth_event_t stop)
 {
   uchar head[2];
-  int i, start;
+  int i;
+  unsigned start;
 
   i = pth_read_ev (fd, &head, 2, stop);
   if (i != 2)
