@@ -1,2 +1,32 @@
-DEFS=class_gen.h class_init.h parser_gentoken.h parser_genunion.h parser_objectdesc.h scanner_gen.h write_gen.h
-dist_noinst_DATA=$(DEFS)
+DEF=class_gen.h class_init.h parser_gentoken.h parser_genunion.h parser_objectdesc.h scanner_gen.h write_gen.h
+READ=parser.pre parser1.pre parser2.pre scanner.pre
+
+dist_noinst_DATA=$(DEF)
+
+INCLUDES=-I../../common -I../struct -I../lib -I.
+AM_YFLAGS=-d
+BUILT_SOURCES=parser1.post parser1.1.ypp parser1.1.h scanner.post scanner.1.lpp parser2.post parser2.1.ypp parser2.1.h
+CLEANFILES=parser2.post parser1.post scanner.post scanner.1.lpp parser1.1.ypp parser1.1.h parser1.1.cpp parser2.1.ypp \
+	parser2.1.h parser2.1.cpp scanner.1.cpp
+noinst_LIBRARIES=libread1.a libread2.a
+
+libread1_a_SOURCES=scanner.1.lpp parser1.1.ypp
+
+libread2_a_SOURCES=scanner.1.lpp parser2.1.ypp
+
+@AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/scanner.Po@am__quote@
+@AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/parser1.Po@am__quote@
+@AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/parser2.Po@am__quote@
+
+
+%.1.lpp : %.post
+	cp $< $@
+%.1.ypp : %.post
+	cp $< $@
+
+.pre.post:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -E -P -x c -O0 -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -E -P -x c -O0 -o $@ $<

@@ -1,0 +1,97 @@
+%{
+/*
+    BCU SDK bcu development enviroment
+    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#include "scanner.h"
+#include "stack.h"
+#include "classes.h"
+#include "map.h"
+
+void yyerror(char*s)
+{
+  parserError("%s",s);
+}
+
+Stack<void*> stack;
+Device* parser_dev;
+
+%}
+
+%union {
+long int intval;
+const char* str;
+String* string;
+double fval;
+bool bval;
+IdentMap* map;
+IdentArray* identarray;
+IdentArray* stringarray;
+#include "parser_genunion.h"
+#include "Objects.lst"
+};
+
+%error-verbose
+%start file;
+%token<intval> INT
+%token<str> IDENT STRING
+%token<fval> FLOAT
+%token  TRUE FALSE;
+%token NEVER_OCCUR
+
+%type<intval> intc
+%type<fval> floatc
+%type<map> identmap identmap1
+%type<identarray> identarray identarray1
+%type<stringarray> stringarray stringarray1
+%type<bval> bool;
+%type<string> string ident
+
+#include "parser_gentoken.h"
+#include "Objects.lst"
+
+%%
+
+floatc : FLOAT | intc { $$=$1; } ;
+intc : INT ;
+
+string : STRING {$$=unescapeString($1); } | string STRING { String* n=unescapeString($2); (*$1)+=*n;delete n; } ;
+ident : IDENT {$$=new String($1); };
+bool : TRUE { $$=1; } | FALSE { $$=0; };
+
+identmap1 : { $$=new IdentMap; } | identmap1 ident '=' string ';' {Map m;m.Name=*$2; m.Value=*$4;delete $2; delete $4; $1->add(m); $$=$1; } 
+
+identmap : '{' identmap1 '}' { $$=$2;} ;
+
+identarray1 : ident { $$=new IdentArray; $$->add(*$1); delete $1; } | identarray1 ',' ident {$1->add(*$3); delete $3; $$=$1; } 
+
+stringarray1 : string { $$=new StringArray; $$->add(*$1); delete $1; } | stringarray1 ',' ident {$1->add(*$3); delete $3; $$=$1; } 
+
+ebs : ',' | ;
+
+identarray : '{' '}' {$$=new IdentArray; }
+	| '{' identarray1 ebs '}' { $$=$2;} ;
+
+stringarray : '{' '}' {$$=new StringArray; }
+	| '{' stringarray1 ebs '}' { $$=$2;} ;
+
+#include "parser_objectdesc.h"
+#include "Objects.lst"
+
+
+file : Device_struct { parser_dev=$1; };
