@@ -332,7 +332,7 @@ GenBCUHeader (FILE * f, Device & d)
   fprintf (f, "\t.hword %d\n", d.BCU);
   if (d.BCU != BCU_bcu12)
     {
-      fprintf (f, "\t.hword %d\n", 38);
+      fprintf (f, "\t.hword %d\n", 42);
       fprintf (f, "\t.hword %d\n", L_BCU2_INIT);
       fprintf (f, "\t.hword addrtab\n");
       fprintf (f, "\t.hword addrtab_end-addrtab\n");
@@ -354,6 +354,8 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.hword _UserInit\n");
       fprintf (f, "\t.hword _UserRun\n");
       fprintf (f, "\t.hword _UserSave\n");
+      fprintf (f, "\t.hword eeprom_start\n");
+      fprintf (f, "\t.hword eeprom_end\n");
     }
   fprintf (f, "\t.section .bcuconfig\n");
   if (d.BCU == BCU_bcu12)

@@ -613,11 +613,13 @@ STR_BCU2Start::STR_BCU2Start ()
   initaddr = 0;
   runaddr = 0;
   saveaddr = 0;
+  eeprom_start = 0;
+  eeprom_end = 0;
 }
 
 STR_BCU2Start::STR_BCU2Start (const CArray & c)
 {
-  if (c () != 40)
+  if (c () != 44)
     throw 1;
   addrtab_start = c[4] << 8 | c[5];
   addrtab_size = c[6] << 8 | c[7];
@@ -637,13 +639,15 @@ STR_BCU2Start::STR_BCU2Start (const CArray & c)
   initaddr = c[34] << 8 | c[35];
   runaddr = c[36] << 8 | c[37];
   saveaddr = c[38] << 8 | c[39];
+  saveaddr = c[40] << 8 | c[41];
+  saveaddr = c[42] << 8 | c[43];
 }
 
 CArray
 STR_BCU2Start::toArray ()
 {
   CArray d;
-  uint16_t len = 38;
+  uint16_t len = 42;
   d.resize (2 + len);
   d[0] = (len >> 8) & 0xff;
   d[1] = (len) & 0xff;
@@ -685,6 +689,10 @@ STR_BCU2Start::toArray ()
   d[37] = (runaddr) & 0xff;
   d[38] = (saveaddr >> 8) & 0xff;
   d[39] = (saveaddr) & 0xff;
+  d[38] = (eeprom_start >> 8) & 0xff;
+  d[39] = (eeprom_start) & 0xff;
+  d[38] = (eeprom_end >> 8) & 0xff;
+  d[39] = (eeprom_end) & 0xff;
   return d;
 }
 
@@ -695,11 +703,11 @@ STR_BCU2Start::decode ()
   sprintf (buf,
 	   "BCU2_INIT: init:%04X run:%04X save:%04X addr_tab:%04X(%d) assoc_tab:%04X(%d) text:%04X-%04X\n"
 	   " param:%04X-%04X obj:%04X(%d) appcallback:%04X\n"
-	   " groupobj:%04X seg0:%04X seg1:%04X sphandler:%04X\n",
+	   " groupobj:%04X seg0:%04X seg1:%04X sphandler:%04X eeprom:%04X-%04X\n",
 	   initaddr, runaddr, saveaddr, addrtab_start, addrtab_size,
 	   assoctab_start, assoctab_size, readonly_start, readonly_end,
 	   param_start, param_end, obj_ptr, obj_count, appcallback,
-	   groupobj_ptr, seg0, seg1, sphandler);
+	   groupobj_ptr, seg0, seg1, sphandler, eeprom_start, eeprom_end);
   return buf;
 }
 

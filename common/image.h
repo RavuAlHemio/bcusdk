@@ -248,6 +248,8 @@ public:
   uint16_t initaddr;
   uint16_t runaddr;
   uint16_t saveaddr;
+  uint16_t eeprom_start;
+  uint16_t eeprom_end;
 
     STR_BCU2Start ();
     STR_BCU2Start (const CArray & str);

@@ -102,6 +102,7 @@ eeprom_start = . ;
 .eeprom : {
 
 }
+eeprom_end = . ;
 param_start = . ;
 .parameter : {
 	*(.parameter)
