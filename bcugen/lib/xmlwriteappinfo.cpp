@@ -220,6 +220,7 @@ GenListParameter (const ListParameter & d)
     nc (n, "Unit", d.Unit ());
   return n;
 }
+
 static xmlNodePtr
 GenIntParameter (const IntParameter & d)
 {
@@ -250,6 +251,7 @@ GenIntParameter (const IntParameter & d)
     }
   return n;
 }
+
 static xmlNodePtr
 GenFloatParameter (const FloatParameter & d)
 {
@@ -281,6 +283,7 @@ GenFloatParameter (const FloatParameter & d)
 
   return n;
 }
+
 static xmlNodePtr
 GenStringParameter (const StringParameter & d)
 {
@@ -354,8 +357,8 @@ GenChild (xmlNodePtr n, const Device & d)
       if (p)
 	xmlAddChild (n, p), j++;
     }
-  /*  if(!j)
-     die(_("no functional block")); */
+  if (!j)
+    die (_("no functional block with enabled interfaces"));
   for (i = 0; i < d.GroupObjects (); i++)
     {
       p = GenGroupObject (d.GroupObjects[i]);
