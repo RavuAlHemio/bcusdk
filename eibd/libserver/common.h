@@ -20,11 +20,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <stdint.h>
+#include "types.h"
 #include <assert.h>
 
-/** unsigned char */
-typedef uint8_t uchar;
 /** EIB address */
 typedef uint16_t eibaddr_t;
 /** Domain address */
@@ -56,8 +54,6 @@ typedef enum
 { GroupAddress, IndividualAddress } EIB_AddrType;
 
 
-#include "array.h"
-#include "strings.h"
 #include "queue.h"
 #include "exception.h"
 #include "threads.h"
@@ -82,9 +78,6 @@ String FormatEIBAddr (eibaddr_t a);
 String FormatGroupAddr (eibaddr_t a);
 /** formats an EIB domain address */
 String FormatDomainAddr (domainaddr_t addr);
-
-/** Array of characters */
-typedef Array < uchar > CArray;
 
 #include "trace.h"
 
