@@ -301,27 +301,45 @@ Layer7_Connection::X_Memory_Write (memaddr_t addr, const CArray & data)
 int
 Layer7_Connection::X_Memory_Write_Block (memaddr_t addr, const CArray & data)
 {
+  CArray prev;
+  int i, j;
   const unsigned blocksize = 12;
-  for (unsigned i = 0; i < data (); i += blocksize)
-    if (X_Memory_Write
-	(addr + i,
-	 CArray (data.array () + i,
-		 (data () - i > blocksize ? blocksize : data () - i))) == -1)
-      return -1;
+  if (X_Memory_Read_Block (addr, data (), prev) == -1)
+    return -1;
+  for (i = 0; i < data (); i++)
+    {
+      if (data[i] == prev[i])
+	continue;
+      j = 0;
+      while (data[i + j] != prev[i + j] && j < blocksize && i + j < data ())
+	j++;
+      if (X_Memory_Write (addr + i, CArray (data.array () + i, j)) == -1)
+	return -1;
+      i += j - 1;
+    }
+
   return 0;
 }
 
 int
 Layer7_Connection::X_Memory_Read_Block (memaddr_t addr, int len, CArray & erg)
 {
-  const unsigned blocksize = 2;
+  unsigned blocksize = 12;
   CArray e;
   erg.resize (len);
   for (unsigned i = 0; i < len; i += blocksize)
     {
+    rt:
       if (A_Memory_Read
 	  (addr + i, (len - i > blocksize ? blocksize : len - i), e) == -1)
-	return -1;
+	{
+	  if (blocksize == 12)
+	    {
+	      blocksize = 2;
+	      goto rt;
+	    }
+	  return -1;
+	}
       erg.setpart (e, i);
     }
   return 0;
