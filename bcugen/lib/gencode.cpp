@@ -51,31 +51,7 @@ GenGroupObjectASM (FILE * f, GroupObject & o, BCUType b)
   int flag = 0;
   if (o.ObjNo == -1)
     return;
-  switch (o.Priority)
-    {
-    case PRIO_SYSTEM:
-      flag = 0;
-      break;
-    case PRIO_URGENT:
-      flag = 1;
-      break;
-    case PRIO_NORMAL:
-      flag = 2;
-      break;
-    default:
-      flag = 3;
-    }
-  flag |= 4;
-  if (o.ReadAddress ())
-    flag |= 8;
-  if (o.ReceiveAddress ())
-    flag |= 0x10;
-  if (o.eeprom)
-    flag |= 0x20;
-  if (o.SendAddress_lineno)
-    flag |= 0x40;
-  if (o.UpdateAddress () || b == BCU_bcu12)
-    flag |= 0x80;
+  flag = GroupObjectFlag (o, b);
   fprintf (f, "\t.byte %s(%s),0x%02X,GROUPTYPE_%d\n",
 	   (b == BCU_bcu12 ? "lo8" : "offset8"), o.Name (), flag, o.Type);
 }

@@ -19,6 +19,45 @@
 
 #include "addrtab.h"
 
+int
+GroupObjectFlag (GroupObject & o, BCUType b)
+{
+  int flag;
+  if (o.ObjAddress () == 0)
+    {
+      if (b == BCU_bcu12)
+	return 0x80;
+      else
+	return 0x00;
+    }
+  switch (o.Priority)
+    {
+    case PRIO_SYSTEM:
+      flag = 0;
+      break;
+    case PRIO_URGENT:
+      flag = 1;
+      break;
+    case PRIO_NORMAL:
+      flag = 2;
+      break;
+    default:
+      flag = 3;
+    }
+  flag |= 4;
+  if (o.ReadAddress ())
+    flag |= 8;
+  if (o.ReceiveAddress ())
+    flag |= 0x10;
+  if (o.eeprom)
+    flag |= 0x20;
+  if (o.SendAddress_lineno)
+    flag |= 0x40;
+  if (o.UpdateAddress () || b == BCU_bcu12)
+    flag |= 0x80;
+  return flag;
+}
+
 static int
 hasAddress (Array < eibgaddr_t > &a, eibgaddr_t addr)
 {
@@ -40,7 +79,7 @@ addAddress (Array < eibgaddr_t > &a, eibgaddr_t addr)
 }
 
 void
-BuildObjAddress (GroupObject & o, int &objno, BCUType b)
+BuildObjAddress (GroupObject & o, BCUType b)
 {
   int i, j;
   int first = 1;
@@ -96,6 +135,11 @@ BuildObjAddress (GroupObject & o, int &objno, BCUType b)
 		("line %d: unsupported combination of group addresses, merging them"),
 		o.lineno);
     }
+}
+
+void
+BuildObjNo (GroupObject & o, int &objno)
+{
   if (o.ObjAddress ())
     o.ObjNo = objno++;
   else
@@ -113,34 +157,30 @@ AddrNo (Array < eibgaddr_t > a, eibgaddr_t ga)
 }
 
 void
-printAddrTab (FILE * f, Device & d)
+BuildAddrTable (AddrTable & t, Device & d)
 {
-  int objno = 0, i, j, fn;
-  Array < eibgaddr_t > addr;
   Array < bool > used;
-  Array < int >ObjNo;
-  Array < int >Addr;
   int maxs = 0;
-  for (i = 0; i < d.GroupObjects (); i++)
-    BuildObjAddress (d.GroupObjects[i], objno, d.BCU);
+  int i, j, fn;
+  t.addr.resize (0);
   for (i = 0; i < d.GroupObjects (); i++)
     for (j = 0; j < d.GroupObjects[i].ObjAddress (); j++)
-      addAddress (addr, d.GroupObjects[i].ObjAddress[j]);
-  addr.sort ();
+      addAddress (t.addr, d.GroupObjects[i].ObjAddress[j]);
+  t.addr.sort ();
 
   for (i = 0; i < d.GroupObjects (); i++)
     maxs += d.GroupObjects[i].ObjAddress ();
   used.resize (maxs);
-  ObjNo.resize (maxs);
-  Addr.resize (maxs);
+  t.ObjNo.resize (maxs);
+  t.Addr.resize (maxs);
   for (i = 0; i < maxs; i++)
     used[i] = 0;
   for (i = 0; i < d.GroupObjects (); i++)
     if (d.GroupObjects[i].SendAddress_lineno)
       {
 	used[i] = 1;
-	ObjNo[i] = d.GroupObjects[i].ObjNo;
-	Addr[i] = AddrNo (addr, d.GroupObjects[i].SendAddress);
+	t.ObjNo[i] = d.GroupObjects[i].ObjNo;
+	t.Addr[i] = AddrNo (t.addr, d.GroupObjects[i].SendAddress);
       }
   fn = 0;
   while (fn < maxs && used[fn])
@@ -151,19 +191,34 @@ printAddrTab (FILE * f, Device & d)
 	  d.GroupObjects[i].SendAddress != d.GroupObjects[i].ObjAddress[j])
 	{
 	  used[fn] = 1;
-	  ObjNo[fn] = d.GroupObjects[i].ObjNo;
-	  Addr[fn] = AddrNo (addr, d.GroupObjects[i].ObjAddress[j]);
+	  t.ObjNo[fn] = d.GroupObjects[i].ObjNo;
+	  t.Addr[fn] = AddrNo (t.addr, d.GroupObjects[i].ObjAddress[j]);
 	  fn++;
 	  while (fn < maxs && used[fn])
 	    fn++;
 	}
+}
+
+void
+printAddrTab (FILE * f, Device & d)
+{
+  int objno = 0, i;
+  int maxs = 0;
+  AddrTable t;
+  for (i = 0; i < d.GroupObjects (); i++)
+    BuildObjAddress (d.GroupObjects[i], d.BCU);
+  for (i = 0; i < d.GroupObjects (); i++)
+    BuildObjNo (d.GroupObjects[i], objno);
+
+  BuildAddrTable (t, d);
+  maxs = t.addr ();
 
   fprintf (f, "\t.section .addrtab\n");
   fprintf (f, "addrtab:\n");
-  fprintf (f, "\t.byte %d\n", addr () + 1);
+  fprintf (f, "\t.byte %d\n", t.addr () + 1);
   fprintf (f, "\t.hword 0x%04X # physical address\n", d.PhysicalAddress);
-  for (i = 0; i < addr (); i++)
-    fprintf (f, "\t.hword 0x%04X\n", addr[i]);
+  for (i = 0; i < t.addr (); i++)
+    fprintf (f, "\t.hword 0x%04X\n", t.addr[i]);
   if (d.BCU != BCU_bcu12)
     fprintf (f, "\t.byte 0 #Checksum\n");
   fprintf (f, "addrtab_end:\n");
@@ -171,7 +226,7 @@ printAddrTab (FILE * f, Device & d)
   fprintf (f, "assoctab:\n");
   fprintf (f, "\t.byte %d\n", maxs);
   for (i = 0; i < maxs; i++)
-    fprintf (f, "\t.byte %d, %d\n", Addr[i] + 1, ObjNo[i]);
+    fprintf (f, "\t.byte %d, %d\n", t.Addr[i] + 1, t.ObjNo[i]);
   if (d.BCU != BCU_bcu12)
     fprintf (f, "\t.byte 0 #Checksum\n");
   fprintf (f, "assoctab_end:\n");
