@@ -195,6 +195,9 @@ EMI1Layer2Interface::Send_L_Data (LPDU * l)
     }
   L_Data_PDU *l1 = (L_Data_PDU *) l;
   assert (l1->data () >= 1);
+  /* discard long frames, as they are not supported by EMI 1 */
+  if (l1->data () > 0x10)
+    return;
   assert (l1->data () <= 0x10);
   assert ((l1->hopcount & 0xf8) == 0);
 
