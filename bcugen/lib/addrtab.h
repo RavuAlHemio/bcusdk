@@ -23,6 +23,17 @@
 #include "classes.h"
 #include <stdio.h>
 
+typedef struct {
+    Array < eibgaddr_t > addr;
+    Array < int >ObjNo;
+    Array < int >Addr;
+} AddrTable;
+
+void BuildObjAddress (GroupObject & o, BCUType b);
+void BuildAddrTable (AddrTable & t, Device & d);
+int GroupObjectFlag (GroupObject & o, BCUType b);
+
+
 void printAddrTab (FILE * f, Device & d);
 void printPseudoAddrTab (FILE * f, Device & d);
 
