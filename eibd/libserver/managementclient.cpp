@@ -595,6 +595,24 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	if (maskver != 0x0020 && i->BCUType == BCUImage::B_bcu20)
 	  goto out;
 
+	uchar level;
+	r = IMG_AUTHORIZATION_FAILED;
+	if (m.A_Authorize (i->installkey, level) == -1)
+	  goto out;
+
+	if (level)
+	  goto out;
+
+	r = IMG_KEY_WRITE;
+	for (j = 0; j < 3; j++)
+	  {
+	    level = j;
+	    if (m.A_KeyWrite (i->keys[level], level) == -1)
+	      goto out;
+	    if(j != level)
+	      goto out;
+	  }
+
 	for (j = 0; j < i->load (); j++)
 	  {
 	    r = i->load[j].error;
