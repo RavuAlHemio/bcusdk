@@ -42,7 +42,7 @@ main (int ac, char *ag[])
   len = EIB_MC_PropertyDesc (con, obj, prop, &type, &count, &access);
   if (len == -1)
     die ("Read failed");
-  printf ("Property: type:%d count:%d acces:%02X\n", type, count, access);
+  printf ("Property: type:%d count:%d access:%02X\n", type, count, access);
 
   EIBClose (con);
   return 0;
