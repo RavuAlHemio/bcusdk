@@ -38,11 +38,13 @@ SECTIONS {
 	SHORT(0x01)
 	*(.text)
 	*(.data)
+        *(.data.hi)
 	*(.parameter)
 }
 /DISCARD/ : {
 	*(.ram)
 	*(.bss)
+        *(.bss.hi)
 }
 
 }

@@ -53,7 +53,6 @@ _eeprom_start = . ;
 	*(.addrtab)
 	*(.assoctab)
 	*(.commobjs)
-	*(.eeprom)
 	*(.ratelimit)
 	*(.init)
 	*(.text)
@@ -72,6 +71,7 @@ _data_size = _data_end - _data_start ;
 . = _text_end + _data_size ;
 _end_readonly = . ;
 .parameter : {
+	*(.eeprom)
 	*(.parameter)
 }
 
