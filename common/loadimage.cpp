@@ -24,6 +24,7 @@ static void
 GenAlloc (CArray & req, uint16_t start, uint16_t len, uint8_t access,
 	  uint8_t type, bool check)
 {
+  check = 0;
   const uchar zero[10] = { 0 };
   req.set (zero, 10);
   req[0] = 0x03;
@@ -93,11 +94,16 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	  delete i;
 	  return IMG_NO_ADDRESS;
 	}
-
+      if (c->code[8] < 8 || c->code[8] > c->code () + 1)
+	{
+	  delete i;
+	  return IMG_WRONG_CHECKLIM;
+	}
       img = new BCUImage;
       img->code = c->code;
       img->BCUType = BCUImage::B_bcu1;
       img->addr = (c->code[0x17] << 8) | (c->code[0x18]);
+
       return IMG_IMAGE_LOADABLE;
     }
   if (b->bcutype == 0x0020 || b->bcutype == 0x0021)
@@ -262,7 +268,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       img->load.add (r);
 
       GenAlloc (r.req, s1->assoctab_start, s1->assoctab_size, 0x13, 0x03, 1);
-      r.memaddr = s1->addrtab_start;
+      r.memaddr = s1->assoctab_start;
       r.len = s1->assoctab_size;
       r.error = IMG_WRITE_ASSOC;
       img->load.add (r);
@@ -295,15 +301,21 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       r.error = IMG_ALLOC_LORAM;
       img->load.add (r);
 
-      GenAlloc (r.req, 0x0972, 0x004A, 0x23, 0x01, 0);
+      GenAlloc (r.req, 0x0972, 0x004A, 0x23, 0x02, 0);
       r.error = IMG_ALLOC_HIRAM;
       img->load.add (r);
 
       GenAlloc (r.req, 0x0100, 0x0016, 0x03, 0x03, 0);
       r.error = IMG_ALLOC_INIT;
-      r.len = 0x0016;
+      r.len = 0x001;
       r.memaddr = 0x100;
       img->load.add (r);
+
+      r.obj = 0xff;
+      r.memaddr = 0x103;
+      r.len = 0x13;
+      img->load.add (r);
+      r.obj = 3;
 
       GenAlloc (r.req, s1->readonly_start,
 		s1->readonly_end - s1->readonly_start, 0x03, 0x03, 1);
@@ -565,6 +577,9 @@ decodeBCULoadResult (BCU_LOAD_RESULT r)
       break;
     case IMG_FINISH_PROC:
       return _("error finishing application programm");
+      break;
+    case IMG_WRONG_CHECKLIM:
+      return _("wrong check limit");
       break;
 
     default:
