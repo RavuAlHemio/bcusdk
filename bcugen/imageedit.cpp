@@ -260,7 +260,26 @@ PatchImage (Image & i, Device & d)
       }
   }
   /*Key handling */
-
+  {
+    STR_BCU2Key *k = (STR_BCU2Key *) i.findStream (S_BCU2Key);
+    if (!k)
+      {
+	k = new STR_BCU2Key;
+	i.str.add (k);
+      }
+    if (d.InstallKey_lineno)
+      k->installkey = d.InstallKey;
+    k->keys.resize (4);
+    int i;
+    for (i = 0; i < 4; i++)
+      k->keys[i] = 0xffffffff;
+    for (i = 0; i < d.Keys (); i++)
+      {
+	if (d.Keys[i].level < 0 || d.Keys[i].level > 3)
+	  die (_("unsupported key level %d"), d.Keys[i].level);
+	k->keys[d.Keys[i].level] = d.Keys[i].key;
+      }
+  }
 }
 
 int
