@@ -509,6 +509,6 @@ String
 GetVariant (Device & d)
 {
   char buf[1000];
-  sprintf (buf, "bcu%04x%s", d.BCU, d.Model_lineno ? d.Model () : "");
+  sprintf (buf, "bcu_%04x%s", d.BCU, d.Model_lineno ? d.Model () : "");
   return buf;
 }
