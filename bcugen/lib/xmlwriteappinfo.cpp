@@ -80,6 +80,10 @@ GenInterface (const Interface & d)
     nc (n, "Title", d.Title ());
   if (d.AddInfo ())
     nc (n, "AddInfo", d.AddInfo ());
+  if(d.GroupTitle())
+    nc (n, "GroupTitle", d.GroupTitle ());
+  if(d.InvisibleIf_lineno)
+    nc (n, "InvisibleIf", printExpression(d.InvisibleIf)());
 
   for (int i = 0; i < d.References (); i++)
     {

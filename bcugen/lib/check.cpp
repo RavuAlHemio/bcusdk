@@ -610,6 +610,7 @@ CheckGroupObject (Device & d, GroupObject & o)
 
 #endif
 }
+void CheckExpressionBool (Expr * s, int l, const Device & d);
 
 void
 CheckInterface (Device & d, Interface & o)
@@ -645,6 +646,9 @@ CheckInterface (Device & d, Interface & o)
   if (o.DPTType < 0)
     die (_("line %d: invalid DPT Type"), o.DPTType_lineno);
 
+  if (o.InvisibleIf_lineno)
+    CheckExpressionBool (o.InvisibleIf, o.InvisibleIf_lineno, d);
+
 #else
 
 #endif
@@ -678,6 +682,195 @@ CheckFunctionalBlock (Device & d, FunctionalBlock & o)
 
 }
 
+void
+CheckExpressionList (Expr * s, int l, const Device & d)
+{
+  int i, j;
+  if (!s || s->Type != Expr::E_IN)
+    die (_("line %d: no list expression"), l);
+  for (i = 0; i < d.ListParameters (); i++)
+    if (d.ListParameters[i].Name == s->s)
+      break;
+  if (i == d.ListParameters ())
+    die (_("line %d: undefined list parameter %s"), l, s->s ());
+  const ListParameter & o = d.ListParameters[i];
+  for (i = 0; i < s->id (); i++)
+    {
+      for (j = 0; j < o.Elements (); j++)
+	if (o.Elements[j].Name == s->id[i])
+	  break;
+      if (j == o.Elements ())
+	die (_("line %d: undefined list element %s"), l, s->id[i] ());
+      s->id[i] = o.Elements[j].Value;
+    }
+  s->s = o.ID;
+  if (!o.ID ())
+    {
+      int found = 0;
+      for (i = 0; i < s->id (); i++)
+	if (o.ListDefault == s->id[i])
+	  found = 1;
+      Expr *s1 = new Expr;
+      s1->i = found;
+      s1->Type = Expr::E_INT;
+      s->op1 = s1;
+      s->Type = Expr::E_NOTNULL;
+    }
+}
+
+typedef enum
+{ EX_INT, EX_FLOAT, EX_STRING } EX_Type;
+
+EX_Type
+GetExpressionType (Expr * s, int l, const Device & d)
+{
+  int i;
+  EX_Type e1, e2;
+  if (!s)
+    die (_("line %d: no expression"), l);
+  switch (s->Type)
+    {
+    case Expr::E_PAR:
+      for (i = 0; i < d.StringParameters (); i++)
+	if (d.StringParameters[i].Name == s->s)
+	  break;
+      if (d.StringParameters () != i)
+	{
+	  s->s = d.StringParameters[i].ID;
+	  if (!s->s ())
+	    {
+	      s->s = d.StringParameters[i].Value;
+	      s->Type = Expr::E_STRING;
+	    }
+	  return EX_STRING;
+	}
+      for (i = 0; i < d.IntParameters (); i++)
+	if (d.IntParameters[i].Name == s->s)
+	  break;
+      if (d.IntParameters () != i)
+	{
+	  s->s = d.IntParameters[i].ID;
+	  if (!s->s ())
+	    {
+	      s->i = d.IntParameters[i].Value;
+	      s->Type = Expr::E_INT;
+	    }
+	  return EX_INT;
+	}
+      for (i = 0; i < d.FloatParameters (); i++)
+	if (d.FloatParameters[i].Name == s->s)
+	  break;
+      if (d.FloatParameters () != i)
+	{
+	  s->s = d.FloatParameters[i].ID;
+	  if (!s->s ())
+	    {
+	      s->f = d.FloatParameters[i].Value;
+	      s->Type = Expr::E_FLOAT;
+	    }
+	  return EX_FLOAT;
+	}
+      die (_("line %d: undefined parameter %s"), l, s->s ());
+      break;
+    case Expr::E_INT:
+      return EX_INT;
+    case Expr::E_FLOAT:
+      return EX_FLOAT;
+    case Expr::E_STRING:
+      return EX_STRING;
+    case Expr::E_NEG:
+      e1 = GetExpressionType (s->op1, l, d);
+      if (e1 != EX_INT && e1 != EX_FLOAT)
+	die (_("line %d: unsupported type for negation"), l);
+      return e1;
+    case Expr::E_PLUS:
+    case Expr::E_MINUS:
+    case Expr::E_MUL:
+    case Expr::E_DIV:
+      e1 = GetExpressionType (s->op1, l, d);
+      if (e1 != EX_INT && e1 != EX_FLOAT)
+	die (_("line %d: unsupported type for aritmetic operation"), l);
+
+      e2 = GetExpressionType (s->op2, l, d);
+      if (e2 != EX_INT && e2 != EX_FLOAT)
+	die (_("line %d: unsupported type for aritmetic operation"), l);
+
+      if (e1 == EX_FLOAT)
+	return EX_FLOAT;
+      if (e2 == EX_FLOAT)
+	return EX_FLOAT;
+      return EX_INT;
+    case Expr::E_MOD:
+      e1 = GetExpressionType (s->op1, l, d);
+      if (e1 != EX_INT)
+	die (_("line %d: unsupported type for modulo operation"), l);
+
+      e2 = GetExpressionType (s->op2, l, d);
+      if (e2 != EX_INT)
+	die (_("line %d: unsupported type for modulo operation"), l);
+
+      return EX_INT;
+
+    default:
+      die (_("line %d: invalid expression"), l);
+    }
+}
+void
+CheckExpressionCompare (Expr * s1, Expr * s2, int l, const Device & d)
+{
+  EX_Type e1, e2;
+  e1 = GetExpressionType (s1, l, d);
+  e2 = GetExpressionType (s2, l, d);
+  if (e1 == EX_INT && e2 == EX_FLOAT)
+    e1 = EX_FLOAT;
+  if (e1 == EX_FLOAT && e2 == EX_INT)
+    e2 = EX_FLOAT;
+  if (e1 != e2)
+    die (_("line %d: different types for compare expression"), l);
+}
+
+void
+CheckExpressionInt (Expr * s1, int l, const Device & d)
+{
+  EX_Type e1;
+  e1 = GetExpressionType (s1, l, d);
+  if (e1 != EX_INT)
+    die (_("line %d: expect integer value"), l);
+}
+
+void
+CheckExpressionBool (Expr * s, int l, const Device & d)
+{
+  if (!s)
+    die (_("line %d: no expression"), l);
+  switch (s->Type)
+    {
+    case Expr::E_AND:
+    case Expr::E_OR:
+      CheckExpressionBool (s->op1, l, d);
+      CheckExpressionBool (s->op2, l, d);
+      break;
+    case Expr::E_NOT:
+      CheckExpressionBool (s->op1, l, d);
+      break;
+    case Expr::E_IN:
+      CheckExpressionList (s, l, d);
+      break;
+    case Expr::E_EQ:
+    case Expr::E_NE:
+    case Expr::E_LT:
+    case Expr::E_GT:
+    case Expr::E_LE:
+    case Expr::E_GE:
+      CheckExpressionCompare (s->op1, s->op2, l, d);
+      break;
+    case Expr::E_NOTNULL:
+      CheckExpressionInt (s->op1, l, d);
+      break;
+    default:
+      die (_("line %d: invalid expression"), l);
+    }
+}
 
 void
 CheckDevice (Device & d)

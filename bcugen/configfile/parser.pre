@@ -84,17 +84,18 @@ Expr* expr;
 
 intp : intc { $$=new Expr; $$->i=$1; $$->Type=Expr::E_INT; } 
   | '(' intp ')' { $$=$2; }
-  | IDENT { $$=new Expr; $$->s=$1;$$->Type=Expr::E_IPAR; }
+  | IDENT { $$=new Expr; $$->s=$1;$$->Type=Expr::E_PAR; }
   | '-' intp %prec NEG { $$=new Expr;$$->op1=$2;$$->Type=Expr::E_NEG;}
   | intp '+' intp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_PLUS;}
   | intp '-' intp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_MINUS;}
   | intp '/' intp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_DIV;}
   | intp '%' intp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_MOD;}
-  | intp '*' intp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_MUL;};
+  | intp '*' intp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_MUL;}
+  | bool {  $$=new Expr; $$->i=$1; $$->Type=Expr::E_INT; } 
  
 floatp : floatc { $$=new Expr; $$->f=$1; $$->Type=Expr::E_FLOAT; } 
   | '(' floatp ')' { $$=$2; }
-  | IDENT { $$=new Expr; $$->s=$1;$$->Type=Expr::E_FPAR; }
+  | IDENT { $$=new Expr; $$->s=$1;$$->Type=Expr::E_PAR; }
   | '-' floatp %prec NEG { $$=new Expr;$$->op1=$2;$$->Type=Expr::E_NEG;}
   | floatp '+' floatp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_PLUS;}
   | floatp '-' floatp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_MINUS;}
@@ -104,7 +105,7 @@ floatp : floatc { $$=new Expr; $$->f=$1; $$->Type=Expr::E_FLOAT; }
  
 stringp : string { $$=new Expr; $$->s=*$1; $$->Type=Expr::E_STRING; delete $1;}
   | '(' stringp ')' { $$=$2; }
-  | IDENT { $$=new Expr; $$->s=$1;$$->Type=Expr::E_SPAR; };
+  | IDENT { $$=new Expr; $$->s=$1;$$->Type=Expr::E_PAR; };
 
 stringb : stringp T_EQ stringp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_EQ;}
   | stringp T_NE stringp { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_NE;}
@@ -134,8 +135,7 @@ expr : expr T_AND expr { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_AND;
    | '!' expr { $$=new Expr;$$->op1=$2;$$->Type=Expr::E_NOT;}
    | '(' expr ')' { $$=$2; }
    | expr T_OR expr { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_OR;}
-   | intb | floatb | listb | stringb 
-   | bool {  $$=new Expr; $$->i=$1; $$->Type=Expr::E_INT; } 
+   | intb | floatb | listb | stringb ;
 
 floatc : FLOAT | intc { $$=$1; } ;
 intc : INT ;

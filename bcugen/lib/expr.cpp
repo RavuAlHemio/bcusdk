@@ -81,11 +81,7 @@ printExpression (Expr * s)
       return buf;
     case Expr::E_STRING:
       return (String) "\"" + escapeString (s->s) + "\"";
-    case Expr::E_IPAR:
-      return s->s;
-    case Expr::E_FPAR:
-      return s->s;
-    case Expr::E_SPAR:
+    case Expr::E_PAR:
       return s->s;
     case Expr::E_IN:
       s1 = s->s + " IN(";
