@@ -261,6 +261,7 @@ Layer7_Connection::A_KeyWrite (eibkey_type key, uchar & level)
 {
   A_Key_Write_PDU r;
   r.key = key;
+  r.level = level;
   APDU *a = Request_Response (&r);
   if (!a)
     return -1;
