@@ -32,6 +32,7 @@ public:
     B_bcu1, B_bcu20, B_bcu21
   } BCUType;
   CArray code;
+  eibaddr_t addr;
 };
 
 BCU_LOAD_RESULT PrepareLoadImage (const CArray & c, BCUImage * &img);

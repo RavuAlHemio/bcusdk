@@ -66,9 +66,22 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	  return IMG_TEXT_OVERFLOW;
 	}
 
+      if (s->textsize != c->code ())
+	{
+	  delete i;
+	  return IMG_WRONG_SIZE;
+	}
+
+      if (s->textsize < 0x18)
+	{
+	  delete i;
+	  return IMG_NO_ADDRESS;
+	}
+
       img = new BCUImage;
       img->code = c->code;
       img->BCUType = BCUImage::B_bcu1;
+      img->addr = (c->code[0x17] << 8) | (c->code[0x18]);
       return IMG_IMAGE_LOADABLE;
     }
   if (b->bcutype == 0x0020)
@@ -120,6 +133,49 @@ decodeBCULoadResult (BCU_LOAD_RESULT r)
     case IMG_IMAGE_LOADABLE:
       return _("Image is loadable");
       break;
+    case IMG_NO_ADDRESS:
+      return _("no address found in the image");
+      break;
+    case IMG_WRONG_SIZE:
+      return _("unexpected size of the text segment");
+      break;
+    case IMG_NO_DEVICE_CONNECTION:
+      return _("connection to the device failed");
+      break;
+    case IMG_MASK_READ_FAILED:
+      return _("read of mask version failed");
+      break;
+    case IMG_WRONG_MASK_VERSION:
+      return _("incompatible mask version");
+      break;
+    case IMG_CLEAR_ERROR:
+      return _("reseting of RunFlags failed");
+      break;
+    case IMG_RESET_ADDR_TAB:
+      return _("reseting of the address table failed");
+      break;
+    case IMG_LOAD_HEADER:
+      return _("loading of the header failed");
+      break;
+    case IMG_LOAD_MAIN:
+      return _("loading of the code in the eeprom failed");
+      break;
+    case IMG_ZERO_RAM:
+      return _("cleaning the ram failed");
+      break;
+    case IMG_FINALIZE_ADDR_TAB:
+      return _("finalizing the address table failed");
+      break;
+    case IMG_PREPARE_RUN:
+      return _("setting the RunFlags failed");
+      break;
+    case IMG_RESTART:
+      return _("restart failed");
+      break;
+    case IMG_LOADED:
+      return _("image successful loaded");
+      break;
+
     default:
       return _("errorcode not defined");
     }

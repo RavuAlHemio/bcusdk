@@ -30,4 +30,7 @@ typedef uint8_t uchar;
 /** Array of characters */
 typedef Array < uchar > CArray;
 
+/** EIB address */
+typedef uint16_t eibaddr_t;
+
 #endif
