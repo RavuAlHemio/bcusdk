@@ -562,8 +562,8 @@ STR_BCU2Size::toArray ()
   d.resize (2 + len);
   d[0] = (len >> 8) & 0xff;
   d[1] = (len) & 0xff;
-  d[2] = (L_BCU1_SIZE >> 8) & 0xff;
-  d[3] = (L_BCU1_SIZE) & 0xff;
+  d[2] = (L_BCU2_SIZE >> 8) & 0xff;
+  d[3] = (L_BCU2_SIZE) & 0xff;
   d[4] = (textsize >> 8) & 0xff;
   d[5] = (textsize) & 0xff;
   d[6] = (stacksize >> 8) & 0xff;
@@ -584,7 +584,7 @@ STR_BCU2Size::decode ()
 {
   char buf[200];
   sprintf (buf,
-	   "BCU1_SIZE: text:%d stack:%d lo_data:%d lo_bss:%d hi_data:%d hi_bss:%d\n",
+	   "BCU2_SIZE: text:%d stack:%d lo_data:%d lo_bss:%d hi_data:%d hi_bss:%d\n",
 	   textsize, stacksize, lo_datasize, lo_bsssize, hi_datasize,
 	   hi_bsssize);
   return buf;
@@ -641,14 +641,14 @@ CArray
 STR_BCU2Start::toArray ()
 {
   CArray d;
-  uint16_t len = 46;
+  uint16_t len = 38;
   d.resize (2 + len);
   d[0] = (len >> 8) & 0xff;
   d[1] = (len) & 0xff;
   d[2] = (L_BCU2_INIT >> 8) & 0xff;
   d[3] = (L_BCU2_INIT) & 0xff;
   d[4] = (addrtab_start >> 8) & 0xff;
-  d[5] = (addrtab_size) & 0xff;
+  d[5] = (addrtab_start) & 0xff;
   d[6] = (addrtab_size >> 8) & 0xff;
   d[7] = (addrtab_size) & 0xff;
   d[8] = (assoctab_start >> 8) & 0xff;
