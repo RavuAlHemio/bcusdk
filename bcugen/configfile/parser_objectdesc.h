@@ -22,7 +22,7 @@
 #undef END_OBJECT
 #define END_OBJECT  NEVER_OCCUR { $$; } ;
 
-#define ATTRIB_INIT(A) typeof($$) a =typeof($$)(stack.top())
+#define ATTRIB_INIT(A) typeof($$) a =(typeof($$))(stack.top())
 #define ATTRIB_CHECKDOUBLE(A) if(a->A##_lineno)parserError(_("%s already set at line %d"),#A,a->A##_lineno);a->A##_lineno=yylineno;
 
 #undef ATTRIB_STRING
