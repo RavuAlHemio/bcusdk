@@ -67,6 +67,7 @@
       <xs:sequence>
         <xs:element name="ProgramID" type="xs:string"/>
         <xs:element name="PhysicalAddress" type="eibaddr"/>
+	<xs:element name="InstallKey" type="keytype"/>
         <xs:element name="Key" minOccurs="0">
           <xs:complexType>
             <xs:simpleContent>

@@ -21,6 +21,7 @@
 
 <!ENTITY % ACCESSLEVEL "(#PCDATA)">
 
+<!ELEMENT InstallKey %KEY;>
 <!ELEMENT Key %KEY;>
 <!ATTLIST Key
   id %KEYID; #REQUIRED
@@ -92,7 +93,7 @@
 <!ELEMENT PhysicalAddress %EIBADDR;>
 
 
-<!ELEMENT DeviceConfig (ProgramID,PhysicalAddress,Key*,(GroupObject|Property|PollingMaster|PollingSlave)*,Parameter?)>
+<!ELEMENT DeviceConfig (ProgramID,PhysicalAddress,InstallKey?,Key*,(GroupObject|Property|PollingMaster|PollingSlave)*,Parameter?)>
 <!ATTLIST DeviceConfig
    version %IDSTRING; #REQUIRED 
 >

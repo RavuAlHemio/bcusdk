@@ -2,6 +2,7 @@
 <DeviceConfig xmlns:ns1="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.auto.tuwien.ac.at/~mkoegler/eib/xml/configdesc.xsd" version="0.0.0" ns1:schemaLocation="http://www.auto.tuwien.ac.at/~mkoegler/eib/xml/configdesc.xsd">
   <ProgramID>11234235r0fjdf9323</ProgramID>
   <PhysicalAddress>0.0.0</PhysicalAddress>
+  <InstallKey>00000000</InstallKey>
   <Key id="1">00000000</Key>
   <GroupObject id="go1">
     <Priority>low</Priority>

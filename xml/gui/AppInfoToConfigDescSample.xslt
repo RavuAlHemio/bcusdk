@@ -12,6 +12,7 @@
         <xsl:value-of select="ai:ProgramID"/>
       </ProgramID>
       <PhysicalAddress>0.0.0</PhysicalAddress>
+      <InstallKey>00000000</InstallKey>
       <Key id="1">00000000</Key>
       <xsl:for-each select="ai:GroupObject">
         <xsl:element name="GroupObject">
