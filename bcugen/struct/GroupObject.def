@@ -1,0 +1,49 @@
+/*
+    BCU SDK bcu development enviroment
+    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+OBJECT(GroupObject)
+
+#if !(defined(PARSER_GEN)&& defined(READ_INPUT))
+ATTRIB_IDENT(ID)
+ATTRIB_BOOL(Sending)
+ATTRIB_BOOL(Receiving)
+#endif
+
+ATTRIB_IDENT(Name)
+ATTRIB_ENUM(Type,GroupType,Map_GroupType)
+ATTRIB_IDENT(on_update)
+ATTRIB_BOOL(eeprom)
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_STRING(Title)
+ATTRIB_STRING(AddInfo)
+ATTRIB_BOOL(StateBased)
+#endif
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK)) && !(defined(PARSER_GEN)&& defined(READ_INPUT))
+ATTRIB_INT(SendAddress)
+ATTRIB_INT(Priority)
+#endif
+
+PRIVATE_VAR(Array<eibgaddr_t> ReceiveAddress)
+PRIVATE_VAR(Array<eibgaddr_t> ReadAddress)
+PRIVATE_VAR(Array<eibgaddr_t> UpdateAddress)
+PRIVATE_VAR(int ObjNo)
+PRIVATE_VAR(Array<eibgaddr_t> ObjAddress)
+END_OBJECT
