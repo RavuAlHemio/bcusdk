@@ -39,9 +39,11 @@ SECTIONS {
 	*(.text)
 	*(.data)
         *(.data.hi)
+	*(.eeprom)
 	*(.parameter)
 }
 /DISCARD/ : {
+	*(.loram)
 	*(.ram)
 	*(.bss)
         *(.bss.hi)
