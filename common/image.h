@@ -38,6 +38,7 @@ typedef enum
   S_BCU1Size,
   S_BCU2Size,
   S_BCU2Start,
+  S_BCU2Key,
 } STR_Type;
 
 class STR_Stream
@@ -254,6 +255,22 @@ public:
   STR_Type getType ()
   {
     return S_BCU2Start;
+  }
+  String decode ();
+};
+
+class STR_BCU2Key:public STR_Stream
+{
+public:
+  eibkey_type installkey;
+  Array < eibkey_type > keys;
+
+  STR_BCU2Key ();
+  STR_BCU2Key (const CArray & str);
+  CArray toArray ();
+  STR_Type getType ()
+  {
+    return S_BCU2Key;
   }
   String decode ();
 };

@@ -74,6 +74,8 @@ STR_Stream::fromArray (const CArray & c)
 	return new STR_BCU1Size (c);
       case L_BCU2_SIZE:
 	return new STR_BCU2Size (c);
+      case L_BCU2_KEY:
+	return new STR_BCU2Key (c);
       default:
 	return new STR_Unknown (c);
       }
@@ -699,6 +701,65 @@ STR_BCU2Start::decode ()
 	   param_start, param_end, obj_ptr, obj_count, appcallback,
 	   groupobj_ptr, seg0, seg1, sphandler);
   return buf;
+}
+
+STR_BCU2Key::STR_BCU2Key ()
+{
+  installkey = 0xFFFFFFFF;
+}
+
+STR_BCU2Key::STR_BCU2Key (const CArray & c)
+{
+  unsigned i;
+  if (c () % 4)
+    throw 1;
+  if (c () < 8)
+    throw 1;
+  installkey = (c[4] << 24) | (c[5] << 16) | (c[6] << 8) | (c[7]);
+  for (i = 8; i < c (); i += 4)
+    keys.add ((c[i] << 24) | (c[i + 1] << 16) | (c[i + 2] << 8) | (c[i + 3]));
+}
+
+CArray
+STR_BCU2Key::toArray ()
+{
+  CArray d;
+  int i;
+  uint16_t len = keys () * 4 + 4 + 2;
+  d.resize (2 + len);
+  d[0] = (len >> 8) & 0xff;
+  d[1] = (len) & 0xff;
+  d[2] = (L_BCU2_KEY >> 8) & 0xff;
+  d[3] = (L_BCU2_KEY) & 0xff;
+  d[4] = (installkey >> 24) & 0xff;
+  d[5] = (installkey >> 16) & 0xff;
+  d[6] = (installkey >> 8) & 0xff;
+  d[7] = (installkey >> 0) & 0xff;
+  for (i = 0; i < keys (); i++)
+    {
+      d[8 + 4 * i] = (keys[i] >> 24) & 0xff;
+      d[9 + 4 * i] = (keys[i] >> 16) & 0xff;
+      d[10 + 4 * i] = (keys[i] >> 8) & 0xff;
+      d[11 + 4 * i] = (keys[i] >> 0) & 0xff;
+    }
+  return d;
+}
+
+
+String
+STR_BCU2Key::decode ()
+{
+  char buf[200];
+  String s;
+  int i;
+  sprintf (buf, "BCU2_KEY: install:%08X ", installkey);
+  s = buf;
+  for (i = 0; i < keys (); i++)
+    {
+      sprintf (buf, "level%d: %08X ", i, keys[i]);
+      s += buf;
+    }
+  return s;
 }
 
 Image::Image ()
