@@ -392,14 +392,14 @@ GenBCUHeader (FILE * f, Device & d)
   fprintf (f, "\t.hword 0x%04X # DevType\n", d.DeviceType);
   fprintf (f, "\t.byte 0x%02X # version\n", d.Version);
   if (d.BCU == BCU_bcu12)
-    fprintf (f, "\t.byte _end_readonly-0x100+1 # CheckLim\n");
+    fprintf (f, "\t.byte _end_readonly-0x100 # CheckLim\n");
   else
     fprintf (f, "\t.byte 0x09 # CheckLim\n");
   fprintf (f, "\t.byte 0x%02X # PEI_Type\n", d.PEIType);
   fprintf (f, "\t.byte 0x%02X # SyncRate\n", d.SyncRate);
   fprintf (f, "\t.byte 0x%02X # PortCDDR\n", d.PortCDDR);
   fprintf (f, "\t.byte 0x%02X # PortADDR\n", d.PortADDR);
-  fprintf (f, "\t.byte 0x00 # RunError\n");
+  fprintf (f, "\t.byte 0xFF # RunError\n");
   fprintf (f, "\t.byte 0x%02X # RouteCnt\n",
 	   (d.RouteCount << 4) | (d.U_DELMSG ? 0x80 : 0x00));
   fprintf (f, "\t.byte 0x%02X # MaxRstCnt\n",
@@ -473,13 +473,13 @@ GenTestAsm (FILE * f, Device & d)
   fprintf (f, "_UserInit:\n");
   fprintf (f, "\tjsr _initmem\n");
   if (d.on_init ())
-    fprintf (f, "jmp %s\n", d.on_init ());
+    fprintf (f, "\tjmp %s\n", d.on_init ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserSave:\n");
   fprintf (f, "\tjsr _initstack\n");
   if (d.on_save ())
-    fprintf (f, "jmp %s\n", d.on_save ());
+    fprintf (f, "\tjmp %s\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserRun:\n");
@@ -489,7 +489,7 @@ GenTestAsm (FILE * f, Device & d)
     GenGroupObjectUpdate (f, d.GroupObjects[i]);
 
   if (d.on_run ())
-    fprintf (f, "jmp %s\n", d.on_run ());
+    fprintf (f, "\tjmp %s\n", d.on_run ());
   else
     fprintf (f, "\trts\n");
 
@@ -528,13 +528,13 @@ GenRealAsm (FILE * f, Device & d)
   fprintf (f, "_UserInit:\n");
   fprintf (f, "\tjsr _initmem\n");
   if (d.on_init ())
-    fprintf (f, "jmp %s\n", d.on_init ());
+    fprintf (f, "\tjmp %s\n", d.on_init ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserSave:\n");
   fprintf (f, "\tjsr _initstack\n");
   if (d.on_save ())
-    fprintf (f, "jmp %s\n", d.on_save ());
+    fprintf (f, "\tjmp %s\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserRun:\n");
@@ -543,7 +543,7 @@ GenRealAsm (FILE * f, Device & d)
   for (i = 0; i < d.GroupObjects (); i++)
     GenGroupObjectUpdate (f, d.GroupObjects[i]);
   if (d.on_run ())
-    fprintf (f, "jmp %s\n", d.on_run ());
+    fprintf (f, "\tjmp %s\n", d.on_run ());
   else
     fprintf (f, "\trts\n");
 }

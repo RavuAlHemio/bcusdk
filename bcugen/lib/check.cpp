@@ -1030,7 +1030,7 @@ CheckDevice (Device & d)
   if (!d.BCU2_PROTECT_lineno)
     d.BCU2_PROTECT = 0;
   if (!d.BCU2_WATCHDOG_lineno)
-    d.BCU2_WATCHDOG = 0;
+    d.BCU2_WATCHDOG = 1;
   if (!d.PLM_FAST_lineno)
     d.PLM_FAST = 0;
   if (!d.A_Event_lineno)
