@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=1.9
 
-SUBDIRS=. common eibd xml bcu
+SUBDIRS=. common eibd xml bcu bcugen
 
 BUILT_SOURCES=path.h
 CLEANFILES=path.h
