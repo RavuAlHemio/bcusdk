@@ -162,6 +162,12 @@ public:
     return data;
   }
 
+  /** returns pointer to the elements */
+  T *array ()
+  {
+    return data;
+  }
+
   /** resize array to newcount elements */
   void resize (unsigned newcount)
   {
@@ -221,19 +227,6 @@ public:
 	    data[j] = x;
 	  }
   }
-};
-
-/** implements an automatic resizing array */
-template < class T > class ResizeArray:public Array < T >
-{
-  /** access element and create it, if not present */
-  T & operator[](unsigned elem)
-  {
-    if (elem >= count)
-      resize (elem + 1);
-    return data[elem];
-  }
-
 };
 
 #endif
