@@ -441,8 +441,8 @@ parseDeviceDesc (Device & d, xmlNodePtr n)
 	  if (!strcmp (name, "ProgramID"))
 	    {
 	      const char *pid = gc (cld);
-	      if (d.ProgramID != pid)
-		printf (_("ProgramID mismatch\n"));
+//	      if (d.ProgramID != pid)
+//		printf (_("ProgramID mismatch\n"));
 	      f (pid);
 	    }
 	  if (!strcmp (name, "PhysicalAddress"))
