@@ -35,7 +35,7 @@ EIBNETIP =
 endif
 
 noinst_LIBRARIES = libbackend.a
-INCLUDES=-I../libserver
+INCLUDES=-I../libserver -I../../common
 
 libbackend_a_SOURCES= $(FT12) $(PEI16) $(TPUART) $(PEI16s) $(TPUARTs) $(EIBNETIP)
 
