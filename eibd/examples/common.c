@@ -48,6 +48,14 @@ readaddr (const char *addr)
   return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
 }
 
+eibaddr_t
+readgaddr (const char *addr)
+{
+  int a, b, c;
+  sscanf (addr, "%d/%d/%d", &a, &b, &c);
+  return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
+}
+
 unsigned
 readHex (const char *addr)
 {

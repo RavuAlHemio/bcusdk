@@ -38,11 +38,16 @@ void die (const char *msg, ...);
  * \return EIB address
  */
 eibaddr_t readaddr (const char *addr);
+/** parses a EIB group address
+ * \param addr string with the EIB address
+ * \return EIB address
+ */
+eibaddr_t readgaddr (const char *addr);
 /** parses a hex number
  * \param addr string
  * \return parsed hex number
  */
-unsigned readHex(const char*addr);
+unsigned readHex (const char *addr);
 /** parse hex numbers (byte size) out of a comand line
  * \param buf output buffer
  * \param size buffer size
@@ -50,4 +55,4 @@ unsigned readHex(const char*addr);
  * \param ag argument array
  * \return parsed bytes
  */
-int readBlock(uchar* buf,int size,int ac,char*ag[]);
+int readBlock (uchar * buf, int size, int ac, char *ag[]);
