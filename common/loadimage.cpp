@@ -36,9 +36,35 @@ GenAlloc (CArray & req, uint16_t start, uint16_t len, uint8_t access,
   req[8] = check ? 0x80 : 0x00;
 }
 
+typedef struct
+{
+  uint16_t start;
+  uint16_t len;
+} Segment;
+
+static int
+AddSegmentOverlap (Array < Segment > &s, uint16_t start, uint16_t len)
+{
+  int i;
+  for (i = 0; i < s (); i++)
+    {
+      if (start >= s[i].start && start < s[i].start + s[i].len)
+	return 0;
+      if (s[i].start >= start && s[i].start < start + len)
+	return 0;
+    }
+  Segment s1;
+  s1.start = start;
+  s1.len = len;
+  if (len)
+    s.add (s1);
+  return 1;
+}
+
 BCU_LOAD_RESULT
 PrepareLoadImage (const CArray & im, BCUImage * &img)
 {
+  Array < Segment > seg;
   img = 0;
   Image *i = Image::fromArray (im);
   if (!i)
@@ -156,7 +182,10 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	  delete i;
 	  return IMG_ADDRTAB_OVERFLOW;
 	}
-      if (s1->assoctab_start < s1->addrtab_start + s1->addrtab_size)
+
+      AddSegmentOverlap (seg, s1->addrtab_start, s1->addrtab_size);
+
+      if (!AddSegmentOverlap (seg, s1->assoctab_start, s1->assoctab_size))
 	{
 	  delete i;
 	  return IMG_OVERLAP_ASSOCTAB;
@@ -166,25 +195,38 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	  delete i;
 	  return IMG_ADDRTAB_OVERFLOW;
 	}
-      if (s1->readonly_start < s1->assoctab_start + s1->assoctab_size)
-	{
-	  delete i;
-	  return IMG_OVERLAP_TEXT;
-	}
       if (s1->readonly_end < s1->readonly_start)
 	{
 	  delete i;
 	  return IMG_NEGATIV_TEXT_SIZE;
 	}
-      if (s1->param_start < s1->readonly_end)
+      if (!AddSegmentOverlap
+	  (seg, s1->readonly_start, s1->readonly_end - s1->readonly_start))
 	{
 	  delete i;
-	  return IMG_OVERLAP_PARAM;
+	  return IMG_OVERLAP_TEXT;
 	}
       if (s1->param_end < s1->param_start)
 	{
 	  delete i;
 	  return IMG_NEGATIV_TEXT_SIZE;
+	}
+      if (s1->eeprom_end < s1->eeprom_start)
+	{
+	  delete i;
+	  return IMG_NEGATIV_TEXT_SIZE;
+	}
+      if (!AddSegmentOverlap
+	  (seg, s1->eeprom_start, s1->eeprom_end - s1->eeprom_start))
+	{
+	  delete i;
+	  return IMG_OVERLAP_EEPROM;
+	}
+      if (!AddSegmentOverlap
+	  (seg, s1->param_start, s1->param_end - s1->param_start))
+	{
+	  delete i;
+	  return IMG_OVERLAP_PARAM;
 	}
       if (s1->obj_count > 0xff)
 	{
@@ -346,11 +388,11 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       if (r.len)
 	img->load.add (r);
 
-      GenAlloc (r.req, s1->readonly_end, s1->param_start - s1->readonly_end,
+      GenAlloc (r.req, s1->eeprom_start, s1->eeprom_end - s1->eeprom_start,
 		0x13, 0x03, 0);
       r.error = IMG_ALLOC_EEPROM;
-      r.len = s1->param_start - s1->readonly_end;
-      r.memaddr = s1->readonly_end;
+      r.len = s1->eeprom_end - s1->eeprom_start;
+      r.memaddr = s1->eeprom_start;
       if (r.len)
 	img->load.add (r);
 
@@ -513,16 +555,19 @@ decodeBCULoadResult (BCU_LOAD_RESULT r)
       return _("address table too big");
       break;
     case IMG_OVERLAP_ASSOCTAB:
-      return _("association table and address table overlap");
+      return _("association table overlaps with an other segment");
       break;
     case IMG_OVERLAP_TEXT:
-      return _("text segement overlaps with association table");
+      return _("text segement overlaps with an other segment");
       break;
     case IMG_NEGATIV_TEXT_SIZE:
-      return _("text segment end < text segment start");
+      return _("segment end < text segment");
       break;
     case IMG_OVERLAP_PARAM:
-      return _("text and param segment overlag");
+      return _("param segment overlaps with an other segment");
+      break;
+    case IMG_OVERLAP_EEPROM:
+      return _("eeprom segment overlaps with an other segment");
       break;
     case IMG_OBJTAB_OVERFLOW:
       return _("too many objects");
