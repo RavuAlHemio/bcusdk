@@ -536,7 +536,7 @@ EIBOpenT_Group (EIBConnection * con, eibaddr_t dest, int write_only)
   EIBSETTYPE (head, EIB_OPEN_T_GROUP);
   EIBSETADDR (head + 2, dest);
   head[4] = (write_only ? 0xff : 0);
-  i = SendRequest (con, 4, head);
+  i = SendRequest (con, 5, head);
   if (i == -1)
     return -1;
 
@@ -564,7 +564,7 @@ EIBOpenT_Broadcast (EIBConnection * con, int write_only)
     }
   EIBSETTYPE (head, EIB_OPEN_T_BROADCAST);
   head[4] = (write_only ? 0xff : 0);
-  i = SendRequest (con, 4, head);
+  i = SendRequest (con, 5, head);
   if (i == -1)
     return -1;
 
