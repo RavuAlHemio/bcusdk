@@ -111,8 +111,12 @@ public:
   String operator + (const String & a)
   {
     String b;
-    b.len = a.len + len;
-    if (b.len)
+    if (!len)
+      return a;
+    if (!a.len)
+      return *this;
+    b.len = a.len + len - 1;
+    if (b.len > 0)
       {
 	b.data = new char[b.len];
 	if (data)
@@ -125,7 +129,7 @@ public:
     return b;
   }
 
-  bool operator == (const String & a)
+  bool operator == (const String & a) const
   {
     if (!a.len && !len)
       return 1;
@@ -134,7 +138,7 @@ public:
     return (!strcmp (data, a.data));
   }
 
-  bool operator!= (const String & a)
+  bool operator!= (const String & a) const
   {
     return !(*this == a);
   }

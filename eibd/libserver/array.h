@@ -210,6 +210,17 @@ public:
     return count;
   }
 
+  void sort ()
+  {
+    for (int i = 0; i < count; i++)
+      for (int j = i + 1; j < count; j++)
+	if (data[i] > data[j])
+	  {
+	    T x = data[i];
+	    data[i] = data[j];
+	    data[j] = x;
+	  }
+  }
 };
 
 /** implements an automatic resizing array */
