@@ -195,7 +195,7 @@ EMI1Layer2Interface::Send_L_Data (LPDU * l)
     }
   L_Data_PDU *l1 = (L_Data_PDU *) l;
   assert (l1->data () >= 1);
-  assert (l1->data () <= 0xf);
+  assert (l1->data () <= 0x10);
   assert ((l1->hopcount & 0xf8) == 0);
 
   CArray pdu;

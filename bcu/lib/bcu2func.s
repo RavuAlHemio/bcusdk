@@ -42,7 +42,7 @@
 	.set U_flagsGet,	0x505A
 	.set U_flagsSet,	0x505D
 	.set U_testObj,		0x507B
-	.set U_transRequest,	0x50E7
+	.set U_transRequest,	0x507E
 	.set EEwrite,		0x503F
 	.set EEsetChecksum,	0x503C
 	.set U_debounce,	0x5051
