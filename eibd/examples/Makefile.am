@@ -6,7 +6,7 @@ bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progm
 	mpeitype madcread mread mwrite mpropread mpropwrite mpropdesc mpropscan
 
 examplesdir=$(pkgdatadir)/examples
-examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c progmodestatus.c vbusmonitor2.c \
+dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c progmodestatus.c vbusmonitor2.c \
 	busmonitor2.c maskver.c mprogmodeon.c mpropread.c mwrite.c progmodetoggle.c writeaddress.c \
 	common.c mmaskver.c mprogmodestatus.c mpropscan.c progmodeoff.c readindividual.c \
 	common.h mpeitype.c mprogmodetoggle.c mpropwrite.c progmodeon.c vbusmonitor1.c
