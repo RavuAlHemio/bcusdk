@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include "eibnetrouter.h"
 
-#define EIBNETIP_URL "ip:[multicast[:port]]\n"
+#define EIBNETIP_URL "ip:[multicast_addr[:port]]\n"
 #define EIBNETIP_DOC "ip connects with the EIBnet/IP protocol over an EIBnet/IP gateway. The gateway must be so configured, that it routes the necessary addresses\n\n"
 
 #define EIBNETIP_PREFIX "ip"
