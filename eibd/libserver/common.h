@@ -23,8 +23,6 @@
 #include "types.h"
 #include <assert.h>
 
-/** EIB address */
-typedef uint16_t eibaddr_t;
 /** Domain address */
 typedef uint16_t domainaddr_t;
 /** serial number */
