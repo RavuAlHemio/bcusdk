@@ -281,11 +281,13 @@ int EIB_MC_PropertyRead (EIBConnection * con, uint8_t obj, uint8_t property,
  * \param nr_of_elem number of elements
  * \param len buffer size
  * \param buf buffer
- * \return -1 if error, else write length
+ * \param max_len length of the result buffer
+ * \param res buffer for the result
+ * \return -1 if error, else length of the returned result
  */
 int EIB_MC_PropertyWrite (EIBConnection * con, uint8_t obj, uint8_t property,
 			  uint16_t start, uint8_t nr_of_elem, int len,
-			  const uint8_t * buf);
+			  const uint8_t * buf, int max_len, uint8_t * res);
 /** read a property description on a mangement connection
  * \param con eibd connection
  * \param obj object index

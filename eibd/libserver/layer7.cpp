@@ -146,7 +146,7 @@ Layer7_Connection::A_Property_Read (uchar obj, uchar propertyid,
 int
 Layer7_Connection::A_Property_Write (uchar obj, uchar propertyid,
 				     uint16_t start, uchar count,
-				     const CArray & data)
+				     const CArray & data, CArray & result)
 {
   A_PropertyValue_Write_PDU r;
   r.obj = obj;
@@ -154,7 +154,12 @@ Layer7_Connection::A_Property_Write (uchar obj, uchar propertyid,
   r.start = start & 0x0fff;
   r.count = count & 0x0f;
   r.data = data;
-  l4->Send (r.ToPacket ());
+  APDU *a = Request_Response (&r);
+  if (!a)
+    return -1;
+  A_PropertyValue_Response_PDU *a1 = (A_PropertyValue_Response_PDU *) a;
+  result = a1->data;
+  delete a;
   return 0;
 }
 
@@ -271,7 +276,7 @@ Layer7_Connection::X_Property_Write (uchar obj, uchar propertyid,
 				     const CArray & data)
 {
   CArray d1;
-  if (A_Property_Write (obj, propertyid, start, count, data) == -1)
+  if (A_Property_Write (obj, propertyid, start, count, data, d1) == -1)
     return -1;
   if (A_Property_Read (obj, propertyid, start, count, d1) == -1)
     return -1;

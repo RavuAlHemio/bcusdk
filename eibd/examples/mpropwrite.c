@@ -24,6 +24,7 @@ main (int ac, char *ag[])
   int len, obj, prop, start, nr_of_elem;
   EIBConnection *con;
   uchar buf[255];
+  uchar res[255];
   eibaddr_t dest;
 
   if (ac < 7)
@@ -44,9 +45,12 @@ main (int ac, char *ag[])
   printf ("Write: ");
   printHex (len, buf);
   printf ("\n");
-  len = EIB_MC_PropertyWrite (con, obj, prop, start, nr_of_elem, len, buf);
+  len =
+    EIB_MC_PropertyWrite (con, obj, prop, start, nr_of_elem, len, buf,
+			  sizeof (res), res);
   if (len == -1)
     die ("Write failed");
+  printHex (len, res);
 
   EIBClose (con);
   return 0;

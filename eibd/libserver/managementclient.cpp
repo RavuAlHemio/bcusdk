@@ -375,13 +375,22 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		  c->sendreject (stop);
 		  break;
 		}
-	      if (m.
-		  X_Property_Write (c->buf[2], c->buf[3],
-				    (c->buf[4] << 8) | c->buf[5], c->buf[6],
-				    CArray (c->buf + 7, c->size - 7)) == -1)
-		c->sendreject (stop);
-	      else
-		c->sendreject (stop, EIB_MC_PROP_WRITE);
+	      {
+		CArray data, erg;
+		if (m.
+		    A_Property_Write (c->buf[2], c->buf[3],
+				      (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				      CArray (c->buf + 7, c->size - 7),
+				      erg) == -1)
+		  c->sendreject (stop);
+		else
+		  {
+		    erg.resize (2);
+		    EIBSETTYPE (erg, EIB_MC_PROP_WRITE);
+		    erg.setpart (data, 2);
+		    c->sendmessage (erg (), erg.array (), stop);
+		  }
+	      }
 	      break;
 
 	    case EIB_MC_AUTHORIZE:

@@ -62,9 +62,9 @@ public:
 		       uchar count, CArray & erg);
   /** write a property */
   int A_Property_Write (uchar obj, uchar propertyid, uint16_t start,
-			uchar count, const CArray & data);
+			uchar count, const CArray & data, CArray & result);
   /** descripbe a property */
-  int A_Property_Desc (uchar obj, uchar& property, uchar property_index,
+  int A_Property_Desc (uchar obj, uchar & property, uchar property_index,
 		       uchar & type, uint16_t & max_nr_elements,
 		       uchar & access);
   /** read device descript (mask version) */

@@ -1085,7 +1085,7 @@ EIB_MC_Read (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
 int
 EIB_MC_PropertyWrite (EIBConnection * con, uint8_t obj, uint8_t property,
 		      uint16_t start, uint8_t nr_of_elem, int len,
-		      const uint8_t * buf)
+		      const uint8_t * buf, int max_len, uint8_t * res)
 {
   uchar *ibuf;
   int i;
@@ -1119,7 +1119,11 @@ EIB_MC_PropertyWrite (EIBConnection * con, uint8_t obj, uint8_t property,
       errno = ECONNRESET;
       return -1;
     }
-  return len;
+  i = con->size - 2;
+  if (i > max_len)
+    i = max_len;
+  memcpy (res, con->buf + 2, i);
+  return i;
 }
 
 int
