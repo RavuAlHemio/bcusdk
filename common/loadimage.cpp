@@ -198,7 +198,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	}
 
       STR_BCU2Key *s2 = (STR_BCU2Key *) i->findStream (S_BCU2Key);
-      if (s2 && s2->keys () != 4)
+      if (s2 && s2->keys () != 3)
 	{
 	  delete i;
 	  return IMG_INVALID_KEY;
@@ -218,11 +218,10 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       else
 	{
 	  img->installkey = 0xFFFFFFFF;
-	  img->keys.resize (4);
+	  img->keys.resize (3);
 	  img->keys[0] = 0xFFFFFFFF;
 	  img->keys[1] = 0xFFFFFFFF;
 	  img->keys[2] = 0xFFFFFFFF;
-	  img->keys[3] = 0xFFFFFFFF;
 	}
 
       const uchar zero[10] = { 0 };

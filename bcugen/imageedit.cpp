@@ -269,13 +269,13 @@ PatchImage (Image & i, Device & d)
       }
     if (d.InstallKey_lineno)
       k->installkey = d.InstallKey;
-    k->keys.resize (4);
+    k->keys.resize (3);
     int i;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < 3; i++)
       k->keys[i] = 0xffffffff;
     for (i = 0; i < d.Keys (); i++)
       {
-	if (d.Keys[i].level < 0 || d.Keys[i].level > 3)
+	if (d.Keys[i].level < 0 || d.Keys[i].level > 2)
 	  die (_("unsupported key level %d"), d.Keys[i].level);
 	k->keys[d.Keys[i].level] = d.Keys[i].key;
       }
