@@ -44,10 +44,34 @@
 <comment>"*"+"/"        BEGIN(INITIAL);
 
 ";" return ';';
+":" return ':';
+"?" return '?';
 "{" return '{';
 "}" return '}';
 "," return ',';
+")" return ')';
+"(" return '(';
+"||" return T_OR;
+"&&" return T_AND;
+"|" return '|';
+"&" return '&';
+"^" return '^';
+"==" return T_EQ;
 "=" return '=';
+"!=" return T_NE;
+"<=" return T_LE;
+">=" return T_GE;
+">>" return T_RSHIFT;
+"<<" return T_LSHIFT;
+"<" return '<';
+">" return '>';
+"+" return '+';
+"-" return '-';
+"*" return '*';
+"/" return '/';
+"%" return '%';
+"~" return '~';
+"!" return '!';
 
 true return TRUE;
 false return FALSE;
