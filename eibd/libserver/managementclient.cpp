@@ -19,6 +19,7 @@
 
 #include "managementclient.h"
 #include "management.h"
+#include "loadimage.h"
 
 void
 ReadIndividualAddresses (Layer3 * l3, Trace * t, ClientConnection * c,
@@ -461,4 +462,109 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
   {
     c->sendreject (stop);
   }
+}
+
+void
+LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
+{
+  uchar buf[200];
+  CArray img (c->buf + 2, c->size - 2);
+  BCUImage *i;
+  BCU_LOAD_RESULT r = PrepareLoadImage (img, i);
+  if (r != IMG_IMAGE_LOADABLE)
+    {
+      if (i)
+	delete i;
+      EIBSETTYPE (buf, EIB_LOAD_IMAGE);
+      buf[2] = (r >> 8) & 0xff;
+      buf[3] = (r) & 0xff;
+      c->sendmessage (4, buf, stop);
+      return;
+    }
+
+  try
+  {
+    uint16_t maskver;
+    uchar c;
+    r = IMG_NO_DEVICE_CONNECTION;
+    Management_Connection m (l3, t, i->addr);
+    r = IMG_MASK_READ_FAILED;
+    if (m.A_Device_Descriptor_Read (maskver) == -1)
+      goto out;
+    r = IMG_WRONG_MASK_VERSION;
+    if (i->BCUType == BCUImage::B_bcu1)
+      {
+	if (maskver != 0x0012)
+	  goto out;
+
+	/* set error flags in BCU (0x10D = 0x00) */
+	r = IMG_CLEAR_ERROR;
+	c = 0;
+	if (m.X_Memory_Write (0x010d, CArray (&c, 1)) == -1)
+	  goto out;
+
+	/*set length of the address tab to 1 */
+	r = IMG_RESET_ADDR_TAB;
+	c = 0x01;
+	if (m.X_Memory_Write (0x0116, CArray (&c, 1)) == -1)
+	  goto out;
+
+	/*load the data from 0x100 to 0x100 */
+	r = IMG_LOAD_HEADER;
+	if (m.X_Memory_Write (0x0100, CArray (i->code.array (), 1)))
+	  goto out;
+
+	/*load the data from 0x104 to 0x10C */
+	if (m.X_Memory_Write (0x0104, CArray (i->code.array () + 0x04, 8)))
+	  goto out;
+
+	/*load the data from 0x10E to 0x115 */
+	if (m.X_Memory_Write (0x010E, CArray (i->code.array () + 0x0E, 7)))
+	  goto out;
+
+	/*load the data from 0x119H to eeprom end */
+	r = IMG_LOAD_MAIN;
+	if (m.
+	    X_Memory_Write_Block (0x119,
+				  CArray (i->code.array () + 0x19,
+					  i->code () - 0x19)))
+	  goto out;
+
+	/*erase the user RAM (0x0CE to 0x0DF) */
+	r = IMG_ZERO_RAM;
+	uchar zero[18] = { 0 };
+	if (m.X_Memory_Write (0x00ce, CArray (zero, 18)))
+	  goto out;
+
+	/* set the length of the address table */
+	r = IMG_FINALIZE_ADDR_TAB;
+	if (m.
+	    X_Memory_Write_Block (0x0116,
+				  CArray (i->code.array () + 0x16, 1)))
+	  goto out;
+
+	/* reset all error flags in the BCU (0x10D = 0xFF) */
+	r = IMG_PREPARE_RUN;
+	c = 0xff;
+	if (m.X_Memory_Write (0x010d, CArray (&c, 1)))
+	  goto out;
+
+	r = IMG_RESTART;
+	m.A_Restart ();
+
+	r = IMG_LOADED;
+	goto out;
+      }
+  }
+  catch (Exception e)
+  {
+  }
+out:
+
+  if (i)
+    delete i;
+  EIBSETTYPE (buf, EIB_LOAD_IMAGE);
+  buf[2] = (r >> 8) & 0xff;
+  buf[3] = (r) & 0xff;
+  c->sendmessage (4, buf, stop);
 }
