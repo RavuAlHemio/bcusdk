@@ -478,6 +478,8 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 {
   uchar buf[200];
   CArray img (c->buf + 2, c->size - 2);
+  CArray erg;
+  int j;
   BCUImage *i;
   BCU_LOAD_RESULT r = PrepareLoadImage (img, i);
   if (r != IMG_IMAGE_LOADABLE)
@@ -524,13 +526,13 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	if (m.X_Memory_Write (0x0100, CArray (&c, 1)) == -1)
 	  goto out;
 
-	/*load the data from 0x104 to 0x10C */
-	if (m.X_Memory_Write (0x0104, CArray (i->code.array () + 0x04, 8)) ==
+	/*load the data from 0x103 to 0x10C */
+	if (m.X_Memory_Write (0x0103, CArray (i->code.array () + 0x04, 10)) ==
 	    -1)
 	  goto out;
 
 	/*load the data from 0x10E to 0x115 */
-	if (m.X_Memory_Write (0x010E, CArray (i->code.array () + 0x0E, 7)) ==
+	if (m.X_Memory_Write (0x010E, CArray (i->code.array () + 0x0E, 8)) ==
 	    -1)
 	  goto out;
 
@@ -563,6 +565,41 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	c = 0xff;
 	if (m.X_Memory_Write (0x010d, CArray (&c, 1)) == -1)
 	  goto out;
+
+	r = IMG_RESTART;
+	m.A_Restart ();
+
+	r = IMG_LOADED;
+	goto out;
+      }
+    if (i->BCUType == BCUImage::B_bcu20 || i->BCUType == BCUImage::B_bcu21)
+      {
+	if (maskver != 0x0020 && i->BCUType == BCUImage::B_bcu20)
+	  goto out;
+
+	if (maskver != 0x0020 && i->BCUType == BCUImage::B_bcu20)
+	  goto out;
+
+	for (j = 0; j < i->load (); j++)
+	  {
+	    r = i->load[j].error;
+	    if (i->load[j].obj != 0xff)
+	      {
+		if (m.A_Property_Write (i->load[j].obj, i->load[j].prop,
+					i->load[j].start, 1, i->load[j].req,
+					erg) == -1)
+		  goto out;
+		if (erg != i->load[j].result)
+		  goto out;
+	      }
+	    if (i->load[j].memaddr != 0xffff)
+	      if (m.
+		  X_Memory_Write (i->load[j].memaddr,
+				  CArray (i->code.array () +
+					  i->load[j].memaddr - 0x100,
+					  i->load[j].len)) == -1)
+		goto out;
+	  }
 
 	r = IMG_RESTART;
 	m.A_Restart ();
