@@ -860,6 +860,11 @@ CheckDevice (Device & d)
   if (d.BCU == BCU_bcu12 && d.PollingSlaves ())
     die (_("BCU1 supports no polling"));
 
+  if (d.BCU == BCU_bcu12 && d.InstallKey_lineno)
+    die (_("installkey not supported"));
+  if (d.BCU == BCU_bcu12 && d.Keys ())
+    die (_("bcu1 supports no access protection"));
+
   if (d.BCU != BCU_bcu12)
     {
       if (d.Objects ())
