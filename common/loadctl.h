@@ -33,6 +33,7 @@ typedef enum
 {
   L_CODE = 1,
   L_BCU1_SIZE = 2,
+  L_BCU2_SIZE = 3,
 
   L_BCU_TYPE = 100,
   L_BCU2_INIT,

@@ -72,6 +72,8 @@ STR_Stream::fromArray (const CArray & c)
 	return new STR_Code (c);
       case L_BCU1_SIZE:
 	return new STR_BCU1Size (c);
+      case L_BCU2_SIZE:
+	return new STR_BCU2Size (c);
       default:
 	return new STR_Unknown (c);
       }
@@ -530,8 +532,82 @@ STR_BCU1Size::decode ()
   return buf;
 }
 
+STR_BCU2Size::STR_BCU2Size ()
+{
+  textsize = 0;
+  stacksize = 0;
+  lo_datasize = 0;
+  lo_bsssize = 0;
+  hi_datasize = 0;
+  hi_bsssize = 0;
+}
+
+STR_BCU2Size::STR_BCU2Size (const CArray & c)
+{
+  if (c () != 16)
+    throw 1;
+  textsize = c[4] << 8 | c[5];
+  stacksize = c[6] << 8 | c[7];
+  lo_datasize = c[8] << 8 | c[9];
+  lo_bsssize = c[10] << 8 | c[11];
+  hi_datasize = c[12] << 8 | c[13];
+  hi_bsssize = c[14] << 8 | c[15];
+}
+
+CArray
+STR_BCU2Size::toArray ()
+{
+  CArray d;
+  uint16_t len = 14;
+  d.resize (2 + len);
+  d[0] = (len >> 8) & 0xff;
+  d[1] = (len) & 0xff;
+  d[2] = (L_BCU1_SIZE >> 8) & 0xff;
+  d[3] = (L_BCU1_SIZE) & 0xff;
+  d[4] = (textsize >> 8) & 0xff;
+  d[5] = (textsize) & 0xff;
+  d[6] = (stacksize >> 8) & 0xff;
+  d[7] = (stacksize) & 0xff;
+  d[8] = (lo_datasize >> 8) & 0xff;
+  d[9] = (lo_datasize) & 0xff;
+  d[10] = (lo_bsssize >> 8) & 0xff;
+  d[11] = (lo_bsssize) & 0xff;
+  d[12] = (hi_datasize >> 8) & 0xff;
+  d[13] = (hi_datasize) & 0xff;
+  d[14] = (hi_bsssize >> 8) & 0xff;
+  d[15] = (hi_bsssize) & 0xff;
+  return d;
+}
+
+String
+STR_BCU2Size::decode ()
+{
+  char buf[200];
+  sprintf (buf,
+	   "BCU1_SIZE: text:%d stack:%d lo_data:%d lo_bss:%d hi_data:%d hi_bss:%d\n",
+	   textsize, stacksize, lo_datasize, lo_bsssize, hi_datasize,
+	   hi_bsssize);
+  return buf;
+}
+
 STR_BCU2Start::STR_BCU2Start ()
 {
+  addrtab_start = 0;
+  addrtab_size = 0;
+  assoctab_start = 0;
+  assoctab_size = 0;
+  readonly_start = 0;
+  readonly_end = 0;
+  param_start = 0;
+  param_end = 0;
+
+  obj_ptr = 0;
+  obj_count = 0;
+  appcallback = 0;
+  groupobj_ptr = 0;
+  seg0 = 0;
+  seg1 = 0;
+  sphandler = 0;
   initaddr = 0;
   runaddr = 0;
   saveaddr = 0;
@@ -539,29 +615,74 @@ STR_BCU2Start::STR_BCU2Start ()
 
 STR_BCU2Start::STR_BCU2Start (const CArray & c)
 {
-  if (c () != 10)
+  if (c () != 40)
     throw 1;
-  initaddr = c[4] << 8 | c[5];
-  runaddr = c[6] << 8 | c[7];
-  saveaddr = c[8] << 8 | c[9];
+  addrtab_start = c[4] << 8 | c[5];
+  addrtab_size = c[6] << 8 | c[7];
+  assoctab_start = c[8] << 8 | c[9];
+  assoctab_size = c[10] << 8 | c[11];
+  readonly_start = c[12] << 8 | c[13];
+  readonly_end = c[14] << 8 | c[15];
+  param_start = c[16] << 8 | c[17];
+  param_end = c[18] << 8 | c[19];
+  obj_ptr = c[20] << 8 | c[21];
+  obj_count = c[22] << 8 | c[23];
+  appcallback = c[24] << 8 | c[25];
+  groupobj_ptr = c[26] << 8 | c[27];
+  seg0 = c[28] << 8 | c[29];
+  seg1 = c[30] << 8 | c[31];
+  sphandler = c[32] << 8 | c[33];
+  initaddr = c[34] << 8 | c[35];
+  runaddr = c[36] << 8 | c[37];
+  saveaddr = c[38] << 8 | c[39];
 }
 
 CArray
 STR_BCU2Start::toArray ()
 {
   CArray d;
-  uint16_t len = 8;
+  uint16_t len = 46;
   d.resize (2 + len);
   d[0] = (len >> 8) & 0xff;
   d[1] = (len) & 0xff;
   d[2] = (L_BCU2_INIT >> 8) & 0xff;
   d[3] = (L_BCU2_INIT) & 0xff;
-  d[4] = (initaddr >> 8) & 0xff;
-  d[5] = (initaddr) & 0xff;
-  d[6] = (runaddr >> 8) & 0xff;
-  d[7] = (runaddr) & 0xff;
-  d[8] = (saveaddr >> 8) & 0xff;
-  d[9] = (saveaddr) & 0xff;
+  d[4] = (addrtab_start >> 8) & 0xff;
+  d[5] = (addrtab_size) & 0xff;
+  d[6] = (addrtab_size >> 8) & 0xff;
+  d[7] = (addrtab_size) & 0xff;
+  d[8] = (assoctab_start >> 8) & 0xff;
+  d[9] = (assoctab_start) & 0xff;
+  d[10] = (assoctab_size >> 8) & 0xff;
+  d[11] = (assoctab_size) & 0xff;
+  d[12] = (readonly_start >> 8) & 0xff;
+  d[13] = (readonly_start) & 0xff;
+  d[14] = (readonly_end >> 8) & 0xff;
+  d[15] = (readonly_end) & 0xff;
+  d[16] = (param_start >> 8) & 0xff;
+  d[17] = (param_start) & 0xff;
+  d[18] = (param_end >> 8) & 0xff;
+  d[19] = (param_end) & 0xff;
+  d[20] = (obj_ptr >> 8) & 0xff;
+  d[21] = (obj_ptr) & 0xff;
+  d[22] = (obj_count >> 8) & 0xff;
+  d[23] = (obj_count) & 0xff;
+  d[24] = (appcallback >> 8) & 0xff;
+  d[25] = (appcallback) & 0xff;
+  d[26] = (groupobj_ptr >> 8) & 0xff;
+  d[27] = (groupobj_ptr) & 0xff;
+  d[28] = (seg0 >> 8) & 0xff;
+  d[29] = (seg0) & 0xff;
+  d[30] = (seg1 >> 8) & 0xff;
+  d[31] = (seg1) & 0xff;
+  d[32] = (sphandler >> 8) & 0xff;
+  d[33] = (sphandler) & 0xff;
+  d[34] = (initaddr >> 8) & 0xff;
+  d[35] = (initaddr) & 0xff;
+  d[36] = (runaddr >> 8) & 0xff;
+  d[37] = (runaddr) & 0xff;
+  d[38] = (saveaddr >> 8) & 0xff;
+  d[39] = (saveaddr) & 0xff;
   return d;
 }
 
@@ -569,8 +690,14 @@ String
 STR_BCU2Start::decode ()
 {
   char buf[200];
-  sprintf (buf, "BCU2_INIT: init:%04X run:%04X save:%04X\n", initaddr,
-	   runaddr, saveaddr);
+  sprintf (buf,
+	   "BCU2_INIT: init:%04X run:%04X save:%04X addr_tab:%04X(%d) assoc_tab:%04X(%d) text:%04X-%04X\n"
+	   " param:%04X-%04X obj:%04X(%d) appcallback:%04X\n"
+	   " groupobj:%04X seg0:%04X seg1:%04X sphandler:%04X\n",
+	   initaddr, runaddr, saveaddr, addrtab_start, addrtab_size,
+	   assoctab_start, assoctab_size, readonly_start, readonly_end,
+	   param_start, param_end, obj_ptr, obj_count, appcallback,
+	   groupobj_ptr, seg0, seg1, sphandler);
   return buf;
 }
 

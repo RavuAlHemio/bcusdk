@@ -36,6 +36,7 @@ typedef enum
   S_ListParameter,
   S_GroupObject,
   S_BCU1Size,
+  S_BCU2Size,
   S_BCU2Start,
 } STR_Type;
 
@@ -205,9 +206,44 @@ public:
   }
   String decode ();
 };
+class STR_BCU2Size:public STR_Stream
+{
+public:
+  uint16_t textsize;
+  uint16_t stacksize;
+  uint16_t lo_datasize;
+  uint16_t lo_bsssize;
+  uint16_t hi_datasize;
+  uint16_t hi_bsssize;
+
+    STR_BCU2Size ();
+    STR_BCU2Size (const CArray & str);
+  CArray toArray ();
+  STR_Type getType ()
+  {
+    return S_BCU2Size;
+  }
+  String decode ();
+};
 class STR_BCU2Start:public STR_Stream
 {
 public:
+  uint16_t addrtab_start;
+  uint16_t addrtab_size;
+  uint16_t assoctab_start;
+  uint16_t assoctab_size;
+  uint16_t readonly_start;
+  uint16_t readonly_end;
+  uint16_t param_start;
+  uint16_t param_end;
+
+  uint16_t obj_ptr;
+  uint16_t obj_count;
+  uint16_t appcallback;
+  uint16_t groupobj_ptr;
+  uint16_t seg0;
+  uint16_t seg1;
+  uint16_t sphandler;
   uint16_t initaddr;
   uint16_t runaddr;
   uint16_t saveaddr;
