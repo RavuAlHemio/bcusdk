@@ -164,12 +164,16 @@ printAddrTab (FILE * f, Device & d)
   fprintf (f, "\t.hword 0x%04X # physical address\n", d.PhysicalAddress);
   for (i = 0; i < addr (); i++)
     fprintf (f, "\t.hword 0x%04X\n", addr[i]);
+  if (d.BCU != BCU_bcu12)
+    fprintf (f, "\t.byte 0 #Checksum\n");
   fprintf (f, "addrtab_end:\n");
   fprintf (f, "\t.section .assoctab\n");
   fprintf (f, "assoctab:\n");
   fprintf (f, "\t.byte %d\n", maxs);
   for (i = 0; i < maxs; i++)
     fprintf (f, "\t.byte %d, %d\n", Addr[i] + 1, ObjNo[i]);
+  if (d.BCU != BCU_bcu12)
+    fprintf (f, "\t.byte 0 #Checksum\n");
   fprintf (f, "assoctab_end:\n");
   d.ObjCount = objno;
   if (d.ObjCount > 85)
@@ -198,12 +202,17 @@ printPseudoAddrTab (FILE * f, Device & d)
   fprintf (f, "\t.hword 0x0000 # physical address\n");
   for (i = 0; i < d.Test_Addr_Count; i++)
     fprintf (f, "\t.hword 0x0000\n");
+  if (d.BCU != BCU_bcu12)
+    fprintf (f, "\t.byte 0 #Checksum\n");
   fprintf (f, "addrtab_end:\n");
+
   fprintf (f, "\t.section .assoctab\n");
   fprintf (f, "assoctab:\n");
   fprintf (f, "\t.byte %d\n", d.Test_Assoc_Count);
   for (i = 0; i < d.Test_Assoc_Count; i++)
     fprintf (f, "\t.byte 0, 0\n");
+  if (d.BCU != BCU_bcu12)
+    fprintf (f, "\t.byte 0 #Checksum\n");
   fprintf (f, "assoctab_end:\n");
 
   for (i = 0; i < d.GroupObjects (); i++)

@@ -39,8 +39,10 @@ SECTIONS {
 	*(.text)
 	*(.data)
         *(.data.hi)
+	*(.checksum.1)
 	*(.eeprom)
 	*(.parameter)
+	*(.checksum.2)
 }
 /DISCARD/ : {
 	*(.loram)

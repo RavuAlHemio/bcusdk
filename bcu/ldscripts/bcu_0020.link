@@ -93,6 +93,10 @@ _data_hi_size = _data_hi_end - _data_hi_start ;
 
 . = _text_end + _data_size + _data_hi_size ;
 
+.checksum.1 : {
+	BYTE(0)
+}
+
 readonly_end = . ;
 eeprom_start = . ;
 .eeprom : {
@@ -101,6 +105,9 @@ eeprom_start = . ;
 param_start = . ;
 .parameter : {
 	*(.parameter)
+}
+.checksum.2 : {
+        BYTE(0)
 }
 param_end = . ;
 
