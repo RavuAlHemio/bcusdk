@@ -331,6 +331,8 @@ main (int ac, char *ag[])
   printf ("%s\n", i->decode ()());
 
   f = fopen (ag[3], "w");
+  if (!f)
+    die (_("can not write to %s"), ag[3]);
   p = i->toArray ();
   if (dump)
     printf ("%s", HexDump (p) ());
