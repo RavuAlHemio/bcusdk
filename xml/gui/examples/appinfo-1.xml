@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sample application information
+    Copyright (C) 2005 Martin Kögler mkoegler@auto.tuwien.ac.at
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+-->
 <!DOCTYPE DeviceDesc SYSTEM "appinfo.dtd">
 <DeviceDesc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.auto.tuwien.ac.at/~mkoegler/eib/xml/appinfo.xsd" version="0.0.0" xsi:schemaLocation="http://www.auto.tuwien.ac.at/~mkoegler/eib/appinfo.xsd">
   <ProgramID>11234235r0fjdf9323</ProgramID>
