@@ -2,6 +2,7 @@ DEF=class_gen.h class_init.h parser_gentoken.h parser_genunion.h parser_objectde
 READ=parser.pre parser1.pre parser2.pre scanner.pre
 
 dist_noinst_DATA=$(DEF)
+EXTRA_DIST=parser.pre parser1.pre parser2.pre scanner.pre
 
 INCLUDES=-I../../common -I../struct -I../lib -I.
 AM_YFLAGS=-d

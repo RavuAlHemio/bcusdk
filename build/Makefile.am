@@ -16,9 +16,11 @@ do_subst = sed -e 's,[@]VERSION[@],$(VERSION),g' \
                  -e 's,[@]BINDIR[@],$(BINDIR),g' \
                  -e 's,[@]XMLDIR[@],$(XMLDIR),g'
 
+SCRIPT=build.ai build.img gencitemplate
+EXTRA_DIST=build.ai.in build.img.in gencitemplate.in
 
-bin_SCRIPTS=build.ai build.img gencitemplate
-CLEANFILES=build.ai build.img gencitemplate
+bin_SCRIPTS=$(SCRIPT)
+CLEANFILES=$(SCRIPT)
 
 % : $(srcdir)/%.in Makefile
 	$(do_subst) < $<  > $@
