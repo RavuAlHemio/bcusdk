@@ -23,6 +23,7 @@
 #include "write.h"
 #include "check.h"
 #include "gencode.h"
+#include "symboltab.h"
 
 int
 main (int ac, char *ag[])
@@ -33,12 +34,13 @@ main (int ac, char *ag[])
       ("Usage: %s description config appinfo hfile incfile cfile asmfile variant",
        ag[0]);
 
+  NewSymbol ("main", 0);
   Device *d = ReadConfig (ag[1]);
   if (!d)
     die (_("read of description %s failed"), ag[1]);
   CheckDevice (*d);
 
-  d->ProgramID="[!--*PROGID--]";
+  d->ProgramID = "[!--*PROGID--]";
   WriteConfig (ag[2], d);
   WriteAppInfo (d, ag[3]);
 
