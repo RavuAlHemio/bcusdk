@@ -41,31 +41,31 @@ _initmem:
 	ldx $_bss_size
 lp1:	
 	beq wt1
-	sta %X,_bss_start
+	sta %X,_bss_start-1
 	decx
 	bra lp1
 wt1:
 	ldx $_bss_hi_size
 lp1a:	
 	beq wt1a
-	sta %X,_bss_hi_start
+	sta %X,_bss_hi_start-1
 	decx
 	bra lp1a
 wt1a:
 	ldx $_data_size
 lp2:	
 	beq wt2
-	lda %X,_text_end
-	sta %X,_data_start
+	lda %X,_text_end-1
+	sta %X,_data_start-1
 	decx
 	bra lp2
 wt2:		
 	ldx $_data_hi_size
 lp2a:	
 	beq wt2a
-	lda %X,_data_hi_img
-	sta %X,_data_hi_start
+	lda %X,_data_hi_img-1
+	sta %X,_data_hi_start-1
 	decx
 	bra lp2a
 wt2a:		
-	rts
+	jmp _initstack

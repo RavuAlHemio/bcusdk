@@ -45,15 +45,15 @@ _initmem:
 	ldx $_bss_size
 lp1:	
 	beq wt1
-	sta %X,_bss_start
+	sta %X,_bss_start-1
 	decx
 	bra lp1
 wt1:
 	ldx $_data_size
 lp2:	
 	beq wt2
-	lda %X,_text_end
-	sta %X,_data_start
+	lda %X,_text_end-1
+	sta %X,_data_start-1
 	decx
 	bra lp2
 wt2:		
