@@ -87,6 +87,7 @@ typedef enum
   IMG_SET_OBJ,
   IMG_SET_TASK2,
   IMG_FINISH_PROC,
+  IMG_WRONG_CHECKLIM,
 } BCU_LOAD_RESULT;
 
 #endif
