@@ -24,6 +24,17 @@
 
 #include "types.h"
 
+typedef struct
+{
+  BCU_LOAD_RESULT error;
+  uint8_t obj;
+  uint8_t prop;
+  CArray req;
+  CArray result;
+  uint16_t memaddr;
+  uint16_t len;
+} EIBLoadRequest;
+
 class BCUImage
 {
 public:
@@ -32,6 +43,7 @@ public:
     B_bcu1, B_bcu20, B_bcu21
   } BCUType;
   CArray code;
+    Array < EIBLoadRequest > load;
   eibaddr_t addr;
 };
 
