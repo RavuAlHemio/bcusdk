@@ -24,7 +24,6 @@ static void
 GenAlloc (CArray & req, uint16_t start, uint16_t len, uint8_t access,
 	  uint8_t type, bool check)
 {
-  check = 0;
   const uchar zero[10] = { 0 };
   req.set (zero, 10);
   req[0] = 0x03;
@@ -147,7 +146,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	  delete i;
 	  return IMG_NO_START;
 	}
-      if (s1->addrtab_start != 0x116)
+      if (s1->addrtab_start != 0x116 || s1->addrtab_size < 4)
 	{
 	  delete i;
 	  return IMG_WRONG_ADDRTAB;
@@ -239,7 +238,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 
       r.obj = 0xff;
       r.memaddr += 3;
-      r.len = s1->addrtab_size - 3;
+      r.len = s1->addrtab_size - 4;
       img->load.add (r);
 
       r.obj = 1;
@@ -269,7 +268,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 
       GenAlloc (r.req, s1->assoctab_start, s1->assoctab_size, 0x13, 0x03, 1);
       r.memaddr = s1->assoctab_start;
-      r.len = s1->assoctab_size;
+      r.len = s1->assoctab_size - 1;
       r.error = IMG_WRITE_ASSOC;
       img->load.add (r);
 
@@ -320,7 +319,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       GenAlloc (r.req, s1->readonly_start,
 		s1->readonly_end - s1->readonly_start, 0x03, 0x03, 1);
       r.error = IMG_ALLOC_RO;
-      r.len = s1->readonly_end - s1->readonly_start;
+      r.len = s1->readonly_end - s1->readonly_start - 1;
       r.memaddr = s1->readonly_start;
       if (r.len)
 	img->load.add (r);
@@ -338,7 +337,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       r.error = IMG_ALLOC_PARAM;
       r.len = s1->param_end - s1->param_start;
       r.memaddr = s1->param_start;
-      if (r.len)
+      if (r.len > 1)
 	img->load.add (r);
 
       r.memaddr = 0xffff;
