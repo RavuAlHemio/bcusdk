@@ -511,15 +511,18 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 
 	/*load the data from 0x100 to 0x100 */
 	r = IMG_LOAD_HEADER;
-	if (m.X_Memory_Write (0x0100, CArray (i->code.array (), 1)))
+	c = 0xff;
+	if (m.X_Memory_Write (0x0100, CArray (&c, 1)) == -1)
 	  goto out;
 
 	/*load the data from 0x104 to 0x10C */
-	if (m.X_Memory_Write (0x0104, CArray (i->code.array () + 0x04, 8)))
+	if (m.X_Memory_Write (0x0104, CArray (i->code.array () + 0x04, 8)) ==
+	    -1)
 	  goto out;
 
 	/*load the data from 0x10E to 0x115 */
-	if (m.X_Memory_Write (0x010E, CArray (i->code.array () + 0x0E, 7)))
+	if (m.X_Memory_Write (0x010E, CArray (i->code.array () + 0x0E, 7)) ==
+	    -1)
 	  goto out;
 
 	/*load the data from 0x119H to eeprom end */
@@ -527,26 +530,29 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	if (m.
 	    X_Memory_Write_Block (0x119,
 				  CArray (i->code.array () + 0x19,
-					  i->code () - 0x19)))
+					  i->code () - 0x19)) == -1)
+	  goto out;
+
+	if (m.X_Memory_Write (0x0100, CArray (i->code.array (), 1)) == -1)
 	  goto out;
 
 	/*erase the user RAM (0x0CE to 0x0DF) */
 	r = IMG_ZERO_RAM;
 	uchar zero[18] = { 0 };
-	if (m.X_Memory_Write (0x00ce, CArray (zero, 18)))
+	if (m.X_Memory_Write_Block (0x00ce, CArray (zero, 18)) == -1)
 	  goto out;
 
 	/* set the length of the address table */
 	r = IMG_FINALIZE_ADDR_TAB;
 	if (m.
 	    X_Memory_Write_Block (0x0116,
-				  CArray (i->code.array () + 0x16, 1)))
+				  CArray (i->code.array () + 0x16, 1)) == -1)
 	  goto out;
 
 	/* reset all error flags in the BCU (0x10D = 0xFF) */
 	r = IMG_PREPARE_RUN;
 	c = 0xff;
-	if (m.X_Memory_Write (0x010d, CArray (&c, 1)))
+	if (m.X_Memory_Write (0x010d, CArray (&c, 1)) == -1)
 	  goto out;
 
 	r = IMG_RESTART;

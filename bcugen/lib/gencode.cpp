@@ -106,7 +106,7 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
       if (o.Sending)
 	fprintf (f, "static void %s_transmit(){}\n", o.Name ());
 #else
-      if (o.SendAddress_lineno)
+      if (o.Sending)
 	fprintf (f, "static void %s_transmit(){}\n", o.Name ());
 #endif
     }
@@ -118,11 +118,11 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
 	fprintf (f, "void %s();\n", o.on_update ());
 #ifdef PHASE1
       if (o.Sending)
-	fprintf (f, "static void %s_transmit(){transmit_groupobject(%d);}\n",
+	fprintf (f, "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
 		 o.Name (), o.ObjNo);
 #else
       if (o.SendAddress_lineno)
-	fprintf (f, "static void %s_transmit(){transmit_groupobject(%d);}\n",
+	fprintf (f, "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
 		 o.Name (), o.ObjNo);
 #endif
     }
@@ -249,6 +249,8 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.FloatParameters (); i++)
     {
       FloatParameter & s = d.FloatParameters[i];
+      if (!s.ID ())
+	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 5);
       fprintf (f, "\t.hword %d\n", L_FLOAT_PAR);
       fprintf (f, "\t.hword %s\n", s.Name ());
@@ -257,6 +259,8 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.IntParameters (); i++)
     {
       IntParameter & s = d.IntParameters[i];
+      if (!s.ID ())
+	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 6);
       fprintf (f, "\t.hword %d\n", L_INT_PAR);
       fprintf (f, "\t.hword %s\n", s.Name ());
@@ -267,6 +271,8 @@ printParameterInfo (FILE * f, Device & d)
     {
       int j, l = 0;
       ListParameter & s = d.ListParameters[i];
+      if (!s.ID ())
+	continue;
       for (j = 0; j < s.Elements (); j++)
 	l += strlen (s.Elements[j].Value ()) + 1;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 7 + l);
@@ -280,6 +286,8 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.GroupObjects (); i++)
     {
       GroupObject & s = d.GroupObjects[i];
+      if (!s.ID ())
+	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 4);
       fprintf (f, "\t.hword %d\n", L_GROUP_OBJECT);
       fprintf (f, "\t.byte %d\n", i);
@@ -340,9 +348,9 @@ GenBCUHeader (FILE * f, Device & d)
     }
   fprintf (f, "\t.section .bcuconfig\n");
   if (d.BCU == BCU_bcu12)
-    i = (d.BCU1_PROTECT ? 0x00 : 0x01) | (d.BCU1_SEC ? 0x00 : 0x01);
+    i = (d.BCU1_PROTECT ? 0x00 : 0x02) | (d.BCU1_SEC ? 0x00 : 0x01);
   else
-    i = (d.BCU2_PROTECT ? 0x00 : 0x01) | (d.BCU2_WATCHDOG ? 0x01 : 0x00);
+    i = (d.BCU2_PROTECT ? 0x00 : 0x02) | (d.BCU2_WATCHDOG ? 0x01 : 0x00);
 
   fprintf (f, "\t.byte 0x%02X # OptionReg\n", 0xfc | i);
   fprintf (f, "\t.hword 0x%04X # manufacturer\n", d.ManufacturerCode);

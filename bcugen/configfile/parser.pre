@@ -90,6 +90,7 @@ identarray : '{' '}' {$$=new IdentArray; }
 stringarray : '{' '}' {$$=new StringArray; }
 	| '{' stringarray1 ebs '}' { $$=$2;} ;
 
+#define PARSER_GEN
 #include "parser_objectdesc.h"
 #include "Objects.lst"
 
