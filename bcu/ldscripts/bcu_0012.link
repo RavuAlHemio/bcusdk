@@ -90,8 +90,5 @@ _stack_size = SPBASE + SPINIT - _data_end ;
 	SHORT(_bss_size)
 	}
 
-/* TODO */
-SPBASE = 0 ;
-SPINIT = 0xD8;
 }
 
