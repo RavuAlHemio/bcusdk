@@ -21,14 +21,14 @@ OBJECT(GroupObject)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_BOOL(Sending)
-ATTRIB_BOOL(Receiving)
 #endif
 
 ATTRIB_IDENT(Name)
 ATTRIB_ENUM(Type,GroupType,Map_GroupType)
 ATTRIB_IDENT(on_update)
 ATTRIB_BOOL(eeprom)
+ATTRIB_BOOL(Sending)
+ATTRIB_BOOL(Receiving)
 
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
 ATTRIB_STRING(Title)
