@@ -49,3 +49,5 @@
 
 #undef PRIVATE_VAR
 #define PRIVATE_VAR(A)
+#undef ATTRIB_EXPR
+#define ATTRIB_EXPR(A)

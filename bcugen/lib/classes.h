@@ -21,6 +21,7 @@
 #define CLASSES_H
 
 #include "common.h"
+#include "expr.h"
 
 #include "class_gen.h"
 #include "Objects.lst"

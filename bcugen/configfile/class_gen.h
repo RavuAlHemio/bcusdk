@@ -48,3 +48,5 @@
 
 #undef PRIVATE_VAR
 #define PRIVATE_VAR(A) A;
+#undef ATTRIB_EXPR
+#define ATTRIB_EXPR(A) Expr* A;int A##_lineno;

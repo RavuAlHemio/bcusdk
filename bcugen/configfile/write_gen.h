@@ -48,3 +48,5 @@
 #define ATTRIB_ENUM(A,B,C) if(d.A##_lineno) fprintf(f,"%s %s;\n",#A,un##C(d.A));
 #undef PRIVATE_VAR
 #define PRIVATE_VAR(A)
+#undef ATTRIB_EXPR
+#define ATTRIB_EXPR(A) if(d.A##_lineno) fprintf(f,"%s=%s;\n",#A,printExpression(d.A)());

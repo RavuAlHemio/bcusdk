@@ -72,6 +72,7 @@
 "%" return '%';
 "~" return '~';
 "!" return '!';
+"IN" return T_IN;
 
 true return TRUE;
 false return FALSE;
