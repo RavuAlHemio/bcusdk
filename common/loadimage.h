@@ -46,6 +46,8 @@ public:
   CArray code;
     Array < EIBLoadRequest > load;
   eibaddr_t addr;
+  eibkey_type installkey;
+  Array < eibkey_type > keys;
 };
 
 BCU_LOAD_RESULT PrepareLoadImage (const CArray & c, BCUImage * &img);

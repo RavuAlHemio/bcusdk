@@ -196,11 +196,34 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	  delete i;
 	  return IMG_WRONG_LOADCTL;
 	}
+
+      STR_BCU2Key *s2 = (STR_BCU2Key *) i->findStream (S_BCU2Key);
+      if (s2 && s2->keys () != 4)
+	{
+	  delete i;
+	  return IMG_INVALID_KEY;
+	}
+
       img = new BCUImage;
       img->code = c->code;
       img->BCUType =
 	(b->bcutype == 0x0020 ? BCUImage::B_bcu20 : BCUImage::B_bcu21);
       img->addr = (c->code[0x17] << 8) | (c->code[0x18]);
+
+      if (s2)
+	{
+	  img->installkey = s2->installkey;
+	  img->keys = s2->keys;
+	}
+      else
+	{
+	  img->installkey = 0xFFFFFFFF;
+	  img->keys.resize (4);
+	  img->keys[0] = 0xFFFFFFFF;
+	  img->keys[1] = 0xFFFFFFFF;
+	  img->keys[2] = 0xFFFFFFFF;
+	  img->keys[3] = 0xFFFFFFFF;
+	}
 
       const uchar zero[10] = { 0 };
       EIBLoadRequest r;
@@ -579,6 +602,15 @@ decodeBCULoadResult (BCU_LOAD_RESULT r)
       break;
     case IMG_WRONG_CHECKLIM:
       return _("wrong check limit");
+      break;
+    case IMG_AUTHORIZATION_FAILED:
+      return _("authorization failed");
+      break;
+    case IMG_INVALID_KEY:
+      return _("invalid key information");
+      break;
+    case IMG_KEY_WRITE:
+      return _("key write failed");
       break;
 
     default:
