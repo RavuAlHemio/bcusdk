@@ -10,9 +10,9 @@ CLEANFILES=parser2.post parser1.post scanner.post scanner.1.lpp parser1.1.ypp pa
 	parser2.1.h parser2.1.cpp scanner.1.cpp
 noinst_LIBRARIES=libread1.a libread2.a
 
-libread1_a_SOURCES=scanner.1.lpp parser1.1.ypp
+libread1_a_SOURCES=scanner.1.lpp parser1.1.ypp readconfig.cpp readconfig.h
 
-libread2_a_SOURCES=scanner.1.lpp parser2.1.ypp
+libread2_a_SOURCES=scanner.1.lpp parser2.1.ypp readconfig.cpp readconfig.h
 
 @AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/scanner.Po@am__quote@
 @AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/parser1.Po@am__quote@
