@@ -202,6 +202,8 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
     int16_t val;
     uchar buf[10];
     int i;
+    eibkey_type key;
+
     if (c->size < 4)
       {
 	c->sendreject (stop);
@@ -400,7 +402,12 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		  break;
 		}
 	      EIBSETTYPE (buf, EIB_MC_AUTHORIZE);
-	      if (m.A_Authorize (c->buf + 2, buf[3]) == -1)
+	      key =
+		(c->buf[2] << 24) | (c->buf[3] << 16) | (c->
+							 buf[4] << 8) | (c->
+									 buf
+									 [5]);
+	      if (m.A_Authorize (key, buf[3]) == -1)
 		c->sendreject (stop);
 	      else
 		c->sendmessage (3, buf, stop);
@@ -412,7 +419,12 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		  c->sendreject (stop);
 		  break;
 		}
-	      if (m.A_KeyWrite (c->buf + 2, *(c->buf + 6)) == -1)
+	      key =
+		(c->buf[2] << 24) | (c->buf[3] << 16) | (c->
+							 buf[4] << 8) | (c->
+									 buf
+									 [5]);
+	      if (m.A_KeyWrite (key, *(c->buf + 6)) == -1)
 		c->sendreject (stop);
 	      else
 		c->sendreject (stop, EIB_MC_KEY_WRITE);

@@ -22,11 +22,12 @@
 #include "common.h"
 
 
-timestamp_t getTime()
+timestamp_t
+getTime ()
 {
   struct timeval t;
-  gettimeofday(&t,0);
-  return ((timestamp_t)t.tv_sec)*1000000+((timestamp_t)t.tv_usec);
+  gettimeofday (&t, 0);
+  return ((timestamp_t) t.tv_sec) * 1000000 + ((timestamp_t) t.tv_usec);
 }
 
 String
@@ -52,6 +53,14 @@ FormatDomainAddr (domainaddr_t addr)
 {
   char buf[255];
   sprintf (buf, "%04X", addr);
+  return buf;
+}
+
+String
+FormatEIBKey (eibkey_type key)
+{
+  char buf[255];
+  sprintf (buf, "%08X", key);
   return buf;
 }
 

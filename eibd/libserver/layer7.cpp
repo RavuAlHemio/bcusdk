@@ -243,10 +243,10 @@ Layer7_Connection::A_Memory_Write (memaddr_t addr, const CArray & data)
 }
 
 int
-Layer7_Connection::A_Authorize (uchar key[4], uchar & level)
+Layer7_Connection::A_Authorize (eibkey_type key, uchar & level)
 {
   A_Authorize_Request_PDU r;
-  memcpy (r.key, key, sizeof (key));
+  r.key = key;
   APDU *a = Request_Response (&r);
   if (!a)
     return -1;
@@ -257,10 +257,10 @@ Layer7_Connection::A_Authorize (uchar key[4], uchar & level)
 }
 
 int
-Layer7_Connection::A_KeyWrite (uchar key[4], uchar & level)
+Layer7_Connection::A_KeyWrite (eibkey_type key, uchar & level)
 {
   A_Key_Write_PDU r;
-  memcpy (r.key, key, sizeof (key));
+  r.key = key;
   APDU *a = Request_Response (&r);
   if (!a)
     return -1;

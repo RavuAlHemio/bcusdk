@@ -76,9 +76,9 @@ public:
   /** write memory */
   int A_Memory_Write (memaddr_t addr, const CArray & data);
   /** try to authorize */
-  int A_Authorize (uchar key[4], uchar & level);
+  int A_Authorize (eibkey_type key, uchar & level);
   /** try to write a key */
-  int A_KeyWrite (uchar key[4], uchar & level);
+  int A_KeyWrite (eibkey_type key, uchar & level);
 
   /** write a property and verify */
   int X_Property_Write (uchar obj, uchar propertyid, uint16_t start,

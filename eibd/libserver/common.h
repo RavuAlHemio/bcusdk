@@ -68,7 +68,7 @@ void addHex (String & s, uchar c);
 void add16Hex (String & s, uint16_t c);
 
 /** get current time */
-timestamp_t getTime();
+timestamp_t getTime ();
 
 /** formats an EIB individual address */
 String FormatEIBAddr (eibaddr_t a);
@@ -76,6 +76,8 @@ String FormatEIBAddr (eibaddr_t a);
 String FormatGroupAddr (eibaddr_t a);
 /** formats an EIB domain address */
 String FormatDomainAddr (domainaddr_t addr);
+/** formats an EIB key */
+String FormatEIBKey (eibkey_type addr);
 
 #include "trace.h"
 

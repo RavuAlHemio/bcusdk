@@ -662,7 +662,7 @@ public:
 class A_Authorize_Request_PDU:public APDU
 {
 public:
-  uchar key[4];
+  eibkey_type key;
 
   A_Authorize_Request_PDU ();
   A_Authorize_Request_PDU (const CArray & p);
@@ -693,7 +693,7 @@ class A_Key_Write_PDU:public APDU
 {
 public:
   uchar level;
-  uchar key[4];
+  eibkey_type key;
 
     A_Key_Write_PDU ();
     A_Key_Write_PDU (const CArray & p);

@@ -1907,14 +1907,14 @@ bool A_Restart_PDU::isResponse(const APDU* req) const
 
 A_Authorize_Request_PDU::A_Authorize_Request_PDU ()
 {
-  memset (key, 0, sizeof (key));
+  key = 0;
 }
 
 A_Authorize_Request_PDU::A_Authorize_Request_PDU (const CArray & c)
 {
   if (c () != 7)
     throw Exception (PDU_WRONG_FORMAT);
-  memcpy (key, c.array () + 3, 4);
+  key = (c[3]<<24) | (c[4]<<16) | (c[5]<<8) | (c[6]);
 }
 
 CArray
@@ -1925,7 +1925,10 @@ A_Authorize_Request_PDU::ToPacket ()
   pdu[0] = 0x03;
   pdu[1] = 0xD1;
   pdu[2] = 0x00;
-  pdu.setpart (key, 3, 4);
+  pdu[3] = (key >> 24) & 0xff;
+  pdu[4] = (key >> 16) & 0xff;
+  pdu[5] = (key >> 8) & 0xff;
+  pdu[6] = (key) & 0xff;
   return pdu;
 }
 
@@ -1933,9 +1936,7 @@ String
 A_Authorize_Request_PDU::Decode ()
 {
   String s ("A_Authorize_Request Key:");
-  for (unsigned i = 0; i < sizeof (key); i++)
-    addHex (s, key[i]);
-  return s;
+  return s + FormatEIBKey (key);
 }
 
 bool A_Authorize_Request_PDU::isResponse(const APDU* req) const
@@ -1985,7 +1986,7 @@ bool A_Authorize_Response_PDU::isResponse(const APDU* req) const
 
 A_Key_Write_PDU::A_Key_Write_PDU ()
 {
-  memset (key, 0, sizeof (key));
+  key = 0;
   level = 0;
 }
 
@@ -1994,7 +1995,7 @@ A_Key_Write_PDU::A_Key_Write_PDU (const CArray & c)
   if (c () != 7)
     throw Exception (PDU_WRONG_FORMAT);
   level = c[2];
-  memcpy (key, c.array () + 3, 4);
+  key = (c[3]<<24) | (c[4]<<16) | (c[5]<<8) | (c[6]);
 }
 
 CArray
@@ -2005,7 +2006,10 @@ A_Key_Write_PDU::ToPacket ()
   pdu[0] = 0x03;
   pdu[1] = 0xD3;
   pdu[2] = level;
-  pdu.setpart (key, 3, 4);
+  pdu[3] = (key >> 24) & 0xff;
+  pdu[4] = (key >> 16) & 0xff;
+  pdu[5] = (key >> 8) & 0xff;
+  pdu[6] = (key) & 0xff;
   return pdu;
 }
 
@@ -2015,9 +2019,7 @@ A_Key_Write_PDU::Decode ()
   String s ("A_Key_Write Level:");
   addHex (s, level);
   s += " Key: ";
-  for (unsigned i = 0; i < sizeof (key); i++)
-    addHex (s, key[i]);
-  return s;
+  return s + FormatEIBKey (key);
 }
 
 bool A_Key_Write_PDU::isResponse(const APDU* req) const
