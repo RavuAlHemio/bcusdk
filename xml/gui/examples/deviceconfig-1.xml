@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<DeviceConfig xmlns:ns1="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.auto.tuwien.ac.at/~mkoegler/eib/xml/configdesc.xsd" version="0.0.0" ns1:schemaLocation="http://www.auto.tuwien.ac.at/~mkoegler/eib/xml/configdesc.xsd">
+  <ProgramID>11234235r0fjdf9323</ProgramID>
+  <PhysicalAddress>0.0.0</PhysicalAddress>
+  <Key id="1">00000000</Key>
+  <GroupObject id="go1">
+    <Priority>low</Priority>
+    <SendAddress>0000</SendAddress>
+    <ReceiveAddress>
+      <GroupAddr>0000</GroupAddr>
+    </ReceiveAddress>
+    <ReadAddress>
+      <GroupAddr>0000</GroupAddr>
+    </ReadAddress>
+    <UpdateAddress>
+      <GroupAddr>0000</GroupAddr>
+    </UpdateAddress>
+  </GroupObject>
+  <GroupObject id="go2">
+    <Priority>low</Priority>
+    <SendAddress>0000</SendAddress>
+    <ReceiveAddress>
+      <GroupAddr>0000</GroupAddr>
+    </ReceiveAddress>
+    <ReadAddress>
+      <GroupAddr>0000</GroupAddr>
+    </ReadAddress>
+    <UpdateAddress>
+      <GroupAddr>0000</GroupAddr>
+    </UpdateAddress>
+  </GroupObject>
+  <Property id="p1">
+    <Disable>false</Disable>
+    <ReadOnly>false</ReadOnly>
+    <ReadAccess>1</ReadAccess>
+    <WriteAccess>1</WriteAccess>
+  </Property>
+  <Property id="p2">
+    <Disable>false</Disable>
+    <ReadOnly>false</ReadOnly>
+    <ReadAccess>1</ReadAccess>
+    <WriteAccess>1</WriteAccess>
+  </Property>
+  <PollingSlave id="ps1">
+    <PollingAddress>0000</PollingAddress>
+    <PollingSlot>0</PollingSlot>
+  </PollingSlave>
+  <PollingSlave id="ps2">
+    <PollingAddress>0000</PollingAddress>
+    <PollingSlot>0</PollingSlot>
+  </PollingSlave>
+  <PollingMaster id="pm1">
+    <PollingAddress>0000</PollingAddress>
+    <PollingCount>0</PollingCount>
+  </PollingMaster>
+  <PollingMaster id="pm2">
+    <PollingAddress>0000</PollingAddress>
+    <PollingCount>0</PollingCount>
+  </PollingMaster>
+  <Parameter>
+    <ListParameter id="lp1">
+      <Value>le1</Value>
+    </ListParameter>
+    <ListParameter id="lp2">
+      <Value>le3</Value>
+    </ListParameter>
+    <IntParameter id="ip1">
+      <Value>2</Value>
+    </IntParameter>
+    <IntParameter id="ip2">
+      <Value>2222222</Value>
+    </IntParameter>
+    <FloatParameter id="fp1">
+      <Value>2</Value>
+    </FloatParameter>
+    <FloatParameter id="fp2">
+      <Value>1</Value>
+    </FloatParameter>
+    <StringParameter id="sp1">
+      <Value>234</Value>
+    </StringParameter>
+    <StringParameter id="sp2">
+      <Value>test</Value>
+    </StringParameter>
+  </Parameter>
+</DeviceConfig>

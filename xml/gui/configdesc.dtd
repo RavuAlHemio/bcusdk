@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- defines version 0.0.0 -->
+
+<!ENTITY % IDSTRING    "CDATA">
+<!ENTITY % STRING    "(#PCDATA)">
+
+<!ENTITY % INT "(#PCDATA)">
+<!ENTITY % BOOL "(#PCDATA)">
+<!ENTITY % FLOAT "(#PCDATA)">
+
+<!ENTITY % PRIORITY "(#PCDATA)">
+
+<!ENTITY % EIBADDR "(#PCDATA)">
+<!ENTITY % GROUPADDR "(#PCDATA)">
+<!ENTITY % POLLINGADDR "(#PCDATA)">
+<!ENTITY % POLLINGSLOT "(#PCDATA)">
+<!ENTITY % POLLINGCOUNT "(#PCDATA)">
+
+<!ENTITY % KEY "(#PCDATA)">
+<!ENTITY % KEYID "CDATA">
+
+<!ENTITY % ACCESSLEVEL "(#PCDATA)">
+
+<!ELEMENT Key %KEY;>
+<!ATTLIST Key
+  id %KEYID; #REQUIRED
+>
+
+<!ELEMENT GroupAddr %GROUPADDR;>
+<!ELEMENT PollingAddress %POLLINGADDR;>
+
+<!ELEMENT Priority %PRIORITY;>
+<!ELEMENT SendAddress %GROUPADDR;>
+<!ELEMENT ReceiveAddress (GroupAddr+)>
+<!ELEMENT ReadAddress (GroupAddr+)>
+<!ELEMENT UpdateAddress (GroupAddr+)>
+
+<!ELEMENT GroupObject (Priority?,SendAddress?,ReceiveAddress?,ReadAddress?,UpdateAddress?)>
+<!ATTLIST GroupObject
+   id ID #REQUIRED
+>
+
+<!ELEMENT Disable %BOOL;>
+<!ELEMENT ReadOnly %BOOL;>
+<!ELEMENT ReadAccess %ACCESSLEVEL;>
+<!ELEMENT WriteAccess %ACCESSLEVEL;>
+
+<!ELEMENT Property (Disable?,ReadOnly?,ReadAccess?,WriteAccess?)>
+<!ATTLIST Property
+   id ID #REQUIRED
+>
+
+<!ELEMENT PollingCount %POLLINGCOUNT;>
+
+<!ELEMENT PollingMaster (PollingAddress,PollingCount)?>
+<!ATTLIST PollingMaster
+   id ID #REQUIRED
+>
+
+<!ELEMENT PollingSlot %POLLINGSLOT;>
+
+<!ELEMENT PollingSlave (PollingAddress,PollingSlot)?>
+<!ATTLIST PollingSlave
+   id ID #REQUIRED
+>
+
+<!ELEMENT Value %STRING;>
+
+<!ELEMENT ListParameter (Value)>
+<!ATTLIST ListParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT IntParameter (Value)>
+<!ATTLIST IntParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT FloatParameter (Value)>
+<!ATTLIST FloatParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT StringParameter (Value)>
+<!ATTLIST StringParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT Parameter (ListParameter|IntParameter|FloatParameter|StringParameter)+>
+
+<!ELEMENT ProgramID %STRING;>
+<!ELEMENT PhysicalAddress %EIBADDR;>
+
+
+<!ELEMENT DeviceConfig (ProgramID,PhysicalAddress,Key*,(GroupObject|Property|PollingMaster|PollingSlave)*,Parameter?)>
+<!ATTLIST DeviceConfig
+   version %IDSTRING; #REQUIRED 
+>

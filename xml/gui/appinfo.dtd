@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- defines version 0.0.0 -->
+
+<!ENTITY % IDSTRING    "CDATA">
+<!ENTITY % STRING    "(#PCDATA)">
+
+<!ENTITY % INT "(#PCDATA)">
+<!ENTITY % BOOL "(#PCDATA)">
+<!ENTITY % FLOAT "(#PCDATA)">
+
+<!ENTITY % DPTTYPE "(#PCDATA)">
+<!ENTITY % FBTYPE "(#PCDATA)">
+<!ENTITY % GROUPTYPE "(#PCDATA)">
+<!ENTITY % PROPERTYTYPE "(#PCDATA)">
+
+<!ELEMENT Category %STRING;>
+<!ELEMENT Manufacturer %STRING;>
+<!ELEMENT OrderNo %STRING;>
+<!ELEMENT Title %STRING;>
+<!ELEMENT Author %STRING;>
+<!ELEMENT Copyright %STRING;>
+<!ELEMENT MaskVersion %STRING;>
+<!ELEMENT AddInfo %STRING;>
+
+<!ELEMENT Description (MaskVersion,Title,AddInfo?,OrderNo?,Manufacturer?,Category?,Author?,Copyright?)>
+
+
+<!ELEMENT PollingMaster (Title,AddInfo?)>
+<!ATTLIST PollingMaster
+   id ID #REQUIRED
+>
+<!ELEMENT PollingSlave (Title,AddInfo?)>
+<!ATTLIST PollingSlave
+   id ID #REQUIRED
+>
+
+<!ELEMENT StateBased %BOOL;>
+<!ELEMENT Sending %BOOL;>
+<!ELEMENT Receiving %BOOL;>
+<!ELEMENT GroupType %GROUPTYPE;>
+
+<!ELEMENT GroupObject (Title,AddInfo?,GroupType,Sending,Receiving,StateBased)>
+<!ATTLIST GroupObject
+   id ID #REQUIRED
+>
+
+<!ELEMENT PropertyType %GROUPTYPE;>
+<!ELEMENT PropertyId %INT;>
+<!ELEMENT ObjectIndex %INT;>
+<!ELEMENT Writeable %BOOL;>
+<!ELEMENT MaxArrayLength %INT;>
+
+<!ELEMENT Property (Title,AddInfo?,PropertyType,ObjectIndex,PropertyId,Writeable,MaxArrayLength)>
+<!ATTLIST Property
+   id ID #REQUIRED
+>
+
+<!ELEMENT Unit %STRING;>
+
+<!ELEMENT ListElement %STRING;>
+<!ATTLIST ListElement
+   id ID #REQUIRED
+>
+<!ELEMENT ListDefault EMPTY>
+<!ATTLIST ListDefault
+   idref IDREF #REQUIRED
+>
+
+<!ELEMENT ListParameter (Title,AddInfo?,ListDefault,ListElement+,Unit?)>
+<!ATTLIST ListParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT MinValue %FLOAT;>
+<!ELEMENT MaxValue %FLOAT;>
+<!ELEMENT DefaultValue %FLOAT;>
+
+<!ELEMENT Precision %FLOAT;>
+<!ELEMENT Increment %FLOAT;>
+
+<!ELEMENT IntParameter (Title,AddInfo?,MinValue,MaxValue,Default,Unit?,Precision?,Increment?)>
+<!ATTLIST IntParameter
+   id ID #REQUIRED
+>
+<!ELEMENT FloatParameter (Title,AddInfo?,MinValue,MaxValue,Default,Unit?,Precision?,Increment?)>
+<!ATTLIST FloatParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT MaxLength %INT;>
+<!ELEMENT RegExp %STRING;>
+<!ELEMENT Default %STRING;>
+
+<!ELEMENT StringParameter (Title,AddInfo?,Default,RegExp?,MaxLength,Unit?)>
+<!ATTLIST StringParameter
+   id ID #REQUIRED
+>
+
+<!ELEMENT DPTType %DPTTYPE;>
+<!ELEMENT Abbreviation %STRING;>
+
+<!ELEMENT Reference EMPTY>
+<!ATTLIST Reference
+   idref IDREF #REQUIRED
+>
+
+
+<!ELEMENT Interface (DPTType,Abbreviation,Title?,AddInfo?,Reference+)>
+<!ATTLIST Interface
+   id ID #REQUIRED
+>
+
+<!ELEMENT ProfileID %FBTYPE;>
+
+<!ELEMENT FunctionalBlock (ProfileID,Title,AddInfo?,Interface*)>
+<!ATTLIST FunctionalBlock
+   id ID #REQUIRED
+>
+
+
+<!ELEMENT Parameter (ListParameter|IntParameter|FloatParameter|StringParameter)+>
+<!ELEMENT ProgramID %STRING;>
+
+<!ELEMENT DeviceDesc (ProgramID,Description,FunctionalBlock+,(GroupObject|Property|PollingMaster|PollingSlave)*,Parameter?)>
+<!ATTLIST DeviceDesc
+   version %IDSTRING; #REQUIRED 
+>
