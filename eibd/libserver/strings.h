@@ -1,0 +1,144 @@
+/*
+    EIBD eib bus access and management daemon
+    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef STRING_H
+#define STRING_H
+
+#include <string.h>
+
+/** implements a string */
+class String
+{
+  /** content */
+  char *data;
+  /** length */
+  unsigned len;
+public:
+  /** free memory */
+    virtual ~ String ()
+  {
+    if (data)
+      delete[]data;
+  }
+
+  /** initialize with the empty string */
+  String ()
+  {
+    data = 0;
+    len = 0;
+  }
+
+  /** initialize with a string */
+  String (const String & a)
+  {
+    len = a.len;
+    if (len)
+      {
+	data = new char[len];
+	memcpy (data, a.data, len);
+      }
+    else
+      data = 0;
+  }
+  /** assign a String */
+  const String & operator = (const String & a)
+  {
+    if (data)
+      delete[]data;
+    len = a.len;
+    if (len)
+      {
+	data = new char[len];
+	memcpy (data, a.data, len);
+      }
+    else
+      data = 0;
+    return a;
+  }
+
+  /** initialize with a character constant */
+  String (const char *msg)
+  {
+    if (msg)
+      {
+	len = strlen (msg) + 1;
+	data = new char[len];
+	strcpy (data, msg);
+      }
+    else
+      {
+	data = 0;
+	len = 0;
+      }
+  }
+
+  /** assign a character constant */
+  const String & operator = (const char *msg)
+  {
+    if (data)
+      delete[]data;
+    if (msg)
+      {
+	len = strlen (msg) + 1;
+	data = new char[len];
+	strcpy (data, msg);
+      }
+    else
+      {
+	data = 0;
+	len = 0;
+      }
+    return *this;
+  }
+
+  /** concats two strings*/
+  String operator + (const String & a)
+  {
+    String b;
+    b.len = a.len + len;
+    if (b.len)
+      {
+	b.data = new char[b.len];
+	if (data)
+	  strcpy (b.data, data);
+	else
+	  b.data[0] = 0;
+	if (a.data)
+	  strcat (b.data, a.data);
+      }
+    return b;
+  }
+
+  /** returns the content as char* */
+  const char *operator  () () const
+  {
+    return data;
+  }
+
+};
+
+/** adds a text to a string */
+inline const String &
+operator += (String & a, const String b)
+{
+  String c = a + b;
+  return (a = c);
+}
+
+#endif
