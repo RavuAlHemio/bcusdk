@@ -932,6 +932,13 @@ A_PropertyValue_Response_PDU::Decode ()
 
 bool A_PropertyValue_Response_PDU::isResponse(const APDU* req) const
 {
+  if(req->getType()==A_PropertyValue_Write)
+    {
+      const A_PropertyValue_Write_PDU* a=(const A_PropertyValue_Write_PDU*)req;
+      if(a->obj==obj&&a->prop==prop&&a->start==start&&a->count==count)
+	return 1;
+    }
+
   if(req->getType()!=A_PropertyValue_Read)
    return 0;
   const A_PropertyValue_Read_PDU* a=(const A_PropertyValue_Read_PDU*)req;
