@@ -20,7 +20,7 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-#include <pth.h>
+#include <pthsem.h>
 
 /** interface for a class started by a thread */
 class Runable
