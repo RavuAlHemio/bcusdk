@@ -125,6 +125,20 @@ public:
     return b;
   }
 
+  bool operator == (const String & a)
+  {
+    if (!a.len && !len)
+      return 1;
+    if (a.len != len)
+      return 0;
+    return (!strcmp (data, a.data));
+  }
+
+  bool operator!= (const String & a)
+  {
+    return !(*this == a);
+  }
+
   /** returns the content as char* */
   const char *operator  () () const
   {
