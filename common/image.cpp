@@ -689,10 +689,10 @@ STR_BCU2Start::toArray ()
   d[37] = (runaddr) & 0xff;
   d[38] = (saveaddr >> 8) & 0xff;
   d[39] = (saveaddr) & 0xff;
-  d[38] = (eeprom_start >> 8) & 0xff;
-  d[39] = (eeprom_start) & 0xff;
-  d[38] = (eeprom_end >> 8) & 0xff;
-  d[39] = (eeprom_end) & 0xff;
+  d[40] = (eeprom_start >> 8) & 0xff;
+  d[41] = (eeprom_start) & 0xff;
+  d[42] = (eeprom_end >> 8) & 0xff;
+  d[43] = (eeprom_end) & 0xff;
   return d;
 }
 
