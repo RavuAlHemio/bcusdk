@@ -78,6 +78,7 @@ ATTRIB_IDENT(on_init)
 ATTRIB_IDENT(on_save)
 
 PRIVATE_VAR(Array<KeyMap> Keys)
+PRIVATE_VAR(Array<eibkey_t> Key)
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK)) && !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_INT(MaskVersion)
 ATTRIB_INT(PhysicalAddress)

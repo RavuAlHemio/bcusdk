@@ -1060,6 +1060,24 @@ CheckDevice (Device & d)
 
   if (d.BCU != BCU_bcu12)
     {
+      d.Key.resize (3);
+      for (i = 0; i < 3; i++)
+	d.Key[i] = 0xFFFFFFFF;
+      if (d.Keys ())
+	{
+	  for (i = 0; i < d.Keys (); i++)
+	    {
+	      if (d.Keys[i].level < 0 || d.Keys[i].level > 2)
+		die (_("unsupported key level %d"), d.Keys[i].level);
+	      for (int j = 0; j < i; j++)
+		if (d.Keys[i].level == d.Keys[j].level)
+		  die (_("duplicate key level %d"), d.Keys[i].level);
+	      d.Key[d.Keys[i].level] = d.Keys[i].key;
+	    }
+	}
+      if (!d.InstallKey_lineno)
+	d.InstallKey = 0xFFFFFFFF;
+
       if (d.Objects ())
 	die (_("not yet supported"));
 

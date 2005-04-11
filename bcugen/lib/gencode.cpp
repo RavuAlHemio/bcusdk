@@ -332,6 +332,11 @@ GenBCUHeader (FILE * f, Device & d)
   fprintf (f, "\t.hword %d\n", d.BCU);
   if (d.BCU != BCU_bcu12)
     {
+      fprintf (f, "\t.hword %d\n", 4 * 4 + 2);
+      fprintf (f, "\t.hword %d\n", L_BCU2_KEY);
+      fprintf (f, "\t.word 0x%08X\n", d.InstallKey);
+      for (i = 0; i < 3; i++)
+	fprintf (f, "\t.word 0x%08X\n", d.Key[i]);
       fprintf (f, "\t.hword %d\n", 42);
       fprintf (f, "\t.hword %d\n", L_BCU2_INIT);
       fprintf (f, "\t.hword addrtab\n");
