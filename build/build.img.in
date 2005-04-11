@@ -93,7 +93,7 @@ if [ "x$OUT" == "x" ]; then
 fi
 
 if [ "x$TMP" == "x" ]; then
-	TMP=`mktemp -u`||exit 1
+	TMP=`mktemp -u bcusdk.XXXXXXXXXX`||exit 1
 	mkdir $TMP
 elif [ ! -e "$TMP" ]; then
 	mkdir $TMP
