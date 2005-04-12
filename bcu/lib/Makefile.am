@@ -1,3 +1,5 @@
+include ../VARIANT
+
 AS=@TAS@
 LD=@TLD@
 AR=@TAR@
@@ -16,3 +18,9 @@ BCU2=initbcu2.s bcu2func.s
 libbcu_0012_a_SOURCES=$(BCU1) $(COMMON)
 libbcu_0020_a_SOURCES=$(BCU2) $(COMMON)
 
+tlib_DATA=$(addsuffix .a,$(addprefix lib,$(BCU_LIST)))
+
+libbcu_0012%.a : libbcu_0012.a
+	ln -s $< $@
+libbcu_0020%.a : libbcu_0020.a
+	ln -s $< $@
