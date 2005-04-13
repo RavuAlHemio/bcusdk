@@ -29,22 +29,8 @@
 #define _BCU_COMMON_H
 
 typedef unsigned char uchar;
+#define EEPROM_ATTRIB __attribute ((eeprom))
 
-typedef unsigned char GROUP0_T;
-typedef unsigned char GROUP1_T;
-typedef unsigned char GROUP2_T;
-typedef unsigned char GROUP3_T;
-typedef unsigned char GROUP4_T;
-typedef unsigned char GROUP5_T;
-typedef unsigned char GROUP6_T;
-typedef unsigned char GROUP7_T;
-typedef unsigned short GROUP8_T;
-typedef unsigned char GROUP9_T[3];
-typedef float GROUP10_T;
-typedef unsigned char GROUP11_T[6];
-typedef double GROUP12_T;
-typedef unsigned char GROUP13_T[10];
-typedef unsigned char GROUP14_T[14];
-
+#include "grouptypes.h"
 
 #endif

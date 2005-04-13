@@ -25,16 +25,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef _BCU_0012_H
-#define _BCU_0012_H
+#ifndef _BCU_0020_H
+#define _BCU_0020_H
 
 #include "bcu_common.h"
 
-static void inline transmit_groupobject (uchar no) {
-  if(!__builtin_constant_p(no)) 
-asm volatile ("lda %0\n\tjsr U_transRequest" : : "r"(no) : "A","X","RegC","RegJ");
-else
-asm volatile ("lda $%0\n\tjsr U_transRequest" : : "i"(no) : "A","X","RegC","RegJ");
- }
+#define BCU_0020_H
+#include "bcu_funcs.h"
 
 #endif

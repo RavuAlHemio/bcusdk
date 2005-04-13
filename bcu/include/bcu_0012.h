@@ -30,11 +30,6 @@
 
 #include "bcu_common.h"
 
-static void inline transmit_groupobject (uchar no) {
-  if(!__builtin_constant_p(no)) 
-asm volatile ("lda %0\n\tjsr U_transRequest" : : "r"(no) : "A","X","RegB","RegC","RegJ");
-else
-asm volatile ("lda $%0\n\tjsr U_transRequest" : : "i"(no) : "A","X","RegB","RegC","RegJ");
- }
+#include "bcu_funcs.h"
 
 #endif
