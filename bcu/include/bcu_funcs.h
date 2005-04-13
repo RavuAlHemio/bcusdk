@@ -28,6 +28,64 @@
 #ifndef _BCU_FUNCS_H
 #define _BCU_FUNCS_H
 
+#include <stdbool.h>
+
+typedef struct
+{
+  bool newstate;
+  uchar stateok;
+} FT12_GetStatus_Result;
+
+typedef struct
+{
+  unsigned short quotient;
+  unsigned short remainder;
+  bool overflow;
+} U_Div_Result;
+
+typedef struct
+{
+  unsigned short product;
+  bool overflow;
+} U_Mul_Result;
+
+typedef struct
+{
+  uchar pointer;
+  bool found;
+} PopBuf_Result;
+
+typedef struct
+{
+  uchar pointer;
+  bool valid;
+} AllocBuf_Result;
+
+typedef struct
+{
+  bool expired;
+  uchar time;
+} TM_GetFlg_Result;
+
+typedef struct
+{
+  uchar octet;
+  bool error;
+} U_SerialShift_Result;
+
+typedef struct
+{
+  uchar pointer;
+  bool error;
+} S_xxShift_Result;
+
+typedef struct
+{
+  signed short value;
+  bool error;
+} U_map_Result;
+
+
 extern const uchar OR_TAB[8];
 extern const uchar AND_TAB[8];
 
@@ -148,8 +206,8 @@ _U_readAD (uchar channel, uchar count)
 		    (channel), "r" (count):"A", "X");
       else
       asm
-	volatile ("lda %1\n\tldx $%2\n\tjsr U_readAD":"=t" (ret):"r" (channel),
-		  "i" (count):"A", "X");
+	volatile ("lda %1\n\tldx $%2\n\tjsr U_readAD":"=t" (ret):"r"
+		  (channel), "i" (count):"A", "X");
     }
   else
     {
@@ -173,8 +231,8 @@ _U_ioAST (uchar val)
     asm volatile ("lda %1\n\tjsr U_ioAST":"=z" (ret):"r" (val):"A", "X",
 		  "RegB", "RegC", "RegD");
   else
-  asm volatile ("lda $%1\n\tjsr U_ioAST":"=z" (ret):"i" (val):"A", "X", "RegB",
-		"RegC", "RegD");
+  asm volatile ("lda $%1\n\tjsr U_ioAST":"=z" (ret):"i" (val):"A", "X",
+		"RegB", "RegC", "RegD");
   return ret;
 }
 
@@ -212,22 +270,26 @@ _U_SetTM (uchar timer, uchar pointer, uchar time)
     {
       if (!__builtin_constant_p (timer))
 	asm
-	  volatile ("lda %1\n\tldx %2\n\tjsr U_SetTM"::"e" (time),"r" (timer),
-		    "r" (pointer):"A", "X", "RegB", "RegC", "RegD");
+	  volatile ("lda %1\n\tldx %2\n\tjsr U_SetTM"::"e" (time),
+		    "r" (timer), "r" (pointer):"A", "X", "RegB", "RegC",
+		    "RegD");
       else
-      asm volatile ("lda %1\n\tldx $%2\n\tjsr U_SetTM"::"e" (time),"r" (timer),
-		    "i" (pointer):"A", "X", "RegB", "RegC", "RegD");
+      asm volatile ("lda %1\n\tldx $%2\n\tjsr U_SetTM"::"e" (time),
+		    "r" (timer), "i" (pointer):"A", "X", "RegB", "RegC",
+		    "RegD");
     }
   else
     {
       if (!__builtin_constant_p (timer))
 	asm
-	  volatile ("lda $%1\n\tldx %2\n\tjsr U_SetTM"::"e" (time),"i" (timer),
-		    "r" (pointer):"A", "X", "RegB", "RegC", "RegD");
+	  volatile ("lda $%1\n\tldx %2\n\tjsr U_SetTM"::"e" (time),
+		    "i" (timer), "r" (pointer):"A", "X", "RegB", "RegC",
+		    "RegD");
       else
       asm
-	volatile ("lda $%1\n\tldx $%2\n\tjsr U_SetTM"::"e" (time),"i" (timer),
-		  "i" (pointer):"A", "X", "RegB", "RegC", "RegD");
+	volatile ("lda $%1\n\tldx $%2\n\tjsr U_SetTM"::"e" (time),
+		  "i" (timer), "i" (pointer):"A", "X", "RegB", "RegC",
+		  "RegD");
     }
 }
 
@@ -235,10 +297,10 @@ static void inline
 _U_SetTMx (uchar timer, uchar time)
 {
   if (!__builtin_constant_p (timer))
-    asm volatile ("lda %1\n\tjsr U_SetTMx"::"e" (time),"r" (timer):"A", "X",
+    asm volatile ("lda %1\n\tjsr U_SetTMx"::"e" (time), "r" (timer):"A", "X",
 		  "RegB", "RegC", "RegD");
   else
-  asm volatile ("lda %1\n\tjsr U_SetTMx"::"e" (time),"r" (timer):"A", "X",
+  asm volatile ("lda %1\n\tjsr U_SetTMx"::"e" (time), "r" (timer):"A", "X",
 		"RegB", "RegC", "RegD");
 }
 
@@ -258,6 +320,60 @@ _FreeBuf (uchar pointer)
     asm volatile ("ldx %0\n\tjsr FreeBuf"::"r" (pointer):"A", "X", "RegB");
   else
   asm volatile ("ldx $%0\n\tjsr FreeBuf"::"i" (pointer):"A", "X", "RegB");
+}
+
+#define DEF_SHIFTROT(NAME) static uchar inline _##NAME(uchar val){uchar ret;asm volatile ("lda %1\n\t jsr " #NAME "\n\tsta %1":"=r"(ret):"r"(val):"A");return ret; }
+
+DEF_SHIFTROT (shlA4)
+DEF_SHIFTROT (shlA5)
+DEF_SHIFTROT (shlA6)
+DEF_SHIFTROT (shlA7)
+DEF_SHIFTROT (shrA4)
+DEF_SHIFTROT (shrA5)
+DEF_SHIFTROT (shrA6)
+DEF_SHIFTROT (shrA7)
+DEF_SHIFTROT (rolA1)
+DEF_SHIFTROT (rolA2)
+DEF_SHIFTROT (rolA3) DEF_SHIFTROT (rolA4) DEF_SHIFTROT (rolA7)
+     static uchar inline
+     _U_SetBit (uchar octet, uchar bit, bool set)
+{
+  if (!__builtin_constant_p (bit))
+    {
+      if (set)
+	asm volatile ("sec\n\tlda %1\n\tjsr U_SetBit":"=h" (octet):"r" (bit),
+		      "0" (octet):"RegB", "A");
+      else
+      asm volatile ("clc\n\tlda %1\n\tjsr U_SetBit":"=h" (octet):"r" (bit),
+		    "0" (octet):"RegB", "A");
+    }
+  else
+    {
+      if (set)
+	asm volatile ("sec\n\tlda $%1\n\tjsr U_SetBit":"=h" (octet):"i" (bit),
+		      "0" (octet):"RegB", "A");
+      else
+      asm volatile ("clc\n\tlda $%1\n\tjsr U_SetBit":"=h" (octet):"i" (bit),
+		    "0" (octet):"RegB", "A");
+    }
+  return octet;
+}
+
+static bool inline
+_U_GetBit (uchar octet, uchar bit)
+{
+  uchar ret;
+  if (!__builtin_constant_p (bit))
+    asm
+      volatile
+      ("lda %1\n\tjsr U_GetBit\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+       (ret):"r" (bit), "h" (octet):"A", "X", "RegB");
+  else
+  asm
+    volatile
+    ("lda $%1\n\tjsr U_GetBit\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+     (ret):"i" (bit), "h" (octet):"A", "X", "RegB");
+  return ret;
 }
 
 #ifdef BCU_0020_H
@@ -380,6 +496,23 @@ _U_MS_Switch (uchar msgid, uchar destination)
     }
 }
 
+static FT12_GetStatus_Result inline
+_U_FT12_GetStatus (bool force_reset)
+{
+  FT12_GetStatus_Result ret;
+  if (force_reset)
+    asm
+      volatile
+      ("sec\n\tjsr U_FT12_GetStatus\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+       (ret.stateok), "=r" (ret.newstate)::"A");
+  else
+  asm
+    volatile
+    ("clc\n\tjsr U_FT12_GetStatus\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+     (ret.stateok), "=r" (ret.newstate)::"A");
+  return ret;
+}
+
 static void inline
 _U_FT12_Reset (uchar baudrate)
 {
@@ -411,8 +544,57 @@ _U_SPI_Init ()
 #endif
 
 /* not implemented:
+
+typedef struct
+{
+  unsigned short quotient;
+  unsigned short remainder;
+  bool overflow;
+} U_Div_Result;
+
+typedef struct
+{
+  unsigned short product;
+  bool overflow;
+} U_Mul_Result;
+
+typedef struct
+{
+  uchar pointer;
+  bool found;
+} PopBuf_Result;
+
+typedef struct
+{
+  uchar pointer;
+  bool valid;
+} AllocBuf_Result;
+
+typedef struct
+{
+  bool expired;
+  uchar time;
+} TM_GetFlg_Result;
+
+typedef struct
+{
+  uchar octet;
+  bool error;
+} U_SerialShift_Result;
+
+typedef struct
+{
+  uchar pointer;
+  bool error;
+} S_xxShift_Result;
+
+typedef struct
+{
+  signed short value;
+  bool error;
+} U_map_Result;
+
 AL_SAPcallback
-U_testObj
 U_EE_WriteHI
 U_map
 S_AstShift
@@ -428,12 +610,9 @@ multDE_FG
 divDE_BC
 FP_Flt2Int
 FP_Int2Flt
-shlAn
-shrAn
-rolAn
-U_SetBit
-U_GetBit
-U_FT12_GetStatus
+
+not necessary:
+U_testObj
 
 not supported:
 U_TS_Seti
