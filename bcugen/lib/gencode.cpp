@@ -73,6 +73,7 @@ GenGroupObjectUpdate (FILE * f, GroupObject & o)
 void
 GenGroupObjectHeader (FILE * f, GroupObject & o)
 {
+  fprintf (f, "static const int %s_no = %d;\n", o.Name (), o.ObjNo);
   if (o.ObjNo == -1)
     {
       fprintf (f, "static GROUP%d_T %s;\n", o.Type, o.Name ());
@@ -96,12 +97,12 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
 #ifdef PHASE1
       if (o.Sending)
 	fprintf (f,
-		 "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
+		 "static void inline %s_transmit(){_U_transRequest(%d);}\n",
 		 o.Name (), o.ObjNo);
 #else
       if (o.SendAddress_lineno)
 	fprintf (f,
-		 "static void inline %s_transmit(){transmit_groupobject(%d);}\n",
+		 "static void inline %s_transmit(){_U_transRequest(%d);}\n",
 		 o.Name (), o.ObjNo);
 #endif
     }

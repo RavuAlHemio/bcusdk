@@ -558,6 +558,7 @@ CheckGroupObject (Device & d, GroupObject & o)
     undefined ("GroupObject", "StateBased", o.lineno);
 
   o.ID = NewSymbol (o.Name, o.lineno);
+  NewSymbol (o.Name + "_no", o.lineno);
   if (!UsedbyInterface (d, o.Name))
     {
       o.ID = 0;
