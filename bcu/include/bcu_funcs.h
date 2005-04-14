@@ -40,7 +40,7 @@ typedef struct
 {
   unsigned short quotient;
   unsigned short remainder;
-  bool overflow;
+  bool error;
 } U_Div_Result;
 
 typedef struct
@@ -223,6 +223,25 @@ _U_readAD (uchar channel, uchar count)
   return ret;
 }
 
+static U_map_Result inline
+_U_map (signed short value, uchar ptr)
+{
+  U_map_Result ret;
+  if (!__builtin_constant_p (ptr))
+    asm
+      volatile
+      ("ldx %2\n\tjsr U_map\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=q"
+       (ret.value), "=r" (ret.error):"r" (ptr), "q" (value):"A", "X", "RegD",
+       "RegE", "RegF", "RegG", "RegH", "RegI");
+  else
+  asm
+    volatile
+    ("ldx $%2\n\tjsr U_map\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=q"
+     (ret.value), "=r" (ret.error):"i" (ptr), "q" (value):"A", "X", "RegD",
+     "RegE", "RegF", "RegG", "RegH", "RegI");
+  return ret;
+}
+
 static uchar inline
 _U_ioAST (uchar val)
 {
@@ -233,6 +252,63 @@ _U_ioAST (uchar val)
   else
   asm volatile ("lda $%1\n\tjsr U_ioAST":"=z" (ret):"i" (val):"A", "X",
 		"RegB", "RegC", "RegD");
+  return ret;
+}
+
+static S_xxShift_Result inline
+_S_AstShift (uchar ptr)
+{
+  S_xxShift_Result ret;
+  if (!__builtin_constant_p (ptr))
+    asm
+      volatile
+      ("ldx %2\n\tjsr S_AstShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+       (ret.pointer), "=r" (ret.error):"r" (ptr):"A", "X", "RegB", "RegC",
+       "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  else
+  asm
+    volatile
+    ("ldx $%2\n\tjsr S_AstShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+     (ret.pointer), "=r" (ret.error):"i" (ptr):"A", "X", "RegB", "RegC",
+     "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  return ret;
+}
+
+static S_xxShift_Result inline
+_S_LastShift (uchar ptr)
+{
+  S_xxShift_Result ret;
+  if (!__builtin_constant_p (ptr))
+    asm
+      volatile
+      ("ldx %2\n\tjsr S_LastShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+       (ret.pointer), "=r" (ret.error):"r" (ptr):"A", "X", "RegB", "RegC",
+       "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  else
+  asm
+    volatile
+    ("ldx $%2\n\tjsr S_LastShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+     (ret.pointer), "=r" (ret.error):"i" (ptr):"A", "X", "RegB", "RegC",
+     "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  return ret;
+}
+
+static U_SerialShift_Result inline
+_U_SerialShift (uchar octet)
+{
+  U_SerialShift_Result ret;
+  if (!__builtin_constant_p (octet))
+    asm
+      volatile
+      ("lda %2\n\tjsr U_SerialShift\n\tsta %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+       (ret.octet), "=r" (ret.error):"r" (octet):"A", "X", "RegB", "RegC",
+       "RegD", "RegE", "RegF", "RegG", "RegI");
+  else
+  asm
+    volatile
+    ("lda $%2\n\tjsr U_SerialShift\n\tsta %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+     (ret.octet), "=r" (ret.error):"i" (octet):"A", "X", "RegB", "RegC",
+     "RegD", "RegE", "RegF", "RegG", "RegI");
   return ret;
 }
 
@@ -261,6 +337,25 @@ _TM_Load (uchar setup, uchar runtime)
 		    "i" (runtime):"A", "X", "RegB", "RegC", "RegD", "RegE",
 		    "RegF");
     }
+}
+
+static TM_GetFlg_Result inline
+_TM_GetFlg (uchar timer)
+{
+  TM_GetFlg_Result ret;
+  if (!__builtin_constant_p (timer))
+    asm
+      volatile
+      ("lda %2\n\tjsr TM_GetFlg\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+       (ret.time), "=r" (ret.expired):"r" (timer):"A", "X", "RegB", "RegC",
+       "RegD", "RegE");
+  else
+  asm
+    volatile
+    ("lda $%2\n\tjsr TM_GetFlg\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+     (ret.time), "=r" (ret.expired):"i" (timer):"A", "X", "RegB", "RegC",
+     "RegD", "RegE");
+  return ret;
 }
 
 static void inline
@@ -304,6 +399,56 @@ _U_SetTMx (uchar timer, uchar time)
 		"RegB", "RegC", "RegD");
 }
 
+static bool inline
+_U_GetTM (uchar timer, uchar pointer)
+{
+  uchar ret;
+  if (!__builtin_constant_p (pointer))
+    {
+      if (!__builtin_constant_p (timer))
+	asm
+	  volatile
+	  ("lda %1\n\tldx %2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	   (ret):"r" (timer), "r" (pointer):"A", "X", "RegB", "RegC", "RegD");
+      else
+      asm
+	volatile
+	("lda $%1\n\tldx %2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	 (ret):"i" (timer), "r" (pointer):"A", "X", "RegB", "RegC", "RegD");
+    }
+  else
+    {
+      if (!__builtin_constant_p (timer))
+	asm
+	  volatile
+	  ("lda %1\n\tldx $%2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	   (ret):"r" (timer), "i" (pointer):"A", "X", "RegB", "RegC", "RegD");
+      else
+      asm
+	volatile
+	("lda $%1\n\tldx $%2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	 (ret):"i" (timer), "i" (pointer):"A", "X", "RegB", "RegC", "RegD");
+    }
+  return ret;
+}
+
+static bool inline
+_U_GetTMx (uchar timer)
+{
+  uchar ret;
+  if (!__builtin_constant_p (timer))
+    asm
+      volatile
+      ("lda %1\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+       (ret):"r" (timer):"A", "X", "RegB", "RegC", "RegD");
+  else
+  asm
+    volatile
+    ("lda $%1\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+     (ret):"i" (timer):"A", "X", "RegB", "RegC", "RegD");
+  return ret;
+}
+
 static void inline
 _U_delay (uchar delay)
 {
@@ -313,6 +458,23 @@ _U_delay (uchar delay)
   asm volatile ("lda $%0\n\tjsr U_delay"::"i" (delay):"A", "X", "RegB");
 }
 
+static AllocBuf_Result inline
+_AllocBuf (bool longbuf)
+{
+  AllocBuf_Result ret;
+  if (longbuf)
+    asm
+      volatile
+      ("sec\n\tjsr AllocBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+       (ret.valid), "=r" (ret.pointer)::"A", "X");
+  else
+  asm
+    volatile
+    ("clc\n\tjsr AllocBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+     (ret.valid), "=r" (ret.pointer)::"A", "X");
+  return ret;
+}
+
 static void inline
 _FreeBuf (uchar pointer)
 {
@@ -320,6 +482,46 @@ _FreeBuf (uchar pointer)
     asm volatile ("ldx %0\n\tjsr FreeBuf"::"r" (pointer):"A", "X", "RegB");
   else
   asm volatile ("ldx $%0\n\tjsr FreeBuf"::"i" (pointer):"A", "X", "RegB");
+}
+
+static PopBuf_Result inline
+_PopBuf (uchar msg)
+{
+  PopBuf_Result ret;
+  if (!__builtin_constant_p (msg))
+    asm
+      volatile
+      ("lda %2\n\tjsr PopBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+       (ret.found), "=r" (ret.pointer):"r" (msg):"A", "X", "RegB");
+  else
+  asm
+    volatile
+    ("lda $%2\n\tjsr PopBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+     (ret.found), "=r" (ret.pointer):"i" (msg):"A", "X", "RegB");
+  return ret;
+}
+
+static U_Mul_Result inline
+_multDE_FG (unsigned short v1, unsigned short v2)
+{
+  U_Mul_Result ret;
+  asm
+    volatile
+    ("jsr multDE_FD\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+     (ret.overflow), "=q" (ret.product):"t" (v1), "u" (v2):"A", "X");
+  return ret;
+}
+
+static U_Div_Result inline
+_divDE_BC (unsigned short dividend, unsigned short divisior)
+{
+  U_Div_Result ret;
+  asm
+    volatile
+    ("jsr divDE_BC\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+     (ret.error), "=u" (ret.quotient), "=t" (ret.remainder):"q" (divisior),
+     "t" (dividend):"A", "X", "RegB", "RegC");
+  return ret;
 }
 
 #define DEF_SHIFTROT(NAME) static uchar inline _##NAME(uchar val){uchar ret;asm volatile ("lda %1\n\t jsr " #NAME "\n\tsta %1":"=r"(ret):"r"(val):"A");return ret; }
@@ -335,7 +537,9 @@ DEF_SHIFTROT (shrA7)
 DEF_SHIFTROT (rolA1)
 DEF_SHIFTROT (rolA2)
 DEF_SHIFTROT (rolA3) DEF_SHIFTROT (rolA4) DEF_SHIFTROT (rolA7)
-     static uchar inline
+     static
+       uchar
+       inline
      _U_SetBit (uchar octet, uchar bit, bool set)
 {
   if (!__builtin_constant_p (bit))
@@ -496,6 +700,43 @@ _U_MS_Switch (uchar msgid, uchar destination)
     }
 }
 
+static short inline
+_FP_Flt2Int (uchar ptr, uchar exponent)
+{
+  short ret;
+  if (!__builtin_constant_p (ptr))
+    asm volatile ("ldx %1\n\tjsr FP_Flt2Int":"=q" (ret):"r" (ptr),
+		  "f" (exponent):"A", "X", "RegD", "RegE");
+  else
+  asm volatile ("ldx $%1\n\tjsr FP_Flt2Int":"=q" (ret):"i" (ptr),
+		"f" (exponent):"A", "X", "RegD", "RegE");
+  return ret;
+}
+
+static void inline
+_FP_Int2Flt (short val, uchar ptr, uchar exponent)
+{
+  if (!__builtin_constant_p (ptr))
+    asm volatile ("ldx %0\n\tjsr FP_Int2Flt"::"r" (ptr), "f" (exponent),
+		  "q" (val));
+  else
+  asm volatile ("ldx $%0\n\tjsr FP_Int2Flt"::"i" (ptr), "f" (exponent),
+		"q" (val));
+}
+
+static void inline
+_U_FT12_Reset (uchar baudrate)
+{
+  if (!__builtin_constant_p (baudrate))
+    asm volatile ("lda %0\n\tjsr U_FT12_Reset"::"r" (baudrate):"A", "X",
+		  "RegB", "RegC", "RegD", "RegE", "RegF", "RegG", "RegH",
+		  "RegI", "RegJ", "RegK", "RegL", "RegM", "RegN");
+  else
+  asm volatile ("lda $%0\n\tjsr U_FT12_Reset"::"i" (baudrate):"A", "X",
+		"RegB", "RegC", "RegD", "RegE", "RegF", "RegG", "RegH",
+		"RegI", "RegJ", "RegK", "RegL", "RegM", "RegN");
+}
+
 static FT12_GetStatus_Result inline
 _U_FT12_GetStatus (bool force_reset)
 {
@@ -511,19 +752,6 @@ _U_FT12_GetStatus (bool force_reset)
     ("clc\n\tjsr U_FT12_GetStatus\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
      (ret.stateok), "=r" (ret.newstate)::"A");
   return ret;
-}
-
-static void inline
-_U_FT12_Reset (uchar baudrate)
-{
-  if (!__builtin_constant_p (baudrate))
-    asm volatile ("lda %0\n\tjsr U_FT12_Reset"::"r" (baudrate):"A", "X",
-		  "RegB", "RegC", "RegD", "RegE", "RegF", "RegG", "RegH",
-		  "RegI", "RegJ", "RegK", "RegL", "RegM", "RegN");
-  else
-  asm volatile ("lda $%0\n\tjsr U_FT12_Reset"::"i" (baudrate):"A", "X",
-		"RegB", "RegC", "RegD", "RegE", "RegF", "RegG", "RegH",
-		"RegI", "RegJ", "RegK", "RegL", "RegM", "RegN");
 }
 
 static void inline
@@ -544,72 +772,8 @@ _U_SPI_Init ()
 #endif
 
 /* not implemented:
-
-typedef struct
-{
-  unsigned short quotient;
-  unsigned short remainder;
-  bool overflow;
-} U_Div_Result;
-
-typedef struct
-{
-  unsigned short product;
-  bool overflow;
-} U_Mul_Result;
-
-typedef struct
-{
-  uchar pointer;
-  bool found;
-} PopBuf_Result;
-
-typedef struct
-{
-  uchar pointer;
-  bool valid;
-} AllocBuf_Result;
-
-typedef struct
-{
-  bool expired;
-  uchar time;
-} TM_GetFlg_Result;
-
-typedef struct
-{
-  uchar octet;
-  bool error;
-} U_SerialShift_Result;
-
-typedef struct
-{
-  uchar pointer;
-  bool error;
-} S_xxShift_Result;
-
-typedef struct
-{
-  signed short value;
-  bool error;
-} U_map_Result;
-
 AL_SAPcallback
 U_EE_WriteHI
-U_map
-S_AstShift
-S_LastShift
-U_SerialShift
-TM_GetFlg
-U_SetTM
-U_GetTM
-U_GetTMx
-AllocBuf
-PopBuf
-multDE_FG
-divDE_BC
-FP_Flt2Int
-FP_Int2Flt
 
 not necessary:
 U_testObj
