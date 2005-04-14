@@ -1,4 +1,4 @@
-INCLUDES=-I../include -I../../common
+AM_CPPFLAGS=-I../include -I../../common
 
 LDADD=../client/libeibclient.a
 bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progmodetoggle progmodestatus maskver \

@@ -1,5 +1,5 @@
 SUBDIRS=struct configfile lib
-INCLUDES=-I../common -Istruct -Iconfigfile -Ilib -I../eibd/include
+AM_CPPFLAGS=-I../common -Istruct -Iconfigfile -Ilib -I../eibd/include
 bin_PROGRAMS=viewimage bcugen1 bcugen2 loadimage imageedit
 
 viewimage_SOURCES=viewimage.cpp

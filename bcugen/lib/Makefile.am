@@ -1,5 +1,5 @@
-INCLUDES=-I../../common -I../struct -I../configfile
-AM_CPPFLAGS=$(XML_CPPFLAGS)
+AM_CPPFLAGS=-I../../common -I../struct -I../configfile $(XML_CPPFLAGS)
+
 noinst_LIBRARIES=libbcugen.a libcheck1.a libcheck2.a
 libbcugen_a_SOURCES=common.h common.cpp regexp.h regexp.cpp symboltab.h symboltab.cpp \
 	map.cpp map.h write.cpp write.h classes.h classes.cpp scanner.h \
@@ -7,5 +7,5 @@ libbcugen_a_SOURCES=common.h common.cpp regexp.h regexp.cpp symboltab.h symbolta
 	addrtab.h addrtab.cpp expr.h expr.cpp
 
 libcheck1_a_SOURCES=check.cpp check.h gencode.cpp gencode.h
-libcheck1_a_CPPFLAGS=-D PHASE1
+libcheck1_a_CPPFLAGS=-D PHASE1 $(AM_CPPFLAGS)
 libcheck2_a_SOURCES=check.cpp check.h gencode.cpp gencode.h
