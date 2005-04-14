@@ -245,6 +245,25 @@ _U_map (signed short value, uchar ptr)
   return ret;
 }
 
+static signed short inline
+_U_map_NE (signed short value, uchar ptr)
+{
+  signed short ret;
+  if (!__builtin_constant_p (ptr))
+    asm
+      volatile
+      ("ldx %1\n\tjsr U_map":"=q"
+       (ret):"r" (ptr), "q" (value):"A", "X", "RegD",
+       "RegE", "RegF", "RegG", "RegH", "RegI");
+  else
+  asm
+    volatile
+    ("ldx $%1\n\tjsr U_map":"=q"
+     (ret):"i" (ptr), "q" (value):"A", "X", "RegD",
+     "RegE", "RegF", "RegG", "RegH", "RegI");
+  return ret;
+}
+
 static uchar inline
 _U_ioAST (uchar val)
 {
@@ -277,6 +296,25 @@ _S_AstShift (uchar ptr)
   return ret;
 }
 
+static uchar inline
+_S_AstShift_NE (uchar ptr)
+{
+  uchar ret;
+  if (!__builtin_constant_p (ptr))
+    asm
+      volatile
+      ("ldx %1\n\tjsr S_AstShift\n\tstx %0":"=r"
+       (ret):"r" (ptr):"A", "X", "RegB", "RegC",
+       "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  else
+  asm
+    volatile
+    ("ldx $%1\n\tjsr S_AstShift\n\tstx %0":"=r"
+     (ret):"i" (ptr):"A", "X", "RegB", "RegC",
+     "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  return ret;
+}
+
 static S_xxShift_Result inline
 _S_LastShift (uchar ptr)
 {
@@ -296,6 +334,25 @@ _S_LastShift (uchar ptr)
   return ret;
 }
 
+static uchar inline
+_S_LastShift_NE (uchar ptr)
+{
+  uchar ret;
+  if (!__builtin_constant_p (ptr))
+    asm
+      volatile
+      ("ldx %1\n\tjsr S_LastShift\n\tstx %0":"=r"
+       (ret):"r" (ptr):"A", "X", "RegB", "RegC",
+       "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  else
+  asm
+    volatile
+    ("ldx $%1\n\tjsr S_LastShift\n\tstx %0":"=r"
+     (ret):"i" (ptr):"A", "X", "RegB", "RegC",
+     "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
+  return ret;
+}
+
 static U_SerialShift_Result inline
 _U_SerialShift (uchar octet)
 {
@@ -311,6 +368,25 @@ _U_SerialShift (uchar octet)
     volatile
     ("lda $%2\n\tjsr U_SerialShift\n\tsta %0" SETAONCARRY "sta %1":"=r"
      (ret.octet), "=r" (ret.error):"i" (octet):"A", "X", "RegB", "RegC",
+     "RegD", "RegE", "RegF", "RegG", "RegI");
+  return ret;
+}
+
+static uchar inline
+_U_SerialShift_NE (uchar octet)
+{
+  uchar ret;
+  if (!__builtin_constant_p (octet))
+    asm
+      volatile
+      ("lda %1\n\tjsr U_SerialShift\n\tsta %0":"=r"
+       (ret):"r" (octet):"A", "X", "RegB", "RegC",
+       "RegD", "RegE", "RegF", "RegG", "RegI");
+  else
+  asm
+    volatile
+    ("lda $%1\n\tjsr U_SerialShift\n\tsta %0":"=r"
+     (ret):"i" (octet):"A", "X", "RegB", "RegC",
      "RegD", "RegE", "RegF", "RegG", "RegI");
   return ret;
 }
@@ -358,6 +434,40 @@ _TM_GetFlg (uchar timer)
     ("lda $%2\n\tjsr TM_GetFlg\n\tsta %0" SETAONCARRY "sta %1":"=r"
      (ret.time), "=r" (ret.expired):"i" (timer):"A", "X", "RegB", "RegC",
      "RegD", "RegE");
+  return ret;
+}
+
+static bool inline
+_TM_GetFlg_M0 (uchar timer)
+{
+  bool ret;
+  if (!__builtin_constant_p (timer))
+    asm
+      volatile
+      ("lda %1\n\tjsr TM_GetFlg" SETAONCARRY "sta %0":"=r"
+       (ret):"r" (timer):"A", "X", "RegB", "RegC", "RegD", "RegE");
+  else
+  asm
+    volatile
+    ("lda $%1\n\tjsr TM_GetFlg" SETAONCARRY "sta %1":"=r"
+     (ret):"i" (timer):"A", "X", "RegB", "RegC", "RegD", "RegE");
+  return ret;
+}
+
+static uchar inline
+_TM_GetFlg_M1 (uchar timer)
+{
+  uchar ret;
+  if (!__builtin_constant_p (timer))
+    asm
+      volatile
+      ("lda %1\n\tjsr TM_GetFlg\n\tsta %0":"=r"
+       (ret):"r" (timer):"A", "X", "RegB", "RegC", "RegD", "RegE");
+  else
+  asm
+    volatile
+    ("lda $%1\n\tjsr TM_GetFlg\n\tsta %0":"=r"
+     (ret):"i" (timer):"A", "X", "RegB", "RegC", "RegD", "RegE");
   return ret;
 }
 
@@ -478,6 +588,17 @@ _AllocBuf (bool longbuf)
   return ret;
 }
 
+static uchar inline
+_AllocBuf_NE (bool longbuf)
+{
+  uchar ret;
+  if (longbuf)
+    asm volatile ("sec\n\tjsr AllocBuf\n\tstx %0":"=r" (ret)::"A", "X");
+  else
+  asm volatile ("clc\n\tjsr AllocBuf\n\tstx %0":"=r" (ret)::"A", "X");
+  return ret;
+}
+
 static void inline
 _FreeBuf (uchar pointer)
 {
@@ -504,6 +625,22 @@ _PopBuf (uchar msg)
   return ret;
 }
 
+static uchar inline
+_PopBuf_NE (uchar msg)
+{
+  uchar ret;
+  if (!__builtin_constant_p (msg))
+    asm
+      volatile
+      ("lda %1\n\tjsr PopBuf\n\tstx %0":"=r"
+       (ret):"r" (msg):"A", "X", "RegB");
+  else
+  asm
+    volatile
+    ("lda $%1\n\tjsr PopBuf\n\tstx %1":"=r" (ret):"i" (msg):"A", "X", "RegB");
+  return ret;
+}
+
 static U_Mul_Result inline
 _multDE_FG (unsigned short v1, unsigned short v2)
 {
@@ -512,6 +649,13 @@ _multDE_FG (unsigned short v1, unsigned short v2)
     volatile
     ("jsr multDE_FD" SETAONCARRY "sta %0":"=r"
      (ret.overflow), "=q" (ret.product):"t" (v1), "u" (v2):"A", "X");
+  return ret;
+}
+static unsigned short inline
+_multDE_FG_NE (unsigned short v1, unsigned short v2)
+{
+  unsigned short ret;
+  asm volatile ("jsr multDE_FD":"=q" (ret):"t" (v1), "u" (v2):"A", "X");
   return ret;
 }
 
@@ -525,6 +669,27 @@ _divDE_BC (unsigned short dividend, unsigned short divisior)
      (ret.error), "=u" (ret.quotient), "=t" (ret.remainder):"q" (divisior),
      "t" (dividend):"A", "X", "RegB", "RegC");
   return ret;
+}
+static unsigned short inline
+_divDE_BC_quotient (unsigned short dividend, unsigned short divisior)
+{
+  U_Div_Result ret;
+  asm
+    volatile
+    ("jsr divDE_BC":"=u" (ret.quotient), "=t" (ret.remainder):"q" (divisior),
+     "t" (dividend):"A", "X", "RegB", "RegC");
+  return ret.quotient;
+}
+
+static unsigned short inline
+_divDE_BC_remainder (unsigned short dividend, unsigned short divisior)
+{
+  U_Div_Result ret;
+  asm
+    volatile
+    ("jsr divDE_BC":"=u" (ret.quotient), "=t" (ret.remainder):"q" (divisior),
+     "t" (dividend):"A", "X", "RegB", "RegC");
+  return ret.remainder;
 }
 
 #define DEF_SHIFTROT(NAME) static uchar inline _##NAME(uchar val){uchar ret;asm volatile ("lda %1\n\t jsr " #NAME "\n\tsta %1":"=r"(ret):"r"(val):"A");return ret; }
