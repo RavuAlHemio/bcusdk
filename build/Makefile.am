@@ -1,6 +1,6 @@
 BINDIR=$(bindir)
 LIBDIR=$(pkglibdir)/lib
-LDDIR=$(pkglibdir)/ldscripts
+LDDIR=$(pkgdatadir)/ldscripts
 INCDIR=$(pkgdatadir)/include
 XMLDIR=$(pkgdatadir)/xml
 
