@@ -85,6 +85,9 @@ typedef struct
   bool error;
 } U_map_Result;
 
+#define SETAONCARRY "\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\t"
+#define SETAONZERO "\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\t"
+#define SETAONNZERO "\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\t"
 
 extern const uchar OR_TAB[8];
 extern const uchar AND_TAB[8];
@@ -230,13 +233,13 @@ _U_map (signed short value, uchar ptr)
   if (!__builtin_constant_p (ptr))
     asm
       volatile
-      ("ldx %2\n\tjsr U_map\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=q"
+      ("ldx %2\n\tjsr U_map" SETAONCARRY "sta %1":"=q"
        (ret.value), "=r" (ret.error):"r" (ptr), "q" (value):"A", "X", "RegD",
        "RegE", "RegF", "RegG", "RegH", "RegI");
   else
   asm
     volatile
-    ("ldx $%2\n\tjsr U_map\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=q"
+    ("ldx $%2\n\tjsr U_map" SETAONCARRY "sta %1":"=q"
      (ret.value), "=r" (ret.error):"i" (ptr), "q" (value):"A", "X", "RegD",
      "RegE", "RegF", "RegG", "RegH", "RegI");
   return ret;
@@ -262,13 +265,13 @@ _S_AstShift (uchar ptr)
   if (!__builtin_constant_p (ptr))
     asm
       volatile
-      ("ldx %2\n\tjsr S_AstShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+      ("ldx %2\n\tjsr S_AstShift\n\tstx %0" SETAONCARRY "sta %1":"=r"
        (ret.pointer), "=r" (ret.error):"r" (ptr):"A", "X", "RegB", "RegC",
        "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
   else
   asm
     volatile
-    ("ldx $%2\n\tjsr S_AstShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+    ("ldx $%2\n\tjsr S_AstShift\n\tstx %0" SETAONCARRY "sta %1":"=r"
      (ret.pointer), "=r" (ret.error):"i" (ptr):"A", "X", "RegB", "RegC",
      "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
   return ret;
@@ -281,13 +284,13 @@ _S_LastShift (uchar ptr)
   if (!__builtin_constant_p (ptr))
     asm
       volatile
-      ("ldx %2\n\tjsr S_LastShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+      ("ldx %2\n\tjsr S_LastShift\n\tstx %0" SETAONCARRY "sta %1":"=r"
        (ret.pointer), "=r" (ret.error):"r" (ptr):"A", "X", "RegB", "RegC",
        "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
   else
   asm
     volatile
-    ("ldx $%2\n\tjsr S_LastShift\n\tstx %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+    ("ldx $%2\n\tjsr S_LastShift\n\tstx %0" SETAONCARRY "sta %1":"=r"
      (ret.pointer), "=r" (ret.error):"i" (ptr):"A", "X", "RegB", "RegC",
      "RegD", "RegE", "RegF", "RegG", "RegH", "RegI");
   return ret;
@@ -300,13 +303,13 @@ _U_SerialShift (uchar octet)
   if (!__builtin_constant_p (octet))
     asm
       volatile
-      ("lda %2\n\tjsr U_SerialShift\n\tsta %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+      ("lda %2\n\tjsr U_SerialShift\n\tsta %0" SETAONCARRY "sta %1":"=r"
        (ret.octet), "=r" (ret.error):"r" (octet):"A", "X", "RegB", "RegC",
        "RegD", "RegE", "RegF", "RegG", "RegI");
   else
   asm
     volatile
-    ("lda $%2\n\tjsr U_SerialShift\n\tsta %0\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+    ("lda $%2\n\tjsr U_SerialShift\n\tsta %0" SETAONCARRY "sta %1":"=r"
      (ret.octet), "=r" (ret.error):"i" (octet):"A", "X", "RegB", "RegC",
      "RegD", "RegE", "RegF", "RegG", "RegI");
   return ret;
@@ -346,13 +349,13 @@ _TM_GetFlg (uchar timer)
   if (!__builtin_constant_p (timer))
     asm
       volatile
-      ("lda %2\n\tjsr TM_GetFlg\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+      ("lda %2\n\tjsr TM_GetFlg\n\tsta %0" SETAONCARRY "sta %1":"=r"
        (ret.time), "=r" (ret.expired):"r" (timer):"A", "X", "RegB", "RegC",
        "RegD", "RegE");
   else
   asm
     volatile
-    ("lda $%2\n\tjsr TM_GetFlg\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+    ("lda $%2\n\tjsr TM_GetFlg\n\tsta %0" SETAONCARRY "sta %1":"=r"
      (ret.time), "=r" (ret.expired):"i" (timer):"A", "X", "RegB", "RegC",
      "RegD", "RegE");
   return ret;
@@ -408,12 +411,12 @@ _U_GetTM (uchar timer, uchar pointer)
       if (!__builtin_constant_p (timer))
 	asm
 	  volatile
-	  ("lda %1\n\tldx %2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	  ("lda %1\n\tldx %2\n\tjsr U_GetTM" SETAONZERO "sta %0":"=r"
 	   (ret):"r" (timer), "r" (pointer):"A", "X", "RegB", "RegC", "RegD");
       else
       asm
 	volatile
-	("lda $%1\n\tldx %2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	("lda $%1\n\tldx %2\n\tjsr U_GetTM" SETAONZERO "sta %0":"=r"
 	 (ret):"i" (timer), "r" (pointer):"A", "X", "RegB", "RegC", "RegD");
     }
   else
@@ -421,12 +424,12 @@ _U_GetTM (uchar timer, uchar pointer)
       if (!__builtin_constant_p (timer))
 	asm
 	  volatile
-	  ("lda %1\n\tldx $%2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	  ("lda %1\n\tldx $%2\n\tjsr U_GetTM" SETAONZERO "sta %0":"=r"
 	   (ret):"r" (timer), "i" (pointer):"A", "X", "RegB", "RegC", "RegD");
       else
       asm
 	volatile
-	("lda $%1\n\tldx $%2\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+	("lda $%1\n\tldx $%2\n\tjsr U_GetTM" SETAONZERO "sta %0":"=r"
 	 (ret):"i" (timer), "i" (pointer):"A", "X", "RegB", "RegC", "RegD");
     }
   return ret;
@@ -439,12 +442,12 @@ _U_GetTMx (uchar timer)
   if (!__builtin_constant_p (timer))
     asm
       volatile
-      ("lda %1\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+      ("lda %1\n\tjsr U_GetTM" SETAONZERO "sta %0":"=r"
        (ret):"r" (timer):"A", "X", "RegB", "RegC", "RegD");
   else
   asm
     volatile
-    ("lda $%1\n\tjsr U_GetTM\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+    ("lda $%1\n\tjsr U_GetTM" SETAONZERO "sta %0":"=r"
      (ret):"i" (timer):"A", "X", "RegB", "RegC", "RegD");
   return ret;
 }
@@ -465,12 +468,12 @@ _AllocBuf (bool longbuf)
   if (longbuf)
     asm
       volatile
-      ("sec\n\tjsr AllocBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+      ("sec\n\tjsr AllocBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
        (ret.valid), "=r" (ret.pointer)::"A", "X");
   else
   asm
     volatile
-    ("clc\n\tjsr AllocBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+    ("clc\n\tjsr AllocBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
      (ret.valid), "=r" (ret.pointer)::"A", "X");
   return ret;
 }
@@ -491,12 +494,12 @@ _PopBuf (uchar msg)
   if (!__builtin_constant_p (msg))
     asm
       volatile
-      ("lda %2\n\tjsr PopBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+      ("lda %2\n\tjsr PopBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
        (ret.found), "=r" (ret.pointer):"r" (msg):"A", "X", "RegB");
   else
   asm
     volatile
-    ("lda $%2\n\tjsr PopBuf\n\tstx %1\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+    ("lda $%2\n\tjsr PopBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
      (ret.found), "=r" (ret.pointer):"i" (msg):"A", "X", "RegB");
   return ret;
 }
@@ -507,7 +510,7 @@ _multDE_FG (unsigned short v1, unsigned short v2)
   U_Mul_Result ret;
   asm
     volatile
-    ("jsr multDE_FD\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+    ("jsr multDE_FD" SETAONCARRY "sta %0":"=r"
      (ret.overflow), "=q" (ret.product):"t" (v1), "u" (v2):"A", "X");
   return ret;
 }
@@ -518,7 +521,7 @@ _divDE_BC (unsigned short dividend, unsigned short divisior)
   U_Div_Result ret;
   asm
     volatile
-    ("jsr divDE_BC\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+    ("jsr divDE_BC" SETAONCARRY "sta %0":"=r"
      (ret.error), "=u" (ret.quotient), "=t" (ret.remainder):"q" (divisior),
      "t" (dividend):"A", "X", "RegB", "RegC");
   return ret;
@@ -570,12 +573,12 @@ _U_GetBit (uchar octet, uchar bit)
   if (!__builtin_constant_p (bit))
     asm
       volatile
-      ("lda %1\n\tjsr U_GetBit\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+      ("lda %1\n\tjsr U_GetBit" SETAONNZERO "sta %0":"=r"
        (ret):"r" (bit), "h" (octet):"A", "X", "RegB");
   else
   asm
     volatile
-    ("lda $%1\n\tjsr U_GetBit\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\tsta %0":"=r"
+    ("lda $%1\n\tjsr U_GetBit" SETAONNZERO "sta %0":"=r"
      (ret):"i" (bit), "h" (octet):"A", "X", "RegB");
   return ret;
 }
@@ -744,12 +747,12 @@ _U_FT12_GetStatus (bool force_reset)
   if (force_reset)
     asm
       volatile
-      ("sec\n\tjsr U_FT12_GetStatus\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+      ("sec\n\tjsr U_FT12_GetStatus\n\tsta %0" SETAONCARRY "sta %1":"=r"
        (ret.stateok), "=r" (ret.newstate)::"A");
   else
   asm
     volatile
-    ("clc\n\tjsr U_FT12_GetStatus\n\tsta %0\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\tsta %1":"=r"
+    ("clc\n\tjsr U_FT12_GetStatus\n\tsta %0" SETAONCARRY "sta %1":"=r"
      (ret.stateok), "=r" (ret.newstate)::"A");
   return ret;
 }
@@ -768,6 +771,10 @@ _U_SPI_Init ()
 {
   asm volatile ("jsr U_SPI_Init":::"A", "X");
 }
+
+#undef SETAONCARRY
+#undef SETAONZERO
+#undef SETAONNZERO
 
 #endif
 
