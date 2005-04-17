@@ -127,6 +127,19 @@ _U_transRequest (uchar no)
 		"RegC", "RegJ");
 }
 
+static uchar inline
+_U_testObj (uchar no)
+{
+  uchar ret;
+  if (!__builtin_constant_p (no))
+    asm volatile ("lda %1\n\tjsr U_testObj":"=c" (ret):"r" (no):"A", "X",
+		  "RegB", "RegJ");
+  else
+  asm volatile ("lda $%1\n\tjsr U_testObj":"=c" (ret):"i" (no):"A", "X",
+		"RegB", "RegJ");
+  return ret;
+}
+
 static void inline
 _EEwrite (uchar offset, uchar value)
 {
@@ -563,12 +576,12 @@ _U_GetTMx (uchar timer)
 }
 
 static void inline
-_U_delay (uchar delay)
+_U_Delay (uchar delay)
 {
   if (!__builtin_constant_p (delay))
-    asm volatile ("lda %0\n\tjsr U_delay"::"r" (delay):"A", "X", "RegB");
+    asm volatile ("lda %0\n\tjsr U_Delay"::"r" (delay):"A", "X", "RegB");
   else
-  asm volatile ("lda $%0\n\tjsr U_delay"::"i" (delay):"A", "X", "RegB");
+  asm volatile ("lda $%0\n\tjsr U_Delay"::"i" (delay):"A", "X", "RegB");
 }
 
 static AllocBuf_Result inline
@@ -705,8 +718,7 @@ DEF_SHIFTROT (shrA7)
 DEF_SHIFTROT (rolA1)
 DEF_SHIFTROT (rolA2)
 DEF_SHIFTROT (rolA3) DEF_SHIFTROT (rolA4) DEF_SHIFTROT (rolA7)
-     static
-       uchar
+     static uchar
        inline
      _U_SetBit (uchar octet, uchar bit, bool set)
 {
@@ -946,9 +958,6 @@ _U_SPI_Init ()
 /* not implemented:
 AL_SAPcallback
 U_EE_WriteHI
-
-not necessary:
-U_testObj
 
 not supported:
 U_TS_Seti
