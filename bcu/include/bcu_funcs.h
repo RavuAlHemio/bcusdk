@@ -89,6 +89,12 @@ typedef struct
 #define SETAONZERO "\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\t"
 #define SETAONNZERO "\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\t"
 
+static void inline
+reset_watchdog ()
+{
+  asm volatile ("bset.0 0x00C");
+}
+
 extern const uchar OR_TAB[8];
 extern const uchar AND_TAB[8];
 
@@ -718,7 +724,8 @@ DEF_SHIFTROT (shrA7)
 DEF_SHIFTROT (rolA1)
 DEF_SHIFTROT (rolA2)
 DEF_SHIFTROT (rolA3) DEF_SHIFTROT (rolA4) DEF_SHIFTROT (rolA7)
-     static uchar
+     static
+       uchar
        inline
      _U_SetBit (uchar octet, uchar bit, bool set)
 {
