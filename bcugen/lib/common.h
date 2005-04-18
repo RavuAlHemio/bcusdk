@@ -71,6 +71,20 @@ typedef enum
 #undef MAP
 } BCUType;
 
+typedef enum
+{
+#define MAP(A,B) TM_##B=A,
+#include "TimerType.lst"
+#undef MAP
+} TimerType;
+
+typedef enum
+{
+#define MAP(A,B) TM_##B=A,
+#include "TimerResType.lst"
+#undef MAP
+} TimerResType;
+
 
 void die (const char *msg, ...);
 void warn (const char *msg, ...);

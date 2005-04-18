@@ -82,6 +82,24 @@ Map_ObjectType (const String & s)
 }
 
 #undef MAP
+#define MAP(A,B) if(s==#B) return TM_##B;
+
+TimerType
+Map_TimerType (const String & s)
+{
+#include "TimerType.lst"
+  parserError (_("unkown TimerType %s"), s ());
+}
+
+TimerResType
+Map_TimerResType (const String & s)
+{
+#include "TimerResType.lst"
+  parserError (_("unkown TimerResolution %s"), s ());
+}
+
+
+#undef MAP
 #define MAP(A,B) if(s==A) return #B;
 
 
@@ -111,6 +129,26 @@ const char *
 unMap_PropertyType (PropertyType s)
 {
 #include "PropertyType.lst"
+  die (_("unknown value %d"), s);
+}
+
+#undef MAP
+#define MAP(A,B) if(s==TM_##B) return #B;
+
+const char *
+unMap_TimerType (TimerType s)
+{
+
+#include "TimerType.lst"
+  die (_("unknown value %d"), s);
+}
+
+
+const char *
+unMap_TimerResType (TimerResType s)
+{
+
+#include "TimerResType.lst"
   die (_("unknown value %d"), s);
 }
 
