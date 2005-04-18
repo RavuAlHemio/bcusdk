@@ -16,18 +16,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+MAP(1,UserTimer)
+MAP(2,CountDownTimer)
+MAP(3,DifferenceCounter)
+MAP(4,SystemTimer)
+MAP(5,MessageTimer)
+MAP(6,MessageCyclicTimer)
 
-#include "Interface.def"
-#include "FunctionalBlock.def"
-#include "GroupObject.def"
-#include "Property.def"
-#include "Object.def"
-#include "PollingMaster.def"
-#include "PollingSlave.def"
-#include "ListParameter.def"
-#include "IntParameter.def"
-#include "StringParameter.def"
-#include "FloatParameter.def"
-#include "Timer.def"
-#include "Debounce.def"
-#include "Device.def"

@@ -16,18 +16,38 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+/* user timer */
+MAP( 1,RES_133ms)
+MAP( 2,RES_266ms)
+MAP( 3,RES_533ms)
+MAP( 4,RES_1066ms)
+MAP( 5,RES_2133ms)
+MAP( 6,RES_4266ms)
+MAP( 7,RES_8533ms)
+MAP( 8,RES_17067ms)
+MAP( 9,RES_34133ms)
+MAP(10,RES_68267ms)
+MAP(11,RES_2min16s)
+MAP(12,RES_4min33s)
+MAP(13,RES_9min6s)
+MAP(14,RES_18min12s)
+MAP(15,RES_36min24s)
+MAP(16,RES_72min48s)
 
-#include "Interface.def"
-#include "FunctionalBlock.def"
-#include "GroupObject.def"
-#include "Property.def"
-#include "Object.def"
-#include "PollingMaster.def"
-#include "PollingSlave.def"
-#include "ListParameter.def"
-#include "IntParameter.def"
-#include "StringParameter.def"
-#include "FloatParameter.def"
-#include "Timer.def"
-#include "Debounce.def"
-#include "Device.def"
+/* BCU 1 Timer */
+MAP(30,RES_0_5ms)
+MAP(31,RES_8ms)
+MAP(32,RES_130ms)
+MAP(33,RES_2100ms)
+MAP(34,RES_33s)
+
+/* BCU 2 Timer Message */
+MAP(40,RES_0_4ms)
+MAP(41,RES_7ms)
+MAP(42,RES_107ms)
+MAP(43,RES_27s)
+
+/* BCU 2 Timer Message Cyclic */
+MAP(50,RES_100ms)
+MAP(51,RES_1s)
+MAP(52,RES_1min)
