@@ -71,6 +71,27 @@ GenGroupObjectUpdate (FILE * f, GroupObject & o)
 }
 
 void
+GenTimerUpdate (FILE * f, Timer & o)
+{
+  if (!o.on_expire ())
+    return;
+  fprintf (f, "\tlda $%d\n", o.TimerNo);
+  switch (o.Type)
+    {
+    case TM_UserTimer:
+      fprintf (f, "\tjsr U_GetTMx\n");
+      fprintf (f, "\tbeq _NoTChange%d\n", o.TimerNo);
+      break;
+    case TM_CountDownTimer:
+      fprintf (f, "\tjsr TM_GetFlg\n");
+      fprintf (f, "\tbcs _NoTChange%d\n", o.TimerNo);
+      break;
+    }
+  fprintf (f, "\tjsr %s\n", o.on_expire ());
+  fprintf (f, "_NoTChange%d:\n", o.TimerNo);
+}
+
+void
 GenGroupObjectHeader (FILE * f, GroupObject & o)
 {
   fprintf (f, "static const int %s_no = %d;\n", o.Name (), o.ObjNo);
@@ -90,7 +111,7 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
   else
     {
       fprintf (f, "%sGROUP%d_T %s __attribute__ ((section (\"%s\")));\n",
-	       o.eeprom ? "const " : "",
+	       o.eeprom ? "const E" : "",
 	       o.Type, o.Name (), o.eeprom ? ".eeprom" : ".ram");
       if (o.on_update ())
 	fprintf (f, "void %s();\n", o.on_update ());
@@ -149,12 +170,92 @@ GenInclude (FILE * f, Device & d)
 void
 GenCommonHeader (FILE * f, Device & d)
 {
+  int i;
   if (d.on_init ())
     fprintf (f, "void %s();\n", d.on_init ());
   if (d.on_run ())
     fprintf (f, "void %s();\n", d.on_run ());
   if (d.on_save ())
     fprintf (f, "void %s();\n", d.on_save ());
+  if (d.Debounces ())
+    {
+      if (d.Debounces[0].Time_lineno)
+	{
+	  int t = (int) (d.Debounces[0].Time / 0.5);
+	  if (t == 60)
+	    fprintf (f,
+		     "static uchar inline %s(uchar val){return _U_deb30(val);}n",
+		     d.Debounces[0].Name ());
+	  else if (t == 20)
+	    fprintf (f,
+		     "static uchar inline %s(uchar val){return _U_deb10(val);}n",
+		     d.Debounces[0].Name ());
+	  else
+	    fprintf (f,
+		     "static uchar inline %s(uchar val){return _U_debounce(val,%d);}n",
+		     d.Debounces[0].Name (), t);
+	}
+      else
+	fprintf (f,
+		 "static uchar inline %s(uchar val,uchar time){return _U_debounce(val,time);}n",
+		 d.Debounces[0].Name ());
+    }
+  for (i = 0; i < d.Timers (); i++)
+    {
+      Timer & o = d.Timers[i];
+      fprintf (f, "static const uchar %s_no=%d;\n", o.Name (), o.TimerNo);
+      if (o.on_expire_lineno)
+	fprintf (f, "void %s();\n", o.on_expire ());
+      switch (o.Type)
+	{
+	case TM_UserTimer:
+	  fprintf (f,
+		   "static void inline %s_set(uchar time){_U_SetTMx(%d,time);}\n",
+		   o.Name (), o.TimerNo);
+	  fprintf (f, "static bool inline %s_get(){return _U_GetTMx(%d);}\n",
+		   o.Name (), o.TimerNo);
+	  fprintf (f, "extern uchar %s;\n", o.Name ());
+	  break;
+	case TM_SystemTimer:
+	  break;
+	case TM_CountDownTimer:
+	  fprintf (f,
+		   "static void inline %s_set(uchar time){_TM_Load(0x%x,time);}\n",
+		   o.Name (),
+		   (o.TimerNo << 4) | ((o.Resolution - TM_RES_0_5ms) & 0x07));
+	  fprintf (f,
+		   "static bool inline %s_get(){return _TM_GetFlg_M0(%d);}\n",
+		   o.Name (), o.TimerNo);
+	  break;
+	case TM_DifferenceCounter:
+	  fprintf (f,
+		   "static void inline %s_set(uchar time){_TM_Load(0x%x,time);}\n",
+		   o.Name (),
+		   (o.
+		    TimerNo << 4) | ((o.Resolution -
+				      TM_RES_0_5ms) & 0x07) | 0x08);
+	  fprintf (f,
+		   "static bool inline %s_get(){return _TM_GetFlg_M1(%d);}\n",
+		   o.Name (), o.TimerNo);
+	  break;
+	case TM_MessageTimer:
+	  fprintf (f,
+		   "static void inline %s_set(uchar time){_U_TS_Set(%d,0x30,0x%x,time,0);}\n",
+		   o.Name (), o.TimerNo,
+		   (((o.Resolution - TM_RES_0_4ms) & 0x07) << 5));
+	  fprintf (f, "static void inline %s_del(){return _U_TS_Del(%d);}\n",
+		   o.Name (), o.TimerNo);
+	  break;
+	case TM_MessageCyclicTimer:
+	  fprintf (f,
+		   "static void inline %s_set(uchar param){_U_TS_Set(%d,0x40,0x%x,time0,param);}\n",
+		   o.Name (), o.TimerNo,
+		   (((o.Resolution - TM_RES_100ms + 1) & 0x07) << 2));
+	  fprintf (f, "static void inline %s_del(){return _U_TS_Del(%d);}\n",
+		   o.Name (), o.TimerNo);
+	  break;
+	}
+    }
 }
 
 void
@@ -325,7 +426,7 @@ GenRealHeader (FILE * f, Device & d)
 void
 GenBCUHeader (FILE * f, Device & d)
 {
-  int i;
+  int i, j;
   fprintf (f, "\t.include \"bcu_%04x.inc\"\n", d.BCU);
   fprintf (f, "\t.section .loadcontrol\n");
   fprintf (f, "\t.hword %d\n", 4);
@@ -417,13 +518,45 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.byte 0 #BCU1 pointer\n");
       fprintf (f, "\t.byte 0 #BCU1 pointer\n");
       fprintf (f, "\t.byte %s #RateLimit Pointer\n",
-	       (d.RateLimit_lineno ? "ratelimit+1" : "0"));
-      fprintf (f, "\t.byte %s\n", "0");
+	       (d.RateLimit_lineno ? "_ratelimit_ptr-0x100+1" : "0"));
+      fprintf (f, "\t.byte %s # Timer Pointer\n",
+	       (d.UserTimer ? "_timer_ptr-0x100+1" : "0"));
       fprintf (f, "\t.byte %d # BCU2 Mark\n", 0);
     }
   if (d.RateLimit_lineno)
-    fprintf (f, "\t.section .ratelimit\nratelimit:\n\t.byte %d # RateLimit",
+    fprintf (f, "\t.section .ratelimit\n_ratelimit_ptr:\n\t.byte %d # RateLimit\n",
 	     d.RateLimit);
+  if (d.Debounces ())
+    fprintf (f, "\t.section .debounce\n\t.hword 0\n");
+  if (d.UserTimer)
+    {
+      fprintf (f, "\t.section .timerval\n");
+      fprintf (f, "_timer_vals:\n");
+      for (i = 0; i < d.Timers (); i++)
+	if (d.Timers[i].Type == TM_UserTimer)
+	  fprintf (f, "\t.global %s\n%s:\n\t.byte 0\n", d.Timers[i].Name (),
+		   d.Timers[i].Name ());
+      fprintf (f, "\t.section .timer\n");
+      fprintf (f, "_timer_table:\n");
+      fprintf (f, "\t.byte _timer_vals\n");
+      for (i = 0; i < d.Timers (); i++)
+	if (d.Timers[i].Type == TM_UserTimer)
+	  {
+	    if (d.Timers[i].TimerNo % 2)
+	      {
+		fprintf (f, "\t.byte 0x%d\n",
+			 (d.Timers[i].Resolution - TM_RES_133ms) | j);
+	      }
+	    else
+	      j = (d.Timers[i].Resolution - TM_RES_133ms) << 4;
+	  }
+      if ((d.UserTimer % 2))
+	fprintf (f, "\t.byte 0x%d\n",
+		 (d.Timers[i].Resolution - TM_RES_133ms) | j);
+      fprintf (f, "\t.section .timerptr\n");
+      fprintf (f, "\t_timer_ptr:\n");
+      fprintf (f, "\t.byte (_timer_table-0x100)\n");
+    }
 }
 
 void
@@ -466,11 +599,15 @@ GenTestAsm (FILE * f, Device & d)
     fprintf (f, "\tjmp %s\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
+  fprintf (f, "\t.section init.1\n");
   fprintf (f, "_UserRun:\n");
   fprintf (f, "\tjsr _initstack\n");
 
   for (i = 0; i < d.GroupObjects (); i++)
     GenGroupObjectUpdate (f, d.GroupObjects[i]);
+
+  for (i = 0; i < d.Timers (); i++)
+    GenTimerUpdate (f, d.Timers[i]);
 
   if (d.on_run ())
     fprintf (f, "\tjmp %s\n", d.on_run ());
@@ -521,11 +658,16 @@ GenRealAsm (FILE * f, Device & d)
     fprintf (f, "\tjmp %s\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
+  fprintf (f, "\t.section init.1\n");
   fprintf (f, "_UserRun:\n");
   fprintf (f, "\tjsr _initstack\n");
 
   for (i = 0; i < d.GroupObjects (); i++)
     GenGroupObjectUpdate (f, d.GroupObjects[i]);
+
+  for (i = 0; i < d.Timers (); i++)
+    GenTimerUpdate (f, d.Timers[i]);
+
   if (d.on_run ())
     fprintf (f, "\tjmp %s\n", d.on_run ());
   else

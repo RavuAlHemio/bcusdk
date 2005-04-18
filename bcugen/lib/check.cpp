@@ -874,6 +874,95 @@ CheckExpressionBool (Expr * s, int l, const Device & d)
 }
 
 void
+CheckDebounce (Device & d, Debounce & o)
+{
+  if (!o.Name ())
+    undefined ("Debounce", "Name", o.lineno);
+  NewSymbol (o.Name, o.lineno);
+  if (o.Time_lineno < 0.5 || o.Time_lineno > 127)
+    die (_("line %d: debounce time not in the range of 0.5 to 127 ms"),
+	 o.Time_lineno);
+}
+
+void
+CheckTimer (Device & d, Timer & o)
+{
+  if (!o.Name ())
+    undefined ("Timer", "Name", o.lineno);
+  NewSymbol (o.Name, o.lineno);
+  NewSymbol (o.Name + "_no", o.lineno);
+  NewSymbol (o.Name + "_set", o.lineno);
+  NewSymbol (o.Name + "_get", o.lineno);
+  NewSymbol (o.Name + "_del", o.lineno);
+  if (!o.Type_lineno)
+    undefined ("Timer", "Type", o.lineno);
+  switch (o.Type)
+    {
+    case TM_UserTimer:
+      o.TimerNo = d.UserTimer++;
+      break;
+    case TM_CountDownTimer:
+    case TM_DifferenceCounter:
+    case TM_SystemTimer:
+    case TM_MessageTimer:
+    case TM_MessageCyclicTimer:
+      o.TimerNo = d.NextTimer++;
+    }
+  switch (o.Type)
+    {
+    case TM_UserTimer:
+      if (!o.Resolution_lineno)
+	undefined ("Timer", "Resolution", o.lineno);
+      if (o.Resolution < TM_RES_133ms || o.Resolution > TM_RES_72min48s)
+	die (_("line %d: unsupported timer resolution"), o.Resolution_lineno);
+      if (o.on_expire ())
+	NewSymbol (o.on_expire, o.on_expire_lineno);
+      break;
+    case TM_SystemTimer:
+      if (o.on_expire_lineno)
+	die (_("line %d: on_expire not supported"), o.on_expire_lineno);
+      if (o.Resolution_lineno)
+	die (_("line %d: Resolution not supported"), o.Resolution_lineno);
+      break;
+    case TM_CountDownTimer:
+      if (!o.Resolution_lineno)
+	undefined ("Timer", "Resolution", o.lineno);
+      if (o.Resolution < TM_RES_0_5ms || o.Resolution > TM_RES_33s)
+	die (_("line %d: unsupported timer resolution"), o.Resolution_lineno);
+      if (o.on_expire ())
+	NewSymbol (o.on_expire, o.on_expire_lineno);
+      break;
+    case TM_DifferenceCounter:
+      if (!o.Resolution_lineno)
+	undefined ("Timer", "Resolution", o.lineno);
+      if (o.Resolution < TM_RES_0_5ms || o.Resolution > TM_RES_33s)
+	die (_("line %d: unsupported timer resolution"), o.Resolution_lineno);
+      if (o.on_expire_lineno)
+	die (_("line %d: on_expire not supported"), o.on_expire_lineno);
+      break;
+    case TM_MessageTimer:
+      if (o.on_expire_lineno)
+	die (_("line %d: on_expire not supported"), o.on_expire_lineno);
+      if (!o.Resolution_lineno)
+	undefined ("Timer", "Resolution", o.lineno);
+      if (o.Resolution < TM_RES_0_4ms || o.Resolution > TM_RES_27s)
+	die (_("line %d: unsupported timer resolution"), o.Resolution_lineno);
+      if (d.BCU == BCU_bcu12)
+	die (_("line %d: timertype not supported on a BCU 1"), o.Type_lineno);
+      break;
+    case TM_MessageCyclicTimer:
+      if (o.on_expire_lineno)
+	die (_("line %d: on_expire not supported"), o.on_expire_lineno);
+      if (!o.Resolution_lineno)
+	undefined ("Timer", "Resolution", o.lineno);
+      if (o.Resolution < TM_RES_100ms || o.Resolution > TM_RES_1min)
+	die (_("line %d: unsupported timer resolution"), o.Resolution_lineno);
+      if (d.BCU == BCU_bcu12)
+	die (_("line %d: timertype not supported on a BCU 1"), o.Type_lineno);
+    }
+}
+
+void
 CheckDevice (Device & d)
 {
   int i;
@@ -904,6 +993,21 @@ CheckDevice (Device & d)
   for (i = 0; i < d.FunctionalBlocks (); i++)
     CheckFunctionalBlock (d, d.FunctionalBlocks[i]);
 
+  for (i = 0; i < d.Debounces (); i++)
+    CheckDebounce (d, d.Debounces[i]);
+  if (d.Debounces () > 1)
+    die (_("only one debouncer supported"));
+
+  d.UserTimer = 0;
+  d.NextTimer = 2;
+  if (d.Debounces ())
+    d.NextTimer = 3;
+
+  for (i = 0; i < d.Timers (); i++)
+    CheckTimer (d, d.Timers[i]);
+
+  if (d.NextTimer > 4)
+    die (_("too many system timers in used"));
 
   if (!d.ManufacturerCode_lineno)
     {
@@ -1089,4 +1193,5 @@ CheckDevice (Device & d)
 	die (_("not yet supported"));
 
     }
+
 }
