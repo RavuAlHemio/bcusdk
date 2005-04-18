@@ -33,6 +33,8 @@ SECTIONS
 
 _bss_start = . ;
 .ram : {
+	*(.debounce)
+	*(.timerval)
 	*(.register)
 	*(.ramflags)
 	*(.ram)
@@ -55,7 +57,10 @@ _eeprom_start = . ;
 	*(.commobjs)
 	*(.ratelimit)
 	*(.init)
+	*(.timerptr)
+	*(.init.1)
 	*(.text)
+	*(.timer)
 	*(.rodata)
 	_text_end = . ;
 	}

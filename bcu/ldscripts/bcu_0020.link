@@ -35,6 +35,8 @@ SECTIONS
 . = 0xCE;
 _bss_start = . ;
 .loram : {
+	*(.debounce)
+	*(.timerval)
 	*(.register)
         *(.ramflags)
 }
@@ -66,8 +68,10 @@ _bss_hi_size = _bss_hi_end - _bss_hi_start ;
         *(.assoctab)
 readonly_start = . ;
         *(.ratelimit)
+	*(.timerptr)
         *(.commobjs)
         *(.init)
+	*(.init.1)
 	*(.eibobjects)
         *(.text)
         *(.rodata)
