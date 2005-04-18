@@ -65,10 +65,16 @@ _bss_hi_size = _bss_hi_end - _bss_hi_start ;
         _text_start = . ;
         *(.bcuconfig)
         *(.addrtab)
-        *(.assoctab)
+eeprom_start = . ;
+.eeprom : {
+	*(.eeprom)
+}
+eeprom_end = . ;
 readonly_start = . ;
         *(.ratelimit)
 	*(.timerptr)
+	*(.timer)
+	*(.loconst)
         *(.commobjs)
         *(.init)
 	*(.init.1)
@@ -102,11 +108,7 @@ _data_hi_size = _data_hi_end - _data_hi_start ;
 }
 
 readonly_end = . ;
-eeprom_start = . ;
-.eeprom : {
-
-}
-eeprom_end = . ;
+        *(.assoctab)
 param_start = . ;
 .parameter : {
 	*(.parameter)

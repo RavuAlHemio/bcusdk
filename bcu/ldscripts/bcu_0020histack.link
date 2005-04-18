@@ -116,7 +116,7 @@ _eeprom_size = param_end - _text_start ;
 
 _stack_size = SPBASE + SPINIT - _data_hi_end ;
 SPBASE = 0x0900 ;
-SPINIT = 0xD1 ;
+SPINIT = 0xA8 ;
 
 .loadcontrol 0x900000 : {
         *(.loadcontrol)

@@ -61,6 +61,7 @@ _eeprom_start = . ;
 	*(.init.1)
 	*(.text)
 	*(.timer)
+	*(.loconst)
 	*(.rodata)
 	_text_end = . ;
 	}
