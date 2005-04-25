@@ -28,18 +28,18 @@
 #ifndef GROUP_TYPES_H
 #define GROUP_TYPES_H
 
-typedef unsigned char GROUP0_T;
-typedef unsigned char GROUP1_T;
-typedef unsigned char GROUP2_T;
-typedef unsigned char GROUP3_T;
-typedef unsigned char GROUP4_T;
-typedef unsigned char GROUP5_T;
-typedef unsigned char GROUP6_T;
-typedef unsigned char GROUP7_T;
-typedef unsigned short GROUP8_T;
-typedef unsigned char GROUP9_T[3];
+typedef uint1 GROUP0_T;
+typedef uint1 GROUP1_T;
+typedef uint1 GROUP2_T;
+typedef uint1 GROUP3_T;
+typedef uint1 GROUP4_T;
+typedef uint1 GROUP5_T;
+typedef uint1 GROUP6_T;
+typedef uint1 GROUP7_T;
+typedef uint2 GROUP8_T;
+typedef uint3 GROUP9_T;
 typedef float GROUP10_T;
-typedef unsigned char GROUP11_T[6];
+typedef uint6 GROUP11_T;
 typedef double GROUP12_T;
 typedef unsigned char GROUP13_T[10];
 typedef unsigned char GROUP14_T[14];
