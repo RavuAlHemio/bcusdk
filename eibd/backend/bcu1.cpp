@@ -29,7 +29,7 @@ BCU1DriverLowLevelDriver::BCU1DriverLowLevelDriver (const char *dev,
   t->TracePrintf (1, this, "Open");
   fd = open (dev, O_RDWR);
   if (fd == -1)
-    throw new Exception (DEV_OPEN_FAIL);
+    throw Exception (DEV_OPEN_FAIL);
 
   pth_sem_init (&in_signal);
   pth_sem_init (&out_signal);
