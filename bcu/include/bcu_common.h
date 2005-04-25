@@ -28,8 +28,7 @@
 #ifndef _BCU_COMMON_H
 #define _BCU_COMMON_H
 
-typedef unsigned char uchar;
-#define EEPROM_ATTRIB __attribute ((eeprom))
+#include "types.h"
 
 #include "grouptypes.h"
 

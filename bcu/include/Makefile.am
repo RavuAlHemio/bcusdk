@@ -2,7 +2,7 @@ include ../VARIANT
 
 BCU1_H=bcu_0012.h
 BCU2_H=bcu_0020.h
-COMMON_H=bcu_common.h grouptypes.h bcu_funcs.h
+COMMON_H=bcu_common.h grouptypes.h bcu_funcs.h types.h
 
 BCU1_INC=bcu_0012.inc
 BCU2_INC=bcu_0020.inc
