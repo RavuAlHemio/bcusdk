@@ -116,9 +116,17 @@ else
 fi
 
 pushd "$TMP" >/dev/null || error
+$TAR x cf bcusdk-version || error
+
+if [ "x`cat bcusdk-version`" == "x0.0.0" ]; then
 $TAR x cf config || error
 $TAR x cf c.inc || error
-popd || error
+else
+echo "Unsupported Formatversion: `cat bcusdk-version`"
+error
+fi
+
+popd >/dev/null || error
 
 $BCUGEN "$TMP/config" "$IN" "$TMP/c.h" "$TMP/p1.s" "$TMP/p.var" || error
 
@@ -132,10 +140,10 @@ fi
 echo "#include \"c.h\"">"$TMP/c.c"
 echo "#include \"c.inc\"">>"$TMP/c.c"
 
-$TGCC -c -O3 -Os -Wall -Winline -g -I$SINC -o "$TMP/c.o" "$TMP/c.c" || error
+$TGCC -c -O3 -Os -Wall -Winline -gstabs -I$SINC -o "$TMP/c.o" "$TMP/c.c" || error
 $TAS -I$SINC -o "$TMP/p1.o" "$TMP/p1.s" || error
 
-$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p1.o" `$TGCC -print-libgcc-file-name` "$LIB/lib$VAR.a" || error
+$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p1.o" -lc -lm `$TGCC -print-libgcc-file-name` "$LIB/lib$VAR.a" || error
 $TLD -Map "$TMP/load.map" -T $LD/genload.link -o "$TMP/load" "$TMP/elf" || error
 
 
