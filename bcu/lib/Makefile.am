@@ -6,6 +6,10 @@ AR=@TAR@
 RANLIB=@TRANLIB@
 CC=@TGCC@
 CCAS=@TGCC@
+AM_CPPFLAGS=-I../include
+AM_CFLAGS=-gstabs -O3 -Os
+CFLAGS=
+EXTRA_DIST=eewrite.c
 
 tlibdir=$(pkglibdir)/lib
 
@@ -14,9 +18,14 @@ tlib_LIBRARIES=libbcu_0012.a libbcu_0020.a
 COMMON=regs.s tmp.s fp.s tmpspace.s
 BCU1=initbcu1.s bcu1func.s
 BCU2=initbcu2.s bcu2func.s
+BCU1_EE=eewrite_QI.c eewrite_HI.c eewrite_AI.c eewrite_SI.c \
+	eewrite_FI.c eewrite_CI.c eewrite_EI.c eewrite_DI.c
 
-libbcu_0012_a_SOURCES=$(BCU1) $(COMMON)
-libbcu_0020_a_SOURCES=$(BCU2) $(COMMON)
+BUILT_SOURCES=$(BCU1_EE)
+CLEANFILES=$(BCU1_EE)
+
+libbcu_0012_a_SOURCES=$(BCU1) $(COMMON) $(BCU1_EE)
+libbcu_0020_a_SOURCES=$(BCU2) $(COMMON) $(BCU1_EE)
 
 tlib_DATA=$(addsuffix .a,$(addprefix lib,$(BCU_LIST)))
 
@@ -24,3 +33,9 @@ libbcu_0012%.a : libbcu_0012.a
 	ln -s $< $@
 libbcu_0020%.a : libbcu_0020.a
 	ln -s $< $@
+
+eewrite_%.c : Makefile
+	for b in QI HI AI SI EI CI FI DI ; do \
+	echo "#define MODE $$b" >eewrite_$$b.c ; \
+	echo "#include \"eewrite.c\"" >>eewrite_$$b.c ; \
+	done
