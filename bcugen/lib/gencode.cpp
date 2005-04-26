@@ -66,7 +66,7 @@ GenGroupObjectUpdate (FILE * f, GroupObject & o)
   fprintf (f, "\tlda $%d\n", o.ObjNo);
   fprintf (f, "\tjsr U_testObj\n");
   fprintf (f, "\tbeq _NoChange%d\n", o.ObjNo);
-  fprintf (f, "\tjsr %s\n", o.on_update ());
+  fprintf (f, "\tjsr %s_stub\n", o.on_update ());
   fprintf (f, "_NoChange%d:\n", o.ObjNo);
 }
 
@@ -87,7 +87,7 @@ GenTimerUpdate (FILE * f, Timer & o)
       fprintf (f, "\tbcs _NoTChange%d\n", o.TimerNo);
       break;
     }
-  fprintf (f, "\tjsr %s\n", o.on_expire ());
+  fprintf (f, "\tjsr %s_stub\n", o.on_expire ());
   fprintf (f, "_NoTChange%d:\n", o.TimerNo);
 }
 
@@ -95,11 +95,11 @@ void
 GenGroupObjectHeader (FILE * f, GroupObject & o)
 {
   fprintf (f, "static const int %s_no = %d;\n", o.Name (), o.ObjNo);
+  if (o.on_update ())
+    fprintf (f, "static void %s();\n", o.on_update ());
   if (o.ObjNo == -1)
     {
       fprintf (f, "static GROUP%d_T %s;\n", o.Type, o.Name ());
-      if (o.on_update ())
-	fprintf (f, "static void %s();\n", o.on_update ());
 #ifdef PHASE1
       if (o.Sending)
 	fprintf (f, "static void %s_transmit(){}\n", o.Name ());
@@ -111,10 +111,11 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
   else
     {
       fprintf (f, "%sGROUP%d_T %s __attribute__ ((section (\"%s\")));\n",
-	       o.eeprom ? "const E" : "",
+	       o.eeprom ? "E" : "",
 	       o.Type, o.Name (), o.eeprom ? ".eeprom" : ".ram");
       if (o.on_update ())
-	fprintf (f, "void %s();\n", o.on_update ());
+	fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+		 o.on_update (), o.on_update ());
 #ifdef PHASE1
       if (o.Sending)
 	fprintf (f,
@@ -155,7 +156,38 @@ GenEIBObject (FILE * f, Object & o)
 									  0x40)
 	       | 0x20);
       fprintf (f, "\t.hword %s%s\n", o.Propertys[i].Name (),
-	       o.Propertys[i].Function () != 0 ? "_stub+0x8000" : "");
+	       o.Propertys[i].handler () !=
+	       0 ? "_stub+0x8000" : (o.Propertys[i].MaxArrayLength >
+				     1 ? "_array" : ""));
+    }
+  for (i = 0; i < o.Propertys (); i++)
+    {
+      if (!o.Propertys[i].handler () && (o.Propertys[i].MaxArrayLength > 1)
+	  && !o.Propertys[i].Disable)
+	{
+	  fprintf (f, "%s_array:\n", o.Propertys[i].Name ());
+	  fprintf (f, "\t.byte %d\n", o.Propertys[i].MaxArrayLength);
+	  fprintf (f, "\t.hword %s\n", o.Propertys[i].Name ());
+	}
+      if (o.Propertys[i].handler () && !o.Propertys[i].Disable)
+	{
+	  fprintf (f, "%s_stub:\n", o.Name ());
+	  fprintf (f, "\tclra\n", o.Name ());
+	  fprintf (f, "\tbcc L1_%s\n", o.Name ());
+	  fprintf (f, "\tinca\n", o.Name ());
+	  fprintf (f, "L1_%s:\n", o.Name ());
+	  fprintf (f, "\tsta __tmp_space\n");
+	  fprintf (f, "\tstx __tmp_space+1\n");
+	  fprintf (f, "\tjsr %s_stub1\n", o.Name ());
+	  fprintf (f, "\tldx __tmp_space+1\n");
+	  fprintf (f, "\tlda __tmp_space+2\n");
+	  fprintf (f, "\tclc\n");
+	  fprintf (f, "\ttst __tmp_space\n");
+	  fprintf (f, "\tbeq L2_%s\n", o.Name ());
+	  fprintf (f, "\tsec\n");
+	  fprintf (f, "L2_%s:\n", o.Name ());
+	  fprintf (f, "\trts\n", o.Name ());
+	}
     }
 }
 
@@ -172,11 +204,20 @@ GenCommonHeader (FILE * f, Device & d)
 {
   int i;
   if (d.on_init ())
-    fprintf (f, "void %s();\n", d.on_init ());
+    fprintf (f, "static void %s();\n", d.on_init ());
   if (d.on_run ())
-    fprintf (f, "void %s();\n", d.on_run ());
+    fprintf (f, "static void %s();\n", d.on_run ());
   if (d.on_save ())
-    fprintf (f, "void %s();\n", d.on_save ());
+    fprintf (f, "static void %s();\n", d.on_save ());
+  if (d.on_init ())
+    fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+	     d.on_init (), d.on_init ());
+  if (d.on_run ())
+    fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+	     d.on_run (), d.on_run ());
+  if (d.on_save ())
+    fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+	     d.on_save (), d.on_save ());
   if (d.Debounces ())
     {
       if (d.Debounces[0].Time_lineno)
@@ -205,7 +246,11 @@ GenCommonHeader (FILE * f, Device & d)
       Timer & o = d.Timers[i];
       fprintf (f, "static const uchar %s_no=%d;\n", o.Name (), o.TimerNo);
       if (o.on_expire_lineno)
-	fprintf (f, "void %s();\n", o.on_expire ());
+	{
+	  fprintf (f, "static void %s();\n", o.on_expire ());
+	  fprintf (f, "void %s_stub() __attribute__ ((nosave)) { %s(); }\n",
+		   o.on_expire (), o.on_expire ());
+	}
       switch (o.Type)
 	{
 	case TM_UserTimer:
@@ -248,12 +293,56 @@ GenCommonHeader (FILE * f, Device & d)
 	  break;
 	case TM_MessageCyclicTimer:
 	  fprintf (f,
-		   "static void inline %s_set(uchar param){_U_TS_Set(%d,0x40,0x%x,time0,param);}\n",
+		   "static void inline %s_set(uchar param){_U_TS_Set(%d,0x40,0x%x,0,param);}\n",
 		   o.Name (), o.TimerNo,
 		   (((o.Resolution - TM_RES_100ms + 1) & 0x07) << 2));
 	  fprintf (f, "static void inline %s_del(){return _U_TS_Del(%d);}\n",
 		   o.Name (), o.TimerNo);
 	  break;
+	}
+    }
+  for (i = 0; i < d.Objects (); i++)
+    {
+      Object & o1 = d.Objects[i];
+      for (int j = 0; j < o1.Propertys (); j++)
+	{
+	  Property & o = o1.Propertys[j];
+	  if (o.handler ())
+	    {
+	      fprintf (f, "static PropertyResult %s(PropertyRequest r);\n");
+	      if (!o.Disable)
+		{
+		  fprintf (f, "extern uint1 __tmp_space[4];\n");
+		  fprintf (f, "void %s_stub1() __attribute__ ((nosave))\n");
+		  fprintf (f, "{PropertyRequest r1;PropertyResult r2;\n");
+		  fprintf (f,
+			   "r1.write=__tmp_space[0];r1.ptr=__tmp_space[1];\n");
+		  fprintf (f, "r2=%s(r1);\n", o.handler ());
+		  fprintf (f,
+			   "__tmp_space[0]=r2.error;__tmp_space[1]=r2.ptr;__tmp_space[2]=r2.length\n");
+		  fprintf (f, "}\n");
+		}
+	    }
+	  else if (o.MaxArrayLength > 1)
+	    {
+	      if (o.Disable)
+		fprintf (f, "static ");
+	      fprintf (f, "struct { int count; PROP%d_T elements[%d]; } %s ",
+		       o.Type, o.Name (), o.MaxArrayLength);
+	      if (!o.Disable)
+		fprintf (f, "%s",
+			 o.eeprom ? "EEPROM_ATTRIB EEPROM_SECTION" : "");
+	      fprintf (f, " = { %d }\n", o.MaxArrayLength);
+	    }
+	  else
+	    {
+	      if (o.Disable)
+		fprintf (f, "static PROP%d_T %s;\n", o.Type, o.Name ());
+	      else
+		fprintf (f, "%sPROP%d_T %s __attribute__ %s;\n",
+			 o.eeprom ? "E" : "", o.Type, o.Name (),
+			 o.eeprom ? "EEPROM_SECTION" : "");
+	    }
 	}
     }
 }
@@ -524,7 +613,8 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.byte %d # BCU2 Mark\n", 0);
     }
   if (d.RateLimit_lineno)
-    fprintf (f, "\t.section .ratelimit\n_ratelimit_ptr:\n\t.byte %d # RateLimit\n",
+    fprintf (f,
+	     "\t.section .ratelimit\n_ratelimit_ptr:\n\t.byte %d # RateLimit\n",
 	     d.RateLimit);
   if (d.Debounces ())
     fprintf (f, "\t.section .debounce\n\t.hword 0\n");
@@ -590,13 +680,13 @@ GenTestAsm (FILE * f, Device & d)
   fprintf (f, "_UserInit:\n");
   fprintf (f, "\tjsr _initmem\n");
   if (d.on_init ())
-    fprintf (f, "\tjmp %s\n", d.on_init ());
+    fprintf (f, "\tjmp %s_stub\n", d.on_init ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserSave:\n");
   fprintf (f, "\tjsr _initstack\n");
   if (d.on_save ())
-    fprintf (f, "\tjmp %s\n", d.on_save ());
+    fprintf (f, "\tjmp %s_stub\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "\t.section init.1\n");
@@ -610,7 +700,7 @@ GenTestAsm (FILE * f, Device & d)
     GenTimerUpdate (f, d.Timers[i]);
 
   if (d.on_run ())
-    fprintf (f, "\tjmp %s\n", d.on_run ());
+    fprintf (f, "\tjmp %s_stub\n", d.on_run ());
   else
     fprintf (f, "\trts\n");
 
@@ -649,13 +739,13 @@ GenRealAsm (FILE * f, Device & d)
   fprintf (f, "_UserInit:\n");
   fprintf (f, "\tjsr _initmem\n");
   if (d.on_init ())
-    fprintf (f, "\tjmp %s\n", d.on_init ());
+    fprintf (f, "\tjmp %s_stub\n", d.on_init ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserSave:\n");
   fprintf (f, "\tjsr _initstack\n");
   if (d.on_save ())
-    fprintf (f, "\tjmp %s\n", d.on_save ());
+    fprintf (f, "\tjmp %s_stub\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
   fprintf (f, "\t.section init.1\n");
@@ -669,7 +759,7 @@ GenRealAsm (FILE * f, Device & d)
     GenTimerUpdate (f, d.Timers[i]);
 
   if (d.on_run ())
-    fprintf (f, "\tjmp %s\n", d.on_run ());
+    fprintf (f, "\tjmp %s_stub\n", d.on_run ());
   else
     fprintf (f, "\trts\n");
 }

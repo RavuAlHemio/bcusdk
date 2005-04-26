@@ -378,7 +378,7 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (o.MaxArrayLength <= 0)
     die (_("line %d: negative array size"), o.lineno);
 
-  if (o.MaxArrayLength <= 0)
+  if (o.MaxArrayLength > 0xff)
     die (_("line %d: maximum array size to big"), o.lineno);
 
   if (!o.PropertyID_lineno)
@@ -390,8 +390,8 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (o.PropertyID & (~0xffff) || o.PropertyID == 0)
     die (_("line %d: wrong Property ID %d"), o.lineno, o.PropertyID);
 
-  if (o.Function ())
-    NewSymbol (o.Function, o.Function_lineno);
+  if (o.handler ())
+    NewSymbol (o.handler, o.handler_lineno);
 
   if (!o.Writeable_lineno)
     {
@@ -399,10 +399,10 @@ CheckProperty (Device & d, Property & o, Object & o1)
       o.Writeable = 1;
     }
 
-  if (!o.Constant_lineno)
+  if (!o.eeprom_lineno)
     {
-      o.Constant_lineno = o.lineno;
-      o.Constant = 0;
+      o.eeprom_lineno = o.lineno;
+      o.eeprom = 0;
     }
 
 #ifdef PHASE1
@@ -449,10 +449,6 @@ CheckProperty (Device & d, Property & o, Object & o1)
     }
 
 #endif
-  if (o.Writeable && o.Constant)
-    die (_("line %d: writable object is constant??"), o.lineno);
-  if (!o.ReadOnly && o.Constant)
-    die (_("line %d: not read only object is constant??"), o.lineno);
 }
 
 void
@@ -1182,9 +1178,6 @@ CheckDevice (Device & d)
 	}
       if (!d.InstallKey_lineno)
 	d.InstallKey = 0xFFFFFFFF;
-
-      if (d.Objects ())
-	die (_("not yet supported"));
 
       if (d.PollingMasters ())
 	die (_("not yet supported"));
