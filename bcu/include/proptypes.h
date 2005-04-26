@@ -80,4 +80,16 @@ typedef PROP24_T EPROP24_T EEPROM_ATTRIB;
 typedef PROP25_T EPROP25_T EEPROM_ATTRIB;
 typedef PROP26_T EPROP26_T EEPROM_ATTRIB;
 
+typedef struct
+{
+  bool write;
+  uint1 ptr;
+} PropertyRequest;
+typedef struct
+{
+  bool error;
+  uint1 ptr;
+  uint1 length;
+} PropertyResult;
+
 #endif

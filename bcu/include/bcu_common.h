@@ -31,5 +31,6 @@
 #include "types.h"
 
 #include "grouptypes.h"
+#include "proptypes.h"
 
 #endif
