@@ -66,9 +66,7 @@ _bss_hi_size = _bss_hi_end - _bss_hi_start ;
         *(.bcuconfig)
         *(.addrtab)
 eeprom_start = . ;
-.eeprom : {
 	*(.eeprom)
-}
 eeprom_end = . ;
 readonly_start = . ;
         *(.ratelimit)
@@ -108,7 +106,9 @@ _data_hi_size = _data_hi_end - _data_hi_start ;
 }
 
 readonly_end = . ;
+.eeprom : {
         *(.assoctab)
+}
 param_start = . ;
 .parameter : {
 	*(.parameter)

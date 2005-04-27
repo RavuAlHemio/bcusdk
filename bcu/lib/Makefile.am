@@ -30,11 +30,11 @@ libbcu_0020_a_SOURCES=$(BCU2) $(COMMON) $(BCU1_EE)
 tlib_DATA=$(addsuffix .a,$(addprefix lib,$(BCU_LIST)))
 
 libbcu_0012%.a : libbcu_0012.a
-	ln -s $< $@
+	-ln -s $< $@
 libbcu_0020%.a : libbcu_0020.a
-	ln -s $< $@
+	-ln -s $< $@
 
-eewrite_%.c : Makefile
+$(BCU1_EE) : Makefile
 	for b in QI HI AI SI EI CI FI DI ; do \
 	echo "#define MODE $$b" >eewrite_$$b.c ; \
 	echo "#include \"eewrite.c\"" >>eewrite_$$b.c ; \

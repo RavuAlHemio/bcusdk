@@ -26,7 +26,8 @@
 */
 #include "bcu_0012.h"
 
-#define HEAD(M) eestore_##M(void* ptr ,unsigned int v __attribute__ ((mode(M))))
+#define NAME(M) eestore_##M
+#define HEAD(M) NAME(M)(void* ptr ,unsigned int v __attribute__ ((mode(M))))
 HEAD (MODE)
 {
   uchar i;
