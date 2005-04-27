@@ -143,7 +143,7 @@ echo "#include \"c.inc\"">>"$TMP/c.c"
 $TGCC -c -O3 -Os -Wall -Winline -gstabs -I$SINC -o "$TMP/c.o" "$TMP/c.c" || error
 $TAS -I$SINC -o "$TMP/p1.o" "$TMP/p1.s" || error
 
-$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p1.o" -lc -lm `$TGCC -print-libgcc-file-name` "$LIB/lib$VAR.a" || error
+$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p1.o" -\( -lc -lm `$TGCC -print-libgcc-file-name` "$LIB/lib$VAR.a" -\) || error
 $TLD -Map "$TMP/load.map" -T $LD/genload.link -o "$TMP/load" "$TMP/elf" || error
 
 
