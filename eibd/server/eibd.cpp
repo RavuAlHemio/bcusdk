@@ -141,7 +141,7 @@ static struct argp_option options[] = {
    "listen at unix domain socket FILE (default /tmp/eib)"},
   {"trace", 't', "LEVEL", 0, "set trace level"},
   {"eibaddr", 'e', "EIBADDR", 0,
-   "sets our own EIB-address to EIBADDR (default 0.0.1), for drivers, which need one address"},
+   "sets our own EIB-address to EIBADDR (default 0.0.1), for drivers, which need an address"},
   {"pid-file", 'p', "FILE", 0, "writes the PID of the process to FILE"},
   {"daemon", 'd', "FILE", OPTION_ARG_OPTIONAL,
    "starts the programm as daemon, the output will be written to FILE, if present"},
