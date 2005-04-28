@@ -95,11 +95,19 @@ void
 GenGroupObjectHeader (FILE * f, GroupObject & o)
 {
   fprintf (f, "static const int %s_no = %d;\n", o.Name (), o.ObjNo);
+  if (o.ObjNo == -1)
+    fprintf (f, "static ");
+  fprintf (f, "GROUP%d_T %s", o.Type, o.Name ());
+  if (o.eeprom)
+    fprintf (f, " EEPROM_ATTRIB EEPROM_SECTION");
+  else
+    fprintf (f, " RAM_SECTION");
+  fprintf (f, ";\n");
+
   if (o.on_update ())
     fprintf (f, "static void %s();\n", o.on_update ());
   if (o.ObjNo == -1)
     {
-      fprintf (f, "static GROUP%d_T %s;\n", o.Type, o.Name ());
 #ifdef PHASE1
       if (o.Sending)
 	fprintf (f, "static void %s_transmit(){}\n", o.Name ());
@@ -110,9 +118,6 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
     }
   else
     {
-      fprintf (f, "%sGROUP%d_T %s __attribute__ ((section (\"%s\")));\n",
-	       o.eeprom ? "E" : "",
-	       o.Type, o.Name (), o.eeprom ? ".eeprom" : ".ram");
       if (o.on_update ())
 	fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
 		 o.on_update (), o.on_update ());
@@ -329,19 +334,19 @@ GenCommonHeader (FILE * f, Device & d)
 		fprintf (f, "static ");
 	      fprintf (f, "struct { int count; PROP%d_T elements[%d]; } %s ",
 		       o.Type, o.Name (), o.MaxArrayLength);
-	      if (!o.Disable)
-		fprintf (f, "%s",
-			 o.eeprom ? "EEPROM_ATTRIB EEPROM_SECTION" : "");
-	      fprintf (f, " = { %d }\n", o.MaxArrayLength);
+	      fprintf (f, "%s",
+		       o.eeprom ? "EEPROM_ATTRIB EEPROM_SECTION" : "");
+	      fprintf (f, " = { %d };\n", o.MaxArrayLength);
 	    }
 	  else
 	    {
 	      if (o.Disable)
-		fprintf (f, "static PROP%d_T %s;\n", o.Type, o.Name ());
+		fprintf (f, "static PROP%d_T %s", o.Type, o.Name ());
 	      else
-		fprintf (f, "%sPROP%d_T %s __attribute__ %s;\n",
-			 o.eeprom ? "E" : "", o.Type, o.Name (),
-			 o.eeprom ? "EEPROM_SECTION" : "");
+		fprintf (f, "PROP%d_T %s", o.Type, o.Name ());
+	      if (o.eeprom)
+		fprintf (f, " EEPROM_SECTION EEPROM_ATTRIB");
+	      fprintf (f, ";\n");
 	    }
 	}
     }
