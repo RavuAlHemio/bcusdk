@@ -29,6 +29,7 @@
 #define _BCU_TYPES_H
 
 #define EEPROM_ATTRIB __attribute__ ((eeprom))
+#define EEPROM_PTR_ATTRIB __attribute__ ((eepromt))
 
 #define EEPROM_SECTION __attribute__ ((section (".eeprom")))
 #define LOW_CONST_SECTION __attribute__ ((section (".loconst")))
@@ -52,23 +53,6 @@ typedef unsigned int uint6 __attribute__ ((mode (CI)));
 typedef unsigned int uint7 __attribute__ ((mode (EI)));
 typedef unsigned int uint8 __attribute__ ((mode (DI)));
 
-typedef sint1 esint1 EEPROM_ATTRIB;
-typedef sint2 esint2 EEPROM_ATTRIB;
-typedef sint3 esint3 EEPROM_ATTRIB;
-typedef sint4 esint4 EEPROM_ATTRIB;
-typedef sint5 esint5 EEPROM_ATTRIB;
-typedef sint6 esint6 EEPROM_ATTRIB;
-typedef sint7 esint7 EEPROM_ATTRIB;
-
-typedef uint1 euint1 EEPROM_ATTRIB;
-typedef uint2 euint2 EEPROM_ATTRIB;
-typedef uint3 euint3 EEPROM_ATTRIB;
-typedef uint4 euint4 EEPROM_ATTRIB;
-typedef uint5 euint5 EEPROM_ATTRIB;
-typedef uint6 euint6 EEPROM_ATTRIB;
-typedef uint7 euint7 EEPROM_ATTRIB;
-
 typedef uint1 uchar;
-typedef euint1 euchar;
 
 #endif
