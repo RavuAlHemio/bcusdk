@@ -639,8 +639,8 @@ STR_BCU2Start::STR_BCU2Start (const CArray & c)
   initaddr = c[34] << 8 | c[35];
   runaddr = c[36] << 8 | c[37];
   saveaddr = c[38] << 8 | c[39];
-  saveaddr = c[40] << 8 | c[41];
-  saveaddr = c[42] << 8 | c[43];
+  eeprom_start = c[40] << 8 | c[41];
+  eeprom_end = c[42] << 8 | c[43];
 }
 
 CArray

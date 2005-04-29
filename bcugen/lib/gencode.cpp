@@ -119,7 +119,7 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
   else
     {
       if (o.on_update ())
-	fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+	fprintf (f, "NOSAVE(void %s_stub()) {%s();}\n",
 		 o.on_update (), o.on_update ());
 #ifdef PHASE1
       if (o.Sending)
@@ -215,13 +215,12 @@ GenCommonHeader (FILE * f, Device & d)
   if (d.on_save ())
     fprintf (f, "static void %s();\n", d.on_save ());
   if (d.on_init ())
-    fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+    fprintf (f, "NOSAVE(void %s_stub()) {%s();}\n",
 	     d.on_init (), d.on_init ());
   if (d.on_run ())
-    fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
-	     d.on_run (), d.on_run ());
+    fprintf (f, "NOSAVE(void %s_stub()) {%s();}\n", d.on_run (), d.on_run ());
   if (d.on_save ())
-    fprintf (f, "void %s_stub() __attribute__ ((nosave)) {%s();}\n",
+    fprintf (f, "NOSAVE(void %s_stub()) {%s();}\n",
 	     d.on_save (), d.on_save ());
   if (d.Debounces ())
     {
@@ -253,7 +252,7 @@ GenCommonHeader (FILE * f, Device & d)
       if (o.on_expire_lineno)
 	{
 	  fprintf (f, "static void %s();\n", o.on_expire ());
-	  fprintf (f, "void %s_stub() __attribute__ ((nosave)) { %s(); }\n",
+	  fprintf (f, "NOSAVE(void %s_stub()) { %s(); }\n",
 		   o.on_expire (), o.on_expire ());
 	}
       switch (o.Type)
@@ -318,7 +317,7 @@ GenCommonHeader (FILE * f, Device & d)
 	      if (!o.Disable)
 		{
 		  fprintf (f, "extern uint1 __tmp_space[4];\n");
-		  fprintf (f, "void %s_stub1() __attribute__ ((nosave))\n");
+		  fprintf (f, "NOSAVE(void %s_stub1())\n");
 		  fprintf (f, "{PropertyRequest r1;PropertyResult r2;\n");
 		  fprintf (f,
 			   "r1.write=__tmp_space[0];r1.ptr=__tmp_space[1];\n");
@@ -530,9 +529,9 @@ GenBCUHeader (FILE * f, Device & d)
     {
       fprintf (f, "\t.hword %d\n", 4 * 4 + 2);
       fprintf (f, "\t.hword %d\n", L_BCU2_KEY);
-      fprintf (f, "\t.word 0x%08X\n", d.InstallKey);
+      fprintf (f, "\t.long 0x%08X\n", d.InstallKey);
       for (i = 0; i < 3; i++)
-	fprintf (f, "\t.word 0x%08X\n", d.Key[i]);
+	fprintf (f, "\t.long 0x%08X\n", d.Key[i]);
       fprintf (f, "\t.hword %d\n", 42);
       fprintf (f, "\t.hword %d\n", L_BCU2_INIT);
       fprintf (f, "\t.hword addrtab\n");
@@ -694,7 +693,7 @@ GenTestAsm (FILE * f, Device & d)
     fprintf (f, "\tjmp %s_stub\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
-  fprintf (f, "\t.section init.1\n");
+  fprintf (f, "\t.section .init.1\n");
   fprintf (f, "_UserRun:\n");
   fprintf (f, "\tjsr _initstack\n");
 
@@ -753,7 +752,7 @@ GenRealAsm (FILE * f, Device & d)
     fprintf (f, "\tjmp %s_stub\n", d.on_save ());
   else
     fprintf (f, "\trts\n");
-  fprintf (f, "\t.section init.1\n");
+  fprintf (f, "\t.section .init.1\n");
   fprintf (f, "_UserRun:\n");
   fprintf (f, "\tjsr _initstack\n");
 
