@@ -28,12 +28,16 @@
 #ifndef _BCU_TYPES_H
 #define _BCU_TYPES_H
 
+#include <stdbool.h>
+
 #define EEPROM_ATTRIB __attribute__ ((eeprom))
 #define EEPROM_PTR_ATTRIB __attribute__ ((eepromt))
 
 #define EEPROM_SECTION __attribute__ ((section (".eeprom")))
 #define LOW_CONST_SECTION __attribute__ ((section (".loconst")))
 #define RAM_SECTION __attribute__ ((section (".ram")))
+
+#define NOSAVE(PROTO) PROTO __attribute__ ((nosave)); PROTO
 
 typedef signed int sint1 __attribute__ ((mode (QI)));
 typedef signed int sint2 __attribute__ ((mode (HI)));
