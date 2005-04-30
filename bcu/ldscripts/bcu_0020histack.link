@@ -35,6 +35,8 @@ SECTIONS
 . = 0xCE;
 _bss_start = . ;
 .loram : {
+	*(.debounce)
+	*(.timerval)
 	*(.register)
         *(.ramflags)
 }
@@ -63,11 +65,18 @@ _bss_hi_size = _bss_hi_end - _bss_hi_start ;
         _text_start = . ;
         *(.bcuconfig)
         *(.addrtab)
-        *(.assoctab)
+eeprom_start = . ;
+	*(.eeprom)
+eeprom_end = . ;
 readonly_start = . ;
         *(.ratelimit)
+	*(.timerptr)
+	*(.timer)
+	*(.loconst)
+_limit_1ff = . ;
         *(.commobjs)
         *(.init)
+	*(.init.1)
 	*(.eibobjects)
         *(.text)
         *(.rodata)
@@ -98,17 +107,15 @@ _data_hi_size = _data_hi_end - _data_hi_start ;
 }
 
 readonly_end = . ;
-eeprom_start = . ;
 .eeprom : {
-
+        *(.assoctab)
 }
-eeprom_end = . ;
 param_start = . ;
 .parameter : {
 	*(.parameter)
 }
 .checksum.2 : {
-        BYTE(0)
+        BYTE(_limit_1ff - 0x101)
 }
 param_end = . ;
 

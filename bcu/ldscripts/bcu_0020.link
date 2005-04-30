@@ -73,6 +73,7 @@ readonly_start = . ;
 	*(.timerptr)
 	*(.timer)
 	*(.loconst)
+_limit_1ff = . ;
         *(.commobjs)
         *(.init)
 	*(.init.1)
@@ -114,7 +115,7 @@ param_start = . ;
 	*(.parameter)
 }
 .checksum.2 : {
-        BYTE(0)
+        BYTE(_limit_1ff - 0x101)
 }
 param_end = . ;
 
