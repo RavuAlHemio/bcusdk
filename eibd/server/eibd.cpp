@@ -120,7 +120,7 @@ const char *argp_program_version = "eibd " VERSION;
 static char doc[] =
   "eibd -- a commonication stack for EIB\n"
   "(C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>\n"
-  "supported urls are:\n"
+  "supported URLs are:\n"
 #undef L2_NAME
 #define L2_NAME(a) a##_URL
 #include "layer2create.h"
@@ -131,7 +131,7 @@ static char doc[] =
   "\n";
 
 /** documentation for arguments*/
-static char args_doc[] = "url";
+static char args_doc[] = "URL";
 
 /** option list */
 static struct argp_option options[] = {
