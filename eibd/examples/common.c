@@ -53,7 +53,7 @@ readgaddr (const char *addr)
 {
   int a, b, c;
   sscanf (addr, "%d/%d/%d", &a, &b, &c);
-  return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
+  return ((a & 0x01f) << 11) | ((b & 0x07) << 8) | ((c & 0xff));
 }
 
 unsigned
