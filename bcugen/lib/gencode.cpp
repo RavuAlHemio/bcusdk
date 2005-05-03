@@ -80,7 +80,7 @@ GenTimerUpdate (FILE * f, Timer & o)
     {
     case TM_UserTimer:
       fprintf (f, "\tjsr U_GetTMx\n");
-      fprintf (f, "\tbeq _NoTChange%d\n", o.TimerNo);
+      fprintf (f, "\tbne _NoTChange%d\n", o.TimerNo);
       break;
     case TM_CountDownTimer:
       fprintf (f, "\tjsr TM_GetFlg\n");
@@ -142,7 +142,7 @@ GenEIBObject (FILE * f, Object & o)
   fprintf (f, "%s:\n", o.Name ());
   fprintf (f, "\t.byte 0x%02X,%d\n", (o.RAccess << 4) | (o.WAccess),
 	   o.PropCount + 1);
-  fprintf (f, "\t.byte %d,%d\n", 0, 4);
+  fprintf (f, "\t.byte %d,%d\n", 1, 4);
   fprintf (f, "\t.hword 0x%04X\n", o.ObjectType);
   for (i = 0; i < o.Propertys (); i++)
     {
@@ -150,7 +150,7 @@ GenEIBObject (FILE * f, Object & o)
 	continue;
       fprintf (f, "\t.byte %d,%d\n", o.Propertys[i].PropertyID,
 	       (o.Propertys[i].Type & 0x1f) | (!o.Propertys[i].
-					       ReadOnly ? 0x80 : 0x00) | (o.
+					       ReadOnly ? 0x00 : 0x80) | (o.
 									  Propertys
 									  [i].
 									  MaxArrayLength
@@ -638,15 +638,14 @@ GenBCUHeader (FILE * f, Device & d)
 	  {
 	    if (d.Timers[i].TimerNo % 2)
 	      {
-		fprintf (f, "\t.byte 0x%d\n",
-			 (d.Timers[i].Resolution - TM_RES_133ms) | j);
+		fprintf (f, "\t.byte 0x%x\n",
+			 ((d.Timers[i].Resolution - TM_RES_133ms) << 4 ) | j);
 	      }
 	    else
-	      j = (d.Timers[i].Resolution - TM_RES_133ms) << 4;
+	      j = (d.Timers[i].Resolution - TM_RES_133ms);
 	  }
       if ((d.UserTimer % 2))
-	fprintf (f, "\t.byte 0x%d\n",
-		 (d.Timers[i].Resolution - TM_RES_133ms) | j);
+	fprintf (f, "\t.byte 0x%x\n", j);
       fprintf (f, "\t.section .timerptr\n");
       fprintf (f, "\t_timer_ptr:\n");
       fprintf (f, "\t.byte (_timer_table-0x100)\n");

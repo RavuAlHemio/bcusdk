@@ -86,8 +86,8 @@ typedef struct
 } U_map_Result;
 
 #define SETAONCARRY "\n\tclra\n\tbcc _L_%=\n\tinca\n_L_%=:\n\t"
-#define SETAONZERO "\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\t"
-#define SETAONNZERO "\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\t"
+#define SETAONZERO "\n\tclra\n\tbne _L_%=\n\tinca\n_L_%=:\n\t"
+#define SETAONNZERO "\n\tclra\n\tbeq _L_%=\n\tinca\n_L_%=:\n\t"
 
 static void inline
 reset_watchdog ()
