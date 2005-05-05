@@ -316,7 +316,7 @@ GenCommonHeader (FILE * f, Device & d)
 	      fprintf (f, "static PropertyResult %s(PropertyRequest r);\n");
 	      if (!o.Disable)
 		{
-		  fprintf (f, "extern uint1 __tmp_space[4];\n");
+		  fprintf (f, "extern volatile uint1 __tmp_space[4];\n");
 		  fprintf (f, "NOSAVE(void %s_stub1())\n");
 		  fprintf (f, "{PropertyRequest r1;PropertyResult r2;\n");
 		  fprintf (f,
