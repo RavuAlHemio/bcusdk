@@ -130,7 +130,8 @@ Layer3::deregisterGroupCallBack (L_Data_CallBack * c, eibaddr_t addr)
 	    if (group[i].dest == addr)
 	      return 1;
 	  }
-	layer2->removeGroupAddress (addr);
+	if (addr)
+	  layer2->removeGroupAddress (addr);
 	return 1;
       }
   t->TracePrintf (3, this, "deregisterGroupCallBack %08X = 0", c);
