@@ -21,9 +21,9 @@ libread2_a_SOURCES=scanner.1.lpp parser2.1.ypp readconfig.cpp readconfig.h
 
 
 %.1.lpp : %.post
-	cp $< $@
+	sed -e "s/YYinclude/#include/g" < $< > $@
 %.1.ypp : %.post
-	cp $< $@
+	sed -e "s/YYinclude/#include/g" < $< > $@
 
 .pre.post:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -D__cplusplus -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -E -P -x c -O0 -o $@ $<; \

@@ -18,10 +18,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "scanner.h"
-#include "stack.h"
-#include "classes.h"
-#include "map.h"
+YYinclude "scanner.h"
+YYinclude "stack.h"
+YYinclude "classes.h"
+YYinclude "map.h"
 
 void yyerror(char*s)
 {
