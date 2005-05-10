@@ -23,22 +23,22 @@
 #include "config.h"
 
 #ifdef HAVE_FT12
-#include "FT12.h"
+#include "b-FT12.h"
 #endif
 #ifdef HAVE_PEI16
-#include "PEI16.h"
+#include "b-PEI16.h"
 #endif
 #ifdef HAVE_TPUART
-#include "TPUART.h"
+#include "b-TPUART.h"
 #endif
 #ifdef HAVE_EIBNETIP
-#include "EIBNETIP.h"
+#include "b-EIBNETIP.h"
 #endif
 #ifdef HAVE_PEI16s
-#include "PEI16s.h"
+#include "b-PEI16s.h"
 #endif
 #ifdef HAVE_TPUARTs
-#include "TPUARTs.h"
+#include "b-TPUARTs.h"
 #endif
 
 #endif
