@@ -22,9 +22,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <asm/types.h>
+#include "eibnetip.h"
+#if 0
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-#include "eibnetip.h"
+#endif
 
 int
 GetHostIP (struct sockaddr_in *sock, const char *Name)
@@ -41,6 +43,7 @@ GetHostIP (struct sockaddr_in *sock, const char *Name)
   return 1;
 }
 
+#if 0
 typedef struct
 {
   struct nlmsghdr n;
@@ -91,6 +94,7 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
     }
   return 0;
 }
+#endif
 
 CArray
 L_Data_ToCEMI (uchar code, const L_Data_PDU & l1)
