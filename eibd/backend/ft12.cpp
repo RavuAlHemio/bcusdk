@@ -35,12 +35,14 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
   tcgetattr (fd, &old);
 
   tcgetattr (fd, &t1);
-  t1.c_cflag = B19200 | CS8 | PARENB | CLOCAL | CREAD;
+  t1.c_cflag = CS8 | PARENB | CLOCAL | CREAD;
   t1.c_iflag = IGNBRK | INPCK | ISIG;
   t1.c_oflag = 0;
   t1.c_lflag = 0;
   t1.c_cc[VTIME] = 1;
   t1.c_cc[VMIN] = 0;
+  cfsetospeed (&t1, B19200);
+  cfsetispeed (&t1, 0);
 
   tcsetattr (fd, TCSAFLUSH, &t1);
   sendflag = 0;
