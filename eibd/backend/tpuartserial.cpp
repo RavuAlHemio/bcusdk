@@ -30,6 +30,7 @@ getstat (int fd)
   ioctl (fd, TIOCMGET, &s);
   return s;
 }
+
 /** set serial status lines */
 static void
 setstat (int fd, int s)
@@ -41,7 +42,6 @@ setstat (int fd, int s)
 TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
 						    eibaddr_t a, Trace * tr)
 {
-  struct serial_struct snew;
   struct termios t1;
   t = tr;
   t->TracePrintf (2, this, "Open");
@@ -49,10 +49,7 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
     throw Exception (DEV_OPEN_FAIL);
-  ioctl (fd, TIOCGSERIAL, &sold);
-  ioctl (fd, TIOCGSERIAL, &snew);
-  snew.flags |= ASYNC_LOW_LATENCY;
-  ioctl (fd, TIOCSSERIAL, &snew);
+  set_low_latency (fd, &sold);
 
   close (fd);
 
@@ -61,12 +58,14 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
     throw Exception (DEV_OPEN_FAIL);
   tcgetattr (fd, &old);
 
-  t1.c_cflag = B19200 | CS8 | CLOCAL | CREAD | PARENB;
+  t1.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
   t1.c_iflag = IGNBRK | INPCK | ISIG;
   t1.c_oflag = 0;
   t1.c_lflag = 0;
   t1.c_cc[VTIME] = 1;
   t1.c_cc[VMIN] = 0;
+  cfsetospeed (&t1, B19200);
+  cfsetispeed (&t1, 0);
 
   tcsetattr (fd, TCSAFLUSH, &t1);
 
@@ -102,7 +101,7 @@ TPUARTSerialLayer2Driver::~TPUARTSerialLayer2Driver ()
     {
       setstat (fd, (getstat (fd) & ~TIOCM_RTS) & ~TIOCM_DTR);
       tcsetattr (fd, TCSAFLUSH, &old);
-      ioctl (fd, TIOCSSERIAL, &sold);
+      restore_low_latency (fd, &sold);
       close (fd);
     }
 
@@ -270,7 +269,8 @@ TPUARTSerialLayer2Driver::RecvLPDU (const uchar * data, int len)
   if (!mode)
     {
       LPDU *l = LPDU::fromPacket (CArray (data, len));
-      if(l->getType()==L_Data&&!((L_Data_PDU*)l)->repeated&&((L_Data_PDU*)l)->valid_checksum)
+      if (l->getType () == L_Data && !((L_Data_PDU *) l)->repeated
+	  && ((L_Data_PDU *) l)->valid_checksum)
 	{
 	  outqueue.put (l);
 	  pth_sem_inc (&out_signal, 1);

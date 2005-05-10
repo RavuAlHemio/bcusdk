@@ -21,8 +21,7 @@
 #define BCU1SERIAL_H
 
 #include <termios.h>
-#include <linux/serial.h>
-
+#include "lowlatency.h"
 #include "lowlevel.h"
 
 /** PEI16 / BCU1 user mode driver */
@@ -33,7 +32,7 @@ class BCU1SerialLowLevelDriver:public LowLevelDriverInterface, private Thread
   /** old termios settings */
   struct termios told;
   /** old serial port settings */
-  struct serial_struct sold;
+  low_latency_save sold;
   /** debug output */
   Trace *t;
   /** semaphore for inqueue */

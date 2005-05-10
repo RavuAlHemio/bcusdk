@@ -20,14 +20,14 @@
 #ifndef TPUART_SERIAL_H
 #define TPUART_SERIAL_H
 #include <termios.h>
-#include <linux/serial.h>
+#include "lowlatency.h"
 #include "layer2.h"
 
 /** TPUART user mode driver */
 class TPUARTSerialLayer2Driver:public Layer2Interface, private Thread
 {
   /** old serial config */
-  struct serial_struct sold;
+  low_latency_save sold;
   /** old termios state */
   struct termios old;
   /** file descriptor */

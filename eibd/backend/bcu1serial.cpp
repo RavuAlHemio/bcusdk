@@ -83,17 +83,13 @@ BCU1SerialLowLevelDriver::BCU1SerialLowLevelDriver (const char *dev,
 						    Trace * tr)
 {
   struct termios ti;
-  struct serial_struct snew;
 
   t = tr;
   t->TracePrintf (1, this, "Open");
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
     throw Exception (DEV_OPEN_FAIL);
-  ioctl (fd, TIOCGSERIAL, &sold);
-  ioctl (fd, TIOCGSERIAL, &snew);
-  snew.flags |= ASYNC_LOW_LATENCY;
-  ioctl (fd, TIOCSSERIAL, &snew);
+  set_low_latency (fd, &sold);
 
   close (fd);
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
@@ -102,12 +98,14 @@ BCU1SerialLowLevelDriver::BCU1SerialLowLevelDriver (const char *dev,
 
   tcgetattr (fd, &told);
 
-  ti.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
+  ti.c_cflag = CS8 | CLOCAL | CREAD;
   ti.c_iflag = IGNBRK | INPCK | ISIG;
   ti.c_oflag = 0;
   ti.c_lflag = 0;
   ti.c_cc[VTIME] = 1;
   ti.c_cc[VMIN] = 0;
+  cfsetospeed (&ti, B9600);
+  cfsetispeed (&ti, 0);
 
   tcsetattr (fd, TCSAFLUSH, &ti);
 
@@ -131,7 +129,7 @@ BCU1SerialLowLevelDriver::~BCU1SerialLowLevelDriver ()
 
   if (fd != -1)
     {
-      ioctl (fd, TIOCSSERIAL, &sold);
+      restore_low_latency (fd, &sold);
       tcsetattr (fd, TCSAFLUSH, &told);
       close (fd);
     }

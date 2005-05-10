@@ -17,13 +17,13 @@ TPUART =
 endif
 
 if HAVE_PEI16s
-PEI16s = bcu1serial.h bcu1serial.cpp
+PEI16s = bcu1serial.h bcu1serial.cpp lowlatency.h lowlatency.cpp
 else
 PEI16s =
 endif
 
 if HAVE_TPUARTs
-TPUARTs = tpuartserial.h tpuartserial.cpp
+TPUARTs = tpuartserial.h tpuartserial.cpp lowlatency.h lowlatency.cpp
 else
 TPUARTs =
 endif
