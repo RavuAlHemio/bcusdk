@@ -254,9 +254,14 @@ main (int ac, char *ag[])
   sigfillset (&t1);
   sigaddset (&t1, SIGINT);
   sigaddset (&t1, SIGTERM);
+  signal (SIGINT, SIG_IGN);
+  signal (SIGTERM, SIG_IGN);
 
   int x;
   pth_sigwait (&t1, &x);
+
+  signal (SIGINT, SIG_DFL);
+  signal (SIGTERM, SIG_DFL);
 
   while (!server.isempty ())
     delete server.get ();
