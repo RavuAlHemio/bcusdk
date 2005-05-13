@@ -12,8 +12,11 @@ AC_PROG_LEX
 AM_PROG_AS
 AC_PROG_RANLIB
 AC_CHECK_PTHSEM(2.0.4,yes,yes,yes)
+AC_CHECK_HEADER(argp.h,,[AC_MSG_ERROR([argp_parse not found])])
+AC_SEARCH_LIBS(argp_parse,argp,,[AC_MSG_ERROR([argp_parse not found])])
 AM_PATH_XML2(2.6.16,,[AC_MSG_ERROR([limxml2 not found])])
-
+AC_CHECK_HEADER(linux/serial.h,[AC_DEFINE(HAVE_LINUX_LOWLATENCY, 1 , [Linux low latency mode enabled])],[AC_MSG_WARN([No supported low latency mode found])])
+AC_CHECK_HEADER(linux/rtnetlink.h,[AC_DEFINE(HAVE_LINUX_NETLINK, 1,[Linux netlink layer available])],[],[-])
 AC_PATH_PROG(TAS,[m68hc05-as],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TLD,[m68hc05-ld],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TAR,[m68hc05-ar],,[$PATH:$bindir:$prefix/bin])
@@ -96,6 +99,18 @@ AC_ARG_ENABLE(eibnetip,
 AM_CONDITIONAL(HAVE_EIBNETIP, test x$eibnetip = xtrue)
 if test x$eibnetip = xtrue ; then
  AC_DEFINE(HAVE_EIBNETIP, 1 , [EIBnet/IP enabled])
+fi
+
+AC_ARG_ENABLE(eibnetiptunnel,
+[  --enable-eibnetiptunnel	enable EIBnet/IP tunneling backend],
+[case "${enableval}" in
+ yes) eibnetiptunnel=true ;;
+  no)  eibnetiptunnel=false ;;
+   *) AC_MSG_ERROR(bad value ${enableval} for --enable-eibnetiptunnel) ;;
+ esac],[eibnetiptunnel=false])
+AM_CONDITIONAL(HAVE_EIBNETIPTUNNEL, test x$eibnetiptunnel = xtrue)
+if test x$eibnetiptunnel = xtrue ; then
+ AC_DEFINE(HAVE_EIBNETIPTUNNEL, 1 , [EIBnet/IP tunneling enabled])
 fi
 
 AC_CONFIG_HEADERS(config.h)

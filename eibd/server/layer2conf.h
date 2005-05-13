@@ -34,6 +34,9 @@
 #ifdef HAVE_EIBNETIP
 #include "b-EIBNETIP.h"
 #endif
+#ifdef HAVE_EIBNETIPTUNNEL
+#include "b-EIBNETIPTUNNEL.h"
+#endif
 #ifdef HAVE_PEI16s
 #include "b-PEI16s.h"
 #endif
