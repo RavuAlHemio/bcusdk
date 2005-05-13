@@ -29,13 +29,13 @@ TPUARTs =
 endif
 
 if HAVE_EIBNETIP
-EIBNETIP = eibnetrouter.h eibnetrouter.cpp eibnetip.h eibnetip.cpp
+EIBNETIP = eibnetrouter.h eibnetrouter.cpp
 else
 EIBNETIP =
 endif
 
 if HAVE_EIBNETIPTUNNEL
-EIBNETIPTUNNEL = eibnettunnel.h eibnettunnel.cpp eibnetip.h eibnetip.cpp
+EIBNETIPTUNNEL = eibnettunnel.h eibnettunnel.cpp
 else
 EIBNETIPTUNNEL =
 endif
