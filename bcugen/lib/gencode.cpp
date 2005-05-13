@@ -532,7 +532,7 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.long 0x%08X\n", d.InstallKey);
       for (i = 0; i < 3; i++)
 	fprintf (f, "\t.long 0x%08X\n", d.Key[i]);
-      fprintf (f, "\t.hword %d\n", 42);
+      fprintf (f, "\t.hword %d\n", 45);
       fprintf (f, "\t.hword %d\n", L_BCU2_INIT);
       fprintf (f, "\t.hword addrtab\n");
       fprintf (f, "\t.hword addrtab_end-addrtab\n");
@@ -556,6 +556,8 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.hword _UserSave\n");
       fprintf (f, "\t.hword eeprom_start\n");
       fprintf (f, "\t.hword eeprom_end\n");
+      fprintf (f, "\t.hword 0\n");
+      fprintf (f, "\t.byte 0\n");
     }
   fprintf (f, "\t.section .bcuconfig\n");
   if (d.BCU == BCU_bcu12)
@@ -639,7 +641,7 @@ GenBCUHeader (FILE * f, Device & d)
 	    if (d.Timers[i].TimerNo % 2)
 	      {
 		fprintf (f, "\t.byte 0x%x\n",
-			 ((d.Timers[i].Resolution - TM_RES_133ms) << 4 ) | j);
+			 ((d.Timers[i].Resolution - TM_RES_133ms) << 4) | j);
 	      }
 	    else
 	      j = (d.Timers[i].Resolution - TM_RES_133ms);
