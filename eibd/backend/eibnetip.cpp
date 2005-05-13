@@ -23,7 +23,8 @@
 #include <unistd.h>
 #include <asm/types.h>
 #include "eibnetip.h"
-#if 0
+#include "config.h"
+#ifdef HAVE_LINUX_NETLINK
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #endif
@@ -43,7 +44,7 @@ GetHostIP (struct sockaddr_in *sock, const char *Name)
   return 1;
 }
 
-#if 0
+#ifdef HAVE_LINUX_NETLINK
 typedef struct
 {
   struct nlmsghdr n;
@@ -350,7 +351,7 @@ EIBNetIPSocket::Run (pth_sem_t * stop1)
 			 &rl, stop);
       if (i > 0 && rl == sizeof (r))
 	{
-	  if (recvall || !memcpy (&r, &recvaddr, sizeof (&r)))
+	  if (recvall || !memcmp (&r, &recvaddr, sizeof (r)))
 	    {
 	      t->TracePacket (0, this, "Recv", i, buf);
 	      EIBNetIPPacket *p =

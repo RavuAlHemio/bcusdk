@@ -34,8 +34,14 @@ else
 EIBNETIP =
 endif
 
+if HAVE_EIBNETIPTUNNEL
+EIBNETIPTUNNEL = eibnettunnel.h eibnettunnel.cpp eibnetip.h eibnetip.cpp
+else
+EIBNETIPTUNNEL =
+endif
+
 noinst_LIBRARIES = libbackend.a
 AM_CPPFLAGS=-I../libserver -I../../common
 
-libbackend_a_SOURCES= $(FT12) $(PEI16) $(TPUART) $(PEI16s) $(TPUARTs) $(EIBNETIP)
+libbackend_a_SOURCES= $(FT12) $(PEI16) $(TPUART) $(PEI16s) $(TPUARTs) $(EIBNETIP) $(EIBNETIPTUNNEL)
 
