@@ -8,5 +8,6 @@ MANAGEMENT=management.h management.cpp
 FRONTEND_C=client.h client.cpp busmonitor.h busmonitor.cpp connection.h connection.cpp managementclient.h managementclient.cpp 
 FRONTEND=server.h server.cpp localserver.h localserver.cpp inetserver.h inetserver.cpp $(FRONTEND_C)
 EMI=emi1.h emi1.cpp emi2.h emi2.cpp
+EIBNETIP=eibnetip.cpp eibnetip.h
 
-libeibstack_a_SOURCES =$(COMMON) $(CORE) $(PDUs) $(MANAGEMENT) $(FRONTEND) $(EMI)   
+libeibstack_a_SOURCES =$(COMMON) $(CORE) $(PDUs) $(MANAGEMENT) $(FRONTEND) $(EMI) $(EIBNETIP) 
