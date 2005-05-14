@@ -188,14 +188,18 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 
   EIBNetIPPacket p;
   EIBNetIPPacket *p1;
-  p.service = CONNECTION_REQUEST;
-  p.data.resize (20);
-  p.data.setpart (IPtoEIBNetIP (&saddr), 0);
-  p.data.setpart (IPtoEIBNetIP (&saddr), 8);
-  p.data[16] = 0x04;
-  p.data[17] = 0x04;
-  p.data[18] = 0x02;		//mode
-  p.data[19] = 0x00;
+  EIBnet_ConnectRequest creq;
+  EIBnet_ConnectResponse cresp;
+  EIBnet_ConnectionStateRequest csreq;
+  EIBnet_TunnelRequest treq;
+  EIBnet_TunnelACK tresp;
+  creq.caddr = saddr;
+  creq.daddr = saddr;
+  creq.CRI.resize (3);
+  creq.CRI[0] = 0x04;
+  creq.CRI[1] = 0x02;
+  creq.CRI[2] = 0x00;
+  p = creq.ToPacket ();
   sock->Send (p);
 
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
@@ -219,23 +223,19 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	    case CONNECTION_RESPONSE:
 	      if (mod)
 		goto err;
-	      if (p1->data () < 12)
+	      if (parseEIBnet_ConnectResponse (*p1, cresp))
 		{
 		  t->TracePrintf (1, this, "Recv wrong connection response");
 		  break;
 		}
-	      if (p1->data[1] != 0)
+	      if (cresp.status != 0)
 		{
 		  t->TracePrintf (1, this, "Connect failed with error %02X",
-				  p1->data[1]);
+				  cresp.status);
 		  goto out;
 		}
-	      if (EIBnettoIP (CArray (p1->data.array () + 2, 8), &daddr))
-		{
-		  t->TracePrintf (1, this, "Wrong address format");
-		  goto out;
-		}
-	      channel = p1->data[0];
+	      daddr = cresp.daddr;
+	      channel = cresp.channel;
 	      mod = 1;
 	      sock->recvaddr = daddr;
 	      sock->sendaddr = daddr;
@@ -247,39 +247,40 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  t->TracePrintf (1, this, "Not connected");
 		  goto err;
 		}
-	      if (p1->data () < 6 || p1->data[0] != 4)
+	      if (parseEIBnet_TunnelRequest (*p1, treq))
 		{
 		  t->TracePrintf (1, this, "Invalid request");
 		  break;
 		}
-	      if (p1->data[1] != channel)
+	      if (treq.channel != channel)
 		{
 		  t->TracePrintf (1, this, "Not for us");
 		  break;
 		}
-	      if (p1->data[2] != rno)
+	      if (treq.seqno != rno)
 		{
 		  t->TracePrintf (1, this, "Wrong sequence %d<->%d",
-				  p1->data[2], rno);
+				  treq.seqno, rno);
 		  break;
 		}
 	      rno++;
 	      if (rno > 0xff)
 		rno = 0;
-	      p.service = TUNNEL_RESPONSE;
-	      p.data.set (p1->data.array (), 4);
+	      tresp.status = 0;
+	      tresp.channel = channel;
+	      tresp.seqno = treq.seqno;
+	      p = tresp.ToPacket ();
 	      sock->Send (p);
 	      //Confirmation
-	      if (p1->data[4] == 0x2E)
+	      if (treq.CEMI[0] == 0x2E)
 		break;
-	      if (p1->data[4] != 0x29)
+	      if (treq.CEMI[0] != 0x29)
 		{
 		  t->TracePrintf (1, this, "Unexpected CEMI Type %02X",
-				  p1->data[4]);
+				  treq.CEMI[0]);
 		  break;
 		}
-	      c = CEMI_to_L_Data (CArray
-				  (p1->data.array () + 4, p1->data () - 4));
+	      c = CEMI_to_L_Data (treq.CEMI);
 	      if (c)
 		{
 
@@ -314,20 +315,25 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  t->TracePrintf (1, this, "Not connected");
 		  goto err;
 		}
-	      if (p1->data () != 4 || p1->data[0] != 4)
+	      if (parseEIBnet_TunnelACK (*p1, tresp))
 		{
 		  t->TracePrintf (1, this, "Invalid response");
 		  break;
 		}
-	      if (p1->data[1] != channel)
+	      if (tresp.channel != channel)
 		{
 		  t->TracePrintf (1, this, "Not for us");
 		  break;
 		}
-	      if (p1->data[2] != sno)
+	      if (tresp.seqno != sno)
 		{
 		  t->TracePrintf (1, this, "Wrong sequence %d<->%d",
-				  p1->data[2], sno);
+				  tresp.seqno, sno);
+		  break;
+		}
+	      if (tresp.status)
+		{
+		  t->TracePrintf (1, this, "Error in ACK %d", tresp.status);
 		  break;
 		}
 	      if (mod == 2)
@@ -362,11 +368,9 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	{
 	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
 		     pth_timeout (30, 0));
-	  p.service = CONNECTIONSTATE_REQUEST;
-	  p.data.resize (10);
-	  p.data[0] = channel;
-	  p.data[1] = 0;
-	  p.data.setpart (IPtoEIBNetIP (&saddr), 2);
+	  csreq.caddr = saddr;
+	  csreq.channel = channel;
+	  p = csreq.ToPacket ();
 	  sock->sendaddr = caddr;
 	  t->TracePrintf (1, this, "Heartbeat");
 	  sock->Send (p);
@@ -375,14 +379,10 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 
       if (!inqueue.isempty () && mod == 1)
 	{
-	  p.service = TUNNEL_REQUEST;
-	  const CArray & ce = inqueue.top ();;
-	  p.data.resize (ce () + 4);
-	  p.data.setpart (ce, 4);
-	  p.data[0] = 4;
-	  p.data[1] = channel;
-	  p.data[2] = sno;
-	  p.data[3] = 0;
+	  treq.channel = channel;
+	  treq.seqno = sno;
+	  treq.CEMI = inqueue.top ();
+	  p = treq.ToPacket ();
 	  t->TracePacket (1, this, "SendTunnel", p.data);
 	  sock->Send (p);
 	  mod = 2;
@@ -391,11 +391,10 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	}
     }
 out:
-  p.service = DISCONNECT_REQUEST;
-  p.data.resize (10);
-  p.data[0] = channel;
-  p.data[1] = 0;
-  p.data.setpart (IPtoEIBNetIP (&saddr), 2);
+  EIBnet_DisconnectRequest dreq;
+  dreq.caddr = saddr;
+  dreq.channel = channel;
+  p = dreq.ToPacket ();
   if (channel != -1)
     sock->Send (p);
 
