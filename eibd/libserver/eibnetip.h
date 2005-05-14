@@ -24,6 +24,11 @@
 #include "common.h"
 #include "lpdu.h"
 
+#define SEARCH_REQUEST 0x0201
+#define SEARCH_RESPONSE 0x0202
+#define DESCRIPTION_REQUEST 0x0203
+#define DESCRIPTION_RESPONSE 0x0204
+
 #define CONNECTION_REQUEST 0x0205
 #define CONNECTION_RESPONSE 0x0206
 #define CONNECTIONSTATE_REQUEST 0x0207
@@ -72,6 +77,176 @@ public:
   {
   }
 };
+
+class EIBnet_ConnectRequest
+{
+public:
+  EIBnet_ConnectRequest ();
+  struct sockaddr_in caddr;
+  struct sockaddr_in daddr;
+  CArray CRI;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_ConnectRequest (const EIBNetIPPacket & p,
+				EIBnet_ConnectRequest & r);
+
+class EIBnet_ConnectResponse
+{
+public:
+  EIBnet_ConnectResponse ();
+  uchar channel;
+  uchar status;
+  struct sockaddr_in daddr;
+  CArray CRD;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_ConnectResponse (const EIBNetIPPacket & p,
+				 EIBnet_ConnectResponse & r);
+
+class EIBnet_ConnectionStateRequest
+{
+public:
+  EIBnet_ConnectionStateRequest ();
+  uchar channel;
+  uchar status;
+  struct sockaddr_in caddr;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_ConnectionStateRequest (const EIBNetIPPacket & p,
+					EIBnet_ConnectionStateRequest & r);
+
+class EIBnet_ConnectionStateResponse
+{
+public:
+  EIBnet_ConnectionStateResponse ();
+  uchar channel;
+  uchar status;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_ConnectionStateResponse (const EIBNetIPPacket & p,
+					 EIBnet_ConnectionStateResponse & r);
+
+class EIBnet_DisconnectRequest
+{
+public:
+  EIBnet_DisconnectRequest ();
+  struct sockaddr_in caddr;
+  uchar channel;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_DisconnectRequest (const EIBNetIPPacket & p,
+				   EIBnet_DisconnectRequest & r);
+
+class EIBnet_DisconnectResponse
+{
+public:
+  EIBnet_DisconnectResponse ();
+  uchar channel;
+  uchar status;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_DisconnectResponse (const EIBNetIPPacket & p,
+				    EIBnet_DisconnectResponse & r);
+
+class EIBnet_TunnelRequest
+{
+public:
+  EIBnet_TunnelRequest ();
+  uchar channel;
+  uchar seqno;
+  CArray CEMI;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_TunnelRequest (const EIBNetIPPacket & p,
+			       EIBnet_TunnelRequest & r);
+
+class EIBnet_TunnelACK
+{
+public:
+  EIBnet_TunnelACK ();
+  uchar channel;
+  uchar seqno;
+  uchar status;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_TunnelACK (const EIBNetIPPacket & p, EIBnet_TunnelACK & r);
+
+typedef struct
+{
+  uchar family;
+  uchar version;
+} DIB_service_Entry;
+
+class EIBnet_DescriptionRequest
+{
+public:
+  EIBnet_DescriptionRequest ();
+  struct sockaddr_in caddr;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_DescriptionRequest (const EIBNetIPPacket & p,
+				    EIBnet_DescriptionRequest & r);
+
+class EIBnet_DescriptionResponse
+{
+public:
+  EIBnet_DescriptionResponse ();
+  uchar KNXmedium;
+  uchar devicestatus;
+  eibaddr_t individual_addr;
+  uint16_t installid;
+  serialnumber_t serial;
+    Array < DIB_service_Entry > services;
+  struct in_addr multicastaddr;
+  uchar MAC[6];
+  uchar name[30];
+  CArray optional;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_DescriptionResponse (const EIBNetIPPacket & p,
+				     EIBnet_DescriptionResponse & r);
+
+class EIBnet_SearchRequest
+{
+public:
+  EIBnet_SearchRequest ();
+  struct sockaddr_in caddr;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_SearchRequest (const EIBNetIPPacket & p,
+			       EIBnet_SearchRequest & r);
+
+class EIBnet_SearchResponse
+{
+public:
+  EIBnet_SearchResponse ();
+  uchar KNXmedium;
+  uchar devicestatus;
+  eibaddr_t individual_addr;
+  uint16_t installid;
+  serialnumber_t serial;
+    Array < DIB_service_Entry > services;
+  struct in_addr multicastaddr;
+  uchar MAC[6];
+  uchar name[30];
+  struct sockaddr_in caddr;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_SearchResponse (const EIBNetIPPacket & p,
+				EIBnet_SearchResponse & r);
+
 
 /** represents a EIBnet/IP packet to send*/
 struct _EIBNetIP_Send
