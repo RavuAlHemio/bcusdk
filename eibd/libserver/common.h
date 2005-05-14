@@ -81,4 +81,6 @@ String FormatEIBKey (eibkey_type addr);
 
 #include "trace.h"
 
+#define CONST const
+
 #endif
