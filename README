@@ -1,0 +1,76 @@
+bcusdk - A free development environment for BCU1 and BCU2
+---------------------------------------------------------
+
+Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+http://www.auto.tuwien.ac.at/~mkoegler
+
+This program may destroy hardware or cause other damage.
+This program comes with no warrenty, refer to clause 11+12
+of the GNU GPL:
+
+			    NO WARRANTY
+
+  11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE
+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
+REPAIR OR CORRECTION.
+
+  12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING
+OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED
+TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY
+YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
+PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES.
+
+---------------------------------------------------------
+
+After the legal warning, what does this mean:
+
+Every thing, except eibd, transforms only files like a normal
+compiler and is not really dangerous.
+
+In the default configuration, eibd is only dangerouse, if a
+buffer overflow (or similar) is found, because all bus access
+backends are disabled.
+
+Run eibd in a controlled environment, where you don't expect
+malicious people, because eibd has no access control mechanisms
+in it. Additionally there has been no audit for security problems.
+
+At configure time, you have to enable all backends, with which
+you like to work (It is possible to enable all, if you like it).
+
+Running eibd on Linux 2.6.x (where x is < 11) may crash your kernel,
+even as normal users, if the tpuarts or bcus backend are used.
+Linux 2.4.x is not affected.
+
+With eibd you can send arbitrary telegrams on the EIB bus, which
+may destroy your EIB configuration or cause a hardware damage.
+
+The problematic operation are:
+*) writing memory
+*) writing a property
+*) writing individul addresses
+*) loading a image
+
+See the BCU SDK documentation for how to recover from errors (Chapter Usage).
+A recovery should always be possible, if you have access to the PEI
+of the BCU.
+
+----------------------------------------------------------
+
+How to use the BCU SDK is covered in the documentation.
+Parts of the BCU SDK even run on Windows using Cygwin.
+See the webpage about it.
+
+Martin Kögler
+mkoegler@auto.tuwien.ac.at
+http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcus
