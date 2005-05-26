@@ -136,6 +136,7 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
       {
 	src->sin_family = AF_INET;
 	src->sin_addr.s_addr = tab->table[i].dwAddr;
+	free (tab);
 	return 1;
       }
   free (tab);
