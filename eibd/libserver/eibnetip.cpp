@@ -28,6 +28,12 @@
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #endif
+#ifdef HAVE_WINDOWS_IPHELPER
+#define Array XArray
+#include <windows.h>
+#include <iphlpapi.h>
+#undef Array
+#endif
 
 int
 GetHostIP (struct sockaddr_in *sock, const char *Name)
@@ -94,6 +100,45 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
 	}
       a = RTA_NEXT (a, l);
     }
+  return 0;
+}
+#endif
+
+#ifdef HAVE_WINDOWS_IPHELPER
+int
+GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
+{
+  DWORD d = 0;
+  PMIB_IPADDRTABLE tab;
+  DWORD s = 0;
+
+  memset (src, 0, sizeof (*src));
+  if (GetBestInterface (dest->sin_addr.s_addr, &d) != NO_ERROR)
+    return 0;
+
+  tab = (MIB_IPADDRTABLE *) malloc (sizeof (MIB_IPADDRTABLE));
+  if (!tab)
+    return 0;
+  if (GetIpAddrTable (tab, &s, 0) == ERROR_INSUFFICIENT_BUFFER)
+    {
+      tab = (MIB_IPADDRTABLE *) realloc (tab, s);
+      if (!tab)
+	return 0;
+    }
+  if (GetIpAddrTable (tab, &s, 0) != NO_ERROR)
+    {
+      if (tab)
+	free (tab);
+      return 0;
+    }
+  for (int i = 0; i < tab->dwNumEntries; i++)
+    if (tab->table[i].dwIndex == d)
+      {
+	src->sin_family = AF_INET;
+	src->sin_addr.s_addr = tab->table[i].dwAddr;
+	return 1;
+      }
+  free (tab);
   return 0;
 }
 #endif
