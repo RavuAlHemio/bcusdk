@@ -1,2 +1,2 @@
-SUBDIRS= include client examples libserver backend server
+SUBDIRS= include client examples libserver backend server eibnet
 
