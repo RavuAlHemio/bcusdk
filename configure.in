@@ -16,7 +16,10 @@ AC_CHECK_HEADER(argp.h,,[AC_MSG_ERROR([argp_parse not found])])
 AC_SEARCH_LIBS(argp_parse,argp,,[AC_MSG_ERROR([argp_parse not found])])
 AM_PATH_XML2(2.6.16,,[AC_MSG_ERROR([limxml2 not found])])
 AC_CHECK_HEADER(linux/serial.h,[AC_DEFINE(HAVE_LINUX_LOWLATENCY, 1 , [Linux low latency mode enabled])],[AC_MSG_WARN([No supported low latency mode found])])
-AC_CHECK_HEADER(linux/rtnetlink.h,[AC_DEFINE(HAVE_LINUX_NETLINK, 1,[Linux netlink layer available])],[],[-])
+have_source_info=no
+AC_CHECK_HEADER(linux/rtnetlink.h,[AC_DEFINE(HAVE_LINUX_NETLINK, 1,[Linux netlink layer available]) have_source_info=yes],[],[-])
+AC_CHECK_HEADER(iphlpapi.h,[AC_DEFINE(HAVE_WINDOWS_IPHELPER, 1,[Windows IPHelper available]) 
+  LIBS="-liphlpapi $LIBS"; have_source_info=yes],[],[-])
 AC_PATH_PROG(TAS,[m68hc05-as],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TLD,[m68hc05-ld],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TAR,[m68hc05-ar],,[$PATH:$bindir:$prefix/bin])
@@ -110,8 +113,14 @@ AC_ARG_ENABLE(eibnetiptunnel,
  esac],[eibnetiptunnel=false])
 AM_CONDITIONAL(HAVE_EIBNETIPTUNNEL, test x$eibnetiptunnel = xtrue)
 if test x$eibnetiptunnel = xtrue ; then
+ if test x$have_source_info != xyes ; then
+  AC_MSG_ERROR(not all needed functions for EIBnet/IP tunneling backend available)
+ fi
  AC_DEFINE(HAVE_EIBNETIPTUNNEL, 1 , [EIBnet/IP tunneling enabled])
 fi
+
+
+AM_CONDITIONAL(HAVE_SOURCE_INFO, test x$have_source_info = xyes )
 
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT(Makefile 
