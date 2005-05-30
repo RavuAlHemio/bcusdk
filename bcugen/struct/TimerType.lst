@@ -22,4 +22,5 @@ MAP(3,DifferenceCounter)
 MAP(4,SystemTimer)
 MAP(5,MessageTimer)
 MAP(6,MessageCyclicTimer)
+MAP(7,EnableUserTimer)
 

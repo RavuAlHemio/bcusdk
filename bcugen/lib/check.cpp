@@ -894,6 +894,7 @@ CheckTimer (Device & d, Timer & o)
     undefined ("Timer", "Type", o.lineno);
   switch (o.Type)
     {
+    case TM_EnableUserTimer:
     case TM_UserTimer:
       o.TimerNo = d.UserTimer++;
       break;
@@ -906,6 +907,7 @@ CheckTimer (Device & d, Timer & o)
     }
   switch (o.Type)
     {
+    case TM_EnableUserTimer:
     case TM_UserTimer:
       if (!o.Resolution_lineno)
 	undefined ("Timer", "Resolution", o.lineno);

@@ -78,6 +78,7 @@ GenTimerUpdate (FILE * f, Timer & o)
   fprintf (f, "\tlda $%d\n", o.TimerNo);
   switch (o.Type)
     {
+    case TM_EnableUserTimer:
     case TM_UserTimer:
       fprintf (f, "\tjsr U_GetTMx\n");
       fprintf (f, "\tbne _NoTChange%d\n", o.TimerNo);
@@ -252,11 +253,26 @@ GenCommonHeader (FILE * f, Device & d)
       if (o.on_expire_lineno)
 	{
 	  fprintf (f, "static void %s();\n", o.on_expire ());
-	  fprintf (f, "NOSAVE(void %s_stub()) { %s(); }\n",
-		   o.on_expire (), o.on_expire ());
+	  if (o.Type != TM_EnableUserTimer)
+	    fprintf (f, "NOSAVE(void %s_stub()) { %s(); }\n",
+		     o.on_expire (), o.on_expire ());
 	}
       switch (o.Type)
 	{
+	case TM_EnableUserTimer:
+	  fprintf (f, "static bool %s_enable=false;\n", o.Name ());
+	  fprintf (f,
+		   "static void inline %s_set(uchar time){%s_enable=true;_U_SetTMx(%d,time);}\n",
+		   o.Name (), o.Name (), o.TimerNo);
+	  fprintf (f, "static bool inline %s_get(){return _U_GetTMx(%d);}\n",
+		   o.Name (), o.TimerNo);
+	  fprintf (f, "static void inline %s_del(){%s_enable=false;}\n",
+		   o.Name (), o.Name ());
+	  fprintf (f, "extern uchar %s;\n", o.Name ());
+	  fprintf (f,
+		   "NOSAVE(void %s_stub()) { if(!%s_enable) return; %s_enable=false; %s(); }\n",
+		   o.on_expire (), o.Name (), o.Name (), o.on_expire ());
+	  break;
 	case TM_UserTimer:
 	  fprintf (f,
 		   "static void inline %s_set(uchar time){_U_SetTMx(%d,time);}\n",
@@ -292,7 +308,7 @@ GenCommonHeader (FILE * f, Device & d)
 		   "static void inline %s_set(uchar time){_U_TS_Set(%d,0x30,0x%x,time,0);}\n",
 		   o.Name (), o.TimerNo,
 		   (((o.Resolution - TM_RES_0_4ms) & 0x07) << 5));
-	  fprintf (f, "static void inline %s_del(){return _U_TS_Del(%d);}\n",
+	  fprintf (f, "static void inline %s_del(){_U_TS_Del(%d);}\n",
 		   o.Name (), o.TimerNo);
 	  break;
 	case TM_MessageCyclicTimer:
@@ -300,7 +316,7 @@ GenCommonHeader (FILE * f, Device & d)
 		   "static void inline %s_set(uchar param){_U_TS_Set(%d,0x40,0x%x,0,param);}\n",
 		   o.Name (), o.TimerNo,
 		   (((o.Resolution - TM_RES_100ms + 1) & 0x07) << 2));
-	  fprintf (f, "static void inline %s_del(){return _U_TS_Del(%d);}\n",
+	  fprintf (f, "static void inline %s_del(){_U_TS_Del(%d);}\n",
 		   o.Name (), o.TimerNo);
 	  break;
 	}
@@ -629,14 +645,16 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.section .timerval\n");
       fprintf (f, "_timer_vals:\n");
       for (i = 0; i < d.Timers (); i++)
-	if (d.Timers[i].Type == TM_UserTimer)
+	if (d.Timers[i].Type == TM_UserTimer
+	    || d.Timers[i].Type == TM_EnableUserTimer)
 	  fprintf (f, "\t.global %s\n%s:\n\t.byte 0\n", d.Timers[i].Name (),
 		   d.Timers[i].Name ());
       fprintf (f, "\t.section .timer\n");
       fprintf (f, "_timer_table:\n");
       fprintf (f, "\t.byte _timer_vals\n");
       for (i = 0; i < d.Timers (); i++)
-	if (d.Timers[i].Type == TM_UserTimer)
+	if (d.Timers[i].Type == TM_UserTimer
+	    || d.Timers[i].Type == TM_EnableUserTimer)
 	  {
 	    if (d.Timers[i].TimerNo % 2)
 	      {
