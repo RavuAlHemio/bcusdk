@@ -69,6 +69,7 @@ public:
   CArray *Get_Packet (pth_event_t stop);
   void SendReset ();
   bool Connection_Lost ();
+  EMIVer getEMIVer ();
 };
 
 
