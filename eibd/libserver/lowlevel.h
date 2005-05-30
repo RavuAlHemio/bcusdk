@@ -26,7 +26,10 @@
 class LowLevelDriverInterface
 {
 public:
-  virtual ~ LowLevelDriverInterface ()
+  typedef enum
+  { vEMI1, vEMI2 } EMIVer;
+
+    virtual ~ LowLevelDriverInterface ()
   {
   }
 
@@ -46,6 +49,17 @@ public:
   virtual void SendReset () = 0;
   /** indicate, if connections works */
   virtual bool Connection_Lost () = 0;
+
+  virtual EMIVer getEMIVer () = 0;
 };
+
+/** pointer to a functions, which creates a Low Level interface
+ * @exception Exception in the case of an error
+ * @param conf string, which contain configuration
+ * @param t trace output
+ * @return new LowLevel interface
+ */
+typedef LowLevelDriverInterface *(*LowLevel_Create_Func) (const char *conf,
+							  Trace * t);
 
 #endif
