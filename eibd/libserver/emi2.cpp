@@ -28,7 +28,7 @@ EMI2Layer2Interface::addAddress (eibaddr_t addr)
 bool
 EMI2Layer2Interface::addGroupAddress (eibaddr_t addr)
 {
-  return 0;
+  return 1;
 }
 
 bool
@@ -40,7 +40,7 @@ EMI2Layer2Interface::removeAddress (eibaddr_t addr)
 bool
 EMI2Layer2Interface::removeGroupAddress (eibaddr_t addr)
 {
-  return 0;
+  return 1;
 }
 
 bool
