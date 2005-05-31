@@ -289,10 +289,10 @@ _U_ioAST (uchar val)
   uchar ret;
   if (!__builtin_constant_p (val))
     asm volatile ("lda %1\n\tjsr U_ioAST":"=z" (ret):"r" (val):"A", "X",
-		  "RegB", "RegC", "RegD");
+		  "RegC", "RegD");
   else
   asm volatile ("lda $%1\n\tjsr U_ioAST":"=z" (ret):"i" (val):"A", "X",
-		"RegB", "RegC", "RegD");
+		"RegC", "RegD");
   return ret;
 }
 
