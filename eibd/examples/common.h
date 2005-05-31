@@ -56,3 +56,7 @@ unsigned readHex (const char *addr);
  * \return parsed bytes
  */
 int readBlock (uchar * buf, int size, int ac, char *ag[]);
+/** prints a EIB individual address
+ * \param addr EIB address
+ */
+void printIndividual (eibaddr_t addr);

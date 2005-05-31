@@ -44,16 +44,30 @@ eibaddr_t
 readaddr (const char *addr)
 {
   int a, b, c;
-  sscanf (addr, "%d.%d.%d", &a, &b, &c);
-  return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
+  if (sscanf (addr, "%d.%d.%d", &a, &b, &c) == 3)
+    return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
+  if (sscanf (addr, "%x", &a) == 1)
+    return a & 0xffff;
+  die ("invalid individual address %s", addr);
+}
+
+void
+printIndividual (eibaddr_t addr)
+{
+  printf ("%d.%d.%d", (addr >> 12) & 0x0f, (addr >> 8) & 0x0f, (addr) & 0xff);
 }
 
 eibaddr_t
 readgaddr (const char *addr)
 {
   int a, b, c;
-  sscanf (addr, "%d/%d/%d", &a, &b, &c);
-  return ((a & 0x01f) << 11) | ((b & 0x07) << 8) | ((c & 0xff));
+  if (sscanf (addr, "%d/%d/%d", &a, &b, &c) == 3)
+    return ((a & 0x01f) << 11) | ((b & 0x07) << 8) | ((c & 0xff));
+  if (sscanf (addr, "%d/%d", &a, &b) == 2)
+    return ((a & 0x01f) << 11) | ((b & 0x7FF));
+  if (sscanf (addr, "%x", &a) == 1)
+    return a & 0xffff;
+  die ("invalid group address format %s", addr);
 }
 
 unsigned

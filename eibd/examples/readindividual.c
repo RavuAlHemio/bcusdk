@@ -35,8 +35,11 @@ main (int ac, char *ag[])
   if (len == -1)
     die ("Read failed");
   for (i = 0; i < len; i += 2)
-    printf ("Addr: %d.%d.%d\n", (buf[i] >> 4) & 0x0f, (buf[i]) & 0x0f,
-	    (buf[i + 1]) & 0xff);
+    {
+      printf ("Addr: ");
+      printIndividual ((buf[i] << 8) | buf[i + 1]);
+      printf ("\n");
+    }
 
   EIBClose (con);
   return 0;
