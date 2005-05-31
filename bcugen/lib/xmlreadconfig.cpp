@@ -30,9 +30,13 @@
 static eibaddr_t
 readaddr (const char *addr)
 {
+  eibaddr_t k;
   int a, b, c;
-  sscanf (addr, "%d.%d.%d", &a, &b, &c);
-  return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
+  if (sscanf (addr, "%d.%d.%d", &a, &b, &c) == 3)
+    return ((a & 0x0f) << 12) | ((b & 0x0f) << 8) | ((c & 0xff));
+  sscanf (addr, "%hX", &k);
+  return k;
+
 }
 
 static eibpaddr_t
@@ -47,6 +51,11 @@ static eibgaddr_t
 readgaddr (const char *key)
 {
   eibgaddr_t k;
+  int a, b, c;
+  if (sscanf (key, "%d/%d/%d", &a, &b, &c) == 3)
+    return ((a & 0x1f) << 11) | ((b & 0x07) << 8) | ((c & 0xff));
+  if (sscanf (key, "%d/%d", &a, &b) == 2)
+    return ((a & 0x1f) << 11) | ((b & 0x7FF));
   sscanf (key, "%hX", &k);
   return k;
 }
@@ -441,8 +450,8 @@ parseDeviceDesc (Device & d, xmlNodePtr n)
 	  if (!strcmp (name, "ProgramID"))
 	    {
 	      const char *pid = gc (cld);
-//	      if (d.ProgramID != pid)
-//		printf (_("ProgramID mismatch\n"));
+//            if (d.ProgramID != pid)
+//              printf (_("ProgramID mismatch\n"));
 	      f (pid);
 	    }
 	  if (!strcmp (name, "PhysicalAddress"))
