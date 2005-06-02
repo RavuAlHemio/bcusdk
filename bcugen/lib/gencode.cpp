@@ -673,11 +673,10 @@ GenBCUHeader (FILE * f, Device & d)
 }
 
 void
-GenTestAsm (FILE * f, Device & d)
+GenAsmEntry (FILE * f, Device & d)
 {
   int i, j;
-  GenBCUHeader (f, d);
-  printPseudoAddrTab (f, d);
+
   fprintf (f, "\t.section .commobjs\n");
   fprintf (f, "commobjs:\n");
   fprintf (f, "\t.byte %d,ramflag_pointer\n", d.ObjCount);
@@ -707,11 +706,14 @@ GenTestAsm (FILE * f, Device & d)
   else
     fprintf (f, "\trts\n");
   fprintf (f, "_UserSave:\n");
-  fprintf (f, "\tjsr _initstack\n");
   if (d.on_save ())
-    fprintf (f, "\tjmp %s_stub\n", d.on_save ());
+    {
+      fprintf (f, "\tjsr _initstack\n");
+      fprintf (f, "\tjmp %s_stub\n", d.on_save ());
+    }
   else
     fprintf (f, "\trts\n");
+
   fprintf (f, "\t.section .init.1\n");
   fprintf (f, "_UserRun:\n");
   fprintf (f, "\tjsr _initstack\n");
@@ -726,65 +728,26 @@ GenTestAsm (FILE * f, Device & d)
     fprintf (f, "\tjmp %s_stub\n", d.on_run ());
   else
     fprintf (f, "\trts\n");
+}
+
+void
+GenTestAsm (FILE * f, Device & d)
+{
+  GenBCUHeader (f, d);
+  printPseudoAddrTab (f, d);
+
+  GenAsmEntry (f, d);
 
   printParameterInfo (f, d);
-
 }
 
 void
 GenRealAsm (FILE * f, Device & d)
 {
-  int i, j;
   GenBCUHeader (f, d);
   printAddrTab (f, d);
-  fprintf (f, "\t.section .commobjs\n");
-  fprintf (f, "commobjs:\n");
-  fprintf (f, "\t.byte %d,ramflag_pointer\n", d.ObjCount);
-  for (i = 0; i < d.GroupObjects (); i++)
-    GenGroupObjectASM (f, d.GroupObjects[i], d.BCU);
-  fprintf (f, "\t.section .ramflags\n");
-  fprintf (f, "ramflag_pointer:\n");
-  j = d.ObjCount;
-  if (j % 2)
-    j++;
-  j = j >> 1;
-  for (i = 0; i < j; i++)
-    fprintf (f, "\t.byte 0\n");
 
-  fprintf (f, "\t.section .eibobjects\n");
-  fprintf (f, "eibobjects:\n");
-  for (i = 0; i < d.Objects (); i++)
-    fprintf (f, "\t.hword %s\n", d.Objects[i].Name ());
-  for (i = 0; i < d.Objects (); i++)
-    GenEIBObject (f, d.Objects[i]);
-
-  fprintf (f, "\t.section .init\n");
-  fprintf (f, "_UserInit:\n");
-  fprintf (f, "\tjsr _initmem\n");
-  if (d.on_init ())
-    fprintf (f, "\tjmp %s_stub\n", d.on_init ());
-  else
-    fprintf (f, "\trts\n");
-  fprintf (f, "_UserSave:\n");
-  fprintf (f, "\tjsr _initstack\n");
-  if (d.on_save ())
-    fprintf (f, "\tjmp %s_stub\n", d.on_save ());
-  else
-    fprintf (f, "\trts\n");
-  fprintf (f, "\t.section .init.1\n");
-  fprintf (f, "_UserRun:\n");
-  fprintf (f, "\tjsr _initstack\n");
-
-  for (i = 0; i < d.GroupObjects (); i++)
-    GenGroupObjectUpdate (f, d.GroupObjects[i]);
-
-  for (i = 0; i < d.Timers (); i++)
-    GenTimerUpdate (f, d.Timers[i]);
-
-  if (d.on_run ())
-    fprintf (f, "\tjmp %s_stub\n", d.on_run ());
-  else
-    fprintf (f, "\trts\n");
+  GenAsmEntry (f, d);
 }
 
 String
