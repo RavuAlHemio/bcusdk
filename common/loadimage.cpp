@@ -149,7 +149,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       if (s->hi_datasize + s->hi_bsssize > 24)
 	{
 	  delete i;
-	  return IMG_LODATA_OVERFLOW;
+	  return IMG_HIDATA_OVERFLOW;
 	}
       if (s->textsize > 0x36f)
 	{

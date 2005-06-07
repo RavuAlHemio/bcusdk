@@ -493,7 +493,7 @@ EIBNetIPPacket EIBnet_ConnectResponse::ToPacket ()CONST
   p.data[0] = channel;
   p.data[1] = status;
   p.data.setpart (da, 2);
-  p.data[da () + 2] = CRD ();
+  p.data[da () + 2] = CRD () + 1;
   p.data.setpart (CRD, da () + 3);
   return p;
 }
@@ -851,7 +851,7 @@ parseEIBnet_SearchResponse (const EIBNetIPPacket & p,
     return 1;
   r.KNXmedium = p.data[10];
   r.devicestatus = p.data[11];
-  r.individual_addr = (p.data[13] << 8) | p.data[13];
+  r.individual_addr = (p.data[12] << 8) | p.data[13];
   r.installid = (p.data[14] << 8) | p.data[15];
   memcpy (&r.serial, p.data.array () + 16, 6);
   memcpy (&r.multicastaddr, p.data.array () + 22, 4);
