@@ -115,11 +115,11 @@ static void inline
 _U_flagsSet (uchar no, uchar flag)
 {
   if (!__builtin_constant_p (no))
-    asm volatile ("lda %0\n\tjsr U_flagSet"::"r" (no), "z" (flag):"A", "X",
-		  "RegB", "RegC", "RegJ");
+    asm volatile ("lda %0\n\tjsr U_flagsSet"::"r" (no), "z" (flag):"A", "X",
+		  "RegC", "RegJ");
   else
-  asm volatile ("lda $%0\n\tjsr U_flagSet"::"i" (no), "z" (flag):"A", "X",
-		"RegB", "RegC", "RegJ");
+  asm volatile ("lda $%0\n\tjsr U_flagsSet"::"i" (no), "z" (flag):"A", "X",
+		"RegC", "RegJ");
 }
 
 static void inline
