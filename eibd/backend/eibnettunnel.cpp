@@ -180,6 +180,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   int rno = 0;
   int sno = 0;
   int retry = 0;
+  eibaddr_t myaddr;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &insignal);
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
@@ -234,6 +235,12 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 				  cresp.status);
 		  goto out;
 		}
+	      if (cresp.CRD () != 3)
+		{
+		  t->TracePrintf (1, this, "Recv wrong connection response");
+		  break;
+		}
+	      myaddr = (cresp.CRD[1] << 8) | cresp.CRD[2];
 	      daddr = cresp.daddr;
 	      channel = cresp.channel;
 	      mod = 1;
@@ -294,7 +301,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 			  outqueue.put (l2);
 			  pth_sem_inc (&outsignal, 1);
 			}
-		      if (c->AddrType == IndividualAddress)
+		      if (c->AddrType == IndividualAddress
+			  && c->dest == myaddr)
 			c->dest = 0;
 		      outqueue.put (c);
 		      pth_sem_inc (&outsignal, 1);
