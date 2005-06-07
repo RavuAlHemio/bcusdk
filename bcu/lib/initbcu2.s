@@ -32,10 +32,6 @@ SP:
 	.section .init
 	.global _initstack
 	.global _initmem
-_initstack:
-	lda $SPINIT
-	sta SP
-	rts
 _initmem:
 	clra
 	ldx $_bss_size
@@ -69,3 +65,7 @@ lp2a:
 	bra lp2a
 wt2a:		
 	jmp _initstack
+_initstack:
+	lda $SPINIT
+	sta SP
+	rts
