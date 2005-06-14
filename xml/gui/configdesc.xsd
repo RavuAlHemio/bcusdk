@@ -104,6 +104,7 @@
               <xs:sequence>
                 <xs:element name="Priority" type="priority" minOccurs="0"/>
                 <xs:element name="SendAddress" type="groupaddr" minOccurs="0"/>
+                <xs:element name="ReadRequestAddress" type="groupaddr" minOccurs="0"/>
                 <xs:element name="ReceiveAddress" minOccurs="0">
                   <xs:complexType>
                     <xs:sequence>

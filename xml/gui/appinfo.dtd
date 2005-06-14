@@ -59,9 +59,10 @@
 <!ELEMENT StateBased %BOOL;>
 <!ELEMENT Sending %BOOL;>
 <!ELEMENT Receiving %BOOL;>
+<!ELEMENT Reading %BOOL;>
 <!ELEMENT GroupType %GROUPTYPE;>
 
-<!ELEMENT GroupObject (Title,AddInfo?,GroupType,Sending,Receiving,StateBased)>
+<!ELEMENT GroupObject (Title,AddInfo?,GroupType,Sending,Receiving,Reading,StateBased)>
 <!ATTLIST GroupObject
    id ID #REQUIRED
 >

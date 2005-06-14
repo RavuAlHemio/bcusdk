@@ -54,11 +54,12 @@
 
 <!ELEMENT Priority %PRIORITY;>
 <!ELEMENT SendAddress %GROUPADDR;>
+<!ELEMENT ReadRequestAddress %GROUPADDR;>
 <!ELEMENT ReceiveAddress (GroupAddr+)>
 <!ELEMENT ReadAddress (GroupAddr+)>
 <!ELEMENT UpdateAddress (GroupAddr+)>
 
-<!ELEMENT GroupObject (Priority?,SendAddress?,ReceiveAddress?,ReadAddress?,UpdateAddress?)>
+<!ELEMENT GroupObject (Priority?,SendAddress?,ReadRequestAddress?,ReceiveAddress?,ReadAddress?,UpdateAddress?)>
 <!ATTLIST GroupObject
    id ID #REQUIRED
 >
