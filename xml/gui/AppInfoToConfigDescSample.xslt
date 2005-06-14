@@ -38,16 +38,20 @@
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
           </xsl:attribute>
+          <xsl:comment>
+            <xsl:value-of select="ai:Title"/>
+          </xsl:comment>
           <Priority>low</Priority>
-          <SendAddress>0000</SendAddress>
+          <SendAddress>0/0/0</SendAddress>
+          <ReadRequestAddress>0/0/0</ReadRequestAddress>
           <ReceiveAddress>
-            <GroupAddr>0000</GroupAddr>
+            <GroupAddr>0/0/0</GroupAddr>
           </ReceiveAddress>
           <ReadAddress>
-            <GroupAddr>0000</GroupAddr>
+            <GroupAddr>0/0/0</GroupAddr>
           </ReadAddress>
           <UpdateAddress>
-            <GroupAddr>0000</GroupAddr>
+            <GroupAddr>0/0/0</GroupAddr>
           </UpdateAddress>
         </xsl:element>
       </xsl:for-each>
@@ -56,6 +60,9 @@
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
           </xsl:attribute>
+          <xsl:comment>
+            <xsl:value-of select="ai:Title"/>
+          </xsl:comment>
           <Disable>false</Disable>
           <ReadOnly>false</ReadOnly>
           <ReadAccess>1</ReadAccess>
@@ -67,6 +74,9 @@
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
           </xsl:attribute>
+          <xsl:comment>
+            <xsl:value-of select="ai:Title"/>
+          </xsl:comment>
           <PollingAddress>0000</PollingAddress>
           <PollingSlot>0</PollingSlot>
         </xsl:element>
@@ -76,6 +86,9 @@
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
           </xsl:attribute>
+          <xsl:comment>
+            <xsl:value-of select="ai:Title"/>
+          </xsl:comment>
           <PollingAddress>0000</PollingAddress>
           <PollingCount>0</PollingCount>
         </xsl:element>
@@ -87,6 +100,9 @@
               <xsl:attribute name="id">
                 <xsl:value-of select="@id"/>
               </xsl:attribute>
+              <xsl:comment>
+                <xsl:value-of select="ai:Title"/>
+              </xsl:comment>
               <Value>
                 <xsl:value-of select="ai:ListDefault/@idref"/>
               </Value>
@@ -97,6 +113,9 @@
               <xsl:attribute name="id">
                 <xsl:value-of select="@id"/>
               </xsl:attribute>
+              <xsl:comment>
+                <xsl:value-of select="ai:Title"/>
+              </xsl:comment>
               <Value>
                 <xsl:value-of select="ai:Default"/>
               </Value>
@@ -107,6 +126,9 @@
               <xsl:attribute name="id">
                 <xsl:value-of select="@id"/>
               </xsl:attribute>
+              <xsl:comment>
+                <xsl:value-of select="ai:Title"/>
+              </xsl:comment>
               <Value>
                 <xsl:value-of select="ai:Default"/>
               </Value>
@@ -117,6 +139,9 @@
               <xsl:attribute name="id">
                 <xsl:value-of select="@id"/>
               </xsl:attribute>
+              <xsl:comment>
+                <xsl:value-of select="ai:Title"/>
+              </xsl:comment>
               <Value>
                 <xsl:value-of select="ai:Default"/>
               </Value>
