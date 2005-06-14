@@ -99,6 +99,7 @@
     <GroupType>22</GroupType>
     <Sending>true</Sending>
     <Receiving>false</Receiving>
+    <Reading>false</Reading>
     <StateBased>false</StateBased>
   </GroupObject>
   <GroupObject id="go2">
@@ -107,6 +108,7 @@
     <GroupType>11</GroupType>
     <Sending>true</Sending>
     <Receiving>false</Receiving>
+    <Reading>false</Reading>
     <StateBased>true</StateBased>
   </GroupObject>
   <Parameter>
