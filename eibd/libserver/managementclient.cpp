@@ -592,7 +592,7 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	if (maskver != 0x0020 && i->BCUType == BCUImage::B_bcu20)
 	  goto out;
 
-	if (maskver != 0x0020 && i->BCUType == BCUImage::B_bcu20)
+	if (maskver != 0x0021 && i->BCUType == BCUImage::B_bcu21)
 	  goto out;
 
 	uchar level;
