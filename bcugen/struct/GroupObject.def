@@ -29,6 +29,7 @@ ATTRIB_IDENT(on_update)
 ATTRIB_BOOL(eeprom)
 ATTRIB_BOOL(Sending)
 ATTRIB_BOOL(Receiving)
+ATTRIB_BOOL(Reading)
 
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
 ATTRIB_STRING(Title)
@@ -38,6 +39,7 @@ ATTRIB_BOOL(StateBased)
 
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK)) && !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_INT(SendAddress)
+ATTRIB_INT(ReadRequestAddress)
 ATTRIB_INT(Priority)
 #endif
 
