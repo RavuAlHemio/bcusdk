@@ -80,10 +80,10 @@ GenInterface (const Interface & d)
     nc (n, "Title", d.Title ());
   if (d.AddInfo ())
     nc (n, "AddInfo", d.AddInfo ());
-  if(d.GroupTitle())
+  if (d.GroupTitle ())
     nc (n, "GroupTitle", d.GroupTitle ());
-  if(d.InvisibleIf_lineno)
-    nc (n, "InvisibleIf", printExpression(d.InvisibleIf)());
+  if (d.InvisibleIf_lineno)
+    nc (n, "InvisibleIf", printExpression (d.InvisibleIf) ());
 
   for (int i = 0; i < d.References (); i++)
     {
@@ -143,6 +143,7 @@ GenGroupObject (const GroupObject & d)
   nc (n, "GroupType", buf);
   nc (n, "Sending", d.Sending ? "true" : "false");
   nc (n, "Receiving", d.Receiving ? "true" : "false");
+  nc (n, "Reading", d.Reading ? "true" : "false");
   nc (n, "StateBased", d.StateBased ? "true" : "false");
   return n;
 }

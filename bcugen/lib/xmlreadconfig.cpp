@@ -140,6 +140,13 @@ parseGroupObject (Device & d, xmlNodePtr n)
 	      o.SendAddress_lineno = 1;
 	      f (v);
 	    }
+	  if (!strcmp (name, "ReadRequestAddress"))
+	    {
+	      const char *v = gc (cld);
+	      o.ReadRequestAddress = readgaddr (v);
+	      o.ReadRequestAddress_lineno = 1;
+	      f (v);
+	    }
 	  if (!strcmp (name, "ReceiveAddress"))
 	    {
 	      const char *v = gc (cld);
