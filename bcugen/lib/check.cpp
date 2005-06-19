@@ -585,6 +585,11 @@ CheckGroupObject (Device & d, GroupObject & o)
       o.Sending = 0;
       o.Sending_lineno = o.lineno;
     }
+  if (!o.Reading_lineno)
+    {
+      o.Reading = 0;
+      o.Reading_lineno = o.lineno;
+    }
   if (!o.Receiving_lineno)
     {
       o.Receiving = 0;
@@ -598,9 +603,18 @@ CheckGroupObject (Device & d, GroupObject & o)
 #ifdef PHASE1
   if (o.Sending)
     NewSymbol (o.Name + "_transmit", o.lineno);
+
+  if (o.Reading)
+    NewSymbol (o.Name + "_readrequest", o.lineno);
+
+  if (o.Reading && o.Sending)
+    NewSymbol (o.Name + "_clear", o.lineno);
 #else
   if (!o.Sending && o.SendAddress_lineno)
     die (_("line %d: can not send on this group object"), o.lineno);
+
+  if (!o.Reading && o.ReadRequestAddress_lineno)
+    die (_("line %d: can not read on this group object"), o.lineno);
 
   if (!o.Receiving && o.ReceiveAddress ())
     die (_("line %d: can not receive on this group object"), o.lineno);

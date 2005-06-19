@@ -51,7 +51,7 @@ GroupObjectFlag (GroupObject & o, BCUType b)
     flag |= 0x10;
   if (o.eeprom)
     flag |= 0x20;
-  if (o.SendAddress_lineno)
+  if (o.SendAddress_lineno || o.ReadRequestAddress_lineno)
     flag |= 0x40;
   if (o.UpdateAddress () || b == BCU_bcu12)
     flag |= 0x80;
@@ -135,6 +135,23 @@ BuildObjAddress (GroupObject & o, BCUType b)
 		("line %d: unsupported combination of group addresses, merging them"),
 		o.lineno);
     }
+  if (o.ObjAddress ())
+    first = 0;
+  if (o.ReadRequestAddress_lineno)
+    {
+      if (o.ReadRequestAddress < 0 || o.ReadRequestAddress > 0xffff)
+	die (_("line %d: invalid group address %X"), o.lineno,
+	     o.ReadRequestAddress);
+      if (addAddress (o.ObjAddress, o.ReadRequestAddress))
+	if (!first)
+	  warn (_
+		("line %d: unsupported combination of group addresses, merging them"),
+		o.lineno);
+    }
+  if (o.ReadRequestAddress_lineno && o.SendAddress_lineno)
+    if (o.ReadRequestAddress != o.SendAddress)
+      warn (_("line %d: different outgoing addresses, only one is used"),
+	    o.lineno);
 }
 
 void
@@ -182,13 +199,24 @@ BuildAddrTable (AddrTable & t, Device & d)
 	t.ObjNo[i] = d.GroupObjects[i].ObjNo;
 	t.Addr[i] = AddrNo (t.addr, d.GroupObjects[i].SendAddress);
       }
+    else if (d.GroupObjects[i].ReadRequestAddress_lineno)
+      {
+	used[i] = 1;
+	t.ObjNo[i] = d.GroupObjects[i].ObjNo;
+	t.Addr[i] = AddrNo (t.addr, d.GroupObjects[i].ReadRequestAddress);
+      }
   fn = 0;
   while (fn < maxs && used[fn])
     fn++;
   for (i = 0; i < d.GroupObjects (); i++)
     for (j = 0; j < d.GroupObjects[i].ObjAddress (); j++)
-      if (!d.GroupObjects[i].SendAddress_lineno ||
-	  d.GroupObjects[i].SendAddress != d.GroupObjects[i].ObjAddress[j])
+      if ((!d.GroupObjects[i].SendAddress_lineno &&
+	   (!d.GroupObjects[i].ReadRequestAddress_lineno ||
+	    d.GroupObjects[i].ReadRequestAddress !=
+	    d.GroupObjects[i].ObjAddress[j]))
+	  || (d.GroupObjects[i].SendAddress_lineno
+	      && d.GroupObjects[i].SendAddress !=
+	      d.GroupObjects[i].ObjAddress[j]))
 	{
 	  used[fn] = 1;
 	  t.ObjNo[fn] = d.GroupObjects[i].ObjNo;
