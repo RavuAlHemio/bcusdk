@@ -51,13 +51,13 @@ typedef struct
 
 typedef struct
 {
-  uchar pointer;
+  uchar_loptr pointer;
   bool found;
 } PopBuf_Result;
 
 typedef struct
 {
-  uchar pointer;
+  uchar_loptr pointer;
   bool valid;
 } AllocBuf_Result;
 
@@ -594,20 +594,22 @@ static AllocBuf_Result inline
 _AllocBuf (bool longbuf)
 {
   AllocBuf_Result ret;
+  uchar e;
   if (longbuf)
     asm
       volatile
       ("sec\n\tjsr AllocBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
-       (ret.valid), "=r" (ret.pointer)::"A", "X");
+       (ret.valid), "=r" (e)::"A", "X");
   else
   asm
     volatile
     ("clc\n\tjsr AllocBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
-     (ret.valid), "=r" (ret.pointer)::"A", "X");
+     (ret.valid), "=r" (e)::"A", "X");
+  ret.pointer = (uchar_loptr) (uint2) e;
   return ret;
 }
 
-static uchar inline
+static uchar_loptr inline
 _AllocBuf_NE (bool longbuf)
 {
   uchar ret;
@@ -615,36 +617,39 @@ _AllocBuf_NE (bool longbuf)
     asm volatile ("sec\n\tjsr AllocBuf\n\tstx %0":"=r" (ret)::"A", "X");
   else
   asm volatile ("clc\n\tjsr AllocBuf\n\tstx %0":"=r" (ret)::"A", "X");
-  return ret;
+  return (uchar_loptr) (uint2) ret;
 }
 
 static void inline
-_FreeBuf (uchar pointer)
+_FreeBuf (uchar_loptr pointer)
 {
-  if (!__builtin_constant_p (pointer))
-    asm volatile ("ldx %0\n\tjsr FreeBuf"::"r" (pointer):"A", "X", "RegB");
+  uchar x = ((uint2) pointer);
+  if (!__builtin_constant_p (x))
+    asm volatile ("ldx %0\n\tjsr FreeBuf"::"r" (x):"A", "X", "RegB");
   else
-  asm volatile ("ldx $%0\n\tjsr FreeBuf"::"i" (pointer):"A", "X", "RegB");
+  asm volatile ("ldx $%0\n\tjsr FreeBuf"::"i" (x):"A", "X", "RegB");
 }
 
 static PopBuf_Result inline
 _PopBuf (uchar msg)
 {
   PopBuf_Result ret;
+  uchar e;
   if (!__builtin_constant_p (msg))
     asm
       volatile
       ("lda %2\n\tjsr PopBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
-       (ret.found), "=r" (ret.pointer):"r" (msg):"A", "X", "RegB");
+       (ret.found), "=r" (e):"r" (msg):"A", "X", "RegB");
   else
   asm
     volatile
     ("lda $%2\n\tjsr PopBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
-     (ret.found), "=r" (ret.pointer):"i" (msg):"A", "X", "RegB");
+     (ret.found), "=r" (e):"i" (msg):"A", "X", "RegB");
+  ret.pointer = (uchar_loptr) (uint2) e;
   return ret;
 }
 
-static uchar inline
+static uchar_loptr inline
 _PopBuf_NE (uchar msg)
 {
   uchar ret;
@@ -657,7 +662,7 @@ _PopBuf_NE (uchar msg)
   asm
     volatile
     ("lda $%1\n\tjsr PopBuf\n\tstx %1":"=r" (ret):"i" (msg):"A", "X", "RegB");
-  return ret;
+  return (uchar_loptr) (uint2) ret;
 }
 
 static U_Mul_Result inline
@@ -961,6 +966,39 @@ _U_SPI_Init ()
 #undef SETAONNZERO
 
 #endif
+
+static inline void
+__U_flag_Set (uchar no, uchar bit)
+{
+  if (__builtin_constant_p (no) && __builtin_constant_p (bit))
+    asm volatile ("bset.%1 %0+ramflag_pointer"::"i" (no / 2),
+		  "i" ((bit % 4) + (no % 2) * 4));
+  else
+  _U_flagsSet (no, _U_flagsGet (no) | (1 << bit));
+}
+
+static inline void
+__U_flag_Clear (uchar no, uchar bit)
+{
+  if (__builtin_constant_p (no) && __builtin_constant_p (bit))
+    asm volatile ("bclr.%1 %0+ramflag_pointer"::"i" (no / 2),
+		  "i" ((bit % 4) + (no % 2) * 4));
+  else
+  _U_flagsSet (no, _U_flagsGet (no) & ~(1 << bit));
+}
+
+static inline void
+__U_transRequest (uchar no)
+{
+  if (__builtin_constant_p (no))
+    {
+      __U_flag_Set (no, 0);
+      __U_flag_Set (no, 1);
+    }
+  else
+    _U_transRequest (no);
+}
+
 
 /* not implemented:
 AL_SAPcallback

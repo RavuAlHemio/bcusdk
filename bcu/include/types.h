@@ -33,6 +33,9 @@
 #define EEPROM_ATTRIB __attribute__ ((eeprom))
 #define EEPROM_PTR_ATTRIB __attribute__ ((eepromt))
 
+#define LORAM_ATTRIB __attribute__ ((loram))
+#define LORAM_PTR_ATTRIB __attribute__ ((loramt))
+
 #define EEPROM_SECTION __attribute__ ((section (".eeprom")))
 #define LOW_CONST_SECTION __attribute__ ((section (".loconst")))
 #define RAM_SECTION __attribute__ ((section (".ram")))
@@ -58,5 +61,6 @@ typedef unsigned int uint7 __attribute__ ((mode (EI)));
 typedef unsigned int uint8 __attribute__ ((mode (DI)));
 
 typedef uint1 uchar;
+typedef uchar* uchar_loptr LORAM_PTR_ATTRIB;
 
 #endif
