@@ -109,30 +109,61 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
     fprintf (f, "static void %s();\n", o.on_update ());
   if (o.ObjNo == -1)
     {
-#ifdef PHASE1
       if (o.Sending)
 	fprintf (f, "static void %s_transmit(){}\n", o.Name ());
-#else
-      if (o.Sending)
-	fprintf (f, "static void %s_transmit(){}\n", o.Name ());
-#endif
+      if (o.Reading)
+	fprintf (f, "static void %s_readrequest(){}\n", o.Name ());
+      if (o.Reading && o.Sending)
+	fprintf (f, "static void %s_clear(){}\n", o.Name ());
     }
   else
     {
       if (o.on_update ())
 	fprintf (f, "NOSAVE(void %s_stub()) {%s();}\n",
 		 o.on_update (), o.on_update ());
-#ifdef PHASE1
+
       if (o.Sending)
-	fprintf (f,
-		 "static void inline %s_transmit(){_U_transRequest(%d);}\n",
-		 o.Name (), o.ObjNo);
+	{
+#ifdef PHASE1
+	  if (o.Sending)
 #else
-      if (o.SendAddress_lineno)
-	fprintf (f,
-		 "static void inline %s_transmit(){_U_transRequest(%d);}\n",
-		 o.Name (), o.ObjNo);
+	  if (o.SendAddress_lineno)
 #endif
+	    fprintf (f,
+		     "static void inline %s_transmit(){__U_transRequest(%d);}\n",
+		     o.Name (), o.ObjNo);
+	  else
+	    fprintf (f, "static void %s_transmit(){}\n", o.Name ());
+	}
+
+      if (o.Reading)
+	{
+#ifdef PHASE1
+	  if (o.Reading)
+#else
+	  if (o.ReadRequestAddress_lineno)
+#endif
+	    fprintf (f,
+		     "static void inline %s_readrequest(){__U_flag_Set(%d,2);__U_transRequest(%d);}\n",
+		     o.Name (), o.ObjNo, o.ObjNo);
+	  else
+	    fprintf (f, "static void %s_readrequest(){}\n", o.Name ());
+	}
+      if (o.Reading && o.Sending)
+	{
+#ifdef PHASE1
+	  if (o.Reading && o.Sending)
+#else
+	  if (o.ReadRequestAddress_lineno && o.SendAddress_lineno)
+#endif
+	    fprintf (f,
+		     "static void inline %s_clear(){__U_flag_Clear(%d,2);}\n",
+		     o.Name (), o.ObjNo);
+	  else
+	    fprintf (f, "static void %s_clear(){}\n", o.Name ());
+	}
+
+
     }
 }
 
@@ -683,6 +714,7 @@ GenAsmEntry (FILE * f, Device & d)
   for (i = 0; i < d.GroupObjects (); i++)
     GenGroupObjectASM (f, d.GroupObjects[i], d.BCU);
   fprintf (f, "\t.section .ramflags\n");
+  fprintf (f, "\t.global ramflag_pointer\n");
   fprintf (f, "ramflag_pointer:\n");
   j = d.ObjCount;
   if (j % 2)
