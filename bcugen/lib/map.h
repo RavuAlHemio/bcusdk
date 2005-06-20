@@ -23,7 +23,7 @@
 #include "common.h"
 
 itype Map_ProfileID (const String & s);
-ftype Map_DPTType (const String & s);
+ftype Map_DPType (const String & s);
 GroupType Map_GroupType (const String & s);
 PropertyType Map_PropertyType (const String & s);
 BCUType Map_BCUType (const String & s);

@@ -651,11 +651,11 @@ CheckInterface (Device & d, Interface & o)
   if (!o.Abbreviation ())
     undefined ("Interface", "Abbreviation", o.lineno);
 
-  if (!o.DPTType_lineno)
-    undefined ("Interface", "DPTType", o.lineno);
+  if (!o.DPType_lineno)
+    undefined ("Interface", "DPType", o.lineno);
 
-  if (o.DPTType < 0)
-    die (_("line %d: invalid DPT Type"), o.DPTType_lineno);
+  if (o.DPType < 0)
+    die (_("line %d: invalid DPType"), o.DPType_lineno);
 
   if (o.InvisibleIf_lineno)
     CheckExpressionBool (o.InvisibleIf, o.InvisibleIf_lineno, d);

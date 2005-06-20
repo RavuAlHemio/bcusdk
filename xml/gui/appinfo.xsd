@@ -29,7 +29,7 @@
       <xs:maxLength value="4"/>
     </xs:restriction>
   </xs:simpleType>
-  <xs:simpleType name="DPTType">
+  <xs:simpleType name="DPType">
     <xs:restriction base="xs:string">
       <xs:pattern value="[0-9]+\.[0-9]{3}"/>
     </xs:restriction>
@@ -96,7 +96,7 @@
               <xs:element name="Interface" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="DPTType" type="DPTType"/>
+                    <xs:element name="DPType" type="DPType"/>
                     <xs:element name="Abbreviation" type="xs:string"/>
                     <xs:element name="Title" type="xs:string" minOccurs="0"/>
                     <xs:element name="AddInfo" type="xs:string" minOccurs="0"/>

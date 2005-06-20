@@ -35,13 +35,13 @@
     <ProfileID>123</ProfileID>
     <Title>Button</Title>
     <Interface id="xxx2">
-      <DPTType>12.121</DPTType>
+      <DPType>12.121</DPType>
       <Abbreviation>in</Abbreviation>
       <Title>Input</Title>
       <Reference idref="lp1"/>
     </Interface>
     <Interface id="if2">
-      <DPTType>1.111</DPTType>
+      <DPType>1.111</DPType>
       <Abbreviation>out</Abbreviation>
       <Reference idref="lp1"/>
     </Interface>
@@ -51,7 +51,7 @@
     <Title>Button1</Title>
     <AddInfo>text</AddInfo>
     <Interface id="defaultValue">
-      <DPTType>122.001</DPTType>
+      <DPType>122.001</DPType>
       <Abbreviation>text</Abbreviation>
       <Title>Info</Title>
       <AddInfo>text</AddInfo>

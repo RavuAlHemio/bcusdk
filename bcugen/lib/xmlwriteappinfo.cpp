@@ -72,8 +72,8 @@ GenInterface (const Interface & d)
   int count = 0;
   xmlNodePtr n = nn ("Interface");
   a (n, "id", d.ID ());
-  sprintf (buf, "%0.3f", d.DPTType);
-  nc (n, "DPTType", buf);
+  sprintf (buf, "%0.3f", d.DPType);
+  nc (n, "DPType", buf);
   if (d.Abbreviation ())
     nc (n, "Abbreviation", d.Abbreviation ());
   if (d.Title ())

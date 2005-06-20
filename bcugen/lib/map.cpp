@@ -61,10 +61,10 @@ Map_ProfileID (const String & s)
 }
 
 ftype
-Map_DPTType (const String & s)
+Map_DPType (const String & s)
 {
 #include "DPT.lst"
-  parserError (_("unkown DPT Type %s"), s ());
+  parserError (_("unkown DP Type %s"), s ());
 }
 
 itype

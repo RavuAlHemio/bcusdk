@@ -30,7 +30,7 @@
 <!ENTITY % BOOL "(#PCDATA)">
 <!ENTITY % FLOAT "(#PCDATA)">
 
-<!ENTITY % DPTTYPE "(#PCDATA)">
+<!ENTITY % DPTYPE "(#PCDATA)">
 <!ENTITY % FBTYPE "(#PCDATA)">
 <!ENTITY % GROUPTYPE "(#PCDATA)">
 <!ENTITY % PROPERTYTYPE "(#PCDATA)">
@@ -119,7 +119,7 @@
    id ID #REQUIRED
 >
 
-<!ELEMENT DPTType %DPTTYPE;>
+<!ELEMENT DPType %DPTYPE;>
 <!ELEMENT Abbreviation %STRING;>
 <!ELEMENT GroupTitle %STRING;>
 <!ELEMENT InvisibleIf %STRING;>
@@ -130,7 +130,7 @@
 >
 
 
-<!ELEMENT Interface (DPTType,Abbreviation,Title?,AddInfo?,GroupTitle?,InvisibleIf?,Reference+)>
+<!ELEMENT Interface (DPType,Abbreviation,Title?,AddInfo?,GroupTitle?,InvisibleIf?,Reference+)>
 <!ATTLIST Interface
    id ID #REQUIRED
 >
