@@ -292,15 +292,19 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
+  pth_event_t sendtimeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       if (in () == 0 && !waitconfirm)
 	pth_event_concat (stop, input, NULL);
       if (to)
 	pth_event_concat (stop, timeout, NULL);
+      if (waitconfirm)
+	pth_event_concat (stop, sendtimeout, NULL);
       i = pth_read_ev (fd, buf, sizeof (buf), stop);
       pth_event_isolate (stop);
       pth_event_isolate (timeout);
+      pth_event_isolate (sendtimeout);
       if (i > 0)
 	{
 	  t->TracePacket (0, this, "Recv", i, buf);
@@ -386,6 +390,9 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	    }
 	  to = 0;
 	}
+      if (waitconfirm
+	  && pth_event_status (sendtimeout) == PTH_STATUS_OCCURRED)
+	waitconfirm = 0;
       if (in () == 0 && !inqueue.isempty () && !waitconfirm)
 	{
 	  LPDU *l = (LPDU *) inqueue.top ();
@@ -396,16 +403,19 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	  w.resize (d () * 2);
 	  for (i = 0; i < d (); i++)
 	    {
-	      w[2 * i] = 0x80 | (i & 0x0f);
+	      w[2 * i] = 0x80 | (i & 0x3f);
 	      w[2 * i + 1] = d[i];
 	    }
-	  w[(d () * 2) - 2] = (w[(d () * 2) - 2] & 0x0f) | 0x40;
+	  w[(d () * 2) - 2] = (w[(d () * 2) - 2] & 0x3f) | 0x40;
 	  t->TracePacket (0, this, "Write", w);
 	  j = pth_write_ev (fd, w.array (), w (), stop);
 	  waitconfirm = 1;
+	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, sendtimeout,
+		     pth_timeout (0, 600000));
 	}
     }
   pth_event_free (stop, PTH_FREE_THIS);
   pth_event_free (input, PTH_FREE_THIS);
   pth_event_free (timeout, PTH_FREE_THIS);
+  pth_event_free (sendtimeout, PTH_FREE_THIS);
 }

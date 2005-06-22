@@ -177,7 +177,7 @@ parseProperty (Device & d, xmlNodePtr n)
   int i, j;
   const char *id = gp (n, "id");
   for (i = 0; i < d.Objects (); i++)
-    for (i = 0; i < d.Objects[i].Propertys (); i++)
+    for (j = 0; j < d.Objects[j].Propertys (); i++)
       if (d.Objects[i].Propertys[j].ID == id)
 	goto ok;
   die (_("unknown property"));
