@@ -445,7 +445,7 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (!o.ReadOnly_lineno)
     {
       o.ReadOnly_lineno = o.lineno;
-      o.ReadOnly = o.Writeable;
+      o.ReadOnly = !o.Writeable;
     }
 
 #endif

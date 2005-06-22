@@ -181,7 +181,7 @@ GenEIBObject (FILE * f, Object & o)
       if (o.Propertys[i].Disable)
 	continue;
       fprintf (f, "\t.byte %d,%d\n", o.Propertys[i].PropertyID,
-	       (o.Propertys[i].Type & 0x1f) | (!o.Propertys[i].
+	       (o.Propertys[i].Type & 0x1f) | (o.Propertys[i].
 					       ReadOnly ? 0x00 : 0x80) | (o.
 									  Propertys
 									  [i].
