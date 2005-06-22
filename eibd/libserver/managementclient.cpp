@@ -407,7 +407,7 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 							 buf[4] << 8) | (c->
 									 buf
 									 [5]);
-	      if (m.A_Authorize (key, buf[3]) == -1)
+	      if (m.A_Authorize (key, buf[2]) == -1)
 		c->sendreject (stop);
 	      else
 		c->sendmessage (3, buf, stop);
