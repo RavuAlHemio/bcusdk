@@ -64,7 +64,7 @@ static eibkey_t
 readkey (const char *key)
 {
   eibkey_t k;
-  sscanf (key, "%lu", &k);
+  sscanf (key, "%lx", &k);
   return k;
 }
 
