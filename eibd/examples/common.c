@@ -90,3 +90,37 @@ readBlock (uchar * buf, int size, int ac, char *ag[])
     }
   return i;
 }
+
+static int havekey = 0;
+static uint8_t eibkey[4];
+
+void
+parseKey (int *ac, char **ag[])
+{
+  uint32_t k;
+  if (*ac < 3)
+    return;
+  if (!strcmp ((*ag)[1], "-k"))
+    {
+      sscanf ((*ag)[2], "%x", &k);
+      havekey = 1;
+      eibkey[0] = (k >> 24) & 0xff;
+      eibkey[1] = (k >> 16) & 0xff;
+      eibkey[2] = (k >> 8) & 0xff;
+      eibkey[3] = (k >> 0) & 0xff;
+      *ac -= 2;
+      *ag += 2;
+    }
+}
+
+void
+auth (EIBConnection * con)
+{
+  int res;
+  if (!havekey)
+    return;
+  res = EIB_MC_Authorize (con, eibkey);
+  if (res == -1)
+    die ("authorize failed");
+  printf ("Level %d\n", res);
+}

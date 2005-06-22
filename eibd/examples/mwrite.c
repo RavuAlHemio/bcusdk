@@ -25,9 +25,11 @@ main (int ac, char *ag[])
   EIBConnection *con;
   uchar buf[255];
   eibaddr_t dest;
+  char *prog = ag[0];
 
+  parseKey (&ac, &ag);
   if (ac < 4)
-    die ("usage: %s url eibaddr addr [xx xx xx ..]", ag[0]);
+    die ("usage: %s [-k key] url eibaddr addr [xx xx xx ..]", prog);
   con = EIBSocketURL (ag[1]);
   if (!con)
     die ("Open failed");
@@ -37,6 +39,7 @@ main (int ac, char *ag[])
 
   if (EIB_MC_Connect (con, dest) == -1)
     die ("Connect failed");
+  auth (con);
 
   printf ("Write: ");
   printHex (len, buf);

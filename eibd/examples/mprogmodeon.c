@@ -24,8 +24,11 @@ main (int ac, char *ag[])
   int len;
   EIBConnection *con;
   eibaddr_t dest;
+  char *prog = ag[0];
+
+  parseKey (&ac, &ag);
   if (ac != 3)
-    die ("usage: %s url eibaddr", ag[0]);
+    die ("usage: %s [-k key] url eibaddr", prog);
   con = EIBSocketURL (ag[1]);
   if (!con)
     die ("Open failed");
@@ -33,6 +36,7 @@ main (int ac, char *ag[])
 
   if (EIB_MC_Connect (con, dest) == -1)
     die ("Connect failed");
+  auth (con);
 
   len = EIB_MC_Progmode_On (con);
   if (len == -1)

@@ -60,3 +60,6 @@ int readBlock (uchar * buf, int size, int ac, char *ag[]);
  * \param addr EIB address
  */
 void printIndividual (eibaddr_t addr);
+
+void parseKey (int *ac, char **ag[]);
+void auth (EIBConnection *);

@@ -25,9 +25,11 @@ main (int ac, char *ag[])
   EIBConnection *con;
   uchar buf[255];
   eibaddr_t dest;
+  char *prog = ag[0];
 
+  parseKey (&ac, &ag);
   if (ac != 7)
-    die ("usage: %s url eibaddr obj prop start nr_of_elem", ag[0]);
+    die ("usage: %s [-k key] url eibaddr obj prop start nr_of_elem", prog);
   con = EIBSocketURL (ag[1]);
   if (!con)
     die ("Open failed");
@@ -39,6 +41,7 @@ main (int ac, char *ag[])
 
   if (EIB_MC_Connect (con, dest) == -1)
     die ("Connect failed");
+  auth (con);
 
   len =
     EIB_MC_PropertyRead (con, obj, prop, start, nr_of_elem, sizeof (buf),
