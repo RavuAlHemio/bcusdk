@@ -296,7 +296,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       r.error = IMG_LOAD_ADDR;
       img->load.add (r);
 
-      GenAlloc (r.req, s1->addrtab_start, s1->addrtab_size, 0x13, 0x03, 1);
+      GenAlloc (r.req, s1->addrtab_start, s1->addrtab_size, 0x31, 0x03, 1);
       r.memaddr = s1->addrtab_start;
       r.len = 1;
       r.error = IMG_WRITE_ADDR;
@@ -332,7 +332,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       r.error = IMG_LOAD_ASSOC;
       img->load.add (r);
 
-      GenAlloc (r.req, s1->assoctab_start, s1->assoctab_size, 0x13, 0x03, 1);
+      GenAlloc (r.req, s1->assoctab_start, s1->assoctab_size, 0x31, 0x03, 1);
       r.memaddr = s1->assoctab_start;
       r.len = s1->assoctab_size - 1;
       r.error = IMG_WRITE_ASSOC;
@@ -362,15 +362,15 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       r.error = IMG_LOAD_PROG;
       img->load.add (r);
 
-      GenAlloc (r.req, 0x00C8, 0x0018, 0x23, 0x01, 0);
+      GenAlloc (r.req, 0x00C8, 0x0018, 0x32, 0x01, 0);
       r.error = IMG_ALLOC_LORAM;
       img->load.add (r);
 
-      GenAlloc (r.req, 0x0972, 0x004A, 0x23, 0x02, 0);
+      GenAlloc (r.req, 0x0972, 0x004A, 0x32, 0x02, 0);
       r.error = IMG_ALLOC_HIRAM;
       img->load.add (r);
 
-      GenAlloc (r.req, 0x0100, 0x0016, 0x03, 0x03, 0);
+      GenAlloc (r.req, 0x0100, 0x0016, 0x32, 0x03, 0);
       r.error = IMG_ALLOC_INIT;
       r.len = 0x001;
       r.memaddr = 0x100;
@@ -383,7 +383,7 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
       r.obj = 3;
 
       GenAlloc (r.req, s1->readonly_start,
-		s1->readonly_end - s1->readonly_start, 0x03, 0x03, 1);
+		s1->readonly_end - s1->readonly_start, 0x30, 0x03, 1);
       r.error = IMG_ALLOC_RO;
       r.len = s1->readonly_end - s1->readonly_start - 1;
       r.memaddr = s1->readonly_start;
@@ -391,15 +391,15 @@ PrepareLoadImage (const CArray & im, BCUImage * &img)
 	img->load.add (r);
 
       GenAlloc (r.req, s1->eeprom_start, s1->eeprom_end - s1->eeprom_start,
-		0x13, 0x03, 0);
+		0x31, 0x03, 0);
       r.error = IMG_ALLOC_EEPROM;
       r.len = s1->eeprom_end - s1->eeprom_start;
       r.memaddr = s1->eeprom_start;
       if (r.len)
 	img->load.add (r);
 
-      GenAlloc (r.req, s1->param_start, s1->param_end - s1->param_start, 0x03,
-		0x23, 1);
+      GenAlloc (r.req, s1->param_start, s1->param_end - s1->param_start, 0x32,
+		0x03, 1);
       r.error = IMG_ALLOC_PARAM;
       r.len = s1->param_end - s1->param_start;
       r.memaddr = s1->param_start;
