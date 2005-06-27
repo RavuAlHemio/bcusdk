@@ -104,6 +104,8 @@ if [ ! -d $TMP ]; then
 	exit 1
 fi
 
+TMP=`(cd $TMP; pwd)`
+
 if [ $keep != 1 ]; then
 	trap "rm -r $TMP; exit 1" 1 2 3 5 10 13 15
 fi
