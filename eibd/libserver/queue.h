@@ -72,7 +72,7 @@ public:
   {
     while (akt)
       get ();
-    Entry *a = c->akt;
+    Entry *a = c.akt;
     while (a)
       {
 	put (a->entry);
