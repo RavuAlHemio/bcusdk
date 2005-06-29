@@ -193,7 +193,7 @@ CEMI_to_L_Data (const CArray & data)
   unsigned start = data[1] + 2;
   if (data () < 7 + start)
     return 0;
-  if (data () != 7 + start + data[6 + start] + 1)
+  if (data () < 7 + start + data[6 + start] + 1)
     return 0;
   c.source = (data[start + 2] << 8) | (data[start + 3]);
   c.dest = (data[start + 4] << 8) | (data[start + 5]);
@@ -399,7 +399,8 @@ EIBNetIPSocket::Run (pth_sem_t * stop1)
 			 &rl, stop);
       if (i > 0 && rl == sizeof (r))
 	{
-	  if (recvall || !memcmp (&r, &recvaddr, sizeof (r)))
+	  if (recvall == 1 || !memcmp (&r, &recvaddr, sizeof (r)) ||
+	      (recvall == 2 && memcmp (&r, &localaddr, sizeof (r))))
 	    {
 	      t->TracePacket (0, this, "Recv", i, buf);
 	      EIBNetIPPacket *p =
@@ -756,6 +757,36 @@ EIBnet_DescriptionResponse::EIBnet_DescriptionResponse ()
   memset (&name, 0, sizeof (name));
 }
 
+EIBNetIPPacket EIBnet_DescriptionResponse::ToPacket ()CONST
+{
+  EIBNetIPPacket
+    p;
+  p.service = DESCRIPTION_RESPONSE;
+  p.data.resize (56 + services () * 2);
+  p.data[0] = 54;
+  p.data[1] = 1;
+  p.data[2] = KNXmedium;
+  p.data[3] = devicestatus;
+  p.data[4] = (individual_addr >> 8) & 0xff;
+  p.data[5] = (individual_addr) & 0xff;
+  p.data[6] = (installid >> 8) & 0xff;
+  p.data[7] = (installid) & 0xff;
+  memcpy (p.data.array () + 18, &serial, 6);
+  memcpy (p.data.array () + 14, &multicastaddr, 4);
+  memcpy (p.data.array () + 18, &MAC, 6);
+  memcpy (p.data.array () + 24, &name, 30);
+  p.data[53] = 0;
+  p.data[54] = services () * 2 + 2;
+  p.data[55] = 2;
+  for (int i = 0; i < services (); i++)
+    {
+      p.data[56 + i * 2] = services[i].family;
+      p.data[57 + i * 2] = services[i].version;
+    }
+  p.data.setpart (optional, 56 + services () * 2);
+  return p;
+}
+
 int
 parseEIBnet_DescriptionResponse (const EIBNetIPPacket & p,
 				 EIBnet_DescriptionResponse & r)
@@ -833,6 +864,38 @@ EIBnet_SearchResponse::EIBnet_SearchResponse ()
   multicastaddr.s_addr = 0;
   memset (&MAC, 0, sizeof (MAC));
   memset (&name, 0, sizeof (name));
+}
+
+EIBNetIPPacket EIBnet_SearchResponse::ToPacket ()CONST
+{
+  EIBNetIPPacket
+    p;
+  CArray
+    ca = IPtoEIBNetIP (&caddr);
+  p.service = SEARCH_RESPONSE;
+  p.data.resize (64 + services () * 2);
+  p.data.setpart (ca, 0);
+  p.data[8] = 54;
+  p.data[9] = 1;
+  p.data[10] = KNXmedium;
+  p.data[11] = devicestatus;
+  p.data[12] = (individual_addr >> 8) & 0xff;
+  p.data[13] = (individual_addr) & 0xff;
+  p.data[14] = (installid >> 8) & 0xff;
+  p.data[15] = (installid) & 0xff;
+  memcpy (p.data.array () + 16, &serial, 6);
+  memcpy (p.data.array () + 22, &multicastaddr, 4);
+  memcpy (p.data.array () + 26, &MAC, 6);
+  memcpy (p.data.array () + 32, &name, 30);
+  p.data[61] = 0;
+  p.data[62] = services () * 2 + 2;
+  p.data[63] = 2;
+  for (int i = 0; i < services (); i++)
+    {
+      p.data[64 + i * 2] = services[i].family;
+      p.data[65 + i * 2] = services[i].version;
+    }
+  return p;
 }
 
 int
