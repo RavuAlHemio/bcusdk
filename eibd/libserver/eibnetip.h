@@ -295,8 +295,10 @@ public:
   struct sockaddr_in sendaddr;
   /** addres to accept packets from */
   struct sockaddr_in recvaddr;
+  /** addres to accept packets from */
+  struct sockaddr_in localaddr;
   /** accept all packets*/
-  bool recvall;
+  uchar recvall;
 };
 
 #endif
