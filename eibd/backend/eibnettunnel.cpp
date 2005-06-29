@@ -184,7 +184,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &insignal);
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
-  pth_event_t timeout1 = pth_event (PTH_EVENT_TIME, pth_timeout (30, 0));
+  pth_event_t timeout1 = pth_event (PTH_EVENT_TIME, pth_timeout (10, 0));
   L_Data_PDU *c;
 
   EIBNetIPPacket p;
@@ -194,6 +194,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   EIBnet_ConnectionStateRequest csreq;
   EIBnet_TunnelRequest treq;
   EIBnet_TunnelACK tresp;
+  EIBnet_DisconnectRequest dreq;
+  EIBnet_DisconnectResponse dresp;
   creq.caddr = saddr;
   creq.daddr = saddr;
   creq.CRI.resize (3);
@@ -210,8 +212,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
       if (mod == 2)
 	pth_event_concat (stop, timeout, NULL);
 
-      if (mod != 0)
-	pth_event_concat (stop, timeout1, NULL);
+      pth_event_concat (stop, timeout1, NULL);
 
       p1 = sock->Get (stop);
       pth_event_isolate (stop);
@@ -246,6 +247,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      mod = 1;
 	      sock->recvaddr = daddr;
 	      sock->sendaddr = daddr;
+	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
+			 pth_timeout (30, 0));
 	      break;
 
 	    case TUNNEL_REQUEST:
@@ -359,7 +362,31 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      break;
 	    case CONNECTIONSTATE_RESPONSE:
 	      break;
-
+	    case DISCONNECT_REQUEST:
+	      if (mod == 0)
+		{
+		  t->TracePrintf (1, this, "Not connected");
+		  goto err;
+		}
+	      if (parseEIBnet_DisconnectRequest (*p1, dreq))
+		{
+		  t->TracePrintf (1, this, "Invalid request");
+		  break;
+		}
+	      if (dreq.channel != channel)
+		{
+		  t->TracePrintf (1, this, "Not for us");
+		  break;
+		}
+	      dresp.channel = channel;
+	      dresp.status = 0;
+	      p = treq.ToPacket ();
+	      t->TracePacket (1, this, "SendDis", p.data);
+	      sock->sendaddr = caddr;
+	      sock->Send (p);
+	      sock->sendaddr = daddr;
+	      mod = 0;
+	      break;
 	    default:
 	    err:
 	      t->TracePrintf (1, this, "Recv unexpected service %04X",
@@ -384,6 +411,16 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	  sock->Send (p);
 	  sock->sendaddr = daddr;
 	}
+      if (mod == 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
+	{
+	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
+		     pth_timeout (10, 0));
+	  p = creq.ToPacket ();
+	  t->TracePrintf (1, this, "Connectretry");
+	  sock->sendaddr = caddr;
+	  sock->Send (p);
+	  sock->sendaddr = daddr;
+	}
 
       if (!inqueue.isempty () && mod == 1)
 	{
@@ -399,7 +436,6 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	}
     }
 out:
-  EIBnet_DisconnectRequest dreq;
   dreq.caddr = saddr;
   dreq.channel = channel;
   p = dreq.ToPacket ();
