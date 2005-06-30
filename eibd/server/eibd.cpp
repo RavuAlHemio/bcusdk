@@ -27,6 +27,7 @@
 #include "layer3.h"
 #include "localserver.h"
 #include "inetserver.h"
+#include "eibnetserver.h"
 
 /** structure to store the arguments */
 struct arguments
@@ -43,6 +44,11 @@ struct arguments
   int tracelevel;
   /** EIB address (for some backends) */
   eibaddr_t addr;
+  /* EIBnet/IP server */
+  bool tunnel;
+  bool route;
+  bool discover;
+  const char *serverip;
 };
 /** storage for the arguments*/
 struct arguments arg;
@@ -145,6 +151,14 @@ static struct argp_option options[] = {
   {"pid-file", 'p', "FILE", 0, "write the PID of the process to FILE"},
   {"daemon", 'd', "FILE", OPTION_ARG_OPTIONAL,
    "start the programm as daemon, the output will be written to FILE, if the argument present"},
+#ifdef HAVE_EIBNETIPSERVER
+  {"Tunnel", 'T', 0, 0, "enable EIBnet/IP Tunneling in the EIBnet/IP server"},
+  {"Route", 'R', 0, 0, "enable EIBnet/IP Routing in the EIBnet/IP server"},
+  {"Discover", 'D', 0, 0,
+   "enable advertising function for EIBnet/IP server (SEARCH, DESCRIBE)"},
+  {"Server", 'S', "ip[:port]", OPTION_ARG_OPTIONAL,
+   "starts the EIBnet/IP server part"},
+#endif
   {0}
 };
 
@@ -155,6 +169,18 @@ parse_opt (int key, char *arg, struct argp_state *state)
   struct arguments *arguments = (struct arguments *) state->input;
   switch (key)
     {
+    case 'T':
+      arguments->tunnel = 1;
+      break;
+    case 'R':
+      arguments->route = 1;
+      break;
+    case 'D':
+      arguments->discover = 1;
+      break;
+    case 'S':
+      arguments->serverip = (arg ? arg : "224.0.23.12");
+      break;
     case 'u':
       arguments->name = (char *) (arg ? arg : "/tmp/eib");
       break;
@@ -182,6 +208,33 @@ parse_opt (int key, char *arg, struct argp_state *state)
 /** information for the argument parser*/
 static struct argp argp = { options, parse_opt, args_doc, doc };
 
+EIBnetServer *
+startServer (Layer3 * l3, Trace * t)
+{
+  EIBnetServer *c;
+  char *ip;
+  int port;
+  if (!arg.serverip)
+    return 0;
+
+  char *a = strdup (arg.serverip);
+  char *b;
+  if (!a)
+    die ("out of memory");
+  for (b = a; *b; b++)
+    if (*b == ':')
+      break;
+  if (*b == ':')
+    {
+      *b = 0;
+      port = atoi (b + 1);
+    }
+  else
+    port = 3671;
+  c = new EIBnetServer (a, port, arg.tunnel, arg.route, arg.discover, l3, t);
+  free (a);
+  return c;
+}
 
 int
 main (int ac, char *ag[])
@@ -190,6 +243,7 @@ main (int ac, char *ag[])
   Queue < Server * >server;
   Layer2Interface *l2;
   Layer3 *l3;
+  EIBnetServer *serv = 0;
 
   memset (&arg, 0, sizeof (arg));
   arg.addr = 0x0001;
@@ -200,7 +254,7 @@ main (int ac, char *ag[])
   if (index < ac - 1)
     die ("unexpected parameter");
 
-  if (arg.port == 0 && arg.name == 0)
+  if (arg.port == 0 && arg.name == 0 && arg.serverip == 0)
     die ("No listen-address given");
 
   signal (SIGPIPE, SIG_IGN);
@@ -244,6 +298,7 @@ main (int ac, char *ag[])
       server.put (new InetServer (l3, &t, arg.port));
     if (arg.name)
       server.put (new LocalServer (l3, &t, arg.name));
+    serv = startServer (l3, &t);
   }
   catch (Exception e)
   {
@@ -265,6 +320,8 @@ main (int ac, char *ag[])
 
   while (!server.isempty ())
     delete server.get ();
+  if (serv)
+    delete serv;
 
   delete l3;
 
