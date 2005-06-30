@@ -50,7 +50,7 @@ eibnetip_Create (const char *dev, Trace * t)
     }
   else
     port = 3671;
-  c = new EIBNetIPRouter (dev, port, arg.addr, t);
+  c = new EIBNetIPRouter (a, port, arg.addr, t);
   free (a);
   return c;
 }
