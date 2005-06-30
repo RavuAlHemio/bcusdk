@@ -119,6 +119,20 @@ if test x$eibnetiptunnel = xtrue ; then
  AC_DEFINE(HAVE_EIBNETIPTUNNEL, 1 , [EIBnet/IP tunneling enabled])
 fi
 
+AC_ARG_ENABLE(eibnetipserver,
+[  --enable-eibnetipserver	enable EIBnet/IP server frontend],
+[case "${enableval}" in
+ yes) eibnetipserver=true ;;
+  no)  eibnetipserver=false ;;
+   *) AC_MSG_ERROR(bad value ${enableval} for --enable-eibnetipserver) ;;
+ esac],[eibnetipserver=false])
+if test x$eibnetipserver = xtrue ; then
+ if test x$have_source_info != xyes ; then
+  AC_MSG_ERROR(not all needed functions for EIBnet/IP server available)
+ fi
+ AC_DEFINE(HAVE_EIBNETIPSERVER, 1 , [EIBnet/IP server enabled])
+fi
+
 
 AM_CONDITIONAL(HAVE_SOURCE_INFO, test x$have_source_info = xyes )
 
