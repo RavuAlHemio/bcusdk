@@ -152,10 +152,10 @@ static struct argp_option options[] = {
   {"daemon", 'd', "FILE", OPTION_ARG_OPTIONAL,
    "start the programm as daemon, the output will be written to FILE, if the argument present"},
 #ifdef HAVE_EIBNETIPSERVER
-  {"Tunnel", 'T', 0, 0, "enable EIBnet/IP Tunneling in the EIBnet/IP server"},
-  {"Route", 'R', 0, 0, "enable EIBnet/IP Routing in the EIBnet/IP server"},
-  {"Discover", 'D', 0, 0,
-   "enable advertising function for EIBnet/IP server (SEARCH, DESCRIBE)"},
+  {"Tunnelling", 'T', 0, 0, "enable EIBnet/IP Tunneling in the EIBnet/IP server"},
+  {"Routing", 'R', 0, 0, "enable EIBnet/IP Routing in the EIBnet/IP server"},
+  {"Discovery", 'D', 0, 0,
+   "enable the EIBnet/IP server to answer discovery and description requests (SEARCH, DESCRIPTION)"},
   {"Server", 'S', "ip[:port]", OPTION_ARG_OPTIONAL,
    "starts the EIBnet/IP server part"},
 #endif
