@@ -261,20 +261,20 @@ GenCommonHeader (FILE * f, Device & d)
 	  int t = (int) (d.Debounces[0].Time / 0.5);
 	  if (t == 60)
 	    fprintf (f,
-		     "static uchar inline %s(uchar val){return _U_deb30(val);}n",
+		     "static uchar inline %s(uchar val){return _U_deb30(val);}\n",
 		     d.Debounces[0].Name ());
 	  else if (t == 20)
 	    fprintf (f,
-		     "static uchar inline %s(uchar val){return _U_deb10(val);}n",
+		     "static uchar inline %s(uchar val){return _U_deb10(val);}\n",
 		     d.Debounces[0].Name ());
 	  else
 	    fprintf (f,
-		     "static uchar inline %s(uchar val){return _U_debounce(val,%d);}n",
+		     "static uchar inline %s(uchar val){return _U_debounce(val,%d);}\n",
 		     d.Debounces[0].Name (), t);
 	}
       else
 	fprintf (f,
-		 "static uchar inline %s(uchar val,uchar time){return _U_debounce(val,time);}n",
+		 "static uchar inline %s(uchar val,uchar time){return _U_debounce(val,time);}\n",
 		 d.Debounces[0].Name ());
     }
   for (i = 0; i < d.Timers (); i++)
