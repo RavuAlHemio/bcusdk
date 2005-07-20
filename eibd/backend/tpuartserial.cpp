@@ -269,8 +269,7 @@ TPUARTSerialLayer2Driver::RecvLPDU (const uchar * data, int len)
   if (!mode)
     {
       LPDU *l = LPDU::fromPacket (CArray (data, len));
-      if (l->getType () == L_Data && !((L_Data_PDU *) l)->repeated
-	  && ((L_Data_PDU *) l)->valid_checksum)
+      if (l->getType () == L_Data && ((L_Data_PDU *) l)->valid_checksum)
 	{
 	  outqueue.put (l);
 	  pth_sem_inc (&out_signal, 1);
