@@ -52,6 +52,13 @@ typedef struct
   eibaddr_t dest;
 } Individual_Info;
 
+typedef struct
+{
+  CArray data;
+  timestamp_t end;
+
+} IgnoreInfo;
+
 /** Layer 3 frame dispatches */
 class Layer3:private Thread
 {
@@ -61,6 +68,8 @@ class Layer3:private Thread
   Trace *t;
   /** working mode (bus monitor/normal operation) */
   int mode;
+    Array < IgnoreInfo > ignore;
+
     /** busmonitor callbacks */
     Array < Busmonitor_Info > busmonitor;
     /** vbusmonitor callbacks */

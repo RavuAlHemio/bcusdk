@@ -294,6 +294,22 @@ Layer3::Run (pth_sem_t * stop1)
 	{
 	  L_Data_PDU *l1;
 	  l1 = (L_Data_PDU *) l;
+	  if (l1->repeated)
+	    {
+	      CArray d1 = l1->ToPacket ();
+	      for (i = 0; i < ignore (); i++)
+		if (d1 == ignore[i].data)
+		  {
+		    t->TracePrintf (3, this, "Repeated discareded");
+		    goto wt;
+		  }
+	    }
+	  l1->repeated = 1;
+	  ignore.resize (ignore () + 1);
+	  ignore[ignore () - 1].data = l1->ToPacket ();
+	  ignore[ignore () - 1].end = getTime () + 1000000;
+	  l1->repeated = 0;
+
 	  if (l1->AddrType == IndividualAddress
 	      && l1->dest == layer2->getDefaultAddr ())
 	    l1->dest = 0;
@@ -319,6 +335,14 @@ Layer3::Run (pth_sem_t * stop1)
 		    individual[i].cb->Get_L_Data (new L_Data_PDU (*l1));
 	    }
 	}
+    redel:
+      for (i = 0; i < ignore (); i++)
+	if (ignore[i].end < getTime ())
+	  {
+	    ignore.deletepart (i, 1);
+	    goto redel;
+	  }
+    wt:
       delete l;
 
     }
