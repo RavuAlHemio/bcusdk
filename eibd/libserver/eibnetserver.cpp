@@ -18,6 +18,7 @@
 */
 
 #include "eibnetserver.h"
+#include "emi.h"
 
 #define NAME "eibd"
 

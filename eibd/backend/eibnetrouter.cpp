@@ -18,6 +18,7 @@
 */
 
 #include "eibnetrouter.h"
+#include "emi.h"
 
 EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
 				eibaddr_t a, Trace * tr)

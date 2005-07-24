@@ -53,10 +53,6 @@ int GetSourceAddress (const struct sockaddr_in *dest,
 CArray IPtoEIBNetIP (const struct sockaddr_in *a);
 /** convert EIBnet/IP IP Address to a */
 int EIBnettoIP (const CArray & buf, struct sockaddr_in *a);
-/** convert L_Data_PDU to CEMI frame */
-CArray L_Data_ToCEMI (uchar code, const L_Data_PDU & p);
-/** create L_Data_PDU out of a CEMI frame */
-L_Data_PDU *CEMI_to_L_Data (const CArray & data);
 
 /** represents a EIBnet/IP packet */
 class EIBNetIPPacket

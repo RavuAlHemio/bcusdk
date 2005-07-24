@@ -18,6 +18,7 @@
 */
 
 #include "eibnettunnel.h"
+#include "emi.h"
 
 bool
 EIBNetIPTunnel::addAddress (eibaddr_t addr)
