@@ -27,4 +27,9 @@ CArray L_Data_ToCEMI (uchar code, const L_Data_PDU & p);
 /** create L_Data_PDU out of a CEMI frame */
 L_Data_PDU *CEMI_to_L_Data (const CArray & data);
 
+/** convert L_Data_PDU to EMI1/2 frame */
+CArray L_Data_ToEMI (uchar code, const L_Data_PDU & p);
+/** create L_Data_PDU out of a EMI1/2 frame */
+L_Data_PDU *EMI_to_L_Data (const CArray & data);
+
 #endif
