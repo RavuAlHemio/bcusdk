@@ -44,6 +44,18 @@ EMI2Layer2Interface::removeGroupAddress (eibaddr_t addr)
 }
 
 bool
+EMI2Layer2Interface::Connection_Lost ()
+{
+  return iface->Connection_Lost ();
+}
+
+eibaddr_t
+EMI2Layer2Interface::getDefaultAddr ()
+{
+  return 0;
+}
+
+bool
 EMI2Layer2Interface::openVBusmonitor ()
 {
   vmode = 1;
@@ -55,18 +67,6 @@ EMI2Layer2Interface::closeVBusmonitor ()
 {
   vmode = 0;
   return 1;
-}
-
-bool
-EMI2Layer2Interface::Connection_Lost ()
-{
-  return iface->Connection_Lost ();
-}
-
-eibaddr_t
-EMI2Layer2Interface::getDefaultAddr ()
-{
-  return 0;
 }
 
 EMI2Layer2Interface::EMI2Layer2Interface (LowLevelDriverInterface * i,
