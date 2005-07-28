@@ -1,0 +1,125 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
+
+PACKAGE=tmp
+
+ifeq (,$(DEB_BUILD_GNU_TYPE))
+  include /usr/share/dbs/dpkg-arch.mk
+endif
+
+CONFARGS = -v \
+        --prefix=/usr \
+        --infodir=/usr/share/info \
+        --mandir=/usr/share/man \
+	--libexecdir=/usr/lib \
+	--enable-ft12 \
+	--enable-pei16 \
+	--enable-tpuart \
+	--enable-pei16s \
+	--enable-tpuarts \
+	--enable-eibnetip \
+	--enable-eibnetipserver \
+	--enable-eibnetiptunnel
+
+srcdir=src
+
+# Patches
+#patch_stamp=patch-stamp
+#debian_patches = gcc_avr_fixed_reg
+#include /usr/src/toolchain/patches/gcc/rules.patch
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+include /usr/share/dbs/dbs-build.mk
+
+#unpack: unpack-stamp
+#unpack-stamp:
+#	tar xjf /usr/src/toolchain/gcc.tar.bz2
+#	mv gcc-* src
+#	mkdir build
+#
+#	touch unpack-stamp
+
+configure: configure-stamp
+configure-stamp: $(patched)
+	dh_testdir
+	# Add here commands to configure the package.
+	./configure $(CONFARGS) 
+	touch configure-stamp
+
+build: configure-stamp build-stamp
+build-stamp: $(patched)
+	dh_testdir
+
+	# Add here commands to compile the package.
+	$(MAKE)
+	#/usr/bin/docbook-to-man debian/$(PACKAGE).sgml > $(PACKAGE).1
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) distclean
+	find -type l -exec rm {} \;
+	rm -rf $(STAMP_DIR) $(SOURCE_DIR)
+
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Add here commands to install the package into debian/$(PACKAGE).
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/$(PACKAGE)/
+
+# Must not depend on anything. This is to be called by
+# binary-arch/binary-indep
+# in another 'make' thread.
+binary-common:
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_installchangelogs 
+	dh_installdocs -A README
+	dh_installexamples
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate	
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip -Xusr/lib/bcusdk/lib
+	dh_compress 
+	dh_fixperms
+#	dh_perl
+#	dh_python
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+# Build architecture independant packages using the common target.
+binary-indep: install
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+
+# Build architecture dependant packages using the common target.
+binary-arch: install
+	$(MAKE) -f debian/rules DH_OPTIONS=-a binary-common
+
+
+binary: binary-indep binary-arch 
+.PHONY: build clean binary-indep binary-arch binary-common binary install configure
