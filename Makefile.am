@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=1.9
 
-SUBDIRS=. common eibd xml bcu bcugen archive build
+SUBDIRS=. common eibd xml bcu bcugen archive build debian
 
 BUILT_SOURCES=path.h
 CLEANFILES=path.h
