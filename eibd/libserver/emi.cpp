@@ -158,8 +158,6 @@ EMI_to_L_Data (const CArray & data)
       break;
     }
   c.AddrType = (data[6] & 0x80) ? GroupAddress : IndividualAddress;
-  if (c.AddrType == IndividualAddress)
-    c.dest = 0;
   len = (data[6] & 0x0f) + 1;
   if (len > data.len () - 7)
     len = data.len () - 7;
