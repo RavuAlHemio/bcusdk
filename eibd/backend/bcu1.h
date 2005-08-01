@@ -17,8 +17,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef EIB_TPUART_H
-#define EIB_TPUART_H
+#ifndef EIB_BCU1_H
+#define EIB_BCU1_H
 
 #include "lowlevel.h"
 
