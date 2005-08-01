@@ -18,6 +18,7 @@
 */
 
 #include "emi2.h"
+#include "emi.h"
 
 bool
 EMI2Layer2Interface::addAddress (eibaddr_t addr)
@@ -205,35 +206,7 @@ EMI2Layer2Interface::Send_L_Data (LPDU * l)
   assert (l1->data () <= 0x10);
   assert ((l1->hopcount & 0xf8) == 0);
 
-  CArray pdu;
-  uchar c;
-  switch (l1->prio)
-    {
-    case PRIO_LOW:
-      c = 0x3;
-      break;
-    case PRIO_NORMAL:
-      c = 0x1;
-      break;
-    case PRIO_URGENT:
-      c = 0x02;
-      break;
-    case PRIO_SYSTEM:
-      c = 0x00;
-      break;
-    }
-  pdu.resize (l1->data () + 7);
-  pdu[0] = 0x11;
-  pdu[1] = c << 2;
-  pdu[2] = 0;
-  pdu[3] = 0;
-  pdu[4] = (l1->dest >> 8) & 0xff;
-  pdu[5] = (l1->dest) & 0xff;
-  pdu[6] =
-    (l1->hopcount & 0x07) << 4 | ((l1->data () - 1) & 0x0f) | (l1->AddrType ==
-							       GroupAddress ?
-							       0x80 : 0x00);
-  pdu.setpart (l1->data.array (), 7, l1->data ());
+  CArray pdu = L_Data_ToEMI (0x11, *l1);
   iface->Send_Packet (pdu);
   if (vmode)
     {
@@ -276,49 +249,28 @@ EMI2Layer2Interface::Run (pth_sem_t * stop1)
       CArray *c = iface->Get_Packet (stop);
       if (!c)
 	continue;
-      if (c->len () > 7 && (*c)[0] == 0x29)
+      if (c->len () && (*c)[0] == 0x29 && mode == 2)
 	{
-	  unsigned len;
-	  L_Data_PDU *p = new L_Data_PDU;
-	  p->source = ((*c)[2] << 8) | ((*c)[3]);
-	  p->dest = ((*c)[4] << 8) | ((*c)[5]);
-	  switch (((*c)[1] >> 2) & 0x3)
+	  L_Data_PDU *p = EMI_to_L_Data (*c);
+	  if (p)
 	    {
-	    case 0:
-	      p->prio = PRIO_SYSTEM;
-	      break;
-	    case 1:
-	      p->prio = PRIO_URGENT;
-	      break;
-	    case 2:
-	      p->prio = PRIO_NORMAL;
-	      break;
-	    case 3:
-	      p->prio = PRIO_LOW;
-	      break;
-	    }
-	  p->AddrType = ((*c)[6] & 0x80) ? GroupAddress : IndividualAddress;
-	  if (p->AddrType == IndividualAddress)
-	    p->dest = 0;
-	  len = ((*c)[6] & 0x0f) + 1;
-	  if (len > c->len () - 7)
-	    len = c->len () - 7;
-	  p->data.set (c->array () + 7, len);
-	  p->hopcount = ((*c)[6] >> 4) & 0x07;
-	  delete c;
-	  t->TracePrintf (2, this, "Recv %s", p->Decode ()());
-	  if (vmode)
-	    {
-	      L_Busmonitor_PDU *l2 = new L_Busmonitor_PDU;
-	      l2->pdu.set (p->ToPacket ());
-	      outqueue.put (l2);
+	      delete c;
+	      if (p->AddrType == IndividualAddress)
+		p->dest = 0;
+	      t->TracePrintf (2, this, "Recv %s", p->Decode ()());
+	      if (vmode)
+		{
+		  L_Busmonitor_PDU *l2 = new L_Busmonitor_PDU;
+		  l2->pdu.set (p->ToPacket ());
+		  outqueue.put (l2);
+		  pth_sem_inc (&out_signal, 1);
+		}
+	      outqueue.put (p);
 	      pth_sem_inc (&out_signal, 1);
+	      continue;
 	    }
-	  outqueue.put (p);
-	  pth_sem_inc (&out_signal, 1);
-	  continue;
 	}
-      if (c->len () > 4 && (*c)[0] == 0x2B)
+      if (c->len () > 4 && (*c)[0] == 0x2B && mode == 1)
 	{
 	  L_Busmonitor_PDU *p = new L_Busmonitor_PDU;
 	  p->pdu.set (c->array () + 4, c->len () - 4);
