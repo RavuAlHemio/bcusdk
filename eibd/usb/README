@@ -1,0 +1,16 @@
+This directory contains (beside other things) a customised version of
+a developement snapshot of libusb. Offical version are available at
+http://libusb.sourceforge.net/. The licence for this libary can be
+found in COPYING.
+
+Upstream Authors:
+Johannes Erdfelt, <johannes@erdfelt.com>
+Thomas Sailer, <sailer@ife.ee.ethz.ch>
+
+Please do not bother the upstream authors with bugs introduced by me.
+
+Martin Kögler
+mkoegler@auto.tuwien.ac.at
+
+
+
