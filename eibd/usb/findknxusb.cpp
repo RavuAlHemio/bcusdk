@@ -1,3 +1,22 @@
+/*
+    EIBD eib bus access and management daemon
+    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +80,7 @@ check_device (usb_device_id_t cdev)
 		    }
 		}
 	    }
-	  if (!in && !out)
+	  if (!in || !out)
 	    continue;
 	  if (usb_open (cdev, &h) >= 0)
 	    {
@@ -75,9 +94,10 @@ check_device (usb_device_id_t cdev)
 		strcpy (product, "<Unreadable>");
 	      printf ("device %d:%d:%d:%d (%s:%s)\n",
 		      usb_get_busnum (usb_get_device_bus_id (cdev)),
-		      usb_get_devnum (cdev), j, k, vendor, product);
+		      usb_get_devnum (cdev), cfg.bConfigurationValue,
+		      intf.bInterfaceNumber, vendor, product);
+	      usb_close (h);
 	    }
-	  usb_close (h);
 	}
     }
 }
@@ -92,7 +112,7 @@ check_devlist (usb_device_id_t dev)
   for (i = 0; i < usb_get_child_count (dev); i++)
     {
       cdev = usb_get_child_device_id (dev, i + 1);
-      check_device (cdev);
+      check_devlist (cdev);
     }
 
 }

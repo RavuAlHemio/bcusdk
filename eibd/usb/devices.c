@@ -589,7 +589,7 @@ int usb_get_endpoint_desc(usb_device_id_t devid, int cfgidx, int ifcidx,
   if (eptidx < 0 || eptidx >= as->num_endpoints)
     return -EINVAL;
 
-  memcpy(eptdsc, &as->endpoints[0].desc, sizeof(*eptdsc));
+  memcpy(eptdsc, &as->endpoints[eptidx].desc, sizeof(*eptdsc));
 
   return 0;
 }
