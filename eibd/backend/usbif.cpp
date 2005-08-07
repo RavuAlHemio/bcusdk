@@ -391,7 +391,7 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	    }
 	  t->TracePrintf (0, this, "StartSend");
 	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
-		     PTH_UNTIL_FD_WRITEABLE, recve,
+		     PTH_UNTIL_FD_WRITEABLE, sende,
 		     usb_io_wait_handle (sendh));
 
 	}
