@@ -9,5 +9,6 @@ FRONTEND_C=client.h client.cpp busmonitor.h busmonitor.cpp connection.h connecti
 FRONTEND=server.h server.cpp localserver.h localserver.cpp inetserver.h inetserver.cpp $(FRONTEND_C)
 EMI=emi1.h emi1.cpp emi2.h emi2.cpp emi.h emi.cpp
 EIBNETIP=eibnetip.cpp eibnetip.h eibnetserver.cpp eibnetserver.h
+USB=eibusb.cpp eibusb.h
 
-libeibstack_a_SOURCES =$(COMMON) $(CORE) $(PDUs) $(MANAGEMENT) $(FRONTEND) $(EMI) $(EIBNETIP) 
+libeibstack_a_SOURCES =$(COMMON) $(CORE) $(PDUs) $(MANAGEMENT) $(FRONTEND) $(EMI) $(EIBNETIP) $(USB)
