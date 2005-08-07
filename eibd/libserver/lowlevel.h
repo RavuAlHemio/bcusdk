@@ -27,7 +27,7 @@ class LowLevelDriverInterface
 {
 public:
   typedef enum
-  { vEMI1, vEMI2 } EMIVer;
+  { vEMI1, vEMI2, vCEMI, vRaw } EMIVer;
 
     virtual ~ LowLevelDriverInterface ()
   {
