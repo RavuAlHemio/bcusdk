@@ -40,8 +40,14 @@ else
 EIBNETIPTUNNEL =
 endif
 
-noinst_LIBRARIES = libbackend.a
-AM_CPPFLAGS=-I../libserver -I../../common
+if HAVE_USB
+USB = usbif.h usbif.cpp
+else
+USB =
+endif
 
-libbackend_a_SOURCES= $(FT12) $(PEI16) $(TPUART) $(PEI16s) $(TPUARTs) $(EIBNETIP) $(EIBNETIPTUNNEL)
+noinst_LIBRARIES = libbackend.a
+AM_CPPFLAGS=-I../libserver -I../../common -I../usb
+
+libbackend_a_SOURCES= $(FT12) $(PEI16) $(TPUART) $(PEI16s) $(TPUARTs) $(EIBNETIP) $(EIBNETIPTUNNEL) $(USB)
 
