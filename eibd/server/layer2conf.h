@@ -43,5 +43,8 @@
 #ifdef HAVE_TPUARTs
 #include "b-TPUARTs.h"
 #endif
+#ifdef HAVE_USB
+#include "b-USB.h"
+#endif
 
 #endif

@@ -17,22 +17,23 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef LAYER2_CONF_H
-#define LAYER2_CONF_H
+#ifndef C_USB_H
+#define C_USB_H
 
-#include "config.h"
+#include "eibusb.h"
+#include "usbif.h"
 
-#ifdef HAVE_FT12
-#include "l-FT12.h"
-#endif
-#ifdef HAVE_PEI16
-#include "l-PEI16.h"
-#endif
-#ifdef HAVE_PEI16s
-#include "l-PEI16s.h"
-#endif
-#ifdef HAVE_USB
-#include "l-USB.h"
-#endif
+#define USB_URL "usb:[bus[:device[:config[:interface]]]]\n"
+#define USB_DOC "usb connects over a KNX USB interface\n\n"
+#define USB_PREFIX "usb"
+#define USB_CREATE usb_ll_Create
+
+inline LowLevelDriverInterface *
+usb_ll_Create (const char *dev, Trace * t)
+{
+  usb_set_debug (100);
+  usb_init (0);
+  return initUSBDriver (new USBLowLevelDriver (dev, t), t);
+}
 
 #endif
