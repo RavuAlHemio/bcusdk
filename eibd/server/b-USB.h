@@ -31,7 +31,7 @@
 inline Layer2Interface *
 Usb_Create (const char *dev, Trace * t)
 {
-  usb_set_debug (100);
+  usb_set_debug (0);
   usb_init (0);
   return new USBLayer2Interface (new USBLowLevelDriver (dev, t), t);
 }
