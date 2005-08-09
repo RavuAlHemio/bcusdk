@@ -27,7 +27,7 @@ void usb_set_debug(int level)
   usb_debug = level;
 }
 
-void _usbi_debug(int level, char *func, int line, char *fmt, ...)
+void _usbi_debug(int level, const char *func, int line, char *fmt, ...)
 {
   char str[512];
   va_list ap;
@@ -96,7 +96,8 @@ int usb_get_string(usb_dev_handle_t *dev, int index, int langid,
 			buflen, 1000);
 }
 
-int usb_get_string_simple(usb_dev_handle_t *dev, int index, char *buf, size_t buflen)
+int usb_get_string_simple(usb_dev_handle_t *dev, int index,
+	unsigned char *buf, size_t buflen)
 {
   char tbuf[256];
   int ret, langid, si, di;

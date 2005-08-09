@@ -241,8 +241,8 @@ int usbi_os_io_complete(struct usbi_dev_handle *dev)
 
   /* FIXME: Translate the status code */
 
-  if (io->setup) 
-    memcpy(io->buffer,io->urb.buffer+ USBI_CONTROL_SETUP_LEN,io->bufferlen);
+ if (io->setup)
+    memcpy(io->buffer, io->urb.buffer + USBI_CONTROL_SETUP_LEN, io->bufferlen);
 
   usbi_io_complete(io, urb->status, urb->actual_length);
 
@@ -697,7 +697,7 @@ int usbi_os_refresh_devices(struct usbi_bus *ibus)
   return 0;
 }
 
-static int check_usb_vfs(const unsigned char *dirname)
+static int check_usb_vfs(const char *dirname)
 {
   DIR *dir;
   struct dirent *entry;
@@ -792,23 +792,6 @@ int usb_get_driver_np(usb_dev_handle_t *dev, int interface, char *name,
   return 0;
 }
 
-int usb_detach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
-{
-  struct usbk_ioctl command;
-  int ret;
-
-  command.ifno = interface;
-  command.ioctl_code = IOCTL_USB_DISCONNECT;
-  command.data = NULL;
-
-  ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
-  if (ret)
-    USB_ERROR_STR(-errno, "could not detach kernel driver from interface %d: %s",
-        interface, strerror(errno));
-
-  return 0;
-}
-
 int usb_attach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
 {
   struct usbk_ioctl command;
@@ -821,6 +804,23 @@ int usb_attach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
   ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
   if (ret)
     USB_ERROR_STR(-errno, "could not attach kernel driver to interface %d: %s",
+        interface, strerror(errno));
+
+  return 0;
+}
+
+int usb_detach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
+{
+  struct usbk_ioctl command;
+  int ret;
+
+  command.ifno = interface;
+  command.ioctl_code = IOCTL_USB_DISCONNECT;
+  command.data = NULL;
+
+  ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
+  if (ret)
+    USB_ERROR_STR(-errno, "could not detach kernel driver from interface %d: %s",
         interface, strerror(errno));
 
   return 0;

@@ -87,10 +87,10 @@ check_device (usb_device_id_t cdev)
 	      memset (vendor, 0, sizeof (vendor));
 	      memset (product, 0, sizeof (product));
 	      if (usb_get_string_simple
-		  (h, desc.iManufacturer, vendor, sizeof (vendor) - 1) < 0)
+		  (h, desc.iManufacturer, (unsigned char*) vendor, sizeof (vendor) - 1) < 0)
 		strcpy (vendor, "<Unreadable>");
 	      if (usb_get_string_simple
-		  (h, desc.iProduct, product, sizeof (product) - 1) < 0)
+		  (h, desc.iProduct, (unsigned char*) product, sizeof (product) - 1) < 0)
 		strcpy (product, "<Unreadable>");
 	      printf ("device %d:%d:%d:%d (%s:%s)\n",
 		      usb_get_busnum (usb_get_device_bus_id (cdev)),

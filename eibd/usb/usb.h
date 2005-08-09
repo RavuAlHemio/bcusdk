@@ -246,12 +246,16 @@ int usb_get_raw_device_desc(usb_device_id_t devid,
 int usb_get_raw_config_desc(usb_device_id_t devid,
 	int cfgidx, unsigned char *buffer, size_t buflen);		/* D */
 int usb_refresh_descriptors(usb_device_id_t devid);			/* D */
+int usb_get_string(usb_dev_handle_t *dev, int index, int langid,
+	unsigned char *buf, size_t buflen);				/* D */
+int usb_get_string_simple(usb_dev_handle_t *dev, int index,
+	unsigned char *buf, size_t buflen);				/* D */
 
 /* Functions for searching for devices */
 int usb_match_devices_by_vendor(usb_match_handle_t **match,
 	int vendor, int product);					/* D */
 int usb_match_devices_by_class(usb_match_handle_t **match,
-	int Class, int subclass, int protocol);				/* D */
+	int bClass, int bSubClass, int bProtocol);			/* D */
 int usb_match_next_device(usb_match_handle_t *match,
 	usb_device_id_t *devid);					/* D */
 int usb_free_match(usb_match_handle_t *handle);				/* D */
@@ -271,11 +275,8 @@ int usb_close(usb_dev_handle_t *dev);					/* D */
 /* FIXME: We need to preprocess this with configure.in */
 int usb_get_driver_np(usb_dev_handle_t *dev, int interface, char *name,
 	unsigned int namelen);						/* D */
-int usb_detach_kernel_driver_np(usb_dev_handle_t *dev, int interface);	/* D */
 int usb_attach_kernel_driver_np(usb_dev_handle_t *dev, int interface);	/* D */
-int usb_get_string(usb_dev_handle_t *dev, int index, int langid,
-		   unsigned char *buf, size_t buflen);
-int usb_get_string_simple(usb_dev_handle_t *dev, int index, char *buf, size_t buflen);
+int usb_detach_kernel_driver_np(usb_dev_handle_t *dev, int interface);	/* D */
 
 /* Synchronous I/O functions */
 int usb_control_msg(usb_dev_handle_t *dev, uint8_t bRequestType,

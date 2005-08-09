@@ -270,11 +270,11 @@ static int add_match_to_list(struct usbi_match *match, struct usbi_device *idev)
 }
 
 static int match_interfaces(struct usbi_device *idev,
-	int class, int subclass, int protocol)
+	int bClass, int bSubClass, int bProtocol)
 {
   int c;
 
-  if (class < 0 && subclass < 0 && protocol < 0)
+  if (bClass < 0 && bSubClass < 0 && bProtocol < 0)
     return 1;
 
   /* Now check all of the configs/interfaces/altsettings */
@@ -289,9 +289,9 @@ static int match_interfaces(struct usbi_device *idev,
       for (a = 0; a < intf->num_altsettings; a++) {
         struct usb_interface_desc *as = &intf->altsettings[a].desc;
 
-        if ((class < 0 || class == as->bInterfaceClass) &&
-            (subclass < 0 || subclass == as->bInterfaceSubClass) &&
-            (protocol < 0 || protocol == as->bInterfaceProtocol))
+        if ((bClass < 0 || bClass == as->bInterfaceClass) &&
+            (bSubClass < 0 || bSubClass == as->bInterfaceSubClass) &&
+            (bProtocol < 0 || bProtocol == as->bInterfaceProtocol))
           return 1;
       }
     }
@@ -329,13 +329,13 @@ int usb_match_devices_by_vendor(usb_match_handle_t **handle,
 }
 
 int usb_match_devices_by_class(usb_match_handle_t **handle,
-        int class, int subclass, int protocol)
+        int bClass, int bSubClass, int bProtocol)
 {
   struct usbi_match *match;
   struct usbi_device *idev;
 
-  if (class < -1 || class > 0xff || subclass < -1 || subclass > 0xff ||
-      protocol < -1 || protocol > 0xff)
+  if (bClass < -1 || bClass > 0xff || bSubClass < -1 || bSubClass > 0xff ||
+      bProtocol < -1 || bProtocol > 0xff)
     return -EINVAL;
 
   match = malloc(sizeof(*match));
@@ -345,7 +345,7 @@ int usb_match_devices_by_class(usb_match_handle_t **handle,
   memset(match, 0, sizeof(*match));
 
   list_for_each_entry(idev, &usb_devices, dev_list) {
-    if (match_interfaces(idev, class, subclass, protocol))
+    if (match_interfaces(idev, bClass, bSubClass, bProtocol))
       add_match_to_list(match, idev);
   }
 

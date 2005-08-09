@@ -29,9 +29,10 @@ struct usbi_io *usbi_alloc_io(usb_dev_handle_t *dev, enum usbi_io_type type,
 
   memset(io, 0, sizeof(*io));
 
-  list_init (&io->list);
-  io->type = type;
+  list_init(&io->list);
+
   io->dev = dev;
+  io->type = type;
   io->ep = ep;
   io->setup = setup;
   io->buffer = buffer;

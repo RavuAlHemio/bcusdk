@@ -157,6 +157,7 @@ enum usbi_io_type {
 struct usbi_io {
   struct list_head list;
 
+
   struct usbi_dev_handle *dev;
 
   enum usbi_io_type type;
@@ -175,12 +176,13 @@ struct usbi_io {
   size_t transferlen;		/* amount of buffer transmitted/received */
   int transferstatus;		/* final status */
 
+
   USBI_IO_HANDLE_PRIVATE
 };
 
 /* usb.c */
 extern usb_event_callback_t usbi_event_callback;
-void _usbi_debug(int level, char *func, int line, char *fmt, ...);
+void _usbi_debug(int level, const char *func, int line, char *fmt, ...);
 
 #define usbi_debug(level, fmt...) _usbi_debug(level, __FUNCTION__, __LINE__, fmt)
 
