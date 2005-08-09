@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS=1.9
-
+EXTRA_DIST=bcusdk.spec
 SUBDIRS=. common eibd xml bcu bcugen archive build debian
 
 BUILT_SOURCES=path.h
