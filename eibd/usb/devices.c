@@ -7,6 +7,7 @@
  */
 
 #include <errno.h>
+#include <stdlib.h>	/* malloc, free */
 #include <string.h>	/* memcpy */
 
 #include "usbi.h"

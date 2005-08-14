@@ -187,95 +187,77 @@ uint16_t usb_le16_to_cpu(uint16_t data)
     return data;
 }
 
+static int finish_io(usb_io_handle_t *io)
+{
+  int status, xferlen;
+
+  usb_io_wait(io);
+  status = usb_io_comp_status(io);
+  xferlen = usb_io_xfer_size(io);
+  usb_io_free(io);
+
+  return (status < 0) ? status : xferlen;
+}
+
 int usb_control_msg(usb_dev_handle_t *dev, uint8_t bRequestType,
 	uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
 	void *buffer, size_t bufferlen, unsigned int timeout)
 {
   usb_io_handle_t *io;
-  int status, xferlen;
 
   io = usb_submit_control(dev, 0, bRequestType, bRequest, wValue, wIndex,
 	buffer, bufferlen, timeout, NULL);
   if (!io)
     return -EINVAL;
 
-  usb_io_wait(io);
-  status = usb_io_comp_status(io);
-  xferlen = usb_io_xfer_size(io);
-  usb_io_free(io);
-
-  return (status < 0) ? status : xferlen;
+  return finish_io(io);
 }
 
 int usb_bulk_write(usb_dev_handle_t *dev, unsigned char ep,
 	const void *buffer, size_t bufferlen, unsigned int timeout)
 {
   usb_io_handle_t *io;
-  int status, xferlen;
 
   io = usb_submit_bulk_write(dev, ep, buffer, bufferlen, timeout, NULL);
   if (!io)
     return -EINVAL;
 
-  usb_io_wait(io);
-  status = usb_io_comp_status(io);
-  xferlen = usb_io_xfer_size(io);
-  usb_io_free(io);
-
-  return (status < 0) ? status : xferlen;
+  return finish_io(io);
 }
 
 int usb_bulk_read(usb_dev_handle_t *dev, unsigned char ep,
 	void *buffer, size_t bufferlen, unsigned int timeout)
 {
   usb_io_handle_t *io;
-  int status, xferlen;
 
   io = usb_submit_bulk_read(dev, ep, buffer, bufferlen, timeout, NULL);
   if (!io)
     return -EINVAL;
 
-  usb_io_wait(io);
-  status = usb_io_comp_status(io);
-  xferlen = usb_io_xfer_size(io);
-  usb_io_free(io);
-
-  return (status < 0) ? status : xferlen;
+  return finish_io(io);
 }
 
 int usb_interrupt_write(usb_dev_handle_t *dev, unsigned char ep,
 	const void *buffer, size_t bufferlen, unsigned int timeout)
 {
   usb_io_handle_t *io;
-  int status, xferlen;
 
   io = usb_submit_interrupt_write(dev, ep, buffer, bufferlen, timeout, NULL);
   if (!io)
     return -EINVAL;
 
-  usb_io_wait(io);
-  status = usb_io_comp_status(io);
-  xferlen = usb_io_xfer_size(io);
-  usb_io_free(io);
-
-  return (status < 0) ? status : xferlen;
+  return finish_io(io);
 }
 
 int usb_interrupt_read(usb_dev_handle_t *dev, unsigned char ep,
 	void *buffer, size_t bufferlen, unsigned int timeout)
 {
   usb_io_handle_t *io;
-  int status, xferlen;
 
   io = usb_submit_interrupt_read(dev, ep, buffer, bufferlen, timeout, NULL);
   if (!io)
     return -EINVAL;
 
-  usb_io_wait(io);
-  status = usb_io_comp_status(io);
-  xferlen = usb_io_xfer_size(io);
-  usb_io_free(io);
-
-  return (status < 0) ? status : xferlen;
+  return finish_io(io);
 }
 

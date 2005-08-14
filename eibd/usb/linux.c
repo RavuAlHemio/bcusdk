@@ -241,7 +241,7 @@ int usbi_os_io_complete(struct usbi_dev_handle *dev)
 
   /* FIXME: Translate the status code */
 
- if (io->setup)
+  if (io->setup)
     memcpy(io->buffer, io->urb.buffer + USBI_CONTROL_SETUP_LEN, io->bufferlen);
 
   usbi_io_complete(io, urb->status, urb->actual_length);
