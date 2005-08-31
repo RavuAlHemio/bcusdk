@@ -76,6 +76,16 @@ How to use the BCU SDK is covered in the documentation.
 Parts of the BCU SDK even run on Windows using Cygwin.
 See the webpage about it.
 
+----------------------------------------------------------
+
+In order to justify continuing development, it is helpful to have
+an idea of how many people are using this software. To contribute,
+please send a short mail to bcusdk@auto.tuwien.ac.at whether you
+find this software useful.
+
+Please note, that this is not requirement to use/modify/distribute the
+software.
+
 Martin Kögler
 mkoegler@auto.tuwien.ac.at
 http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcus

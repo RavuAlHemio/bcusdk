@@ -1,5 +1,5 @@
 This is a debian pakcage of a free BCU SDK for EIB.
- This package was downloaded from:
+ This package is available at:
 
   http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcus
 
@@ -24,10 +24,26 @@ XML Schema files as well as DTD have the requirement:
     Modified version of this specification must change the namespace and
     version.
 
+This means, that derived version must use a different the the
+namespace and version as the original version. It does not limit, that
+different derived versions may use the same (not original)
+namespace/version.
+
+The USB backend uses a heavily, modified version of libusb. It is
+under the GNU Lesser General Public License. On Debian GNU/Linux
+systems, the complete text can be found in
+`/usr/share/common-licenses/LGPL'.
+ 
+The official web site of libusb is:
+  http://libusb.sourceforge.net/
+
 --------------------------------------------------------------------
 In order to justify continuing development, it is helpful to have
 an idea of how many people are using this software. To contribute,
 please send a short mail to bcusdk@auto.tuwien.ac.at whether you
 find this software useful.
+
+Please note, that this is not requirement to use/modify/distribute the
+software.
 
 Martin Kögler <mkoegler@auto.tuwien.ac.at>
