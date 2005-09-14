@@ -691,7 +691,7 @@ _divDE_BC (unsigned short dividend, unsigned short divisor)
     volatile
     ("jsr divDE_BC" SETAONCARRY "sta %0":"=r"
      (ret.error), "=u" (ret.quotient), "=t" (ret.remainder):"q" (divisor),
-     "t" (dividend):"A", "X", "RegB", "RegC");
+     "t" (dividend):"A", "X");
   return ret;
 }
 static unsigned short inline
@@ -701,7 +701,7 @@ _divDE_BC_quotient (unsigned short dividend, unsigned short divisor)
   asm
     volatile
     ("jsr divDE_BC":"=u" (ret.quotient), "=t" (ret.remainder):"q" (divisor),
-     "t" (dividend):"A", "X", "RegB", "RegC");
+     "t" (dividend):"A", "X");
   return ret.quotient;
 }
 
@@ -712,7 +712,7 @@ _divDE_BC_remainder (unsigned short dividend, unsigned short divisor)
   asm
     volatile
     ("jsr divDE_BC":"=u" (ret.quotient), "=t" (ret.remainder):"q" (divisor),
-     "t" (dividend):"A", "X", "RegB", "RegC");
+     "t" (dividend):"A", "X");
   return ret.remainder;
 }
 
