@@ -671,7 +671,7 @@ _multDE_FG (unsigned short v1, unsigned short v2)
   U_Mul_Result ret;
   asm
     volatile
-    ("jsr multDE_FD" SETAONCARRY "sta %0":"=r"
+    ("jsr multDE_FG" SETAONCARRY "sta %0":"=r"
      (ret.overflow), "=q" (ret.product):"t" (v1), "u" (v2):"A", "X");
   return ret;
 }
@@ -679,7 +679,7 @@ static unsigned short inline
 _multDE_FG_NE (unsigned short v1, unsigned short v2)
 {
   unsigned short ret;
-  asm volatile ("jsr multDE_FD":"=q" (ret):"t" (v1), "u" (v2):"A", "X");
+  asm volatile ("jsr multDE_FG":"=q" (ret):"t" (v1), "u" (v2):"A", "X");
   return ret;
 }
 
