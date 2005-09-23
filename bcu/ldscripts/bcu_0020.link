@@ -97,8 +97,7 @@ _data_hi_img = _text_end + _data_size;
         _data_hi_start = . ;
 
 }
-        _data_hi_end = . ;
-_data_hi_size = _data_hi_end - _data_hi_start ;
+_data_hi_size = SIZEOF(.data.hi) ;
 
 . = _text_end + _data_size + _data_hi_size ;
 
