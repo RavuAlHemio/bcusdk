@@ -605,7 +605,7 @@ _AllocBuf (bool longbuf)
     volatile
     ("clc\n\tjsr AllocBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
      (ret.valid), "=r" (e)::"A", "X");
-  ret.pointer = (uchar_loptr) (uint2) e;
+  ret.pointer = (uchar_loptr) (uint1) e;
   return ret;
 }
 
@@ -617,13 +617,13 @@ _AllocBuf_NE (bool longbuf)
     asm volatile ("sec\n\tjsr AllocBuf\n\tstx %0":"=r" (ret)::"A", "X");
   else
   asm volatile ("clc\n\tjsr AllocBuf\n\tstx %0":"=r" (ret)::"A", "X");
-  return (uchar_loptr) (uint2) ret;
+  return (uchar_loptr) (uint1) ret;
 }
 
 static void inline
 _FreeBuf (uchar_loptr pointer)
 {
-  uchar x = ((uint2) pointer);
+  uchar x = ((uint1) pointer);
   if (!__builtin_constant_p (x))
     asm volatile ("ldx %0\n\tjsr FreeBuf"::"r" (x):"A", "X", "RegB");
   else
@@ -645,7 +645,7 @@ _PopBuf (uchar msg)
     volatile
     ("lda $%2\n\tjsr PopBuf\n\tstx %1" SETAONCARRY "sta %0":"=r"
      (ret.found), "=r" (e):"i" (msg):"A", "X", "RegB");
-  ret.pointer = (uchar_loptr) (uint2) e;
+  ret.pointer = (uchar_loptr) (uint1) e;
   return ret;
 }
 
@@ -662,7 +662,7 @@ _PopBuf_NE (uchar msg)
   asm
     volatile
     ("lda $%1\n\tjsr PopBuf\n\tstx %1":"=r" (ret):"i" (msg):"A", "X", "RegB");
-  return (uchar_loptr) (uint2) ret;
+  return (uchar_loptr) (uint1) ret;
 }
 
 static U_Mul_Result inline
