@@ -246,7 +246,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		goto out;
 	      r2.CRD.resize (3);
 	      r2.CRD[0] = 0x04;
-	      r2.CRD[1] = 0x02;
+	      r2.CRD[1] = 0x00;
 	      r2.CRD[2] = 0x00;
 	      r2.status = 0x22;
 	      if (r1.CRI () == 3 && r1.CRI[0] == 4 && r1.CRI[1] == 2)
@@ -311,10 +311,16 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      if (c)
 		{
 		  r2.status = 0;
+		  if (r1.CEMI[0] == 0x11)
+		    {
+		      state[i].out.put (L_Data_ToCEMI (0x2E, *c));
+		      pth_sem_inc (state[i].outsignal, 0);
+		    }
 		  if (r1.CEMI[0] == 0x11 || r1.CEMI[0] == 0x29)
 		    l3->send_L_Data (c);
 		  else
 		    delete c;
+
 		}
 	      else
 		r2.status = 0x29;
