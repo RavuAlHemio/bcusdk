@@ -93,7 +93,7 @@ static char args_doc[] = "URL";
 static struct argp_option options[] = {
 
   {"trace", 't', "LEVEL", 0, "set trace level"},
-  {"write", 'w', "LEVEL", 0, "value to write"},
+  {"write", 'w', "SIZE", 0, "value to write"},
   {0}
 };
 
