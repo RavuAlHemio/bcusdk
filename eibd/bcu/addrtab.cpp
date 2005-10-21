@@ -128,7 +128,7 @@ readEMI2AddrTabSize (LowLevelDriverInterface * iface, uchar & result)
     return 0;
   if (d[6] != 0x04)
     return 0;
-  if (d[7] != 0x42)
+  if ((d[7] & 0x03) != 0x02)
     return 0;
   if (d[8] != 0x41)
     return 0;
