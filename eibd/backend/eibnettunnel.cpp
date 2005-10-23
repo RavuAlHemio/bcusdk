@@ -181,6 +181,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   int rno = 0;
   int sno = 0;
   int retry = 0;
+  int heartbeat = 0;
   eibaddr_t myaddr;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &insignal);
@@ -193,6 +194,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   EIBnet_ConnectRequest creq;
   EIBnet_ConnectResponse cresp;
   EIBnet_ConnectionStateRequest csreq;
+  EIBnet_ConnectionStateResponse csresp;
   EIBnet_TunnelRequest treq;
   EIBnet_TunnelACK tresp;
   EIBnet_DisconnectRequest dreq;
@@ -235,7 +237,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		{
 		  t->TracePrintf (1, this, "Connect failed with error %02X",
 				  cresp.status);
-		  goto out;
+		  break;
 		}
 	      if (cresp.CRD () != 3)
 		{
@@ -250,6 +252,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      sock->sendaddr = daddr;
 	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
 			 pth_timeout (30, 0));
+	      heartbeat = 0;
 	      break;
 
 	    case TUNNEL_REQUEST:
@@ -362,6 +365,28 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		t->TracePrintf (1, this, "Unexpected ACK");
 	      break;
 	    case CONNECTIONSTATE_RESPONSE:
+	      if (parseEIBnet_ConnectionStateResponse (*p1, csresp))
+		{
+		  t->TracePrintf (1, this, "Invalid response");
+		  break;
+		}
+	      if (csresp.channel != channel)
+		{
+		  t->TracePrintf (1, this, "Not for us");
+		  break;
+		}
+	      if (csresp.status == 0)
+		{
+		  if (heartbeat > 0)
+		    heartbeat--;
+		  else
+		    t->TracePrintf (1, this,
+				    "Duplicate Connection State Response");
+		}
+	      else
+		t->TracePrintf (1, this,
+				"Connection State Response Error %02x",
+				csresp.status);
 	      break;
 	    case DISCONNECT_REQUEST:
 	      if (mod == 0)
@@ -404,13 +429,27 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	{
 	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
 		     pth_timeout (30, 0));
-	  csreq.caddr = saddr;
-	  csreq.channel = channel;
-	  p = csreq.ToPacket ();
-	  sock->sendaddr = caddr;
-	  t->TracePrintf (1, this, "Heartbeat");
-	  sock->Send (p);
-	  sock->sendaddr = daddr;
+	  if (heartbeat < 5)
+	    {
+	      csreq.caddr = saddr;
+	      csreq.channel = channel;
+	      p = csreq.ToPacket ();
+	      sock->sendaddr = caddr;
+	      t->TracePrintf (1, this, "Heartbeat");
+	      sock->Send (p);
+	      sock->sendaddr = daddr;
+	      heartbeat++;
+	    }
+	  else
+	    {
+	      t->TracePrintf (1, this, "Disconnection because of errors");
+	      dreq.caddr = saddr;
+	      dreq.channel = channel;
+	      p = dreq.ToPacket ();
+	      if (channel != -1)
+		sock->Send (p);
+	      mod = 0;
+	    }
 	}
       if (mod == 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
 	{
