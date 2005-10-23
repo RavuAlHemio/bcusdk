@@ -92,8 +92,8 @@ T_Broadcast::Get (pth_event_t stop)
 
 T_Group::T_Group (Layer3 * l3, Trace * tr, eibaddr_t group, int write_only)
 {
-  tr->TracePrintf (4, this, "OpenGroup %d/%d/%d %s", (group >> 12) & 0x0f,
-		   (group >> 8) & 0x0f, (group) & 0xff,
+  tr->TracePrintf (4, this, "OpenGroup %d/%d/%d %s", (group >> 11) & 0x1f,
+		   (group >> 8) & 0x07, (group) & 0xff,
 		   write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
