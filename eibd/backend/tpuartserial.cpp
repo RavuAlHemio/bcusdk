@@ -358,7 +358,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 			  c |= 0x1;
 		    }
 		  t->TracePrintf (0, this, "SendAck %02X", c);
-		  write (fd, &c, 1);
+		  pth_write_ev (fd, &c, 1, stop);
 		  acked = 1;
 		}
 	      unsigned len = in[5] & 0x0f;
