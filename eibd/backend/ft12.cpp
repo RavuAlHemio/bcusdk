@@ -273,7 +273,7 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 	  const CArray & c = inqueue.top ();
 	  t->TracePacket (0, this, "Send", c);
 	  repeatcount++;
-	  i = write (fd, c.array (), c ());
+	  i = pth_write_ev (fd, c.array (), c (), stop);
 	  if (i == c ())
 	    {
 	      mode = 1;
