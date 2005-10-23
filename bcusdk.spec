@@ -105,6 +105,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 /usr/bin/eibd
 /usr/bin/bcuaddrtab
+/usr/bin/bcuread
 /usr/bin/eibnetdescribe
 /usr/bin/eibnetsearch
 /usr/bin/findknxusb
