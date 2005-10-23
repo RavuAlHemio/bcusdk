@@ -23,8 +23,6 @@ const uchar EMI2_TLL[] = { 0xA9, 0x00, 0x12, 0x34, 0x56, 0x78, 0x0A };
 const uchar EMI2_NORM[] = { 0xA9, 0x00, 0x12, 0x34, 0x56, 0x78, 0x8A };
 const uchar EMI2_LCON[] = { 0x43, 0x00, 0x00, 0x00, 0x00, 0x00 };
 const uchar EMI2_LDIS[] = { 0x44, 0x00, 0x00, 0x00, 0x00, 0x00 };
-const uchar EMI2_READ[] =
-  { 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x02, 0x01, 0x01, 0x16 };
 
 const uchar EMI1_READ[] = { 0x4C, 0x01, 0x01, 0x16 };
 
@@ -38,6 +36,259 @@ llwait (LowLevelDriverInterface * iface)
 	e = pth_event (PTH_EVENT_SEM, iface->Send_Queue_Empty_Cond ());
       pth_wait (e);
       pth_event_free (e, PTH_FREE_THIS);
+    }
+}
+
+int
+readEMI1Mem (LowLevelDriverInterface * iface, memaddr_t addr, uchar len,
+	     CArray & result)
+{
+  CArray *d1, d;
+  d.resize (4);
+  d[0] = 0x4C;
+  d[1] = len;
+  d[2] = (addr >> 8) & 0xff;
+  d[3] = (addr) & 0xff;
+  iface->Send_Packet (d);
+  llwait (iface);
+  d1 = iface->Get_Packet (0);
+  if (!d1)
+    return 0;
+  d = *d1;
+  delete d1;
+  if (d () != 4 + len)
+    return 0;
+  if (d[0] != 0x4B)
+    return 0;
+  if (d[1] != len)
+    return 0;
+  if (d[2] != ((addr >> 8) & 0xff))
+    return 0;
+  if (d[3] != ((addr) & 0xff))
+    return 0;
+  result.set (d.array () + 4, len);
+  return 1;
+}
+
+int
+writeEMI1Mem (LowLevelDriverInterface * iface, memaddr_t addr, CArray data)
+{
+  CArray d;
+  iface->SendReset ();
+  d.resize (4 + data ());
+  d[0] = 0x46;
+  d[1] = data.len () & 0xff;
+  d[2] = (addr >> 8) & 0xff;
+  d[3] = (addr) & 0xff;
+  d.setpart (data, 4);
+  iface->Send_Packet (d);
+  llwait (iface);
+  if (!readEMI1Mem (iface, addr, data (), d))
+    return 0;
+  return d == data;
+}
+
+int
+readEMI2Mem (LowLevelDriverInterface * iface, memaddr_t addr, uchar len,
+	     CArray & result)
+{
+  CArray *d1, d;
+  iface->SendReset ();
+  iface->Send_Packet (CArray (EMI2_TLL, sizeof (EMI2_TLL)));
+  iface->Send_Packet (CArray (EMI2_LCON, sizeof (EMI2_LCON)));
+
+  // ignore ACKs
+  d1 = iface->Get_Packet (0);
+  if (d1)
+    {
+      d = *d1;
+      delete d1;
+      if (d () != 6)
+	return 0;
+      if (d[0] != 0x86)
+	return 0;
+    }
+  else
+    return 0;
+
+  d.resize (11);
+  d[0] = 0x41;
+  d[1] = 0x00;
+  d[2] = 0x00;
+  d[3] = 0x00;
+  d[4] = 0x00;
+  d[5] = 0x00;
+  d[6] = 0x03;
+  d[7] = 0x02;
+  d[8] = len & 0x0f;
+  d[9] = (addr >> 8) & 0xff;
+  d[10] = (addr) & 0xff;
+
+  iface->Send_Packet (d);
+
+  // ignore ACKs
+  d1 = iface->Get_Packet (0);
+  if (d1)
+    {
+      d = *d1;
+      delete d1;
+      if (d () != 11)
+	return 0;
+      if (d[0] != 0x8E)
+	return 0;
+    }
+  else
+    return 0;
+
+  d1 = iface->Get_Packet (0);
+  if (!d1)
+    return 0;
+  d = *d1;
+  delete d1;
+  if (d () != 11 + len)
+    return 0;
+  if (d[0] != 0x89)
+    return 0;
+  if (d[1] != 0x00)
+    return 0;
+  if (d[2] != 0x00)
+    return 0;
+  if (d[3] != 0x00)
+    return 0;
+  if (d[4] != 0x00)
+    return 0;
+  if (d[5] != 0x00)
+    return 0;
+  if (d[6] != 0x03 + len)
+    return 0;
+  if ((d[7] & 0x03) != 0x02)
+    return 0;
+  if (d[8] != (0x40 | len))
+    return 0;
+  if (d[9] != ((addr >> 8) & 0xff))
+    return 0;
+  if (d[10] != ((addr) & 0xff))
+    return 0;
+  result.set (d.array () + 11, len);
+  iface->Send_Packet (CArray (EMI2_LDIS, sizeof (EMI2_LDIS)));
+  d1 = iface->Get_Packet (0);
+  if (!d1)
+    return 0;
+  else
+    {
+      d = *d1;
+      delete d1;
+      if (d () != 6)
+	return 0;
+      if (d[0] != 0x88)
+	return 0;
+    }
+  iface->Send_Packet (CArray (EMI2_NORM, sizeof (EMI2_NORM)));
+  llwait (iface);
+  return 1;
+}
+
+int
+writeEMI2Mem (LowLevelDriverInterface * iface, memaddr_t addr, CArray data)
+{
+  CArray *d1, d;
+  iface->SendReset ();
+  iface->Send_Packet (CArray (EMI2_TLL, sizeof (EMI2_TLL)));
+
+  iface->Send_Packet (CArray (EMI2_LCON, sizeof (EMI2_LCON)));
+
+  // ignore ACKs
+  d1 = iface->Get_Packet (0);
+  if (d1)
+    {
+      d = *d1;
+      delete d1;
+      if (d () != 6)
+	return 0;
+      if (d[0] != 0x86)
+	return 0;
+    }
+  else
+    return 0;
+
+  d.resize (11 + data ());
+  d[0] = 0x41;
+  d[1] = 0x00;
+  d[2] = 0x00;
+  d[3] = 0x00;
+  d[4] = 0x00;
+  d[5] = 0x00;
+  d[6] = 0x03;
+  d[7] = 0x02;
+  d[8] = (0x80 | (data () & 0x0f));
+  d[9] = (addr >> 8) & 0xff;
+  d[10] = (addr) & 0xff;
+  d.setpart (data, 11);
+
+  iface->Send_Packet (d);
+  d1 = iface->Get_Packet (0);
+  if (d1)
+    {
+      d = *d1;
+      delete d1;
+      if (d () != 11 + data ())
+	return 0;
+      if (d[0] != 0x8E)
+	return 0;
+    }
+  else
+    return 0;
+
+  iface->Send_Packet (CArray (EMI2_LDIS, sizeof (EMI2_LDIS)));
+  d1 = iface->Get_Packet (0);
+  if (!d1)
+    return 0;
+  else
+    {
+      d = *d1;
+      delete d1;
+      if (d () != 6)
+	return 0;
+      if (d[0] != 0x88)
+	return 0;
+    }
+
+  iface->Send_Packet (CArray (EMI2_NORM, sizeof (EMI2_NORM)));
+  llwait (iface);
+
+  if (!readEMI2Mem (iface, addr, data (), d))
+    return 0;
+  return d == data;
+}
+
+int
+readEMIMem (LowLevelDriverInterface * iface, memaddr_t addr, uchar len,
+	    CArray & result)
+{
+  switch (iface->getEMIVer ())
+    {
+    case LowLevelDriverInterface::vEMI1:
+      return readEMI1Mem (iface, addr, len, result);
+    case LowLevelDriverInterface::vEMI2:
+      return readEMI2Mem (iface, addr, len, result);
+
+    default:
+      return 0;
+    }
+}
+
+int
+writeEMIMem (LowLevelDriverInterface * iface, memaddr_t addr, CArray data)
+{
+  switch (iface->getEMIVer ())
+    {
+    case LowLevelDriverInterface::vEMI1:
+      return writeEMI1Mem (iface, addr, data);
+    case LowLevelDriverInterface::vEMI2:
+      return writeEMI2Mem (iface, addr, data);
+
+    default:
+      return 0;
     }
 }
 
@@ -89,116 +340,20 @@ writeEMI1AddrTabSize (LowLevelDriverInterface * iface, uchar size)
 int
 readEMI2AddrTabSize (LowLevelDriverInterface * iface, uchar & result)
 {
-  CArray *d1, d;
-  iface->SendReset ();
-  iface->Send_Packet (CArray (EMI2_TLL, sizeof (EMI2_TLL)));
-  iface->Send_Packet (CArray (EMI2_LCON, sizeof (EMI2_LCON)));
-  iface->Send_Packet (CArray (EMI2_READ, sizeof (EMI2_READ)));
-  // ignore ACKs
-  d1 = iface->Get_Packet (0);
-  if (d1)
-    delete d1;
-  else
+  CArray x;
+  if (!readEMI2Mem (iface, 0x116, 1, x))
     return 0;
-
-  d1 = iface->Get_Packet (0);
-  if (d1)
-    delete d1;
-  else
-    return 0;
-
-  d1 = iface->Get_Packet (0);
-  if (!d1)
-    return 0;
-  d = *d1;
-  delete d1;
-  if (d () != 12)
-    return 0;
-  if (d[0] != 0x89)
-    return 0;
-  if (d[1] != 0x00)
-    return 0;
-  if (d[2] != 0x00)
-    return 0;
-  if (d[3] != 0x00)
-    return 0;
-  if (d[4] != 0x00)
-    return 0;
-  if (d[5] != 0x00)
-    return 0;
-  if (d[6] != 0x04)
-    return 0;
-  if ((d[7] & 0x03) != 0x02)
-    return 0;
-  if (d[8] != 0x41)
-    return 0;
-  if (d[9] != 0x01)
-    return 0;
-  if (d[10] != 0x16)
-    return 0;
-  result = d[11];
-  iface->Send_Packet (CArray (EMI2_LDIS, sizeof (EMI2_LDIS)));
-  d1 = iface->Get_Packet (0);
-  if (!d1)
-    return 0;
-  else
-    delete d1;
-  iface->Send_Packet (CArray (EMI2_NORM, sizeof (EMI2_NORM)));
-  llwait (iface);
+  result = x[0];
   return 1;
 }
 
 int
 writeEMI2AddrTabSize (LowLevelDriverInterface * iface, uchar size)
 {
-  uchar res;
-  CArray *d1, d;
-  iface->SendReset ();
-  iface->Send_Packet (CArray (EMI2_TLL, sizeof (EMI2_TLL)));
-
-  iface->Send_Packet (CArray (EMI2_LCON, sizeof (EMI2_LCON)));
-  // ignore ACKs
-  d1 = iface->Get_Packet (0);
-  if (d1)
-    delete d1;
-  else
-    return 0;
-
-  d.resize (12);
-  d[0] = 0x41;
-  d[1] = 0x00;
-  d[2] = 0x00;
-  d[3] = 0x00;
-  d[4] = 0x00;
-  d[5] = 0x00;
-  d[6] = 0x03;
-  d[7] = 0x02;
-  d[8] = 0x81;
-  d[9] = 0x01;
-  d[10] = 0x16;
-  d[11] = size;
-
-  iface->Send_Packet (d);
-  d1 = iface->Get_Packet (0);
-  if (d1)
-    delete d1;
-  else
-    return 0;
-
-  iface->Send_Packet (CArray (EMI2_LDIS, sizeof (EMI2_LDIS)));
-  d1 = iface->Get_Packet (0);
-  if (!d1)
-    return 0;
-  else
-    delete d1;
-  iface->Send_Packet (CArray (EMI2_NORM, sizeof (EMI2_NORM)));
-  llwait (iface);
-
-  if (!readEMI2AddrTabSize (iface, res))
-    return 0;
-  return res == size;
-
-  return 1;
+  CArray x;
+  x.resize (1);
+  x[0] = size;
+  return writeEMI2Mem (iface, 0x116, x);
 }
 
 int
