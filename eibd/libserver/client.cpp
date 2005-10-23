@@ -18,6 +18,7 @@
 */
 
 #include <errno.h>
+#include <unistd.h>
 #include "server.h"
 #include "client.h"
 #include "busmonitor.h"
@@ -50,6 +51,7 @@ ClientConnection::~ClientConnection ()
   s->deregister (this);
   if (buf)
     delete buf;
+  close (fd);
 }
 
 void
