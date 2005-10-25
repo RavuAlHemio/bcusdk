@@ -4,14 +4,14 @@ LDADD=../client/libeibclient.a
 bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progmodetoggle progmodestatus maskver \
 	writeaddress vbusmonitor1 vbusmonitor2 mprogmodeon mprogmodeoff mprogmodetoggle mprogmodestatus mmaskver \
 	mpeitype madcread mread mwrite mpropread mpropwrite mpropdesc mpropscan groupread groupswrite groupwrite \
-	msetkey
+	msetkey grouplisten groupresponse groupsresponse
 
 examplesdir=$(pkgdatadir)/examples
 dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c progmodestatus.c vbusmonitor2.c \
 	busmonitor2.c maskver.c mprogmodeon.c mpropread.c mwrite.c progmodetoggle.c writeaddress.c \
 	common.c mmaskver.c mprogmodestatus.c mpropscan.c progmodeoff.c readindividual.c \
 	common.h mpeitype.c mprogmodetoggle.c mpropwrite.c progmodeon.c vbusmonitor1.c groupread.c \
-	groupwrite.c groupswrite.c msetkey.c
+	groupwrite.c groupswrite.c msetkey.c grouplisten.c groupresponse.c groupsresponse.c
 
 
 busmonitor1_SOURCES=busmonitor1.c common.c
@@ -41,4 +41,7 @@ mpropscan_SOURCES=mpropscan.c common.c
 groupread_SOURCES=groupread.c common.c
 groupwrite_SOURCES=groupwrite.c common.c
 groupswrite_SOURCES=groupswrite.c common.c
+groupresponse_SOURCES=groupresponse.c common.c
+groupsresponse_SOURCES=groupsresponse.c common.c
+grouplisten_SOURCES=grouplisten.c common.c
 msetkey_SOURCES=msetkey.c common.c

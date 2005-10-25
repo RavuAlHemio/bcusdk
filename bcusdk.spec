@@ -119,6 +119,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/groupread
 /usr/bin/groupswrite
 /usr/bin/groupwrite
+/usr/bin/groupsresponse
+/usr/bin/groupresponse
+/usr/bin/grouplisten
 /usr/bin/madcread
 /usr/bin/maskver
 /usr/bin/mmaskver
