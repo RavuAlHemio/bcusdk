@@ -293,95 +293,20 @@ writeEMIMem (LowLevelDriverInterface * iface, memaddr_t addr, CArray data)
 }
 
 int
-readEMI1AddrTabSize (LowLevelDriverInterface * iface, uchar & result)
-{
-  CArray *d1, d;
-  iface->SendReset ();
-  iface->Send_Packet (CArray (EMI1_READ, sizeof (EMI1_READ)));
-  llwait (iface);
-  d1 = iface->Get_Packet (0);
-  if (!d1)
-    return 0;
-  d = *d1;
-  delete d1;
-  if (d () != 5)
-    return 0;
-  if (d[0] != 0x4B)
-    return 0;
-  if (d[1] != 0x01)
-    return 0;
-  if (d[2] != 0x01)
-    return 0;
-  if (d[3] != 0x16)
-    return 0;
-  result = d[4];
-  return 1;
-}
-
-int
-writeEMI1AddrTabSize (LowLevelDriverInterface * iface, uchar size)
-{
-  uchar res;
-  CArray d;
-  iface->SendReset ();
-  d.resize (5);
-  d[0] = 0x46;
-  d[1] = 0x01;
-  d[2] = 0x01;
-  d[3] = 0x16;
-  d[4] = size;
-  iface->Send_Packet (d);
-  llwait (iface);
-  if (!readEMI1AddrTabSize (iface, res))
-    return 0;
-  return res == size;
-}
-
-int
-readEMI2AddrTabSize (LowLevelDriverInterface * iface, uchar & result)
+readAddrTabSize (LowLevelDriverInterface * iface, uchar & result)
 {
   CArray x;
-  if (!readEMI2Mem (iface, 0x116, 1, x))
+  if (!readEMIMem (iface, 0x116, 1, x))
     return 0;
   result = x[0];
   return 1;
 }
 
 int
-writeEMI2AddrTabSize (LowLevelDriverInterface * iface, uchar size)
+writeAddrTabSize (LowLevelDriverInterface * iface, uchar size)
 {
   CArray x;
   x.resize (1);
   x[0] = size;
-  return writeEMI2Mem (iface, 0x116, x);
-}
-
-int
-readAddrTabSize (LowLevelDriverInterface * iface, uchar & result)
-{
-  switch (iface->getEMIVer ())
-    {
-    case LowLevelDriverInterface::vEMI1:
-      return readEMI1AddrTabSize (iface, result);
-    case LowLevelDriverInterface::vEMI2:
-      return readEMI2AddrTabSize (iface, result);
-
-    default:
-      return 0;
-    }
-}
-
-int
-writeAddrTabSize (LowLevelDriverInterface * iface, uchar size)
-{
-  switch (iface->getEMIVer ())
-    {
-    case LowLevelDriverInterface::vEMI1:
-      return writeEMI1AddrTabSize (iface, size);
-    case LowLevelDriverInterface::vEMI2:
-      return writeEMI2AddrTabSize (iface, size);
-
-    default:
-      return 0;
-    }
+  return writeEMIMem (iface, 0x116, x);
 }
