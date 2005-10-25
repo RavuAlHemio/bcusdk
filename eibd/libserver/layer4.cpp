@@ -116,7 +116,7 @@ T_Group::Get_L_Data (L_Data_PDU * l)
     {
       T_DATA_XXX_REQ_PDU *t1 = (T_DATA_XXX_REQ_PDU *) t;
       c.data = t1->data;
-      c.src = l->dest;
+      c.src = l->source;
       outqueue.put (c);
       pth_sem_inc (&sem, 0);
     }
