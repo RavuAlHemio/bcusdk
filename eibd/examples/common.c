@@ -57,6 +57,12 @@ printIndividual (eibaddr_t addr)
   printf ("%d.%d.%d", (addr >> 12) & 0x0f, (addr >> 8) & 0x0f, (addr) & 0xff);
 }
 
+void
+printGroup (eibaddr_t addr)
+{
+  printf ("%d/%d/%d", (addr >> 11) & 0x1f, (addr >> 8) & 0x07, (addr) & 0xff);
+}
+
 eibaddr_t
 readgaddr (const char *addr)
 {
