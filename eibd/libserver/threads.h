@@ -46,6 +46,8 @@ class Thread
   THREADENTRY entry;
   /** stop condition */
   pth_sem_t should_stop;
+  /** priority */
+  int prio;
 
 protected:
   /** main function of the thread
@@ -58,7 +60,7 @@ public:
      * @param o Object to run
      * @param t Entry point
      */
-    Thread (Runable * o = 0, THREADENTRY t = 0);
+    Thread (int Priority = PTH_PRIO_STD, Runable * o = 0, THREADENTRY t = 0);
     virtual ~ Thread ();
 
     /** starts the thread*/

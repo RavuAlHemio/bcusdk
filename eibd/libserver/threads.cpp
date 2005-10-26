@@ -27,11 +27,12 @@ Thread::ThreadWrapper (void *arg)
   return 0;
 }
 
-Thread::Thread (Runable * o, THREADENTRY t)
+Thread::Thread (int Priority, Runable * o, THREADENTRY t)
 {
   obj = o;
   entry = t;
   pth_sem_init (&should_stop);
+  prio = Priority;
   tid = 0;
 }
 
@@ -63,7 +64,10 @@ Thread::Start ()
 	return;
       Stop ();
     }
-  tid = pth_spawn (PTH_ATTR_DEFAULT, &ThreadWrapper, this);
+  pth_attr_t attr = pth_attr_new ();
+  pth_attr_set (attr, PTH_ATTR_PRIO, prio);
+  tid = pth_spawn (attr, &ThreadWrapper, this);
+  pth_attr_destroy (attr);
 }
 
 void
