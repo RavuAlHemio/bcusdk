@@ -258,6 +258,8 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 		  outqueue.put (c);
 		  pth_sem_inc (&out_signal, TRUE);
 		}
+	      else
+		t->TracePrintf (0, this, "Wrong Sequence");
 	      akt.deletepart (0, len);
 	    }
 	  else
