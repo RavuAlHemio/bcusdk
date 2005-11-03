@@ -199,9 +199,9 @@ USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
   if (usb_open (d.dev, &dev) < 0)
     throw Exception (DEV_OPEN_FAIL);
   t->TracePrintf (1, this, "Open");
+  usb_detach_kernel_driver_np (dev, d.interface);
   if (usb_set_configuration (dev, d.config) < 0)
     throw Exception (DEV_OPEN_FAIL);
-  usb_detach_kernel_driver_np (dev, d.interface);
   if (usb_claim_interface (dev, d.interface) < 0)
     throw Exception (DEV_OPEN_FAIL);
   t->TracePrintf (1, this, "Claimed");
