@@ -14,13 +14,25 @@ AC_PROG_RANLIB
 AC_CHECK_PTHSEM(2.0.4,yes,yes,yes)
 AC_CHECK_HEADER(argp.h,,[AC_MSG_ERROR([argp_parse not found])])
 AC_SEARCH_LIBS(argp_parse,argp,,[AC_MSG_ERROR([argp_parse not found])])
-AM_PATH_XML2(2.6.16,,[AC_MSG_ERROR([limxml2 not found])])
 AC_CHECK_HEADER(linux/serial.h,[AC_DEFINE(HAVE_LINUX_LOWLATENCY, 1 , [Linux low latency mode enabled])],[AC_MSG_WARN([No supported low latency mode found])])
 have_source_info=no
 AC_CHECK_HEADER(linux/rtnetlink.h,[AC_DEFINE(HAVE_LINUX_NETLINK, 1,[Linux netlink layer available]) have_source_info=yes],[],[-])
 AC_CHECK_HEADER(linux/usbdevice_fs.h,[AC_DEFINE(LINUX_API, 1, [Linux usb available]) AM_CONDITIONAL(LINUX_API, true) have_usb=yes],[],[-])
 AC_CHECK_HEADER(iphlpapi.h,[AC_DEFINE(HAVE_WINDOWS_IPHELPER, 1,[Windows IPHelper available]) 
   LIBS="-liphlpapi $LIBS"; have_source_info=yes],[],[-])
+
+AC_ARG_ENABLE(onlyeibd,
+[  --enable-onlyeibd		build only eibd (requires no libxml and m68hc05-gnu)],
+[case "${enableval}" in
+ yes) onlyeibd=true ;;
+  no)  onlyeibd=false ;;
+   *) AC_MSG_ERROR(bad value ${enableval} for --enable-onlyeibd) ;;
+ esac],[onlyeibd=false])
+AM_CONDITIONAL(HAVE_ONLYEIBD, test x$onlyeibd = xtrue)
+
+if test x$onlyeibd = xfalse ; then
+
+AM_PATH_XML2(2.6.16,,[AC_MSG_ERROR([limxml2 not found])])
 AC_PATH_PROG(TAS,[m68hc05-as],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TLD,[m68hc05-ld],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TAR,[m68hc05-ar],,[$PATH:$bindir:$prefix/bin])
@@ -32,6 +44,8 @@ test -z "$TAR" && AC_MSG_ERROR([m68hc05-ar not found])
 test -z "$TLD" && AC_MSG_ERROR([m68hc05-ld not found])
 test -z "$TRANLIB" && AC_MSG_ERROR([m68hc05 ranlib not found])
 test -z "$TGCC" && AC_MSG_ERROR([m68hc05 gcc not found])
+
+fi
 
 AC_ARG_ENABLE(ft12,
 [  --enable-ft12		enable FT1.2 backend],

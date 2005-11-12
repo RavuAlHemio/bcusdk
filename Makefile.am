@@ -1,6 +1,13 @@
 AUTOMAKE_OPTIONS=1.9
 EXTRA_DIST=bcusdk.spec
-SUBDIRS=. common eibd xml bcu bcugen archive build debian
+
+if HAVE_ONLYEIBD
+BUILDDIRS = 
+else
+BUILDDIRS = xml bcu bcugen archive build 
+endif
+
+SUBDIRS=. common eibd $(BUILDDIRS) debian
 
 BUILT_SOURCES=path.h
 CLEANFILES=path.h
