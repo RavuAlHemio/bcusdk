@@ -44,6 +44,8 @@
 #define EIB_OPEN_T_BROADCAST            0x0023
 #define EIB_OPEN_T_TPDU                 0x0024
 #define EIB_APDU_PACKET                 0x0025
+#define EIB_OPEN_GROUPCON               0x0026
+#define EIB_GROUP_PACKET                0x0027
 
 #define EIB_PROG_MODE                   0x0030
 #define EIB_MASK_VERSION                0x0031
