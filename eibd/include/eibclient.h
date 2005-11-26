@@ -164,6 +164,31 @@ int EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len,
  * \return received length or -1 if error
  */
 #define EIBGetTPDU EIBGetAPDU_Src
+/** opens a Group communication interface
+ * \param con eibd connection
+ * \param write_only if not null, no packets from the bus will be delivered
+ * \return 0 if successful, -1 if error
+ */
+int EIBOpen_GroupSocket (EIBConnection * con, int write_only);
+/** sends a group APDU
+ * \param con eibd connection
+ * \param dest destination address
+ * \param len length of the APDU
+ * \param data buffer with APDU
+ * \return tranmited length or -1 if error
+ */
+int EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
+		  uint8_t * data);
+/** receive a group APDU with source address
+ * \param con eibd connection
+ * \param maxlen buffer size
+ * \param buf buffer
+ * \param src pointer, where the source address should be stored
+ * \param src pointer, where the destination address should be stored
+ * \return received length or -1 if error
+ */
+int EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
+		     eibaddr_t * src, eibaddr_t * dest);
 
 /** list devices in programming mode
  * \param con eibd connection
