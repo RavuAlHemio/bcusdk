@@ -129,6 +129,13 @@ ClientConnection::Run (pth_sem_t * stop1)
 	  }
 	  break;
 
+	case EIB_OPEN_GROUPCON:
+	  {
+	    A_GroupSocket cl (l3, t, this);
+	    cl.Do (stop);
+	  }
+	  break;
+
 	case EIB_M_INDIVIDUAL_ADDRESS_READ:
 	  ReadIndividualAddresses (l3, t, this, stop);
 	  break;
