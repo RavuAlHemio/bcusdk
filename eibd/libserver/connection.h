@@ -108,4 +108,21 @@ public:
   void Do (pth_event_t stop);
 };
 
+/** implements client interface to a group socket */
+class A_GroupSocket:private Thread
+{
+  Layer3 *layer3;
+  Trace *t;
+  ClientConnection *con;
+  GroupSocket *c;
+
+  void Run (pth_sem_t * stop);
+public:
+    A_GroupSocket (Layer3 * l3, Trace * tr, ClientConnection * cc);
+   ~A_GroupSocket ();
+
+   /** start processing */
+  void Do (pth_event_t stop);
+};
+
 #endif

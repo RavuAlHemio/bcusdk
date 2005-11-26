@@ -133,6 +133,28 @@ A_Connection::A_Connection (Layer3 * l3, Trace * tr, ClientConnection * cc)
   Start ();
 }
 
+A_GroupSocket::A_GroupSocket (Layer3 * l3, Trace * tr, ClientConnection * cc)
+{
+  t = tr;
+  t->TracePrintf (7, this, "OpenGroupSocket");
+  layer3 = l3;
+  con = cc;
+  c = 0;
+  if (con->size != 5)
+    return;
+  try
+  {
+    c = new GroupSocket (layer3, t, con->buf[4] != 0 ? 1 : 0);
+  }
+  catch (Exception c1)
+  {
+    delete c;
+    c = 0;
+    return;
+  }
+  Start ();
+}
+
 A_Broadcast::~A_Broadcast ()
 {
   t->TracePrintf (7, this, "CloseBroadcast");
@@ -168,6 +190,14 @@ A_Individual::~A_Individual ()
 A_Connection::~A_Connection ()
 {
   t->TracePrintf (7, this, "CloseConnection");
+  Stop ();
+  if (c)
+    delete c;
+}
+
+A_GroupSocket::~A_GroupSocket ()
+{
+  t->TracePrintf (7, this, "CloseGroupSocket");
   Stop ();
   if (c)
     delete c;
@@ -296,6 +326,32 @@ A_Connection::Do (pth_event_t stop)
     }
 }
 
+void
+A_GroupSocket::Do (pth_event_t stop)
+{
+  if (!c)
+    {
+      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  if (con->sendmessage (2, con->buf, stop) == -1)
+    return;
+  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+    {
+      if (con->readmessage (stop) == -1)
+	break;
+      if (con->size >= 4)
+	{
+	  if (EIBTYPE (con->buf) != EIB_GROUP_PACKET)
+	    break;
+	  t->TracePacket (7, this, "Send", con->size - 4, con->buf + 4);
+	  GroupAPDU p;
+	  p.data = CArray (con->buf + 4, con->size - 4);
+	  p.dst = (con->buf[2] << 8) | (con->buf[3]);
+	  c->Send (p);
+	}
+    }
+}
 
 void
 A_Broadcast::Run (pth_sem_t * stop1)
@@ -401,6 +457,31 @@ A_Connection::Run (pth_sem_t * stop1)
 	  EIBSETTYPE (res, EIB_APDU_PACKET);
 	  res.setpart (e->array (), 2, e->len ());
 	  t->TracePacket (7, this, "Recv", *e);
+	  con->sendmessage (res (), res.array (), stop);
+	  delete e;
+	}
+    }
+  pth_event_free (stop, PTH_FREE_THIS);
+}
+
+void
+A_GroupSocket::Run (pth_sem_t * stop1)
+{
+  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
+  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+    {
+      GroupAPDU *e = c->Get (stop);
+      if (e)
+	{
+	  CArray res;
+	  res.resize (6 + e->data ());
+	  EIBSETTYPE (res, EIB_GROUP_PACKET);
+	  res[2] = (e->src >> 8) & 0xff;
+	  res[3] = (e->src) & 0xff;
+	  res[4] = (e->dst >> 8) & 0xff;
+	  res[5] = (e->dst) & 0xff;
+	  res.setpart (e->data.array (), 6, e->data ());
+	  t->TracePacket (7, this, "Recv", e->data);
 	  con->sendmessage (res (), res.array (), stop);
 	  delete e;
 	}
