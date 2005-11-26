@@ -1,5 +1,5 @@
 /*
-    EIB Demo program - read ADC value
+    EIB Demo program - set a key in a BCU
     Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify

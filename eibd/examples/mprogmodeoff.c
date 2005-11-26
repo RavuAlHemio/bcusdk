@@ -1,5 +1,5 @@
 /*
-    EIB Demo program - truns programming mode off
+    EIB Demo program - turns programming mode off
     Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
