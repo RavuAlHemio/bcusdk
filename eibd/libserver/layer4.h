@@ -49,6 +49,17 @@ typedef struct
   eibaddr_t addr;
 } TpduComm;
 
+/** informations about a group communication packet */
+typedef struct
+{
+  /** Layer 4 data */
+  CArray data;
+  /** source address */
+  eibaddr_t src;
+  /** destination address */
+  eibaddr_t dst;
+} GroupAPDU;
+
 /** Broadcast Layer 4 connection */
 class T_Broadcast:public L_Data_CallBack
 {
@@ -71,6 +82,30 @@ public:
   BroadcastComm *Get (pth_event_t stop);
   /** send APDU c */
   void Send (const CArray & c);
+};
+
+/** Group Communication socket */
+class GroupSocket:public L_Data_CallBack
+{
+  /** Layer 3 interface */
+  Layer3 *layer3;
+  /** debug output */
+  Trace *t;
+  /** output queue */
+    Queue < GroupAPDU > outqueue;
+    /** semaphore for output queue */
+  pth_sem_t sem;
+
+public:
+    GroupSocket (Layer3 * l3, Trace * t, int write_only);
+    virtual ~ GroupSocket ();
+
+  void Get_L_Data (L_Data_PDU * l);
+
+  /** receives APDU of a broadcast; aborts with NULL if stop occurs */
+  GroupAPDU *Get (pth_event_t stop);
+  /** send APDU c */
+  void Send (const GroupAPDU & c);
 };
 
 /** Group Layer 4 connection */

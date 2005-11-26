@@ -568,3 +568,74 @@ T_Connection::Run (pth_sem_t * stop1)
   out.put (CArray ());
   pth_sem_inc (&outsem, 0);
 }
+
+GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
+{
+  tr->TracePrintf (4, this, "OpenBroadcast %s", write_only ? "WO" : "RW");
+  layer3 = l3;
+  t = tr;
+  pth_sem_init (&sem);
+  if (!write_only)
+    if (!layer3->registerGroupCallBack (this, 0))
+      throw Exception (L4_INIT_FAIL);
+}
+
+GroupSocket::~GroupSocket ()
+{
+  t->TracePrintf (4, this, "CloseBroadcast");
+  layer3->deregisterGroupCallBack (this, 0);
+}
+
+void
+GroupSocket::Get_L_Data (L_Data_PDU * l)
+{
+  GroupAPDU c;
+  TPDU *t = TPDU::fromPacket (l->data);
+  if (t->getType () == T_DATA_XXX_REQ)
+    {
+      T_DATA_XXX_REQ_PDU *t1 = (T_DATA_XXX_REQ_PDU *) t;
+      c.data = t1->data;
+      c.src = l->source;
+      c.dst = l->dest;
+      outqueue.put (c);
+      pth_sem_inc (&sem, 0);
+    }
+  delete l;
+}
+
+void
+GroupSocket::Send (const GroupAPDU & c)
+{
+  T_DATA_XXX_REQ_PDU t;
+  t.data = c.data;
+  String s = t.Decode ();
+  this->t->TracePrintf (4, this, "Send GroupSocket %s", s ());
+  L_Data_PDU *l = new L_Data_PDU;
+  l->source = 0;
+  l->dest = c.dst;
+  l->AddrType = GroupAddress;
+  l->data = t.ToPacket ();
+  layer3->send_L_Data (l);
+}
+
+GroupAPDU *
+GroupSocket::Get (pth_event_t stop)
+{
+  pth_event_t s = pth_event (PTH_EVENT_SEM, &sem);
+
+  pth_event_concat (s, stop, NULL);
+  pth_wait (s);
+  pth_event_isolate (s);
+
+  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+    {
+      pth_sem_dec (&sem);
+      GroupAPDU *c = new GroupAPDU (outqueue.get ());
+
+      pth_event_free (s, PTH_FREE_THIS);
+      t->TracePacket (4, this, "Recv GroupSocket", c->data);
+      return c;
+    }
+  pth_event_free (s, PTH_FREE_THIS);
+  return 0;
+}
