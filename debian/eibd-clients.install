@@ -29,4 +29,6 @@ usr/bin/readindividual
 usr/bin/writeaddress
 usr/bin/mpeitype
 usr/bin/msetkey
+usr/bin/groupsocketlisten
+usr/bin/groupsocketread
 

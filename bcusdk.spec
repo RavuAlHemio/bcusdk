@@ -143,6 +143,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/writeaddress
 /usr/bin/mpeitype
 /usr/bin/msetkey
+/usr/bin/groupsocketlisten
+/usr/bin/groupsocketread
 
 %files -n libeibclient-devel
 %defattr(-,root,root,-)
