@@ -111,7 +111,7 @@ int EIBOpenT_Individual (EIBConnection * con, eibaddr_t dest, int write_only);
  * \return 0 if successful, -1 if error
  */
 int EIBOpenT_Group (EIBConnection * con, eibaddr_t dest, int write_only);
-/** opens a T_Broadcase
+/** opens a T_Broadcast
  * \param con eibd connection
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if successful, -1 if error
