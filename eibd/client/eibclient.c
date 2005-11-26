@@ -683,6 +683,90 @@ EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
 }
 
 int
+EIBOpen_GroupSocket (EIBConnection * con, int write_only)
+{
+  uchar head[5];
+  int i;
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  EIBSETTYPE (head, EIB_OPEN_GROUPCON);
+  head[4] = (write_only ? 0xff : 0);
+  i = SendRequest (con, 5, head);
+  if (i == -1)
+    return -1;
+
+  i = GetRequest (con);
+  if (i == -1)
+    return -1;
+
+  if (EIBTYPE (con) != EIB_OPEN_GROUPCON)
+    {
+      errno = ECONNRESET;
+      return -1;
+    }
+  return 0;
+}
+
+int 
+EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
+		 eibaddr_t * src, eibaddr_t * dest)
+{
+  int i;
+  if (!con || !buf)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  i = GetRequest (con);
+  if (i == -1)
+    return -1;
+
+  if (EIBTYPE (con) != EIB_GROUP_PACKET || con->size < 6)
+    {
+      errno = ECONNRESET;
+      return -1;
+    }
+  i = con->size - 6;
+  if (i > maxlen)
+    i = maxlen;
+  memcpy (buf, con->buf + 6, i);
+  if (src)
+    *src = (con->buf[2] << 8) | (con->buf[3]);
+  if (dest)
+    *dest = (con->buf[4] << 8) | (con->buf[5]);
+  return i;
+}
+
+int 
+EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
+	      uint8_t * data)
+{
+  uchar *ibuf;
+  int i;
+  if (len < 2 || !data)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  ibuf = (uchar *) malloc (len + 4);
+  if (!ibuf)
+    {
+      errno = ENOMEM;
+      return -1;
+    }
+  EIBSETTYPE (ibuf, EIB_GROUP_PACKET);
+  EIBSETADDR (ibuf + 2, dest);
+  memcpy (ibuf + 4, data, len);
+  i = SendRequest (con, len + 4, ibuf);
+  free (ibuf);
+  return i;
+}
+
+int
 EIB_M_ReadIndividualAddresses (EIBConnection * con, int maxlen, uint8_t * buf)
 {
   uchar head[2];
