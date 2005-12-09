@@ -172,6 +172,8 @@ WriteIndividualAddress (Layer3 * l3, Trace * t, ClientConnection * c,
 	return;
       }
     b.A_IndividualAddress_Write (dest);
+    // wait 100ms
+    pth_usleep (100000);
 
     Management_Connection m1 (l3, t, dest);
     if (m1.A_Device_Descriptor_Read (maskver) == -1)
@@ -609,7 +611,7 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	    level = j;
 	    if (m.A_KeyWrite (i->keys[level], level) == -1)
 	      goto out;
-	    if(j != level)
+	    if (j != level)
 	      goto out;
 	  }
 
