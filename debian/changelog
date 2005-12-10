@@ -1,3 +1,9 @@
+bcusdk (0.0.1) unstable; urgency=low
+
+  * New version.
+
+ -- Martin Kögler <mkoegler@auto.tuwien.ac.at>  Sat, 10 Dec 2005 18:44:25 +0100
+
 bcusdk (0.0.0-1) unstable; urgency=low
 
   * Initial Release.

@@ -1,6 +1,6 @@
 Name:           bcusdk
-Version:        0.0.0
-Release:        3
+Version:        0.0.1
+Release:        1
 Summary:        BCU SDK
 
 Group:          Development/Tools
