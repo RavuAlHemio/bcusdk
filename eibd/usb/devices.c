@@ -12,11 +12,11 @@
 
 #include "usbi.h"
 
-static struct list_head usb_busses = { .prev = &usb_busses, .next = &usb_busses };
-static struct list_head usb_devices = { .prev = &usb_devices, .next = &usb_devices };
+static struct list_head usbi_busses = { .prev = &usbi_busses, .next = &usbi_busses };
+static struct list_head usbi_devices = { .prev = &usbi_devices, .next = &usbi_devices };
 
-static usb_bus_id_t cur_bus_id = 1;
-static usb_device_id_t cur_device_id = 1;
+static libusb_bus_id_t cur_bus_id = 1;
+static libusb_device_id_t cur_device_id = 1;
 
 /*
  * Bus code
@@ -28,7 +28,7 @@ void usbi_add_bus(struct usbi_bus *ibus)
 
   list_init(&ibus->devices);
 
-  list_add(&ibus->list, &usb_busses);
+  list_add(&ibus->list, &usbi_busses);
 }
 
 void usbi_free_bus(struct usbi_bus *ibus)
@@ -42,12 +42,12 @@ void usbi_remove_bus(struct usbi_bus *ibus)
   usbi_free_bus(ibus);
 }
 
-struct usbi_bus *usbi_find_bus_by_id(usb_bus_id_t busid)
+struct usbi_bus *usbi_find_bus_by_id(libusb_bus_id_t busid)
 {
   struct usbi_bus *ibus;
 
   /* FIXME: We should probably index the device id in a rbtree or something */
-  list_for_each_entry(ibus, &usb_busses, list) {
+  list_for_each_entry(ibus, &usbi_busses, list) {
     if (ibus->busid == busid)
       return ibus;
   }
@@ -73,7 +73,7 @@ static void usbi_refresh_busses(void)
    * If we don't find it in the new list, the bus was removed. Any
    * busses still in the new list, are new to us.
    */
-  list_for_each_entry_safe(ibus, tibus, &usb_busses, list) {
+  list_for_each_entry_safe(ibus, tibus, &usbi_busses, list) {
     struct usbi_bus *nibus, *tnibus;
     int found = 0;
 
@@ -94,7 +94,7 @@ static void usbi_refresh_busses(void)
   }
 
   /*
-   * Anything on the *busses list is new. So add them to usb_busses
+   * Anything on the *busses list is new. So add them to usbi_busses
    * and process them like the new bus they are
    */
   list_for_each_entry_safe(ibus, tibus, &busses, list) {
@@ -103,15 +103,17 @@ static void usbi_refresh_busses(void)
   }
 }
 
-usb_bus_id_t usb_get_first_bus_id(void)
+int libusb_get_first_bus_id(libusb_bus_id_t *busid)
 {
   struct list_head *tmp;
 
-  if (list_empty(&usb_busses))
+  if (list_empty(&usbi_busses))
     return 0;
 
-  tmp = usb_busses.next;
-  return list_entry(tmp, struct usbi_bus, list)->busid;
+  tmp = usbi_busses.next;
+  *busid = list_entry(tmp, struct usbi_bus, list)->busid;
+
+  return 0;
 }
 
 /*
@@ -119,43 +121,43 @@ usb_bus_id_t usb_get_first_bus_id(void)
  * to the next/prev functions didn't exist. Maybe we can switch to an rbtree
  * and find the next bus id in the list?
  */
-usb_bus_id_t usb_get_next_bus_id(usb_bus_id_t busid)
+int libusb_get_next_bus_id(libusb_bus_id_t *busid)
 {
   struct usbi_bus *ibus;
+  struct list_head *tmp;
 
-  ibus = usbi_find_bus_by_id(busid);
-  if (ibus) {
-    struct list_head *tmp;
+  ibus = usbi_find_bus_by_id(*busid);
+  if (!ibus)
+    return LIBUSB_FAILURE;
 
-    tmp = ibus->list.next;
-    if (tmp == &usb_busses)
-      return 0;
+  tmp = ibus->list.next;
+  if (tmp == &usbi_busses)
+    return LIBUSB_FAILURE;
 
-    return list_entry(tmp, struct usbi_bus, list)->busid;
-  }
+  *busid = list_entry(tmp, struct usbi_bus, list)->busid;
 
   return 0;
 }
 
-usb_bus_id_t usb_get_prev_bus_id(usb_bus_id_t busid)
+int libusb_get_prev_bus_id(libusb_bus_id_t *busid)
 {
   struct usbi_bus *ibus;
+  struct list_head *tmp;
 
-  ibus = usbi_find_bus_by_id(busid);
-  if (ibus) {
-    struct list_head *tmp;
+  ibus = usbi_find_bus_by_id(*busid);
+  if (!ibus)
+    return LIBUSB_FAILURE;
 
-    tmp = ibus->list.prev;
-    if (tmp == &usb_busses)
-      return 0;
+  tmp = ibus->list.prev;
+  if (tmp == &usbi_busses)
+    return LIBUSB_FAILURE;
 
-    return list_entry(tmp, struct usbi_bus, list)->busid;
-  }
+  *busid = list_entry(tmp, struct usbi_bus, list)->busid;
 
   return 0;
 }
 
-int usb_get_busnum(usb_bus_id_t busid)
+int libusb_get_busnum(libusb_bus_id_t busid)
 {
   struct usbi_bus *ibus;
 
@@ -177,16 +179,14 @@ void usbi_add_device(struct usbi_bus *ibus, struct usbi_device *idev)
   idev->bus = ibus;
 
   list_add(&idev->bus_list, &ibus->devices);
-  list_add(&idev->dev_list, &usb_devices);
+  list_add(&idev->dev_list, &usbi_devices);
 
-  /* FIXME: Make this callback in another thread? */
-  if (usbi_event_callback)
-    usbi_event_callback(idev->devid, USB_ATTACH);
+  usbi_callback(idev->devid, USB_ATTACH);
 }
 
 void usbi_remove_device(struct usbi_device *idev)
 {
-  usb_device_id_t devid = idev->devid;
+  libusb_device_id_t devid = idev->devid;
 
   list_del(&idev->bus_list);
   list_del(&idev->dev_list);
@@ -194,17 +194,15 @@ void usbi_remove_device(struct usbi_device *idev)
   usbi_destroy_configuration(idev);
   free(idev);
 
-  /* FIXME: Make this callback in another thread? */
-  if (usbi_event_callback)
-    usbi_event_callback(devid, USB_DETACH);
+  usbi_callback(devid, USB_DETACH);
 }
 
-struct usbi_device *usbi_find_device_by_id(usb_device_id_t devid)
+struct usbi_device *usbi_find_device_by_id(libusb_device_id_t devid)
 {
   struct usbi_device *idev;
 
   /* FIXME: We should probably index the device id in a rbtree or something */
-  list_for_each_entry(idev, &usb_devices, dev_list) {
+  list_for_each_entry(idev, &usbi_devices, dev_list) {
     if (idev->devid == devid)
       return idev;
   }
@@ -232,7 +230,7 @@ void usbi_rescan_devices(void)
 
   usbi_refresh_busses();
 
-  list_for_each_entry(ibus, &usb_busses, list) {
+  list_for_each_entry(ibus, &usbi_busses, list) {
     usbi_os_refresh_devices(ibus);
 
 #if 0
@@ -241,13 +239,13 @@ void usbi_rescan_devices(void)
        * don't need to fetch them again
        */
       if (!idev->desc.device_raw.data) {
-        usb_dev_handle_t *udev;
+        libusb_dev_handle_t *udev;
 
-        ret = usb_open(idev->devid, &udev);
+        ret = libusb_open(idev->devid, &udev);
         if (ret >= 0) {
           usbi_fetch_and_parse_descriptors(udev);
 
-          usb_close(udev);
+          libusb_close(udev);
         }
       }
 
@@ -301,7 +299,7 @@ static int match_interfaces(struct usbi_device *idev,
   return 0;
 }
 
-int usb_match_devices_by_vendor(usb_match_handle_t **handle,
+int libusb_match_devices_by_vendor(libusb_match_handle_t **handle,
         int vendor, int product)
 {
   struct usbi_match *match;
@@ -316,7 +314,7 @@ int usb_match_devices_by_vendor(usb_match_handle_t **handle,
 
   memset(match, 0, sizeof(*match));
 
-  list_for_each_entry(idev, &usb_devices, dev_list) {
+  list_for_each_entry(idev, &usbi_devices, dev_list) {
     struct usb_device_desc *desc = &idev->desc.device;
 
     if ((vendor < 0 || vendor == desc->idVendor) &&
@@ -329,7 +327,7 @@ int usb_match_devices_by_vendor(usb_match_handle_t **handle,
   return 0;
 }
 
-int usb_match_devices_by_class(usb_match_handle_t **handle,
+int libusb_match_devices_by_class(libusb_match_handle_t **handle,
         int bClass, int bSubClass, int bProtocol)
 {
   struct usbi_match *match;
@@ -345,7 +343,7 @@ int usb_match_devices_by_class(usb_match_handle_t **handle,
 
   memset(match, 0, sizeof(*match));
 
-  list_for_each_entry(idev, &usb_devices, dev_list) {
+  list_for_each_entry(idev, &usbi_devices, dev_list) {
     if (match_interfaces(idev, bClass, bSubClass, bProtocol))
       add_match_to_list(match, idev);
   }
@@ -355,13 +353,14 @@ int usb_match_devices_by_class(usb_match_handle_t **handle,
   return 0;
 }
 
-int usb_match_next_device(usb_match_handle_t *handle, usb_device_id_t *mdevid)
+int libusb_match_next_device(libusb_match_handle_t *handle,
+	libusb_device_id_t *mdevid)
 {
   struct usbi_match *match = handle;
 
   while (match->cur_match < match->num_matches) {
     struct usbi_device *idev;
-    usb_device_id_t devid;
+    libusb_device_id_t devid;
 
     devid = match->matches[match->cur_match++];
     idev = usbi_find_device_by_id(devid);
@@ -374,7 +373,7 @@ int usb_match_next_device(usb_match_handle_t *handle, usb_device_id_t *mdevid)
   return -ESRCH;
 }
 
-int usb_free_match(usb_match_handle_t *handle)
+int libusb_free_match(libusb_match_handle_t *handle)
 {
   struct usbi_match *match = handle;
 
@@ -385,135 +384,144 @@ int usb_free_match(usb_match_handle_t *handle)
 }
 
 /* Topology operations */
-/*
- * FIXME: It would be nice if we can handle the case where the dev id passed
- * to the next/prev functions didn't exist. Maybe we can switch to an rbtree
- * and find the next dev id in the list?
- */
-usb_bus_id_t usb_get_next_device_id(usb_device_id_t devid)
-{
-  struct usbi_device *idev;
-  struct list_head *tmp;
-
-  if (devid == 0) {
-    if (list_empty(&usb_devices))
-      return 0;
-
-    tmp = usb_devices.next;
-    return list_entry(tmp, struct usbi_device, dev_list)->devid;
-  }
-
-  idev = usbi_find_device_by_id(devid);
-  if (idev) {
-    tmp = idev->dev_list.next;
-    if (tmp == &usb_devices)
-      return 0;
-
-    return list_entry(tmp, struct usbi_device, dev_list)->devid;
-  }
-
-  return 0;
-}
-
-usb_bus_id_t usb_get_prev_device_id(usb_device_id_t devid)
-{
-  struct usbi_device *idev;
-
-  idev = usbi_find_device_by_id(devid);
-  if (idev) {
-    struct list_head *tmp;
-
-    tmp = idev->dev_list.prev;
-    if (tmp == &usb_devices)
-      return 0;
-
-    return list_entry(tmp, struct usbi_device, dev_list)->devid;
-  }
-
-  return 0;
-}
-
-usb_device_id_t usb_get_root_device_id(usb_bus_id_t busid)
+int libusb_get_first_device_id(libusb_bus_id_t busid,
+	libusb_device_id_t *devid)
 {
   struct usbi_bus *ibus;
 
   ibus = usbi_find_bus_by_id(busid);
   if (!ibus)
-    return -ENOENT;
+    return LIBUSB_UNKNOWN_DEVICE;
 
   if (!ibus->root)
-    return 0;
+    return LIBUSB_FAILURE;
 
-  return ibus->root->devid;
+  *devid = ibus->root->devid;
+
+  return 0;
 }
 
-int usb_get_child_count(usb_device_id_t devid)
+/*
+ * FIXME: It would be nice if we can handle the case where the dev id passed
+ * to the next/prev functions didn't exist. Maybe we can switch to an rbtree
+ * and find the next dev id in the list?
+ */
+int libusb_get_next_device_id(libusb_device_id_t *devid)
+{
+  struct usbi_device *idev;
+  struct list_head *tmp;
+
+  idev = usbi_find_device_by_id(*devid);
+  if (!idev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  tmp = idev->dev_list.next;
+  if (tmp == &usbi_devices)
+    return LIBUSB_FAILURE;
+
+  *devid = list_entry(tmp, struct usbi_device, dev_list)->devid;
+
+  return 0;
+}
+
+int libusb_get_prev_device_id(libusb_device_id_t *devid)
+{
+  struct usbi_device *idev;
+  struct list_head *tmp;
+
+  idev = usbi_find_device_by_id(*devid);
+  if (!idev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  tmp = idev->dev_list.prev;
+  if (tmp == &usbi_devices)
+    return LIBUSB_FAILURE;
+
+  *devid = list_entry(tmp, struct usbi_device, dev_list)->devid;
+
+  return 0;
+}
+
+int libusb_get_child_count(libusb_device_id_t devid, unsigned char *count)
 {
   struct usbi_device *idev;
 
   idev = usbi_find_device_by_id(devid);
   if (!idev)
-    return -ENOENT;
+    return LIBUSB_UNKNOWN_DEVICE;
 
-  return idev->num_ports;
+  *count = idev->num_ports;
+
+  return 0;
 }
 
-usb_device_id_t usb_get_child_device_id(usb_device_id_t devid, int port)
+int libusb_get_child_device_id(libusb_device_id_t hub_devid, int port,
+	libusb_device_id_t *child_devid)
 {
   struct usbi_device *idev;
 
-  idev = usbi_find_device_by_id(devid);
+  idev = usbi_find_device_by_id(hub_devid);
   if (!idev)
-    return 0;
+    return LIBUSB_UNKNOWN_DEVICE;
 
   port--;	/* 1-indexed */
   if (port < 0 || port > idev->num_ports)
-    return 0;
+    return LIBUSB_BADARG;
 
   if (!idev->children[port])
-    return 0;
+    return LIBUSB_BADARG;
 
-  return idev->children[port]->devid;
+  *child_devid = idev->children[port]->devid;
+
+  return 0;
 }
 
-usb_device_id_t usb_get_parent_device_id(usb_device_id_t devid)
+int libusb_get_parent_device_id(libusb_device_id_t child_devid,
+	libusb_device_id_t *hub_devid)
 {
   struct usbi_device *idev;
 
-  idev = usbi_find_device_by_id(devid);
+  idev = usbi_find_device_by_id(child_devid);
   if (!idev)
-    return 0;
+    return LIBUSB_UNKNOWN_DEVICE;
 
   if (!idev->parent)
-    return 0;
+    return LIBUSB_BADARG;
 
-  return idev->parent->devid;
+  *hub_devid = idev->parent->devid;
+
+  return 0;
 }
 
-usb_bus_id_t usb_get_device_bus_id(usb_device_id_t devid)
+int libusb_get_bus_id(libusb_device_id_t devid, libusb_bus_id_t *busid)
 {
   struct usbi_device *idev;
 
   idev = usbi_find_device_by_id(devid);
   if (!idev)
-    return -ENOENT;
+    return LIBUSB_UNKNOWN_DEVICE;
 
-  return idev->bus->busid;
+  *busid = idev->bus->busid;
+
+  return 0;
 }
 
-int usb_get_devnum(usb_device_id_t devid)
+int libusb_get_devnum(libusb_device_id_t devid, unsigned char *devnum)
 {
   struct usbi_device *idev;
 
   idev = usbi_find_device_by_id(devid);
   if (!idev)
-    return -ENOENT;
+    return LIBUSB_UNKNOWN_DEVICE;
 
-  return idev->devnum;
+  *devnum = idev->devnum;
+
+  return 0;
 }
 
 /* Descriptor operations */
-int usb_get_device_desc(usb_device_id_t devid, struct usb_device_desc *devdsc)
+int libusb_get_device_desc(libusb_device_id_t devid,
+	struct usb_device_desc *devdsc)
 {
   struct usbi_device *idev;
 
@@ -526,7 +534,7 @@ int usb_get_device_desc(usb_device_id_t devid, struct usb_device_desc *devdsc)
   return 0;
 }
 
-int usb_get_config_desc(usb_device_id_t devid, int cfgidx,
+int libusb_get_config_desc(libusb_device_id_t devid, int cfgidx,
         struct usb_config_desc *cfgdsc)
 {
   struct usbi_device *idev;
@@ -543,7 +551,7 @@ int usb_get_config_desc(usb_device_id_t devid, int cfgidx,
   return 0;
 }
 
-int usb_get_interface_desc(usb_device_id_t devid, int cfgidx, int ifcidx,
+int libusb_get_interface_desc(libusb_device_id_t devid, int cfgidx, int ifcidx,
         struct usb_interface_desc *ifcdsc)
 {
   struct usbi_device *idev;
@@ -566,7 +574,7 @@ int usb_get_interface_desc(usb_device_id_t devid, int cfgidx, int ifcidx,
   return 0;
 }
 
-int usb_get_endpoint_desc(usb_device_id_t devid, int cfgidx, int ifcidx,
+int libusb_get_endpoint_desc(libusb_device_id_t devid, int cfgidx, int ifcidx,
         int eptidx, struct usb_endpoint_desc *eptdsc)
 {
   struct usbi_device *idev;
@@ -595,7 +603,7 @@ int usb_get_endpoint_desc(usb_device_id_t devid, int cfgidx, int ifcidx,
   return 0;
 }
 
-int usb_get_raw_device_desc(usb_device_id_t devid,
+int libusb_get_raw_device_desc(libusb_device_id_t devid,
 	unsigned char *buffer, size_t buflen)
 {
   struct usbi_device *idev;
@@ -612,7 +620,7 @@ int usb_get_raw_device_desc(usb_device_id_t devid,
   return idev->desc.device_raw.len;
 }
 
-int usb_get_raw_config_desc(usb_device_id_t devid,
+int libusb_get_raw_config_desc(libusb_device_id_t devid,
 	int cfgidx, unsigned char *buffer, size_t buflen)
 {
   struct usbi_device *idev;
@@ -632,7 +640,7 @@ int usb_get_raw_config_desc(usb_device_id_t devid,
   return idev->desc.configs_raw[cfgidx].len;
 }
 
-int usb_refresh_descriptors(usb_device_id_t devid)
+int libusb_refresh_descriptors(libusb_device_id_t devid)
 {
   struct usbi_device *idev;
 

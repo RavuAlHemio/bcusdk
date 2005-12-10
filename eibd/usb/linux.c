@@ -22,6 +22,11 @@ static struct list_head usbi_ios = { .prev = &usbi_ios, .next = &usbi_ios };
 
 static char usbi_path[PATH_MAX + 1] = "";
 
+/*
+ * FIXME: We should try to translate errno error values into the standard
+ * libusb errors instead of just returning LIBUSB_FAILURE
+ */
+
 static int device_open(struct usbi_device *idev)
 {
   int fd;
@@ -29,14 +34,16 @@ static int device_open(struct usbi_device *idev)
   fd = open(idev->filename, O_RDWR);
   if (fd < 0) {
     fd = open(idev->filename, O_RDONLY);
-    if (fd < 0)
-      USB_ERROR_STR(-errno, "failed to open %s: %s", idev->filename, strerror(errno));
+    if (fd < 0) {
+      usbi_debug(1, "failed to open %s: %s", idev->filename, strerror(errno));
+      return LIBUSB_FAILURE;
+    }
   }
   
   return fd;
 }
 
-int usb_os_open(usb_dev_handle_t *dev)
+int usb_os_open(libusb_dev_handle_t *dev)
 {
   struct usbi_device *idev = dev->idev;
 
@@ -49,46 +56,48 @@ int usb_os_open(usb_dev_handle_t *dev)
   return 0;
 }
 
-int usb_os_close(usb_dev_handle_t *dev)
+int usb_os_close(libusb_dev_handle_t *dev)
 {
   if (dev->fd < 0)
     return 0;
 
   if (close(dev->fd) == -1)
     /* Failing trying to close a file really isn't an error, so return 0 */
-    USB_ERROR_STR(0, "tried to close device fd %d: %s", dev->fd,
-	strerror(errno));
+    usbi_debug(2, "error closing device fd %d: %s", dev->fd, strerror(errno));
 
   return 0;
 }
 
-int usb_set_configuration(usb_dev_handle_t *dev, int configuration)
+int libusb_set_configuration(libusb_dev_handle_t *dev, unsigned char cfg)
 {
-  int ret;
+  int ret, _cfg = cfg;
 
-  ret = ioctl(dev->fd, IOCTL_USB_SETCONFIG, &configuration);
-  if (ret < 0)
-    USB_ERROR_STR(-errno, "could not set config %d: %s", configuration,
-	strerror(errno));
+  ret = ioctl(dev->fd, IOCTL_USB_SETCONFIG, &_cfg);
+  if (ret < 0) {
+    usbi_debug(1, "could not set config %u: %s", cfg, strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
-  dev->idev->cur_config = configuration;
+  dev->idev->cur_config = cfg;
 
   return 0;
 }
 
-int usb_get_configuration(usb_device_id_t devid)
+int libusb_get_configuration(libusb_device_id_t devid, unsigned char *cfg)
 {
   struct usbi_device *idev;
 
   idev = usbi_find_device_by_id(devid);
   if (!idev)
-    return -ENODEV;
+    return LIBUSB_UNKNOWN_DEVICE;
 
   /* FIXME: Requery the kernel to make sure this is current information */
-  return idev->cur_config;
+  *cfg = idev->cur_config;
+
+  return 0;
 }
 
-int usb_claim_interface(usb_dev_handle_t *dev, int interface)
+int libusb_claim_interface(libusb_dev_handle_t *dev, int interface)
 {
   struct usbi_device *idev = dev->idev;
   int ret;
@@ -98,8 +107,8 @@ int usb_claim_interface(usb_dev_handle_t *dev, int interface)
     if (errno == EBUSY && usb_debug > 0)
       fprintf(stderr, "Check that you have permissions to write to %s and, if you don't, that you set up hotplug (http://linux-hotplug.sourceforge.net/) correctly.\n", idev->filename);
 
-    USB_ERROR_STR(-errno, "could not claim interface %d: %s", interface,
-	strerror(errno));
+    usbi_debug(1, "could not claim interface %d: %s", interface, strerror(errno));
+    return LIBUSB_FAILURE;
   }
 
   dev->interface = interface;
@@ -109,51 +118,53 @@ int usb_claim_interface(usb_dev_handle_t *dev, int interface)
   return 0;
 }
 
-int usb_release_interface(usb_dev_handle_t *dev, int interface)
+int libusb_release_interface(libusb_dev_handle_t *dev, int interface)
 {
   int ret;
 
   ret = ioctl(dev->fd, IOCTL_USB_RELEASEINTF, &interface);
-  if (ret < 0)
-    USB_ERROR_STR(-errno, "could not release intf %d: %s", interface,
-    	strerror(errno));
+  if (ret < 0) {
+    usbi_debug(1, "could not release interface %d: %s", interface, strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   dev->interface = -1;
 
   return 0;
 }
 
-int usb_set_altinterface(usb_dev_handle_t *dev, int alternate)
+int libusb_set_altinterface(libusb_dev_handle_t *dev, unsigned char alt)
 {
-  int ret;
   struct usbk_setinterface setintf;
+  int ret;
 
   if (dev->interface < 0)
-    USB_ERROR(-EINVAL);
+    return LIBUSB_BADARG;
 
   setintf.interface = dev->interface;
-  setintf.altsetting = alternate;
+  setintf.altsetting = alt;
 
   ret = ioctl(dev->fd, IOCTL_USB_SETINTF, &setintf);
-  if (ret < 0)
-    USB_ERROR_STR(ret, "could not set alt intf %d/%d: %s",
-	dev->interface, alternate, strerror(errno));
+  if (ret < 0) {
+    usbi_debug(1, "could not set alternate interface %d/%d: %s", dev->interface, alt, strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
-  dev->altsetting = alternate;
+  dev->altsetting = alt;
 
   return 0;
 }
 
-int usb_get_altinterface(usb_device_id_t devid)
+int libusb_get_altinterface(libusb_device_id_t devid, unsigned char *alt)
 {
   struct usbi_device *idev;
 
   idev = usbi_find_device_by_id(devid);
   if (!idev)
-    return -ENODEV;
+    return LIBUSB_UNKNOWN_DEVICE;
 
   /* FIXME: Query the kernel for this information */
-  return -EINVAL;
+  return LIBUSB_FAILURE;
 }
 
 static int wakeup_event_thread(void)
@@ -187,7 +198,7 @@ int usbi_os_io_submit(struct usbi_io *io)
   if (io->setup) {
     io->tempbuf = malloc(USBI_CONTROL_SETUP_LEN + io->bufferlen);
     if (!io->tempbuf)
-      return -ENOMEM;
+      return LIBUSB_NO_RESOURCES;
 
     memcpy(io->tempbuf, io->setup, USBI_CONTROL_SETUP_LEN);
     /* FIXME: Only do this on writes? */
@@ -205,18 +216,26 @@ int usbi_os_io_submit(struct usbi_io *io)
   io->urb.signr = 0;
   io->urb.usercontext = (void *)io;
 
+  io->inprogress = 1;
+
+  if (list_empty(&dev->ios)) {
+    list_add(&dev->io_list, &usbi_ios);
+    memcpy(&dev->tvo, &io->tvo, sizeof(dev->tvo));
+  } else if (usbi_timeval_compare(&io->tvo, &dev->tvo) < 0)
+    memcpy(&dev->tvo, &io->tvo, sizeof(dev->tvo));
+
+  list_add(&io->list, &dev->ios);
+
   ret = ioctl(dev->fd, IOCTL_USB_SUBMITURB, &io->urb);
   if (ret < 0) {
     usbi_debug(1, "error submitting URB: %s", strerror(errno));
-    return -EINVAL;
+
+    io->inprogress = 0;
+    list_del(&dev->io_list);
+    list_del(&io->list);
+
+    return LIBUSB_FAILURE;
   }
-
-  io->inprogress = 1;
-
-  if (list_empty(&dev->ios))
-    list_add(&dev->io_list, &usbi_ios);
-
-  list_add(&io->list, &dev->ios);
 
   /* Always do this to avoid race conditions */
   wakeup_event_thread();
@@ -224,6 +243,7 @@ int usbi_os_io_submit(struct usbi_io *io)
   return 0;
 }
 
+/* FIXME: Make sure there aren't any race conditions here */
 int usbi_os_io_complete(struct usbi_dev_handle *dev)
 {
   struct usbk_urb *urb;
@@ -233,7 +253,7 @@ int usbi_os_io_complete(struct usbi_dev_handle *dev)
   ret = ioctl(dev->fd, IOCTL_USB_REAPURBNDELAY, (void *)&urb);
   if (ret < 0) {
     usbi_debug(1, "error reaping URB: %s", strerror(errno));
-    return -EINVAL;
+    return LIBUSB_FAILURE;
   }
 
   io = urb->usercontext;
@@ -244,10 +264,40 @@ int usbi_os_io_complete(struct usbi_dev_handle *dev)
   if (io->setup)
     memcpy(io->buffer, io->urb.buffer + USBI_CONTROL_SETUP_LEN, io->bufferlen);
 
+  /* FIXME: Should this be done without a lock held so the completion handler can callback into this code? */
   usbi_io_complete(io, urb->status, urb->actual_length);
 
   if (list_empty(&io->dev->ios))
     list_del(&io->dev->io_list);
+
+  return 0;
+}
+
+int usbi_os_io_timeout(struct usbi_dev_handle *dev, struct timeval *tvc)
+{
+  struct timeval tvo = { .tv_sec = 0 };
+  struct usbi_io *io, *tio;
+
+  list_for_each_entry_safe(io, tio, &dev->ios, list) {
+    if (usbi_timeval_compare(&io->tvo, tvc) <= 0) {
+      int ret;
+
+      list_del(&io->list);
+
+      ret = ioctl(io->dev->fd, IOCTL_USB_DISCARDURB, &io->urb);
+      if (ret < 0) {
+        usbi_debug(1, "error cancelling URB: %s", strerror(errno));
+        /* FIXME: Better error handling */
+        return LIBUSB_FAILURE;
+      }
+
+      usbi_io_complete(io, LIBUSB_IO_TIMEOUT, 0);
+    } else if (!tvo.tv_sec || usbi_timeval_compare(&io->tvo, &tvo) < 0)
+      /* New soonest timeout */
+      memcpy(&tvo, &io->tvo, sizeof(tvo));
+  }
+
+  memcpy(&dev->tvo, &tvo, sizeof(dev->tvo));
 
   return 0;
 }
@@ -259,7 +309,7 @@ int usbi_os_io_cancel(struct usbi_io *io)
   ret = ioctl(io->dev->fd, IOCTL_USB_DISCARDURB, &io->urb);
   if (ret < 0) {
     usbi_debug(1, "error cancelling URB: %s", strerror(errno));
-    return -EINVAL;
+    return LIBUSB_FAILURE;
   }
 
   /* Always do this to avoid race conditions */
@@ -268,42 +318,91 @@ int usbi_os_io_cancel(struct usbi_io *io)
   return 0;
 }
 
-void usbi_poll_events()
+void *usbi_poll_events()
 {
-  do {
+  char filename[PATH_MAX + 1];
+  int fd;
+
+  snprintf(filename, sizeof(filename), "%s/devices", usbi_path);
+  fd = open(filename, O_RDONLY);
+  if (fd < 0)
+    usbi_debug(0, "unable to open %s to check for topology changes", filename);
+
+  while (1) {
     struct usbi_dev_handle *dev, *tdev;
+    struct timeval tvc, tvo;
     fd_set readfds, writefds;
     int ret, maxfd;
-    struct timeval tv;
 
     FD_ZERO(&readfds);
     FD_ZERO(&writefds);
-    maxfd=-1;
+
+    /* Always check the event_pipe and the devices file */
+    if (fd >= 0)
+      FD_SET(fd, &readfds);
+
+    maxfd = fd;
+
+    gettimeofday(&tvc, NULL);
+
+    memset(&tvo, 0, sizeof(tvo));
+
     list_for_each_entry(dev, &usbi_ios, io_list) {
       FD_SET(dev->fd, &writefds);
       if (dev->fd > maxfd)
         maxfd = dev->fd;
-    }
-    tv.tv_usec=0;
-    tv.tv_sec=0;
 
-    ret = select(maxfd + 1, &readfds, &writefds, NULL, &tv);
+      if (dev->tvo.tv_sec &&
+          (!tvo.tv_sec || usbi_timeval_compare(&dev->tvo, &tvo)))
+        /* New soonest timeout */
+        memcpy(&tvo, &dev->tvo, sizeof(tvo));
+    }
+
+    if (!tvo.tv_sec) {
+      /* Default to an hour from now */
+      tvo.tv_sec = tvc.tv_sec + (60 * 60);
+      tvo.tv_usec = tvc.tv_usec;
+    } else if (usbi_timeval_compare(&tvo, &tvc) < 0)
+      /* Don't give a negative timeout */
+      memcpy(&tvo, &tvc, sizeof(tvo));
+
+    /* Make tvo absolute time now */
+    tvo.tv_sec -= tvc.tv_sec;
+    if (tvo.tv_usec < tvc.tv_usec) {
+      tvo.tv_sec--;
+      tvo.tv_usec += (1000000 - tvc.tv_usec);
+    } else
+      tvo.tv_usec -= tvc.tv_usec;
+
+    ret = select(maxfd + 1, &readfds, &writefds, NULL, &tvo);
     if (ret < 0) {
       usbi_debug(1, "select() call failed: %s", strerror(errno));
-      continue;
+      return 0;
     }
+
+    gettimeofday(&tvc, NULL);
+
+    /* FIXME: We need to handle new/removed busses as well */
+    if (fd >= 0 && FD_ISSET(fd, &readfds))
+      usbi_rescan_devices();
 
     list_for_each_entry_safe(dev, tdev, &usbi_ios, io_list) {
       if (FD_ISSET(dev->fd, &writefds))
         usbi_os_io_complete(dev);
 
+      if (usbi_timeval_compare(&dev->tvo, &tvc) <= 0)
+        usbi_os_io_timeout(dev, &tvc);
+
       if (list_empty(&dev->ios))
         list_del(&dev->io_list);
     }
-  } while (0);
+    break;
+  }
+
+  return NULL;
 }
 
-int usb_io_wait_handle(usb_io_handle_t *io)
+int libusb_io_wait_handle(libusb_io_handle_t *io)
 {
   return io->dev->fd;
 }
@@ -316,9 +415,10 @@ int usbi_os_find_busses(struct list_head *busses)
   /* Scan /proc/bus/usb for bus named directories */
 
   dir = opendir(usbi_path);
-  if (!dir)
-    USB_ERROR_STR(-errno, "couldn't opendir(%s): %s", usbi_path,
-	strerror(errno));
+  if (!dir) {
+    usbi_debug(1, "could not opendir(%s): %s", usbi_path, strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   while ((entry = readdir(dir)) != NULL) {
     struct usbi_bus *ibus;
@@ -332,9 +432,10 @@ int usbi_os_find_busses(struct list_head *busses)
       continue;
     }
 
+    /* FIXME: Centralize allocation and initialization */
     ibus = malloc(sizeof(*ibus));
     if (!ibus)
-      USB_ERROR(-ENOMEM);
+      return LIBUSB_NO_RESOURCES;
 
     memset(ibus, 0, sizeof(*ibus));
 
@@ -352,19 +453,13 @@ int usbi_os_find_busses(struct list_head *busses)
   return 0;
 }
 
-static int device_is_new(struct usbi_bus *ibus, unsigned short devnum)
+static int device_is_new(struct usbi_device *idev, unsigned short devnum)
 {
   char filename[PATH_MAX + 1];
-  struct usbi_device *idev;
   struct stat st;
 
-  /* If we don't have a device by this number yet, it must be new */
-  idev = ibus->dev_by_num[devnum];
-  if (!idev)
-    return 1;
-
   /* Compare the mtime to ensure it's new */
-  snprintf(filename, sizeof(filename) - 1, "%s/%03d", ibus->filename, devnum);
+  snprintf(filename, sizeof(filename) - 1, "%s/%03d", idev->bus->filename, devnum);
   stat(filename, &st);
 
   if (st.st_mtime == idev->mtime)
@@ -393,7 +488,7 @@ static int create_new_device(struct usbi_device **dev, struct usbi_bus *ibus,
 
   idev = malloc(sizeof(*idev));
   if (!idev)
-    USB_ERROR(-ENOMEM);
+    return LIBUSB_NO_RESOURCES;
 
   memset(idev, 0, sizeof(*idev));
 
@@ -406,7 +501,7 @@ static int create_new_device(struct usbi_device **dev, struct usbi_bus *ibus,
     idev->children = malloc(idev->num_ports * sizeof(idev->children[0]));
     if (!idev->children) {
       free(idev);
-      USB_ERROR(-ENOMEM);
+      return LIBUSB_NO_RESOURCES;
     }
 
     memset(idev->children, 0, idev->num_ports * sizeof(idev->children[0]));
@@ -417,7 +512,7 @@ static int create_new_device(struct usbi_device **dev, struct usbi_bus *ibus,
     usbi_debug(2, "couldn't open %s: %s", idev->filename, strerror(errno));
 
     free(idev);
-    USB_ERROR(-ENODEV);
+    return LIBUSB_UNKNOWN_DEVICE;
   }
 
   /* FIXME: Better error messages (with filename for instance) */
@@ -483,12 +578,12 @@ static int create_new_device(struct usbi_device **dev, struct usbi_bus *ibus,
       goto done;
     }
 
-    cfgr->len = usb_le16_to_cpup((uint16_t *)&buf[2]);
+    cfgr->len = libusb_le16_to_cpup((uint16_t *)&buf[2]);
 
     cfgr->data = malloc(cfgr->len);
     if (!cfgr->data) {
       usbi_debug(1, "unable to allocate memory for descriptors");
-      ret = -ENOMEM;
+      ret = LIBUSB_NO_RESOURCES;
       goto err;
     }
 
@@ -517,6 +612,8 @@ static int create_new_device(struct usbi_device **dev, struct usbi_bus *ibus,
 
 done:
   *dev = idev;
+
+  ibus->dev_by_num[devnum] = idev;
 
   close(fd);
 
@@ -548,8 +645,10 @@ int usbi_os_refresh_devices(struct usbi_bus *ibus)
 
   snprintf(devfilename, sizeof(devfilename), "%s/devices", usbi_path);
   f = fopen(devfilename, "r");
-  if (!f)
-    USB_ERROR_STR(-errno, "couldn't open %s: %s", devfilename, strerror(errno));
+  if (!f) {
+    usbi_debug(1, "could not open %s: %s", devfilename, strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   /* Reset the found flag for all devices */
   list_for_each_entry(idev, &ibus->devices, bus_list)
@@ -570,7 +669,7 @@ int usbi_os_refresh_devices(struct usbi_bus *ibus)
     if (!buf[0] || strlen(buf) < 4)
       continue;
 
-    /* We need character and colon to start the line */
+    /* We need a character and colon to start the line */
     if (buf[1] != ':')
       break;
 
@@ -642,13 +741,19 @@ int usbi_os_refresh_devices(struct usbi_bus *ibus)
         break;
       }
 
-      if (!pdevnum && ibus->root) {
+      if (!pdevnum && ibus->root && ibus->root->found) {
         usbi_debug(1, "cannot have two root devices");
         break;
       }
 
       /* Only add this device if it's new */
-      if (device_is_new(ibus, devnum)) {
+
+      /* If we don't have a device by this number yet, it must be new */
+      idev = ibus->dev_by_num[devnum];
+      if (idev && device_is_new(idev, devnum))
+        idev = NULL;
+
+      if (!idev) {
         int ret;
 
         ret = create_new_device(&idev, ibus, devnum, max_children);
@@ -657,10 +762,7 @@ int usbi_os_refresh_devices(struct usbi_bus *ibus)
           break;
         }
 
-        idev->found = 1;
-
         usbi_add_device(ibus, idev);
-        ibus->dev_by_num[devnum] = idev;
 
         /* Setup parent/child relationship */
         if (pdevnum) {
@@ -669,6 +771,8 @@ int usbi_os_refresh_devices(struct usbi_bus *ibus)
         } else
           ibus->root = idev;
       }
+
+      idev->found = 1;
       break;
 
     /* Ignore the rest */
@@ -752,30 +856,33 @@ void usb_os_init(void)
     usbi_debug(1, "no USB VFS found, is it mounted?");
 }
 
-int usb_clear_halt(usb_dev_handle_t *dev, unsigned char ep)
+int libusb_clear_halt(libusb_dev_handle_t *dev, unsigned char ep)
 {
   int ret;
 
   ret = ioctl(dev->fd, IOCTL_USB_CLEAR_HALT, &ep);
-  if (ret)
-    USB_ERROR_STR(ret, "could not clear/halt ep %d: %s", ep,
-    	strerror(errno));
+  if (ret) {
+    usbi_debug(1, "could not clear halt ep %d: %s", ep, strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   return 0;
 }
 
-int usb_reset(usb_dev_handle_t *dev)
+int libusb_reset(libusb_dev_handle_t *dev)
 {
   int ret;
 
   ret = ioctl(dev->fd, IOCTL_USB_RESET, NULL);
-  if (ret)
-     USB_ERROR_STR(ret, "could not reset: %s", strerror(errno));
+  if (ret) {
+    usbi_debug(1, "could not reset: %s", strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   return 0;
 }
 
-int usb_get_driver_np(usb_dev_handle_t *dev, int interface, char *name,
+int libusb_get_driver_np(libusb_dev_handle_t *dev, int interface, char *name,
 	unsigned int namelen)
 {
   struct usbk_getdriver getdrv;
@@ -783,8 +890,10 @@ int usb_get_driver_np(usb_dev_handle_t *dev, int interface, char *name,
 
   getdrv.interface = interface;
   ret = ioctl(dev->fd, IOCTL_USB_GETDRIVER, &getdrv);
-  if (ret)
-    USB_ERROR_STR(-errno, "could not get bound driver: %s", strerror(errno));
+  if (ret) {
+    usbi_debug(1, "could not get bound driver: %s", strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   strncpy(name, getdrv.driver, namelen - 1);
   name[namelen - 1] = 0;
@@ -792,7 +901,7 @@ int usb_get_driver_np(usb_dev_handle_t *dev, int interface, char *name,
   return 0;
 }
 
-int usb_attach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
+int libusb_attach_kernel_driver_np(libusb_dev_handle_t *dev, int interface)
 {
   struct usbk_ioctl command;
   int ret;
@@ -802,14 +911,15 @@ int usb_attach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
   command.data = NULL;
 
   ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
-  if (ret)
-    USB_ERROR_STR(-errno, "could not attach kernel driver to interface %d: %s",
-        interface, strerror(errno));
+  if (ret) {
+    usbi_debug(1, "could not attach kernel driver to interface %d: %s", strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   return 0;
 }
 
-int usb_detach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
+int libusb_detach_kernel_driver_np(libusb_dev_handle_t *dev, int interface)
 {
   struct usbk_ioctl command;
   int ret;
@@ -819,9 +929,10 @@ int usb_detach_kernel_driver_np(usb_dev_handle_t *dev, int interface)
   command.data = NULL;
 
   ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
-  if (ret)
-    USB_ERROR_STR(-errno, "could not detach kernel driver from interface %d: %s",
-        interface, strerror(errno));
+  if (ret) {
+    usbi_debug(1, "could not detach kernel driver to interface %d: %s", strerror(errno));
+    return LIBUSB_FAILURE;
+  }
 
   return 0;
 }

@@ -134,7 +134,8 @@ struct usbk_hub_portinfo {
 #define USBI_DEV_HANDLE_PRIVATE \
 	int fd;		/* file descriptor for usbdevfs entry */	\
 	struct list_head io_list; /* list for devs with pending IO */	\
-	struct list_head ios; /* list of IOs for this devices */
+	struct list_head ios; /* list of IOs for this devices */	\
+	struct timeval tvo; /* next timeout for IOs on this dev */
 
 #define USBI_IO_HANDLE_PRIVATE \
 	struct usbk_urb urb;

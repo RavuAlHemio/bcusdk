@@ -8,6 +8,7 @@
 
 #include <errno.h>
 #include <string.h>	/* memset() */
+#include <sys/time.h>	/* gettimeofday() */
 #include <time.h>	/* time() */
 
 #include "usbi.h"
@@ -17,11 +18,12 @@ static struct list_head completions = { .prev = &completions, .next = &completio
 /*
  * Helper functions
  */
-struct usbi_io *usbi_alloc_io(usb_dev_handle_t *dev, enum usbi_io_type type,
+struct usbi_io *usbi_alloc_io(libusb_dev_handle_t *dev, enum usbi_io_type type,
 	unsigned char ep, void *setup, void *buffer, size_t bufferlen,
-	unsigned int timeout, usb_io_callback_t callback)
+	unsigned int timeout, libusb_io_callback_t callback)
 {
   struct usbi_io *io;
+  struct timeval tvc;
 
   io = malloc(sizeof(*io));
   if (!io)
@@ -41,6 +43,16 @@ struct usbi_io *usbi_alloc_io(usb_dev_handle_t *dev, enum usbi_io_type type,
   io->timeout = timeout;
   io->callback = callback;
 
+  /* Set the end time for the timeout */
+  gettimeofday(&tvc, NULL);
+  io->tvo.tv_sec = tvc.tv_sec + timeout / 1000;
+  io->tvo.tv_usec = tvc.tv_usec + (timeout % 1000) * 1000;
+
+  if (io->tvo.tv_usec > 1000000) {
+    io->tvo.tv_usec -= 1000000;
+    io->tvo.tv_sec++;
+  }
+
   return io;
 }
 
@@ -54,7 +66,7 @@ void usbi_free_io(struct usbi_io *io)
   if (io->tempbuf)
     free(io->tempbuf);
 
-  /* io->setup is only allocated by usb_submit_control() */
+  /* io->setup is only allocated by libusb_submit_control() */
   if (io->setup)
     free(io->setup);
 
@@ -81,7 +93,7 @@ void usbi_io_complete(struct usbi_io *io, int status, int transferlen)
 /*
  * API implementation
  */
-usb_io_handle_t *usb_io_poll_completions(void)
+libusb_io_handle_t *libusb_io_poll_completions(void)
 {
   struct usbi_io *io = NULL;
 
@@ -96,14 +108,14 @@ usb_io_handle_t *usb_io_poll_completions(void)
   return io;
 }
 
-void usb_io_wait(usb_io_handle_t *io)
+static void _libusb_io_wait(libusb_io_handle_t *io)
 {
   struct timeval tv;
   fd_set writefds;
   fd_set readfds;
-  int h=usb_io_wait_handle(io);
+  int h=libusb_io_wait_handle(io);
 
-  while(!usb_is_io_completed(io))
+  while(!libusb_is_io_completed(io))
     {
       tv.tv_usec=1;
       tv.tv_sec=io->start+io->timeout-time(NULL);
@@ -116,7 +128,12 @@ void usb_io_wait(usb_io_handle_t *io)
     }
 }
 
-int usb_io_cancel(usb_io_handle_t *io)
+void libusb_io_wait(libusb_io_handle_t *io)
+{
+  _libusb_io_wait(io);
+}
+
+int libusb_io_cancel(libusb_io_handle_t *io)
 {
   int ret = 0;
 
@@ -130,21 +147,20 @@ int usb_io_cancel(usb_io_handle_t *io)
     goto out;
 
   /* Wait for completion to be returned for cancelled IO */
-  usb_io_wait(io);
+  _libusb_io_wait(io);
 
-  return ret;
 
 out:
   return ret;
 }
 
-int usb_io_free(usb_io_handle_t *io)
+int libusb_io_free(libusb_io_handle_t *io)
 {
   usbi_free_io(io);
   return 0;
 }
 
-int usb_is_io_completed(usb_io_handle_t *io)
+int libusb_is_io_completed(libusb_io_handle_t *io)
 {
   if(io->timeout &&
      time (NULL) - io->start > io->timeout &&
@@ -155,46 +171,46 @@ int usb_is_io_completed(usb_io_handle_t *io)
   return !io->inprogress;
 }
 
-int usb_io_comp_status(usb_io_handle_t *io)
+int libusb_io_comp_status(libusb_io_handle_t *io)
 {
   return io->transferstatus;
 }
 
-unsigned char *usb_io_data(usb_io_handle_t *io)
+unsigned char *libusb_io_data(libusb_io_handle_t *io)
 {
   return io->buffer;
 }
 
-int usb_io_xfer_size(usb_io_handle_t *io)
+int libusb_io_xfer_size(libusb_io_handle_t *io)
 {
   return io->transferlen;
 }
 
-int usb_io_req_size(usb_io_handle_t *io)
+int libusb_io_req_size(libusb_io_handle_t *io)
 {
   return io->bufferlen;
 }
 
-int usb_io_ep_addr(usb_io_handle_t *io)
+int libusb_io_ep_addr(libusb_io_handle_t *io)
 {
   return io->ep;
 }
 
-unsigned long usb_io_seq_nbr(usb_io_handle_t *io)
+unsigned long libusb_io_seq_nbr(libusb_io_handle_t *io)
 {
   return -EINVAL;
 }
 
-usb_dev_handle_t *usb_io_dev(usb_io_handle_t *io)
+libusb_dev_handle_t *libusb_io_dev(libusb_io_handle_t *io)
 {
   return io->dev;
 }
 
-usb_io_handle_t *usb_submit_control(usb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_control(libusb_dev_handle_t *dev,
 	unsigned char ep, uint8_t bRequestType, uint8_t bRequest,
 	uint16_t wValue, uint16_t wIndex, void *buffer,
 	size_t bufferlen, unsigned int timeout,
-	usb_io_callback_t callback)
+	libusb_io_callback_t callback)
 {
   struct usbi_io *io;
   unsigned char *setup;
@@ -207,9 +223,9 @@ usb_io_handle_t *usb_submit_control(usb_dev_handle_t *dev,
   /* Fill in the SETUP packet */
   setup[0] = bRequestType;
   setup[1] = bRequest;
-  *(uint16_t *)(setup + 2) = usb_cpu_to_le16(wValue);
-  *(uint16_t *)(setup + 4) = usb_cpu_to_le16(wIndex);
-  *(uint16_t *)(setup + 6) = usb_cpu_to_le16(bufferlen);
+  *(uint16_t *)(setup + 2) = libusb_cpu_to_le16(wValue);
+  *(uint16_t *)(setup + 4) = libusb_cpu_to_le16(wIndex);
+  *(uint16_t *)(setup + 6) = libusb_cpu_to_le16(bufferlen);
 
   io = usbi_alloc_io(dev, USBI_IO_CONTROL, ep, setup, buffer, bufferlen,
 	timeout, callback);
@@ -227,9 +243,9 @@ usb_io_handle_t *usb_submit_control(usb_dev_handle_t *dev,
   return io;
 }
 
-usb_io_handle_t *usb_submit_bulk_write(usb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_bulk_write(libusb_dev_handle_t *dev,
 	unsigned char ep, const void *buffer, size_t bufferlen,
-	unsigned int timeout, usb_io_callback_t callback)
+	unsigned int timeout, libusb_io_callback_t callback)
 {
   struct usbi_io *io;
   int ret;
@@ -248,9 +264,9 @@ usb_io_handle_t *usb_submit_bulk_write(usb_dev_handle_t *dev,
   return io;
 }
 
-usb_io_handle_t *usb_submit_bulk_read(usb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_bulk_read(libusb_dev_handle_t *dev,
 	unsigned char ep, void *buffer, size_t bufferlen,
-	unsigned int timeout, usb_io_callback_t callback)
+	unsigned int timeout, libusb_io_callback_t callback)
 {
   struct usbi_io *io;
   int ret;
@@ -269,9 +285,9 @@ usb_io_handle_t *usb_submit_bulk_read(usb_dev_handle_t *dev,
   return io;
 }
 
-usb_io_handle_t *usb_submit_interrupt_write(usb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_interrupt_write(libusb_dev_handle_t *dev,
 	unsigned char ep, const void *buffer, size_t bufferlen,
-	unsigned int timeout, usb_io_callback_t callback)
+	unsigned int timeout, libusb_io_callback_t callback)
 {
   struct usbi_io *io;
   int ret;
@@ -290,9 +306,9 @@ usb_io_handle_t *usb_submit_interrupt_write(usb_dev_handle_t *dev,
   return io;
 }
 
-usb_io_handle_t *usb_submit_interrupt_read(usb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_interrupt_read(libusb_dev_handle_t *dev,
 	unsigned char ep, void *buffer, size_t bufferlen,
-	unsigned int timeout, usb_io_callback_t callback)
+	unsigned int timeout, libusb_io_callback_t callback)
 {
   struct usbi_io *io;
   int ret;

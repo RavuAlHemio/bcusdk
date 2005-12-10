@@ -21,31 +21,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "usb.h"
+#include "libusb.h"
 
 void
-check_device (usb_device_id_t cdev)
+check_device (libusb_device_id_t cdev)
 {
   struct usb_device_desc desc;
   struct usb_config_desc cfg;
   struct usb_interface_desc intf;
   struct usb_endpoint_desc ep;
+  libusb_bus_id_t bus;
   int in, out, outint;
-  usb_dev_handle_t *h;
+  libusb_dev_handle_t *h;
   char vendor[512];
   char product[512];
   int j, k, l;
+  unsigned char devnum;
 
   if (!cdev)
     return;
 
-  usb_get_device_desc (cdev, &desc);
+  libusb_get_device_desc (cdev, &desc);
   for (j = 0; j < desc.bNumConfigurations; j++)
     {
-      usb_get_config_desc (cdev, j, &cfg);
+      libusb_get_config_desc (cdev, j, &cfg);
       for (k = 0; k < cfg.bNumInterfaces; k++)
 	{
-	  usb_get_interface_desc (cdev, j, k, &intf);
+	  libusb_get_interface_desc (cdev, j, k, &intf);
 	  if (intf.bInterfaceClass != USB_CLASS_HID)
 	    continue;
 
@@ -55,7 +57,7 @@ check_device (usb_device_id_t cdev)
 
 	  for (l = 0; l < intf.bNumEndpoints; l++)
 	    {
-	      usb_get_endpoint_desc (cdev, j, k, l, &ep);
+	      libusb_get_endpoint_desc (cdev, j, k, l, &ep);
 	      if (ep.wMaxPacketSize == 64)
 		{
 		  if (ep.bEndpointAddress & 0x80)
@@ -82,36 +84,43 @@ check_device (usb_device_id_t cdev)
 	    }
 	  if (!in || !out)
 	    continue;
-	  if (usb_open (cdev, &h) >= 0)
+	  if (libusb_open (cdev, &h) >= 0)
 	    {
 	      memset (vendor, 0, sizeof (vendor));
 	      memset (product, 0, sizeof (product));
-	      if (usb_get_string_simple
-		  (h, desc.iManufacturer, (unsigned char*) vendor, sizeof (vendor) - 1) < 0)
+	      if (libusb_get_string_simple
+		  (h, desc.iManufacturer, (unsigned char *) vendor,
+		   sizeof (vendor) - 1) < 0)
 		strcpy (vendor, "<Unreadable>");
-	      if (usb_get_string_simple
-		  (h, desc.iProduct, (unsigned char*) product, sizeof (product) - 1) < 0)
+	      if (libusb_get_string_simple
+		  (h, desc.iProduct, (unsigned char *) product,
+		   sizeof (product) - 1) < 0)
 		strcpy (product, "<Unreadable>");
+	      libusb_get_devnum (cdev, &devnum);
+	      libusb_get_bus_id (cdev, &bus);
 	      printf ("device %d:%d:%d:%d (%s:%s)\n",
-		      usb_get_busnum (usb_get_device_bus_id (cdev)),
-		      usb_get_devnum (cdev), cfg.bConfigurationValue,
+		      libusb_get_busnum (bus),
+		      devnum, cfg.bConfigurationValue,
 		      intf.bInterfaceNumber, vendor, product);
-	      usb_close (h);
+	      libusb_close (h);
 	    }
 	}
     }
 }
 
 void
-check_devlist (usb_device_id_t dev)
+check_devlist (libusb_device_id_t dev)
 {
-  usb_device_id_t cdev;
+  libusb_device_id_t cdev;
+  unsigned char count;
   int i;
 
   check_device (dev);
-  for (i = 0; i < usb_get_child_count (dev); i++)
+  libusb_get_child_count (dev, &count);
+  for (i = 0; i < count; i++)
     {
-      cdev = usb_get_child_device_id (dev, i + 1);
+      if (libusb_get_child_device_id (dev, i + 1, &cdev) < 0)
+	continue;
       check_devlist (cdev);
     }
 
@@ -121,14 +130,17 @@ int
 main ()
 {
 
-  usb_bus_id_t bus;
-  usb_device_id_t dev;
-  usb_device_id_t cdev;
-  int i, j, k, l;
+  libusb_bus_id_t bus;
+  libusb_device_id_t dev;
 
   printf ("Possible addresses for KNX USB devices:\n");
-  usb_set_debug (0);
-  usb_init (0);
-  for (bus = usb_get_first_bus_id (); bus; bus = usb_get_next_bus_id (bus))
-    check_devlist (usb_get_root_device_id (bus));
+  libusb_set_debug (0);
+  libusb_init ();
+  for (libusb_get_first_bus_id (&bus); bus;)
+    {
+      libusb_get_first_device_id (bus, &dev);
+      check_devlist (dev);
+      if (libusb_get_next_bus_id (&bus) < 0)
+	break;
+    }
 }

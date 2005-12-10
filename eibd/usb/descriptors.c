@@ -12,10 +12,10 @@
 
 #include "usbi.h"
 
-int usb_get_descriptor(usb_dev_handle_t *udev, unsigned char type,
-	unsigned char index, unsigned char *buf, unsigned int buflen)
+int libusb_get_descriptor(libusb_dev_handle_t *udev, unsigned char type,
+	unsigned char index, void *buf, unsigned int buflen)
 {
-  return usb_control_msg(udev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
+  return libusb_control_msg(udev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
                         (type << 8) + index, 0, buf, buflen, 1000);
 }
 
@@ -55,7 +55,7 @@ static int usbi_parse_endpoint(struct usbi_endpoint *ep,
 
   ep->desc.bEndpointAddress = buf[2];
   ep->desc.bmAttributes = buf[3];
-  ep->desc.wMaxPacketSize = usb_le16_to_cpup((uint16_t *)&buf[4]);
+  ep->desc.wMaxPacketSize = libusb_le16_to_cpup((uint16_t *)&buf[4]);
   ep->desc.bInterval = buf[6];
   ep->desc.bRefresh = buf[7];
   ep->desc.bSynchAddress = buf[8];
@@ -227,7 +227,7 @@ int usbi_parse_configuration(struct usbi_config *cfg, unsigned char *buf,
   desc_len = buf[0];
   desc_type = buf[1];
 
-  cfg->desc.wTotalLength = usb_le16_to_cpup((uint16_t *)&buf[2]);
+  cfg->desc.wTotalLength = libusb_le16_to_cpup((uint16_t *)&buf[2]);
   cfg->desc.bNumInterfaces = buf[4];
   cfg->desc.bConfigurationValue = buf[5];
   cfg->desc.iConfiguration = buf[6];
@@ -322,7 +322,7 @@ void usbi_destroy_configuration(struct usbi_device *dev)
   free(dev->desc.device_raw.data);
 }
 
-int usbi_fetch_and_parse_descriptors(usb_dev_handle_t *udev)
+int usbi_fetch_and_parse_descriptors(libusb_dev_handle_t *udev)
 {
   struct usbi_device *dev = udev->idev;
   int i;
@@ -365,7 +365,7 @@ int usbi_fetch_and_parse_descriptors(usb_dev_handle_t *udev)
     int ret;
 
     /* Get the first 8 bytes so we can figure out what the total length is */
-    ret = usb_get_descriptor(udev, USB_DESC_TYPE_CONFIG, i, buf, 8);
+    ret = libusb_get_descriptor(udev, USB_DESC_TYPE_CONFIG, i, buf, 8);
     if (ret < 8) {
       if (ret < 0)
         usbi_debug(1, "unable to get first 8 bytes of config descriptor (ret = %d)",
@@ -376,7 +376,7 @@ int usbi_fetch_and_parse_descriptors(usb_dev_handle_t *udev)
       goto err;
     }
 
-    cfgr->len = usb_le16_to_cpup((uint16_t *)&buf[2]);
+    cfgr->len = libusb_le16_to_cpup((uint16_t *)&buf[2]);
 
     cfgr->data = malloc(cfgr->len);
     if (!cfgr->data) {
@@ -384,7 +384,7 @@ int usbi_fetch_and_parse_descriptors(usb_dev_handle_t *udev)
       goto err;
     }
 
-    ret = usb_get_descriptor(udev, USB_DESC_TYPE_CONFIG, i, cfgr->data, cfgr->len);
+    ret = libusb_get_descriptor(udev, USB_DESC_TYPE_CONFIG, i, cfgr->data, cfgr->len);
     if (ret < cfgr->len) {
       if (ret < 0)
         usbi_debug(1, "unable to get rest of config descriptor (ret = %d)",
@@ -429,14 +429,14 @@ int usbi_parse_device_descriptor(struct usbi_device *dev,
 
   /* FIXME: Verify size and type? */
 
-  dev->desc.device.bcdUSB = usb_le16_to_cpup((uint16_t *)&buf[2]);
+  dev->desc.device.bcdUSB = libusb_le16_to_cpup((uint16_t *)&buf[2]);
   dev->desc.device.bDeviceClass = buf[4];
   dev->desc.device.bDeviceSubClass = buf[5];
   dev->desc.device.bDeviceProtocol = buf[6];
   dev->desc.device.bMaxPacketSize0 = buf[7];
-  dev->desc.device.idVendor = usb_le16_to_cpup((uint16_t *)&buf[8]);
-  dev->desc.device.idProduct = usb_le16_to_cpup((uint16_t *)&buf[10]);
-  dev->desc.device.bcdDevice = usb_le16_to_cpup((uint16_t *)&buf[12]);
+  dev->desc.device.idVendor = libusb_le16_to_cpup((uint16_t *)&buf[8]);
+  dev->desc.device.idProduct = libusb_le16_to_cpup((uint16_t *)&buf[10]);
+  dev->desc.device.bcdDevice = libusb_le16_to_cpup((uint16_t *)&buf[12]);
   dev->desc.device.iManufacturer = buf[14];
   dev->desc.device.iProduct = buf[15];
   dev->desc.device.iSerialNumber = buf[16];

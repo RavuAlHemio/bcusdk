@@ -69,33 +69,38 @@ parseUSBEndpoint (const char *addr)
 }
 
 void
-check_device (usb_device_id_t cdev, USBEndpoint e)
+check_device (libusb_device_id_t cdev, USBEndpoint e)
 {
   struct usb_device_desc desc;
   struct usb_config_desc cfg;
   struct usb_interface_desc intf;
   struct usb_endpoint_desc ep;
   int in, out, outint;
-  usb_dev_handle_t *h;
+  libusb_bus_id_t bus;
+  unsigned char devnum;
+  libusb_dev_handle_t *h;
   int j, k, l;
 
   if (!cdev)
     return;
 
-  if (usb_get_busnum (usb_get_device_bus_id (cdev)) != e.bus && e.bus != -1)
+  libusb_get_devnum (cdev, &devnum);
+  libusb_get_bus_id (cdev, &bus);
+
+  if (libusb_get_busnum (bus) != e.bus && e.bus != -1)
     return;
-  if (usb_get_devnum (cdev) != e.device && e.device != -1)
+  if (devnum != e.device && e.device != -1)
     return;
 
-  usb_get_device_desc (cdev, &desc);
+  libusb_get_device_desc (cdev, &desc);
   for (j = 0; j < desc.bNumConfigurations; j++)
     {
-      usb_get_config_desc (cdev, j, &cfg);
+      libusb_get_config_desc (cdev, j, &cfg);
       if (cfg.bConfigurationValue != e.config && e.config != -1)
 	continue;
       for (k = 0; k < cfg.bNumInterfaces; k++)
 	{
-	  usb_get_interface_desc (cdev, j, k, &intf);
+	  libusb_get_interface_desc (cdev, j, k, &intf);
 	  if (intf.bInterfaceNumber != e.interface && e.interface != -1)
 	    continue;
 	  if (intf.bInterfaceClass != USB_CLASS_HID)
@@ -107,7 +112,7 @@ check_device (usb_device_id_t cdev, USBEndpoint e)
 
 	  for (l = 0; l < intf.bNumEndpoints; l++)
 	    {
-	      usb_get_endpoint_desc (cdev, j, k, l, &ep);
+	      libusb_get_endpoint_desc (cdev, j, k, l, &ep);
 	      if (ep.wMaxPacketSize == 64)
 		{
 		  if (ep.bEndpointAddress & 0x80)
@@ -134,7 +139,7 @@ check_device (usb_device_id_t cdev, USBEndpoint e)
 	    }
 	  if (!in || !out)
 	    continue;
-	  if (usb_open (cdev, &h) >= 0)
+	  if (libusb_open (cdev, &h) >= 0)
 	    {
 	      USBDevice e1;
 	      e1.dev = cdev;
@@ -142,7 +147,7 @@ check_device (usb_device_id_t cdev, USBEndpoint e)
 	      e1.interface = intf.bInterfaceNumber;
 	      e1.sendep = out;
 	      e1.recvep = in;
-	      usb_close (h);
+	      libusb_close (h);
 	      throw e1;
 	    }
 	}
@@ -151,29 +156,38 @@ check_device (usb_device_id_t cdev, USBEndpoint e)
 
 
 void
-check_devlist (usb_device_id_t dev, USBEndpoint e)
+check_devlist (libusb_device_id_t dev, USBEndpoint e)
 {
-  usb_device_id_t cdev;
+  libusb_device_id_t cdev;
+  unsigned char count;
   int i;
 
   check_device (dev, e);
-  for (i = 0; i < usb_get_child_count (dev); i++)
+  libusb_get_child_count (dev, &count);
+  for (i = 0; i < count; i++)
     {
-      cdev = usb_get_child_device_id (dev, i + 1);
+      if (libusb_get_child_device_id (dev, i + 1, &cdev) < 0)
+	continue;
       check_devlist (cdev, e);
     }
-
 }
 
 USBDevice
 detectUSBEndpoint (USBEndpoint e)
 {
-  usb_bus_id_t bus;
+  libusb_bus_id_t bus;
+  libusb_device_id_t dev;
   USBDevice e2;
   try
   {
-    for (bus = usb_get_first_bus_id (); bus; bus = usb_get_next_bus_id (bus))
-      check_devlist (usb_get_root_device_id (bus), e);
+    for (libusb_get_first_bus_id (&bus); bus;)
+      {
+	libusb_get_first_device_id (bus, &dev);
+	check_devlist (dev, e);
+
+	if (libusb_get_next_bus_id (&bus) < 0)
+	  break;
+      }
   }
   catch (USBDevice e1)
   {
@@ -186,23 +200,27 @@ detectUSBEndpoint (USBEndpoint e)
 
 USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
 {
+  libusb_bus_id_t bus;
+  unsigned char devnum;
+
   t = tr;
   t->TracePrintf (1, this, "Detect");
   USBEndpoint e = parseUSBEndpoint (Dev);
   d = detectUSBEndpoint (e);
   if (d.dev == -1)
     throw Exception (DEV_OPEN_FAIL);
+  libusb_get_devnum (d.dev, &devnum);
+  libusb_get_bus_id (d.dev, &bus);
   t->TracePrintf (1, this, "Using %d (%d:%d:%d:%d) (%d:%d)", d.dev,
-		  usb_get_busnum (usb_get_device_bus_id (d.dev)),
-		  usb_get_devnum (d.dev), d.config, d.interface, d.sendep,
-		  d.recvep);
-  if (usb_open (d.dev, &dev) < 0)
+		  libusb_get_busnum (bus),
+		  devnum, d.config, d.interface, d.sendep, d.recvep);
+  if (libusb_open (d.dev, &dev) < 0)
     throw Exception (DEV_OPEN_FAIL);
   t->TracePrintf (1, this, "Open");
-  usb_detach_kernel_driver_np (dev, d.interface);
-  if (usb_set_configuration (dev, d.config) < 0)
+  libusb_detach_kernel_driver_np (dev, d.interface);
+  if (libusb_set_configuration (dev, d.config) < 0)
     throw Exception (DEV_OPEN_FAIL);
-  if (usb_claim_interface (dev, d.interface) < 0)
+  if (libusb_claim_interface (dev, d.interface) < 0)
     throw Exception (DEV_OPEN_FAIL);
   t->TracePrintf (1, this, "Claimed");
 
@@ -222,10 +240,10 @@ USBLowLevelDriver::~USBLowLevelDriver ()
   pth_event_free (getwait, PTH_FREE_THIS);
 
   t->TracePrintf (1, this, "Release");
-  usb_release_interface (dev, d.interface);
-  usb_attach_kernel_driver_np (dev, d.interface);
+  libusb_release_interface (dev, d.interface);
+  libusb_attach_kernel_driver_np (dev, d.interface);
   t->TracePrintf (1, this, "Close");
-  usb_close (dev);
+  libusb_close (dev);
 }
 
 
@@ -299,8 +317,8 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
   uchar recvbuf[64];
   uchar sendbuf[64];
-  usb_io_handle_t *sendh = 0;
-  usb_io_handle_t *recvh = 0;
+  libusb_io_handle_t *sendh = 0;
+  libusb_io_handle_t *recvh = 0;
   pth_event_t sende = pth_event (PTH_EVENT_SEM, &in_signal);;
   pth_event_t recve = pth_event (PTH_EVENT_SEM, &in_signal);;
 
@@ -309,8 +327,8 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
       if (!recvh)
 	{
 	  recvh =
-	    usb_submit_interrupt_read (dev, d.recvep, recvbuf,
-				       sizeof (recvbuf), 1000, 0);
+	    libusb_submit_interrupt_read (dev, d.recvep, recvbuf,
+					  sizeof (recvbuf), 1000, 0);
 	  if (!recvh)
 	    {
 	      t->TracePrintf (0, this, "Error StartRecv");
@@ -319,7 +337,7 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	  t->TracePrintf (0, this, "StartRecv");
 	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
 		     PTH_UNTIL_FD_WRITEABLE, recve,
-		     usb_io_wait_handle (recvh));
+		     libusb_io_wait_handle (recvh));
 	}
       if (recvh)
 	pth_event_concat (stop, recve, NULL);
@@ -334,42 +352,42 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
       pth_event_isolate (recve);
       pth_event_isolate (input);
 
-      if (recvh && usb_is_io_completed (recvh))
+      if (recvh && libusb_is_io_completed (recvh))
 	{
-	  if (usb_io_comp_status (recvh) < 0)
+	  if (libusb_io_comp_status (recvh) < 0)
 	    t->TracePrintf (0, this, "RecvError %d",
-			    usb_io_comp_status (recvh));
+			    libusb_io_comp_status (recvh));
 	  else
 	    {
 	      t->TracePrintf (0, this, "RecvComplete %d",
-			      usb_io_xfer_size (recvh));
+			      libusb_io_xfer_size (recvh));
 	      CArray res;
 	      res.set (recvbuf, sizeof (recvbuf));
 	      t->TracePacket (0, this, "RecvUSB", res);
 	      outqueue.put (new CArray (res));
 	      pth_sem_inc (&out_signal, 1);
 	    }
-	  usb_io_free (recvh);
+	  libusb_io_free (recvh);
 	  recvh = 0;
 	}
 
       if (sendh)
 	{
-	  if (usb_is_io_completed (sendh))
+	  if (libusb_is_io_completed (sendh))
 	    {
-	      if (usb_io_comp_status (sendh) < 0)
+	      if (libusb_io_comp_status (sendh) < 0)
 		t->TracePrintf (0, this, "SendError %d",
-				usb_io_comp_status (sendh));
+				libusb_io_comp_status (sendh));
 	      else
 		{
 		  t->TracePrintf (0, this, "SendComplete %d",
-				  usb_io_xfer_size (sendh));
+				  libusb_io_xfer_size (sendh));
 		  pth_sem_dec (&in_signal);
 		  inqueue.get ();
 		  if (inqueue.isempty ())
 		    pth_sem_set_value (&send_empty, 1);
 		}
-	      usb_io_free (sendh);
+	      libusb_io_free (sendh);
 	      sendh = 0;
 	    }
 	}
@@ -382,8 +400,8 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 		  (c () > sizeof (sendbuf) ? sizeof (sendbuf) : c ()));
 
 	  sendh =
-	    usb_submit_interrupt_write (dev, d.sendep, sendbuf,
-					sizeof (sendbuf), 1000, 0);
+	    libusb_submit_interrupt_write (dev, d.sendep, sendbuf,
+					   sizeof (sendbuf), 1000, 0);
 	  if (!sendh)
 	    {
 	      t->TracePrintf (0, this, "Error StartSend");
@@ -392,19 +410,19 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	  t->TracePrintf (0, this, "StartSend");
 	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
 		     PTH_UNTIL_FD_WRITEABLE, sende,
-		     usb_io_wait_handle (sendh));
+		     libusb_io_wait_handle (sendh));
 
 	}
     }
   if (sendh)
     {
-      usb_io_cancel (sendh);
-      usb_io_free (sendh);
+      libusb_io_cancel (sendh);
+      libusb_io_free (sendh);
     }
   if (recvh)
     {
-      usb_io_cancel (recvh);
-      usb_io_free (recvh);
+      libusb_io_cancel (recvh);
+      libusb_io_free (recvh);
     }
   pth_event_free (stop, PTH_FREE_THIS);
   pth_event_free (input, PTH_FREE_THIS);

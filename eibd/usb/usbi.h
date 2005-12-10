@@ -5,7 +5,7 @@
 #include "config.h"
 #endif
 
-#include "usb.h"
+#include "libusb.h"
 #include "error.h"
 
 /* Prevent namespace pollution */
@@ -20,6 +20,11 @@
 #endif
 
 extern int usb_debug;
+
+struct usbi_event_callback {
+  libusb_event_callback_t func;
+  void *arg;
+};
 
 #define USB_MAX_DEVICES_PER_BUS		128	/* per the USB specs */
 
@@ -38,7 +43,7 @@ struct usb_string_descriptor {
 struct usbi_bus {
   struct list_head list;
 
-  usb_bus_id_t busid;
+  libusb_bus_id_t busid;
   unsigned int busnum;			/* Only needs to be unique */
 
   struct list_head devices;
@@ -100,7 +105,7 @@ struct usbi_device {
   struct list_head dev_list;
   struct list_head bus_list;
 
-  usb_device_id_t devid;
+  libusb_device_id_t devid;
   unsigned int devnum;			/* Only needs to be unique */
 
   struct usbi_bus *bus;
@@ -142,7 +147,7 @@ struct usbi_match {
   unsigned int cur_match;
 
   unsigned int alloc_matches;
-  usb_device_id_t *matches;
+  libusb_device_id_t *matches;
 };
 
 #define USBI_CONTROL_SETUP_LEN	(1 + 1 + 2 + 2 + 2)
@@ -166,8 +171,9 @@ struct usbi_io {
 
   unsigned int start;
   unsigned int timeout;
+  struct timeval tvo;
 
-  usb_io_callback_t callback;
+  libusb_io_callback_t callback;
 
   void *tempbuf;		/* temporary use by backend */
   void *setup;			/* SETUP packet for control messages */
@@ -181,8 +187,9 @@ struct usbi_io {
 };
 
 /* usb.c */
-extern usb_event_callback_t usbi_event_callback;
 void _usbi_debug(int level, const char *func, int line, char *fmt, ...);
+void usbi_callback(libusb_device_id_t devid, enum libusb_event_type type);
+int usbi_timeval_compare(struct timeval *tva, struct timeval *tvb);
 
 #define usbi_debug(level, fmt...) _usbi_debug(level, __FUNCTION__, __LINE__, fmt)
 
@@ -192,18 +199,18 @@ int usbi_os_refresh_devices(struct usbi_bus *bus);
 int usb_os_get_child_list(struct usbi_device *idev,
 	unsigned char children[USB_MAX_DEVICES_PER_BUS]);
 void usb_os_init(void);
-int usb_os_open(usb_dev_handle_t *dev);
-int usb_os_close(usb_dev_handle_t *dev);
+int usb_os_open(libusb_dev_handle_t *dev);
+int usb_os_close(libusb_dev_handle_t *dev);
 int usbi_os_io_submit(struct usbi_io *io);
 int usbi_os_io_cancel(struct usbi_io *io);
 int usbi_os_io_complete(struct usbi_dev_handle *dev);
-void usbi_poll_events();
+void *usbi_poll_events();
 
 /* async.c */
 void usbi_io_complete(struct usbi_io *io, int status, int transferlen);
 
 /* descriptors.c */
-void usb_fetch_descriptors(usb_dev_handle_t *dev);
+void usb_fetch_descriptors(libusb_dev_handle_t *dev);
 void usbi_destroy_configuration(struct usbi_device *odev);
 int usbi_parse_configuration(struct usbi_config *cfg, unsigned char *buf,
 	size_t buflen);
@@ -215,7 +222,7 @@ void usbi_free_bus(struct usbi_bus *bus);
 void usbi_add_device(struct usbi_bus *ibus, struct usbi_device *idev);
 void usbi_remove_device(struct usbi_device *idev);
 void usbi_rescan_devices(void);
-struct usbi_device *usbi_find_device_by_id(usb_device_id_t devid);
+struct usbi_device *usbi_find_device_by_id(libusb_device_id_t devid);
 
 #endif /* _USBI_H_ */
 

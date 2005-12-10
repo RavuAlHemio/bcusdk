@@ -31,8 +31,8 @@
 inline LowLevelDriverInterface *
 usb_ll_Create (const char *dev, Trace * t)
 {
-  usb_set_debug (0);
-  usb_init (0);
+  libusb_set_debug (0);
+  libusb_init ();
   return initUSBDriver (new USBLowLevelDriver (dev, t), t);
 }
 

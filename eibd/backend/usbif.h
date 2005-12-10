@@ -21,7 +21,7 @@
 #define EIB_USB_H
 
 #include "lowlevel.h"
-#include "usb.h"
+#include "libusb.h"
 
 typedef struct
 {
@@ -33,7 +33,7 @@ typedef struct
 
 typedef struct
 {
-  usb_device_id_t dev;
+  libusb_device_id_t dev;
   int config;
   int interface;
   int sendep;
@@ -45,7 +45,7 @@ USBDevice detectUSBEndpoint (USBEndpoint e);
 
 class USBLowLevelDriver:public LowLevelDriverInterface, private Thread
 {
-  usb_dev_handle_t *dev;
+  libusb_dev_handle_t *dev;
   USBDevice d;
   /** debug output */
   Trace *t;
