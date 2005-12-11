@@ -7,7 +7,7 @@ TARGET =
 endif
 
 if HAVE_USB
-LIBUSB = async.c devices.c descriptors.c error.h list.c list.h libusb.h usb.c usbi.h $(TARGET)
+LIBUSB = async.c devices.c descriptors.c list.c list.h libusb.h usb.c usbi.h $(TARGET)
 PROG = findknxusb
 else
 LIBUSB =
