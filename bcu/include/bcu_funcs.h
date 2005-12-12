@@ -846,9 +846,9 @@ _U_TS_Del (uchar val)
 static void inline
 _U_MS_Post (uchar msgid, uchar pointer)
 {
-  if (!__builtin_constant_p (pointer))
+  if (!__builtin_constant_p (msgid))
     {
-      if (!__builtin_constant_p (msgid))
+      if (!__builtin_constant_p (pointer))
 	asm volatile ("lda %0\n\tldx %1\n\tjsr U_MS_Post"::"r" (msgid),
 		      "r" (pointer):"A", "X", "RegB", "RegL", "RegM", "RegN");
       else
@@ -857,7 +857,7 @@ _U_MS_Post (uchar msgid, uchar pointer)
     }
   else
     {
-      if (!__builtin_constant_p (msgid))
+      if (!__builtin_constant_p (pointer))
 	asm volatile ("lda $%0\n\tldx %1\n\tjsr U_MS_Post"::"i" (msgid),
 		      "r" (pointer):"A", "X", "RegB", "RegL", "RegM", "RegN");
       else
