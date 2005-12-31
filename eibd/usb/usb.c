@@ -14,7 +14,10 @@
 #include "usbi.h"
 
 #define USB_DEFAULT_DEBUG_LEVEL		0
-int usb_debug = USB_DEFAULT_DEBUG_LEVEL;
+static int usb_debug = USB_DEFAULT_DEBUG_LEVEL;
+
+static struct list_head usbi_handles = { .prev = &usbi_handles, .next = &usbi_handles };
+static libusb_dev_handle_t cur_handle = 1;
 
 void libusb_set_debug(int level)
 {
@@ -130,44 +133,64 @@ void usbi_callback(libusb_device_id_t devid, enum libusb_event_type type)
   process_callbacks(0);
 }
 
-int libusb_open(libusb_device_id_t devid, libusb_dev_handle_t **handle)
+struct usbi_dev_handle *usbi_find_dev_handle(libusb_dev_handle_t dev)
+{ 
+  struct usbi_dev_handle *hdev;
+
+  /* FIXME: We should probably index the device id in a rbtree or something */
+  list_for_each_entry(hdev, &usbi_handles, list) {
+    if (hdev->handle == dev)
+      return hdev;
+  }
+   
+  return NULL;
+}   
+
+int libusb_open(libusb_device_id_t devid, libusb_dev_handle_t *handle)
 {
   struct usbi_device *idev;
-  libusb_dev_handle_t *udev;
+  struct usbi_dev_handle *hdev;
   int ret;
 
   idev = usbi_find_device_by_id(devid);
   if (!idev)
     return -ENODEV;
 
-  udev = malloc(sizeof(*udev));
-  if (!udev)
+  hdev = malloc(sizeof(*hdev));
+  if (!hdev)
     return -ENOMEM;
 
-  udev->idev = idev;
-  udev->interface = udev->altsetting = -1;
+  hdev->handle = cur_handle++;	/* FIXME: Locking */
+  hdev->idev = idev;
+  hdev->interface = hdev->altsetting = -1;
 
-  ret = usb_os_open(udev);
+  ret = usb_os_open(hdev);
   if (ret < 0) {
-    free(udev);
+    free(hdev);
     return ret;
   }
 
-  *handle = udev;
+  list_add(&hdev->list, &usbi_handles);
+
+  *handle = hdev->handle;
 
   return 0;
 }
 
-int libusb_get_device_id(libusb_dev_handle_t *dev, libusb_device_id_t *devid)
+int libusb_get_device_id(libusb_dev_handle_t dev, libusb_device_id_t *devid)
 {
-  struct usbi_device *idev = dev->idev;
+  struct usbi_dev_handle *hdev;
 
-  *devid = idev->devid;
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  *devid = hdev->idev->devid;
 
   return 0;
 }
 
-int libusb_get_string(libusb_dev_handle_t *dev, int index, int langid,
+int libusb_get_string(libusb_dev_handle_t dev, int index, int langid,
 	void *buf, size_t buflen)
 {
   return libusb_control_msg(dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
@@ -175,7 +198,7 @@ int libusb_get_string(libusb_dev_handle_t *dev, int index, int langid,
 			buflen, 1000);
 }
 
-int libusb_get_string_simple(libusb_dev_handle_t *dev, int index,
+int libusb_get_string_simple(libusb_dev_handle_t dev, int index,
 	void *buf, size_t buflen)
 {
   unsigned char *cbuf = buf;
@@ -223,12 +246,18 @@ int libusb_get_string_simple(libusb_dev_handle_t *dev, int index,
   return di;
 }
 
-int libusb_close(libusb_dev_handle_t *udev)
+int libusb_close(libusb_dev_handle_t dev)
 {
+  struct usbi_dev_handle *hdev;
   int ret;
 
-  ret = usb_os_close(udev);
-  free(udev);
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  ret = usb_os_close(hdev);
+  list_del(&hdev->list);
+  free(hdev);
 
   return ret;
 }
@@ -279,7 +308,7 @@ static int finish_io(libusb_io_handle_t *io)
   return (status < 0) ? status : xferlen;
 }
 
-int libusb_control_msg(libusb_dev_handle_t *dev, uint8_t bRequestType,
+int libusb_control_msg(libusb_dev_handle_t dev, uint8_t bRequestType,
 	uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
 	void *buffer, size_t bufferlen, unsigned int timeout)
 {
@@ -293,7 +322,7 @@ int libusb_control_msg(libusb_dev_handle_t *dev, uint8_t bRequestType,
   return finish_io(io);
 }
 
-int libusb_bulk_write(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_bulk_write(libusb_dev_handle_t dev, unsigned char ep,
 	const void *buffer, size_t bufferlen, unsigned int timeout)
 {
   libusb_io_handle_t *io;
@@ -305,7 +334,7 @@ int libusb_bulk_write(libusb_dev_handle_t *dev, unsigned char ep,
   return finish_io(io);
 }
 
-int libusb_bulk_read(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_bulk_read(libusb_dev_handle_t dev, unsigned char ep,
 	void *buffer, size_t bufferlen, unsigned int timeout)
 {
   libusb_io_handle_t *io;
@@ -317,7 +346,7 @@ int libusb_bulk_read(libusb_dev_handle_t *dev, unsigned char ep,
   return finish_io(io);
 }
 
-int libusb_interrupt_write(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_interrupt_write(libusb_dev_handle_t dev, unsigned char ep,
 	const void *buffer, size_t bufferlen, unsigned int timeout)
 {
   libusb_io_handle_t *io;
@@ -329,7 +358,7 @@ int libusb_interrupt_write(libusb_dev_handle_t *dev, unsigned char ep,
   return finish_io(io);
 }
 
-int libusb_interrupt_read(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_interrupt_read(libusb_dev_handle_t dev, unsigned char ep,
 	void *buffer, size_t bufferlen, unsigned int timeout)
 {
   libusb_io_handle_t *io;

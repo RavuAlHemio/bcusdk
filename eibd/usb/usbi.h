@@ -19,8 +19,6 @@
 #include "linux.h"
 #endif
 
-extern int usb_debug;
-
 struct usbi_event_callback {
   libusb_event_callback_t func;
   void *arg;
@@ -134,6 +132,7 @@ struct usbi_dev_handle {
   /* FIXME: We should keep an array (or maybe list) of opened interfaces here */
   struct list_head list;
 
+  libusb_dev_handle_t handle;
   struct usbi_device *idev;	/* device opened */
 
   unsigned int interface;	/* interface claimed */	
@@ -143,6 +142,10 @@ struct usbi_dev_handle {
 };
 
 struct usbi_match {
+  struct list_head list;
+
+  libusb_match_handle_t handle;
+
   unsigned int num_matches;
   unsigned int cur_match;
 
@@ -190,6 +193,7 @@ struct usbi_io {
 void _usbi_debug(int level, const char *func, int line, char *fmt, ...);
 void usbi_callback(libusb_device_id_t devid, enum libusb_event_type type);
 int usbi_timeval_compare(struct timeval *tva, struct timeval *tvb);
+struct usbi_dev_handle *usbi_find_dev_handle(libusb_dev_handle_t dev);
 
 #define usbi_debug(level, fmt...) _usbi_debug(level, __FUNCTION__, __LINE__, fmt)
 
@@ -199,8 +203,8 @@ int usbi_os_refresh_devices(struct usbi_bus *bus);
 int usb_os_get_child_list(struct usbi_device *idev,
 	unsigned char children[USB_MAX_DEVICES_PER_BUS]);
 void usb_os_init(void);
-int usb_os_open(libusb_dev_handle_t *dev);
-int usb_os_close(libusb_dev_handle_t *dev);
+int usb_os_open(struct usbi_dev_handle *dev);
+int usb_os_close(struct usbi_dev_handle *dev);
 int usbi_os_io_submit(struct usbi_io *io);
 int usbi_os_io_cancel(struct usbi_io *io);
 int usbi_os_io_complete(struct usbi_dev_handle *dev);
@@ -210,7 +214,7 @@ void *usbi_poll_events();
 void usbi_io_complete(struct usbi_io *io, int status, int transferlen);
 
 /* descriptors.c */
-void usb_fetch_descriptors(libusb_dev_handle_t *dev);
+void usb_fetch_descriptors(libusb_dev_handle_t dev);
 void usbi_destroy_configuration(struct usbi_device *odev);
 int usbi_parse_configuration(struct usbi_config *cfg, unsigned char *buf,
 	size_t buflen);

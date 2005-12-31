@@ -43,7 +43,7 @@ static int device_open(struct usbi_device *idev)
   return fd;
 }
 
-int usb_os_open(libusb_dev_handle_t *dev)
+int usb_os_open(struct usbi_dev_handle *dev)
 {
   struct usbi_device *idev = dev->idev;
 
@@ -56,7 +56,7 @@ int usb_os_open(libusb_dev_handle_t *dev)
   return 0;
 }
 
-int usb_os_close(libusb_dev_handle_t *dev)
+int usb_os_close(struct usbi_dev_handle *dev)
 {
   if (dev->fd < 0)
     return 0;
@@ -68,17 +68,22 @@ int usb_os_close(libusb_dev_handle_t *dev)
   return 0;
 }
 
-int libusb_set_configuration(libusb_dev_handle_t *dev, unsigned char cfg)
+int libusb_set_configuration(libusb_dev_handle_t dev, unsigned char cfg)
 {
+  struct usbi_dev_handle *hdev;
   int ret, _cfg = cfg;
 
-  ret = ioctl(dev->fd, IOCTL_USB_SETCONFIG, &_cfg);
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  ret = ioctl(hdev->fd, IOCTL_USB_SETCONFIG, &_cfg);
   if (ret < 0) {
     usbi_debug(1, "could not set config %u: %s", cfg, strerror(errno));
     return LIBUSB_FAILURE;
   }
 
-  dev->idev->cur_config = cfg;
+  hdev->idev->cur_config = cfg;
 
   return 0;
 }
@@ -97,60 +102,71 @@ int libusb_get_configuration(libusb_device_id_t devid, unsigned char *cfg)
   return 0;
 }
 
-int libusb_claim_interface(libusb_dev_handle_t *dev, int interface)
+int libusb_claim_interface(libusb_dev_handle_t dev, int interface)
 {
-  struct usbi_device *idev = dev->idev;
+  struct usbi_dev_handle *hdev;
   int ret;
 
-  ret = ioctl(dev->fd, IOCTL_USB_CLAIMINTF, &interface);
-  if (ret < 0) {
-    if (errno == EBUSY && usb_debug > 0)
-      fprintf(stderr, "Check that you have permissions to write to %s and, if you don't, that you set up hotplug (http://linux-hotplug.sourceforge.net/) correctly.\n", idev->filename);
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
 
+  ret = ioctl(hdev->fd, IOCTL_USB_CLAIMINTF, &interface);
+  if (ret < 0) {
     usbi_debug(1, "could not claim interface %d: %s", interface, strerror(errno));
     return LIBUSB_FAILURE;
   }
 
-  dev->interface = interface;
+  hdev->interface = interface;
 
   /* FIXME: We need to query the current alternate setting and set altsetting */
 
   return 0;
 }
 
-int libusb_release_interface(libusb_dev_handle_t *dev, int interface)
+int libusb_release_interface(libusb_dev_handle_t dev, int interface)
 {
+  struct usbi_dev_handle *hdev;
   int ret;
 
-  ret = ioctl(dev->fd, IOCTL_USB_RELEASEINTF, &interface);
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  ret = ioctl(hdev->fd, IOCTL_USB_RELEASEINTF, &interface);
   if (ret < 0) {
     usbi_debug(1, "could not release interface %d: %s", interface, strerror(errno));
     return LIBUSB_FAILURE;
   }
 
-  dev->interface = -1;
+  hdev->interface = -1;
 
   return 0;
 }
 
-int libusb_set_altinterface(libusb_dev_handle_t *dev, unsigned char alt)
+int libusb_set_altinterface(libusb_dev_handle_t dev, unsigned char alt)
 {
+  struct usbi_dev_handle *hdev;
   struct usbk_setinterface setintf;
   int ret;
 
-  if (dev->interface < 0)
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  if (hdev->interface < 0)
     return LIBUSB_BADARG;
 
-  setintf.interface = dev->interface;
+  setintf.interface = hdev->interface;
   setintf.altsetting = alt;
 
-  ret = ioctl(dev->fd, IOCTL_USB_SETINTF, &setintf);
+  ret = ioctl(hdev->fd, IOCTL_USB_SETINTF, &setintf);
   if (ret < 0) {
-    usbi_debug(1, "could not set alternate interface %d/%d: %s", dev->interface, alt, strerror(errno));
+    usbi_debug(1, "could not set alternate interface %d/%d: %s", hdev->interface, alt, strerror(errno));
     return LIBUSB_FAILURE;
   }
 
-  dev->altsetting = alt;
+  hdev->altsetting = alt;
 
   return 0;
 }
@@ -856,11 +872,16 @@ void usb_os_init(void)
     usbi_debug(1, "no USB VFS found, is it mounted?");
 }
 
-int libusb_clear_halt(libusb_dev_handle_t *dev, unsigned char ep)
+int libusb_clear_halt(libusb_dev_handle_t dev, unsigned char ep)
 {
+  struct usbi_dev_handle *hdev;
   int ret;
 
-  ret = ioctl(dev->fd, IOCTL_USB_CLEAR_HALT, &ep);
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  ret = ioctl(hdev->fd, IOCTL_USB_CLEAR_HALT, &ep);
   if (ret) {
     usbi_debug(1, "could not clear halt ep %d: %s", ep, strerror(errno));
     return LIBUSB_FAILURE;
@@ -869,11 +890,16 @@ int libusb_clear_halt(libusb_dev_handle_t *dev, unsigned char ep)
   return 0;
 }
 
-int libusb_reset(libusb_dev_handle_t *dev)
+int libusb_reset(libusb_dev_handle_t dev)
 {
+  struct usbi_dev_handle *hdev;
   int ret;
 
-  ret = ioctl(dev->fd, IOCTL_USB_RESET, NULL);
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
+  ret = ioctl(hdev->fd, IOCTL_USB_RESET, NULL);
   if (ret) {
     usbi_debug(1, "could not reset: %s", strerror(errno));
     return LIBUSB_FAILURE;
@@ -882,14 +908,19 @@ int libusb_reset(libusb_dev_handle_t *dev)
   return 0;
 }
 
-int libusb_get_driver_np(libusb_dev_handle_t *dev, int interface, char *name,
+int libusb_get_driver_np(libusb_dev_handle_t dev, int interface, char *name,
 	unsigned int namelen)
 {
+  struct usbi_dev_handle *hdev;
   struct usbk_getdriver getdrv;
   int ret;
 
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
+
   getdrv.interface = interface;
-  ret = ioctl(dev->fd, IOCTL_USB_GETDRIVER, &getdrv);
+  ret = ioctl(hdev->fd, IOCTL_USB_GETDRIVER, &getdrv);
   if (ret) {
     usbi_debug(1, "could not get bound driver: %s", strerror(errno));
     return LIBUSB_FAILURE;
@@ -901,16 +932,21 @@ int libusb_get_driver_np(libusb_dev_handle_t *dev, int interface, char *name,
   return 0;
 }
 
-int libusb_attach_kernel_driver_np(libusb_dev_handle_t *dev, int interface)
+int libusb_attach_kernel_driver_np(libusb_dev_handle_t dev, int interface)
 {
+  struct usbi_dev_handle *hdev;
   struct usbk_ioctl command;
   int ret;
+
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
 
   command.ifno = interface;
   command.ioctl_code = IOCTL_USB_CONNECT;
   command.data = NULL;
 
-  ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
+  ret = ioctl(hdev->fd, IOCTL_USB_IOCTL, &command);
   if (ret) {
     usbi_debug(1, "could not attach kernel driver to interface %d: %s", strerror(errno));
     return LIBUSB_FAILURE;
@@ -919,16 +955,21 @@ int libusb_attach_kernel_driver_np(libusb_dev_handle_t *dev, int interface)
   return 0;
 }
 
-int libusb_detach_kernel_driver_np(libusb_dev_handle_t *dev, int interface)
+int libusb_detach_kernel_driver_np(libusb_dev_handle_t dev, int interface)
 {
+  struct usbi_dev_handle *hdev;
   struct usbk_ioctl command;
   int ret;
+
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return LIBUSB_UNKNOWN_DEVICE;
 
   command.ifno = interface;
   command.ioctl_code = IOCTL_USB_DISCONNECT;
   command.data = NULL;
 
-  ret = ioctl(dev->fd, IOCTL_USB_IOCTL, &command);
+  ret = ioctl(hdev->fd, IOCTL_USB_IOCTL, &command);
   if (ret) {
     usbi_debug(1, "could not detach kernel driver to interface %d: %s", strerror(errno));
     return LIBUSB_FAILURE;

@@ -45,7 +45,7 @@ USBDevice detectUSBEndpoint (USBEndpoint e);
 
 class USBLowLevelDriver:public LowLevelDriverInterface, private Thread
 {
-  libusb_dev_handle_t *dev;
+  libusb_dev_handle_t dev;
   USBDevice d;
   /** debug output */
   Trace *t;

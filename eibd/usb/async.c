@@ -18,12 +18,17 @@ static struct list_head completions = { .prev = &completions, .next = &completio
 /*
  * Helper functions
  */
-struct usbi_io *usbi_alloc_io(libusb_dev_handle_t *dev, enum usbi_io_type type,
+struct usbi_io *usbi_alloc_io(libusb_dev_handle_t dev, enum usbi_io_type type,
 	unsigned char ep, void *setup, void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback)
 {
+  struct usbi_dev_handle *hdev;
   struct usbi_io *io;
   struct timeval tvc;
+
+  hdev = usbi_find_dev_handle(dev);
+  if (!hdev)
+    return NULL;
 
   io = malloc(sizeof(*io));
   if (!io)
@@ -33,7 +38,7 @@ struct usbi_io *usbi_alloc_io(libusb_dev_handle_t *dev, enum usbi_io_type type,
 
   list_init(&io->list);
 
-  io->dev = dev;
+  io->dev = hdev;
   io->type = type;
   io->ep = ep;
   io->setup = setup;
@@ -201,12 +206,12 @@ unsigned long libusb_io_seq_nbr(libusb_io_handle_t *io)
   return -EINVAL;
 }
 
-libusb_dev_handle_t *libusb_io_dev(libusb_io_handle_t *io)
+libusb_dev_handle_t libusb_io_dev(libusb_io_handle_t *io)
 {
-  return io->dev;
+  return io->dev->handle;
 }
 
-libusb_io_handle_t *libusb_submit_control(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_control(libusb_dev_handle_t dev,
 	unsigned char ep, uint8_t bRequestType, uint8_t bRequest,
 	uint16_t wValue, uint16_t wIndex, void *buffer,
 	size_t bufferlen, unsigned int timeout,
@@ -243,7 +248,7 @@ libusb_io_handle_t *libusb_submit_control(libusb_dev_handle_t *dev,
   return io;
 }
 
-libusb_io_handle_t *libusb_submit_bulk_write(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_bulk_write(libusb_dev_handle_t dev,
 	unsigned char ep, const void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback)
 {
@@ -264,7 +269,7 @@ libusb_io_handle_t *libusb_submit_bulk_write(libusb_dev_handle_t *dev,
   return io;
 }
 
-libusb_io_handle_t *libusb_submit_bulk_read(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_bulk_read(libusb_dev_handle_t dev,
 	unsigned char ep, void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback)
 {
@@ -285,7 +290,7 @@ libusb_io_handle_t *libusb_submit_bulk_read(libusb_dev_handle_t *dev,
   return io;
 }
 
-libusb_io_handle_t *libusb_submit_interrupt_write(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_interrupt_write(libusb_dev_handle_t dev,
 	unsigned char ep, const void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback)
 {
@@ -306,7 +311,7 @@ libusb_io_handle_t *libusb_submit_interrupt_write(libusb_dev_handle_t *dev,
   return io;
 }
 
-libusb_io_handle_t *libusb_submit_interrupt_read(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_interrupt_read(libusb_dev_handle_t dev,
 	unsigned char ep, void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback)
 {
