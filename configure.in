@@ -22,6 +22,8 @@ AC_CHECK_HEADER(linux/usbdevice_fs.h,[AC_DEFINE(LINUX_API, 1, [Linux usb availab
 AC_CHECK_HEADER(iphlpapi.h,[AC_DEFINE(HAVE_WINDOWS_IPHELPER, 1,[Windows IPHelper available]) 
   LIBS="-liphlpapi $LIBS"; have_source_info=yes],[],[-])
 
+AC_CHECK_FUNCS(gethostbyname_r,,[AC_MSG_WARN([eibd client library not thread safe])])
+
 AM_CONDITIONAL(LINUX_API, test x$have_linux_api = xyes)
 
 AC_ARG_ENABLE(onlyeibd,

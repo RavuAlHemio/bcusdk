@@ -33,6 +33,8 @@
 #include <netdb.h>
 #include <errno.h>
 
+#include "config.h"
+
 #include "eibclient.h"
 #include "eibtypes.h"
 
@@ -64,15 +66,47 @@ struct _EIBConnection
 static int
 GetHostIP (struct sockaddr_in *sock, const char *Name)
 {
+#ifdef HAVE_GETHOSTBYNAME_R
+  int len = 2000;
+  struct hostent host;
+  char *buf = (char *) malloc (len);
+  int res;
+  int err;
+#endif
   struct hostent *h;
   if (!Name)
     return 0;
   memset (sock, 0, sizeof (*sock));
+#ifdef HAVE_GETHOSTBYNAME_R
+  do
+    {
+      res = gethostbyname_r (Name, &host, buf, len, &h, &err);
+      if (res == ERANGE)
+	{
+	  len += 2000;
+	  buf = (char *) realloc (buf, len);
+	}
+      if (!buf)
+	return 0;
+    }
+  while (res == ERANGE);
+
+  if (res || !h)
+    {
+      free (buf);
+      return 0;
+    }
+#else
   h = gethostbyname (Name);
   if (!h)
     return 0;
+#endif
   sock->sin_family = h->h_addrtype;
   sock->sin_addr.s_addr = (*((unsigned long *) h->h_addr_list[0]));
+#ifdef HAVE_GETHOSTBYNAME_R
+  if (buf)
+    free (buf);
+#endif
   return 1;
 }
 
@@ -710,7 +744,7 @@ EIBOpen_GroupSocket (EIBConnection * con, int write_only)
   return 0;
 }
 
-int 
+int
 EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
 		 eibaddr_t * src, eibaddr_t * dest)
 {
@@ -741,9 +775,8 @@ EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
   return i;
 }
 
-int 
-EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
-	      uint8_t * data)
+int
+EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len, uint8_t * data)
 {
   uchar *ibuf;
   int i;
