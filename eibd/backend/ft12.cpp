@@ -166,6 +166,7 @@ FT12LowLevelDriver::Connection_Lost ()
 void
 FT12LowLevelDriver::Run (pth_sem_t * stop1)
 {
+  CArray last;
   int i;
   uchar buf[255];
 
@@ -248,6 +249,18 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 	      t->TracePacket (0, this, "Send Ack", 1, &c1);
 	      i = write (fd, &c1, 1);
 
+	      if ((akt[4] == 0xF3 && recvflag) ||
+		  (akt[4] == 0xD3 && !recvflag))
+		{
+		  if (CArray (akt.array () + 5, akt[1] - 1) != last)
+		    {
+		      t->TracePrintf (0, this, "Sequence jump");
+		      recvflag = !recvflag;
+		    }
+		  else
+		    t->TracePrintf (0, this, "Wrong Sequence");
+		}
+
 	      if ((akt[4] == 0xF3 && !recvflag) ||
 		  (akt[4] == 0xD3 && recvflag))
 		{
@@ -255,11 +268,10 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 		  CArray *c = new CArray;
 		  len = akt[1] + 6;
 		  c->setpart (akt.array () + 5, 0, len - 7);
+		  last = *c;
 		  outqueue.put (c);
 		  pth_sem_inc (&out_signal, TRUE);
 		}
-	      else
-		t->TracePrintf (0, this, "Wrong Sequence");
 	      akt.deletepart (0, len);
 	    }
 	  else
