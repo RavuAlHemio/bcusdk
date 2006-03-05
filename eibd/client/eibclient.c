@@ -47,6 +47,7 @@ struct _EIBConnection
   int (*complete) (EIBConnection *);
   /** file descriptor */
   int fd;
+  unsigned readlen;
   /** buffer */
   uchar *buf;
   /** buffer size */
@@ -166,6 +167,7 @@ EIBSocketLocal (const char *path)
     }
   con->buflen = 0;
   con->buf = 0;
+  con->readlen = 0;
 
   return con;
 }
@@ -295,56 +297,79 @@ lp2:
   return 0;
 }
 
+static int
+CheckRequest (EIBConnection * con)
+{
+  int i;
+  if (con->readlen < 2)
+    {
+      uchar head[2];
+      head[0] = (con->size >> 8) & 0xff;
+      i = read (con->fd, &head + con->readlen, 2 - con->readlen);
+      if (i == -1 && errno == EINTR)
+	return 0;
+      if (i == -1)
+	return -1;
+      if (i == 0)
+	{
+	  errno = ECONNRESET;
+	  return -1;
+	}
+      con->readlen += i;
+      con->size = (head[0] << 8) | (head[1]);
+      if (con->size < 2)
+	{
+	  errno = ECONNRESET;
+	  return -1;
+	}
+
+      if (con->size > con->buflen)
+	{
+	  con->buf = (uchar *) realloc (con->buf, con->size);
+	  if (con->buf == 0)
+	    {
+	      con->buflen = 0;
+	      errno = ENOMEM;
+	      return -1;
+	    }
+	  con->buflen = con->size;
+	}
+      return 0;
+    }
+
+  if (con->readlen < con->size + 2)
+    {
+      i =
+	read (con->fd, con->buf + (con->readlen - 2),
+	      con->size - (con->readlen - 2));
+      if (i == -1 && errno == EINTR)
+	return 0;
+      if (i == -1)
+	return -1;
+      if (i == 0)
+	{
+	  errno = ECONNRESET;
+	  return -1;
+	}
+      con->readlen += i;
+    }
+  return 0;
+}
+
 /** receive packet from eibd */
 static int
 GetRequest (EIBConnection * con)
 {
-  uchar head[2];
-  int i, start, size;
-
-lp1:
-  i = read (con->fd, &head, 2);
-  if (i == -1 && errno == EINTR)
-    goto lp1;
-  if (i == -1)
-    return -1;
-  if (i != 2)
+  do
     {
-      errno = ECONNRESET;
-      return -1;
+      if (CheckRequest (con) == -1)
+	return -1;
     }
+  while (con->readlen < 2
+	 || (con->readlen >= 2 && con->readlen < con->size + 2));
 
-  size = (head[0] << 8) | (head[1]);
-  if (size < 2)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  con->readlen = 0;
 
-  if (size > con->buflen)
-    {
-      con->buf = (uchar *) realloc (con->buf, size);
-      if (con->buf == 0)
-	{
-	  con->buflen = 0;
-	  errno = ENOMEM;
-	  return -1;
-	}
-      con->buflen = size;
-    }
-
-  start = 0;
-lp2:
-  i = read (con->fd, con->buf + start, size - start);
-  if (i == -1 && errno == EINTR)
-    goto lp2;
-  if (i == -1)
-    return -1;
-  start += i;
-  if (start < size)
-    goto lp2;
-
-  con->size = size;
   return 0;
 }
 
