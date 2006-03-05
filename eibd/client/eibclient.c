@@ -374,6 +374,30 @@ GetRequest (EIBConnection * con)
 }
 
 int
+EIB_Poll_Complete (EIBConnection * con)
+{
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  if (CheckRequest (con) == -1)
+    return -1;
+  return (con->readlen >= 2 && con->readlen >= con->size + 2) ? 1 : 0;
+}
+
+int
+EIB_Poll_FD (EIBConnection * con)
+{
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return con->fd;
+}
+
+int
 EIBComplete (EIBConnection * con)
 {
   if (!con)
