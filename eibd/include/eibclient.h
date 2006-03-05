@@ -69,6 +69,24 @@ int EIBClose (EIBConnection * con);
  */
 int EIBComplete (EIBConnection * con);
 
+/** checks, if a asynchronous request is completed
+ * The result must be check with EIBComplete for asynchonous functions.
+ * For connections, where packets are returned (Busmonitor, T_*), it can be used to check, if new data is available.
+ * If this function returns an error, the eibd connection should be considered as broken (and therefore be closed).
+ * \param con eibd connection
+ * \return -1 if any error, 0 if not finished, 1 if finished
+ */
+int EIB_Poll_Complete (EIBConnection * con);
+
+/** returns FD to wait for the next event
+ * The returned file descriptor may only be used to select/poll for read data available.
+ * As EIBComplete (and functions, which return packets) block, if only a part of the data is
+ * available, this can be checked with EIB_Poll_Complete.
+ * \param con eibd connection
+ * \return -1 if any error, else file descriptor
+ */
+int EIB_Poll_FD (EIBConnection * con);
+
 /** switches the connection to binary busmonitor mode
  * \param con eibd connection
  * \return 0 if successful, -1 if error
