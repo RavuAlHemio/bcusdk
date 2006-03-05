@@ -4,7 +4,8 @@ LDADD=../client/libeibclient.a
 bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progmodetoggle progmodestatus maskver \
 	writeaddress vbusmonitor1 vbusmonitor2 mprogmodeon mprogmodeoff mprogmodetoggle mprogmodestatus mmaskver \
 	mpeitype madcread mread mwrite mpropread mpropwrite mpropdesc mpropscan groupread groupswrite groupwrite \
-	msetkey grouplisten groupresponse groupsresponse groupsocketlisten groupsocketread
+	msetkey grouplisten groupresponse groupsresponse groupsocketlisten groupsocketread mpropscanpoll \
+	vbusmonitor1poll
 
 examplesdir=$(pkgdatadir)/examples
 dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c progmodestatus.c vbusmonitor2.c \
@@ -12,12 +13,13 @@ dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c p
 	common.c mmaskver.c mprogmodestatus.c mpropscan.c progmodeoff.c readindividual.c \
 	common.h mpeitype.c mprogmodetoggle.c mpropwrite.c progmodeon.c vbusmonitor1.c groupread.c \
 	groupwrite.c groupswrite.c msetkey.c grouplisten.c groupresponse.c groupsresponse.c \
-	groupsocketlisten.c groupsocketread.c
+	groupsocketlisten.c groupsocketread.c mpropscanpoll.c vbusmonitor1poll.c
 
 
 busmonitor1_SOURCES=busmonitor1.c common.c
 busmonitor2_SOURCES=busmonitor2.c common.c
 vbusmonitor1_SOURCES=vbusmonitor1.c common.c
+vbusmonitor1poll_SOURCES=vbusmonitor1poll.c common.c
 vbusmonitor2_SOURCES=vbusmonitor2.c common.c
 readindividual_SOURCES=readindividual.c common.c
 progmodeon_SOURCES=progmodeon.c common.c
@@ -39,6 +41,7 @@ mpropread_SOURCES=mpropread.c common.c
 mpropwrite_SOURCES=mpropwrite.c common.c
 mpropdesc_SOURCES=mpropdesc.c common.c
 mpropscan_SOURCES=mpropscan.c common.c
+mpropscanpoll_SOURCES=mpropscanpoll.c common.c
 groupread_SOURCES=groupread.c common.c
 groupwrite_SOURCES=groupwrite.c common.c
 groupswrite_SOURCES=groupswrite.c common.c

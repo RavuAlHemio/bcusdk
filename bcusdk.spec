@@ -115,6 +115,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/busmonitor1
 /usr/bin/busmonitor2
 /usr/bin/vbusmonitor1
+/usr/bin/vbusmonitor1poll
 /usr/bin/vbusmonitor2
 /usr/bin/groupread
 /usr/bin/groupswrite
@@ -139,6 +140,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/mpropread
 /usr/bin/mpropwrite
 /usr/bin/mpropscan
+/usr/bin/mpropscanpoll
 /usr/bin/readindividual
 /usr/bin/writeaddress
 /usr/bin/mpeitype
