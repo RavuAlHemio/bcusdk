@@ -292,7 +292,7 @@ int EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
  * \param maxlen buffer size
  * \param buf buffer
  * \param src pointer, where the source address should be stored
- * \param src pointer, where the destination address should be stored
+ * \param dest pointer, where the destination address should be stored
  * \return received length or -1 if error
  */
 int EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
