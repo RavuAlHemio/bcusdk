@@ -239,7 +239,7 @@ void usbi_rescan_devices(void)
        * don't need to fetch them again
        */
       if (!idev->desc.device_raw.data) {
-        libusb_dev_handle_t *udev;
+        libusb_dev_handle_t udev;
 
         ret = libusb_open(idev->devid, &udev);
         if (ret >= 0) {
@@ -299,7 +299,24 @@ static int match_interfaces(struct usbi_device *idev,
   return 0;
 }
 
-int libusb_match_devices_by_vendor(libusb_match_handle_t **handle,
+static struct list_head usbi_match_handles = { .prev = &usbi_match_handles, .next = &usbi_match_handles };
+
+static libusb_match_handle_t cur_match_handle = 1;
+
+struct usbi_match *usbi_find_match(libusb_match_handle_t handle)
+{
+  struct usbi_match *match;
+
+  /* FIXME: We should probably index the device id in a rbtree or something */
+  list_for_each_entry(match, &usbi_match_handles, list) {
+    if (match->handle == handle)
+      return match;
+  }
+
+  return NULL;
+}
+
+int libusb_match_devices_by_vendor(libusb_match_handle_t *handle,
         int vendor, int product)
 {
   struct usbi_match *match;
@@ -314,6 +331,8 @@ int libusb_match_devices_by_vendor(libusb_match_handle_t **handle,
 
   memset(match, 0, sizeof(*match));
 
+  match->handle = cur_match_handle++;	/* FIXME: Locking */
+
   list_for_each_entry(idev, &usbi_devices, dev_list) {
     struct usb_device_desc *desc = &idev->desc.device;
 
@@ -322,12 +341,12 @@ int libusb_match_devices_by_vendor(libusb_match_handle_t **handle,
       add_match_to_list(match, idev);
   }
 
-  *handle = match;
+  *handle = match->handle;
 
   return 0;
 }
 
-int libusb_match_devices_by_class(libusb_match_handle_t **handle,
+int libusb_match_devices_by_class(libusb_match_handle_t *handle,
         int bClass, int bSubClass, int bProtocol)
 {
   struct usbi_match *match;
@@ -343,20 +362,26 @@ int libusb_match_devices_by_class(libusb_match_handle_t **handle,
 
   memset(match, 0, sizeof(*match));
 
+  match->handle = cur_match_handle++;	/* FIXME: Locking */
+
   list_for_each_entry(idev, &usbi_devices, dev_list) {
     if (match_interfaces(idev, bClass, bSubClass, bProtocol))
       add_match_to_list(match, idev);
   }
 
-  *handle = match;
+  *handle = match->handle;
 
   return 0;
 }
 
-int libusb_match_next_device(libusb_match_handle_t *handle,
+int libusb_match_next_device(libusb_match_handle_t handle,
 	libusb_device_id_t *mdevid)
 {
-  struct usbi_match *match = handle;
+  struct usbi_match *match;
+
+  match = usbi_find_match(handle);
+  if (!match)
+    return LIBUSB_UNKNOWN_DEVICE;	/* FIXME: Better error code */
 
   while (match->cur_match < match->num_matches) {
     struct usbi_device *idev;
@@ -373,10 +398,15 @@ int libusb_match_next_device(libusb_match_handle_t *handle,
   return -ESRCH;
 }
 
-int libusb_free_match(libusb_match_handle_t *handle)
+int libusb_free_match(libusb_match_handle_t handle)
 {
-  struct usbi_match *match = handle;
+  struct usbi_match *match;
 
+  match = usbi_find_match(handle);
+  if (!match)
+    return LIBUSB_UNKNOWN_DEVICE;	/* FIXME: Better error code */
+
+  list_del(&match->list);
   free(match->matches);
   free(match);
 

@@ -32,7 +32,7 @@ check_device (libusb_device_id_t cdev)
   struct usb_endpoint_desc ep;
   libusb_bus_id_t bus;
   int in, out, outint;
-  libusb_dev_handle_t *h;
+  libusb_dev_handle_t h;
   char vendor[512];
   char product[512];
   int j, k, l;

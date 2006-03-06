@@ -78,7 +78,7 @@ check_device (libusb_device_id_t cdev, USBEndpoint e)
   int in, out, outint;
   libusb_bus_id_t bus;
   unsigned char devnum;
-  libusb_dev_handle_t *h;
+  libusb_dev_handle_t h;
   int j, k, l;
 
   if (!cdev)

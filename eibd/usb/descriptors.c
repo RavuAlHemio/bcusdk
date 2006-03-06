@@ -12,10 +12,10 @@
 
 #include "usbi.h"
 
-int libusb_get_descriptor(libusb_dev_handle_t *udev, unsigned char type,
+int libusb_get_descriptor(libusb_dev_handle_t dev, unsigned char type,
 	unsigned char index, void *buf, unsigned int buflen)
 {
-  return libusb_control_msg(udev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
+  return libusb_control_msg(dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
                         (type << 8) + index, 0, buf, buflen, 1000);
 }
 
@@ -322,9 +322,9 @@ void usbi_destroy_configuration(struct usbi_device *dev)
   free(dev->desc.device_raw.data);
 }
 
-int usbi_fetch_and_parse_descriptors(libusb_dev_handle_t *udev)
+int usbi_fetch_and_parse_descriptors(struct usbi_dev_handle *hdev)
 {
-  struct usbi_device *dev = udev->idev;
+  struct usbi_device *dev = hdev->idev;
   int i;
 
   dev->desc.num_configs = dev->desc.device.bNumConfigurations;
@@ -365,7 +365,7 @@ int usbi_fetch_and_parse_descriptors(libusb_dev_handle_t *udev)
     int ret;
 
     /* Get the first 8 bytes so we can figure out what the total length is */
-    ret = libusb_get_descriptor(udev, USB_DESC_TYPE_CONFIG, i, buf, 8);
+    ret = libusb_get_descriptor(hdev->handle, USB_DESC_TYPE_CONFIG, i, buf, 8);
     if (ret < 8) {
       if (ret < 0)
         usbi_debug(1, "unable to get first 8 bytes of config descriptor (ret = %d)",
@@ -384,7 +384,7 @@ int usbi_fetch_and_parse_descriptors(libusb_dev_handle_t *udev)
       goto err;
     }
 
-    ret = libusb_get_descriptor(udev, USB_DESC_TYPE_CONFIG, i, cfgr->data, cfgr->len);
+    ret = libusb_get_descriptor(hdev->handle, USB_DESC_TYPE_CONFIG, i, cfgr->data, cfgr->len);
     if (ret < cfgr->len) {
       if (ret < 0)
         usbi_debug(1, "unable to get rest of config descriptor (ret = %d)",

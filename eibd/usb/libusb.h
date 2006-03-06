@@ -198,8 +198,8 @@ struct usb_device_desc {
 typedef unsigned int libusb_device_id_t;
 typedef unsigned int libusb_bus_id_t;
 
-typedef struct usbi_dev_handle libusb_dev_handle_t;
-typedef struct usbi_match libusb_match_handle_t;
+typedef unsigned int libusb_dev_handle_t;
+typedef unsigned int libusb_match_handle_t;
 typedef struct usbi_io libusb_io_handle_t;
 
 enum libusb_event_type {
@@ -281,55 +281,55 @@ int libusb_get_raw_device_desc(libusb_device_id_t devid,
 int libusb_get_raw_config_desc(libusb_device_id_t devid,
 	int cfgidx, unsigned char *buffer, size_t buflen);		/* D */
 int libusb_refresh_descriptors(libusb_device_id_t devid);		/* D */
-int libusb_get_string(libusb_dev_handle_t *dev, int index, int langid,
+int libusb_get_string(libusb_dev_handle_t dev, int index, int langid,
 	void *buf, size_t buflen);					/* D */
-int libusb_get_string_simple(libusb_dev_handle_t *dev, int index,
+int libusb_get_string_simple(libusb_dev_handle_t dev, int index,
 	void *buf, size_t buflen);					/* D */
 
 /* Functions for searching for devices */
-int libusb_match_devices_by_vendor(libusb_match_handle_t **match,
+int libusb_match_devices_by_vendor(libusb_match_handle_t *match,
 	int vendor, int product);					/* D */
-int libusb_match_devices_by_class(libusb_match_handle_t **match,
+int libusb_match_devices_by_class(libusb_match_handle_t *match,
 	int bClass, int bSubClass, int bProtocol);			/* D */
-int libusb_match_next_device(libusb_match_handle_t *match,
+int libusb_match_next_device(libusb_match_handle_t match,
 	libusb_device_id_t *devid);					/* D */
-int libusb_free_match(libusb_match_handle_t *handle);			/* D */
+int libusb_free_match(libusb_match_handle_t handle);			/* D */
 
 /* Functions to control the device */
-int libusb_open(libusb_device_id_t devid, libusb_dev_handle_t **dev);	/* D */
-int libusb_get_device_id(libusb_dev_handle_t *dev,
+int libusb_open(libusb_device_id_t devid, libusb_dev_handle_t *dev);	/* D */
+int libusb_get_device_id(libusb_dev_handle_t dev,
 	libusb_device_id_t *devid);					/* D */
-int libusb_claim_interface(libusb_dev_handle_t *dev, int interface);	/* D */
-int libusb_release_interface(libusb_dev_handle_t *dev, int interface);	/* D */
-int libusb_is_interface_claimed(libusb_dev_handle_t *dev,
+int libusb_claim_interface(libusb_dev_handle_t dev, int interface);	/* D */
+int libusb_release_interface(libusb_dev_handle_t dev, int interface);	/* D */
+int libusb_is_interface_claimed(libusb_dev_handle_t dev,
 	int interface);							/* N */
-int libusb_set_configuration(libusb_dev_handle_t *dev,
+int libusb_set_configuration(libusb_dev_handle_t dev,
 	unsigned char cfg);						/* D */
-int libusb_set_altinterface(libusb_dev_handle_t *dev,
+int libusb_set_altinterface(libusb_dev_handle_t dev,
 	unsigned char alt);						/* D */
-int libusb_clear_halt(libusb_dev_handle_t *dev, unsigned char ep);	/* D */
-int libusb_reset(libusb_dev_handle_t *dev);				/* D */
-int libusb_close(libusb_dev_handle_t *dev);				/* D */
+int libusb_clear_halt(libusb_dev_handle_t dev, unsigned char ep);	/* D */
+int libusb_reset(libusb_dev_handle_t dev);				/* D */
+int libusb_close(libusb_dev_handle_t dev);				/* D */
 
 /* FIXME: We need to preprocess this with configure.in */
-int libusb_get_driver_np(libusb_dev_handle_t *dev, int interface, char *name,
+int libusb_get_driver_np(libusb_dev_handle_t dev, int interface, char *name,
 	unsigned int namelen);						/* D */
-int libusb_attach_kernel_driver_np(libusb_dev_handle_t *dev,
+int libusb_attach_kernel_driver_np(libusb_dev_handle_t dev,
 	int interface);							/* D */
-int libusb_detach_kernel_driver_np(libusb_dev_handle_t *dev,
+int libusb_detach_kernel_driver_np(libusb_dev_handle_t dev,
 	int interface);							/* D */
 
 /* Synchronous I/O functions */
-int libusb_control_msg(libusb_dev_handle_t *dev, uint8_t bRequestType,
+int libusb_control_msg(libusb_dev_handle_t dev, uint8_t bRequestType,
 	uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
 	void *buffer, size_t bufferlen, unsigned int timeout);        	/* D */
-int libusb_bulk_write(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_bulk_write(libusb_dev_handle_t dev, unsigned char ep,
 	const void *buffer, size_t bufferlen, unsigned int timeout); 	/* D */
-int libusb_bulk_read(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_bulk_read(libusb_dev_handle_t dev, unsigned char ep,
 	void *buffer, size_t bufferlen, unsigned int timeout);       	/* D */
-int libusb_interrupt_write(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_interrupt_write(libusb_dev_handle_t dev, unsigned char ep,
 	const void *buffer, size_t bufferlen, unsigned int timeout); 	/* D */
-int libusb_interrupt_read(libusb_dev_handle_t *dev, unsigned char ep,
+int libusb_interrupt_read(libusb_dev_handle_t dev, unsigned char ep,
 	void *buffer, size_t bufferlen, unsigned int timeout);       	/* D */
 
 /* Asynchronous I/O functions */
@@ -342,25 +342,25 @@ int libusb_io_comp_status(libusb_io_handle_t *);			/* D */
 int libusb_io_xfer_size(libusb_io_handle_t *);				/* D */
 int libusb_io_req_size(libusb_io_handle_t *);				/* D */
 int libusb_io_ep_addr(libusb_io_handle_t *);				/* D */
-libusb_dev_handle_t *libusb_io_dev(libusb_io_handle_t *);		/* D */
+libusb_dev_handle_t libusb_io_dev(libusb_io_handle_t *);		/* D */
 unsigned char *libusb_io_data(libusb_io_handle_t *);			/* D */
 int libusb_io_wait_handle(libusb_io_handle_t *);			/* D */
 
-libusb_io_handle_t *libusb_submit_control(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_control(libusb_dev_handle_t dev,
 	unsigned char ep, uint8_t bRequestType, uint8_t bRequest,
 	uint16_t wValue, uint16_t wIndex, void *buffer,
 	size_t bufferlen, unsigned int timeout,
 	libusb_io_callback_t callback);					/* D */
-libusb_io_handle_t *libusb_submit_bulk_write(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_bulk_write(libusb_dev_handle_t dev,
 	unsigned char ep, const void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback);		/* D */
-libusb_io_handle_t *libusb_submit_bulk_read(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_bulk_read(libusb_dev_handle_t dev,
 	unsigned char ep, void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback);		/* D */
-libusb_io_handle_t *libusb_submit_interrupt_write(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_interrupt_write(libusb_dev_handle_t dev,
 	unsigned char ep, const void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback);		/* D */
-libusb_io_handle_t *libusb_submit_interrupt_read(libusb_dev_handle_t *dev,
+libusb_io_handle_t *libusb_submit_interrupt_read(libusb_dev_handle_t dev,
 	unsigned char ep, void *buffer, size_t bufferlen,
 	unsigned int timeout, libusb_io_callback_t callback);		/* D */
 
