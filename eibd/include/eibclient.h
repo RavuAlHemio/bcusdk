@@ -40,102 +40,102 @@ typedef struct _EIBConnection EIBConnection;
 /** type for storing a EIB address */
 typedef uint16_t eibaddr_t;
 
-/** opens a connection to eibd.
+/** Opens a connection to eibd.
  *   url can either be <code>ip:host:[port]</code> or <code>local:/path/to/socket</code>
  * \param url contains the url to connect to
  * \return connection handle or NULL
  */
 EIBConnection *EIBSocketURL (const char *url);
-/** opens a connection to eibd over socket
+/** Opens a connection to eibd over a socket.
  * \param path path to the socket
  * \return connection handle or NULL
  */
 EIBConnection *EIBSocketLocal (const char *path);
-/** opens a connection to eibd over TCP/IP
+/** Opens a connection to eibd over TCP/IP.
  * \param host hostname running eibd
  * \param port portnumber
  * \return connection handle or NULL
  */
 EIBConnection *EIBSocketRemote (const char *host, int port);
 
-/** closes and frees a connection
+/** Closes and frees a connection.
  * \param con eibd connection
  */
 int EIBClose (EIBConnection * con);
 
-/** finish a asynchronous request (and block until then)
+/** Finish an asynchronous request (and block until then).
  * \param con eibd connection
  * \return return value, as returned by the synchronous function call
  */
 int EIBComplete (EIBConnection * con);
 
-/** checks, if a asynchronous request is completed
- * The result must be check with EIBComplete for asynchonous functions.
- * For connections, where packets are returned (Busmonitor, T_*), it can be used to check, if new data is available.
+/** Checks if an asynchronous request is completed (non-blocking).
+ * EIBComplete must be still be used for asynchronous functions to retrieve the return value.
+ * For connections where packets are returned (Busmonitor, T_*), EIB_Poll_Complete can be used to check if new data is available.
  * If this function returns an error, the eibd connection should be considered as broken (and therefore be closed).
  * \param con eibd connection
  * \return -1 if any error, 0 if not finished, 1 if finished
  */
 int EIB_Poll_Complete (EIBConnection * con);
 
-/** returns FD to wait for the next event
+/** Returns FD to wait for the next event.
  * The returned file descriptor may only be used to select/poll for read data available.
- * As EIBComplete (and functions, which return packets) block, if only a part of the data is
- * available, this can be checked with EIB_Poll_Complete.
+ * As EIBComplete (and functions, which return packets) block if only a part of the data is
+ * available, EIB_Poll_Complete can be used to check whether blocking will occur.
  * \param con eibd connection
  * \return -1 if any error, else file descriptor
  */
 int EIB_Poll_FD (EIBConnection * con);
 
-/** switches the connection to binary busmonitor mode
+/** Switches the connection to binary busmonitor mode.
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIBOpenBusmonitor (EIBConnection * con);
 
-/** switches the connection to binary busmonitor mode - asynchronous
+/** Switches the connection to binary busmonitor mode - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIBOpenBusmonitor_async (EIBConnection * con);
 
-/** switches the connection to text busmonitor mode
+/** Switches the connection to text busmonitor mode.
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIBOpenBusmonitorText (EIBConnection * con);
 
-/** switches the connection to text busmonitor mode - asynchronous
+/** Switches the connection to text busmonitor mode - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIBOpenBusmonitorText_async (EIBConnection * con);
 
-/** switches the connection to binary vbusmonitor mode
+/** Switches the connection to binary vbusmonitor mode.
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIBOpenVBusmonitor (EIBConnection * con);
 
-/** switches the connection to binary vbusmonitor mode - asynchronous
+/** Switches the connection to binary vbusmonitor mode - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIBOpenVBusmonitor_async (EIBConnection * con);
 
-/** switches the connection to text vbusmonitor mode
+/** Switches the connection to text vbusmonitor mode.
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIBOpenVBusmonitorText (EIBConnection * con);
 
-/** switches the connection to text vbusmonitor mode - asynchronous
+/** Switches the connection to text vbusmonitor mode - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIBOpenVBusmonitorText_async (EIBConnection * con);
 
-/** receives a packet on a busmonitor connection
+/** Receives a packet on a busmonitor connection.
  * \param con eibd connection
  * \param maxlen size of the buffer
  * \param buf buffer
@@ -143,29 +143,29 @@ int EIBOpenVBusmonitorText_async (EIBConnection * con);
  */
 int EIBGetBusmonitorPacket (EIBConnection * con, int maxlen, uint8_t * buf);
 
-/** opens a T_Connection
+/** Opens a connection of type T_Connection.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \return 0 if successful, -1 if error
  */
 int EIBOpenT_Connection (EIBConnection * con, eibaddr_t dest);
 
-/** opens a T_Connection - asynchronous
+/** Opens a connection of type T_Connection - asynchronous.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \return 0 if started, -1 if error
  */
 int EIBOpenT_Connection_async (EIBConnection * con, eibaddr_t dest);
 
-/** opens a T_Individual
+/** Opens a connection of type T_Individual.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if successful, -1 if error
  */
 int EIBOpenT_Individual (EIBConnection * con, eibaddr_t dest, int write_only);
 
-/** opens a T_Individual - asynchronous
+/** Opens a connection of type T_Individual - asynchronous.
  * \param con eibd connection
  * \param dest destionation address
  * \param write_only if not null, no packets from the bus will be delivered
@@ -174,7 +174,7 @@ int EIBOpenT_Individual (EIBConnection * con, eibaddr_t dest, int write_only);
 int EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
 			       int write_only);
 
-/** opens a T_Group
+/** Opens a connection of type T_Group.
  * \param con eibd connection
  * \param dest group address
  * \param write_only if not null, no packets from the bus will be delivered
@@ -182,7 +182,7 @@ int EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
  */
 int EIBOpenT_Group (EIBConnection * con, eibaddr_t dest, int write_only);
 
-/** opens a T_Group - asynchronous
+/** Opens a connection of type T_Group - asynchronous.
  * \param con eibd connection
  * \param dest group address
  * \param write_only if not null, no packets from the bus will be delivered
@@ -191,35 +191,35 @@ int EIBOpenT_Group (EIBConnection * con, eibaddr_t dest, int write_only);
 int EIBOpenT_Group_async (EIBConnection * con, eibaddr_t dest,
 			  int write_only);
 
-/** opens a T_Broadcast
+/** Opens a connection of type T_Broadcast.
  * \param con eibd connection
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if successful, -1 if error
  */
 int EIBOpenT_Broadcast (EIBConnection * con, int write_only);
 
-/** opens a T_Broadcast - asynchronous
+/** Opens a connection of type T_Broadcast - asynchronous.
  * \param con eibd connection
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if started, -1 if error
  */
 int EIBOpenT_Broadcast_async (EIBConnection * con, int write_only);
 
-/** opens a raw Layer 4 connection
+/** Opens a raw Layer 4 connection.
  * \param con eibd connection
  * \param src my source address (0 means default)
  * \return 0 if successful, -1 if error
  */
 int EIBOpenT_TPDU (EIBConnection * con, eibaddr_t src);
 
-/** opens a raw Layer 4 connection - asynchronous
+/** Opens a raw Layer 4 connection - asynchronous.
  * \param con eibd connection
  * \param src my source address (0 means default)
  * \return 0 if started, -1 if error
  */
 int EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src);
 
-/** sends a APDU
+/** Sends an APDU.
  * \param con eibd connection
  * \param len length of the APDU
  * \param data buffer with APDU
@@ -227,7 +227,7 @@ int EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src);
  */
 int EIBSendAPDU (EIBConnection * con, int len, uint8_t * data);
 
-/** receive a APDU
+/** Receive an APDU (blocking).
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
@@ -235,7 +235,7 @@ int EIBSendAPDU (EIBConnection * con, int len, uint8_t * data);
  */
 int EIBGetAPDU (EIBConnection * con, int maxlen, uint8_t * buf);
 
-/** receive a APDU with source address
+/** Receive a APDU with source address (blocking).
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
@@ -245,7 +245,7 @@ int EIBGetAPDU (EIBConnection * con, int maxlen, uint8_t * buf);
 int EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
 		    eibaddr_t * src);
 
-/** sends a TPDU with destination address
+/** Sends a TPDU with destination address.
  * \param con eibd connection
  * \param dest destination address
  * \param len length of the APDU
@@ -255,30 +255,30 @@ int EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
 int EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len,
 		 uint8_t * data);
 
-/** receive a TPDU with source address
+/** Receive a TPDU with source address.
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
- * \param src pointer, where the source address should be stored
+ * \param src pointer to where the source address should be stored
  * \return received length or -1 if error
  */
 #define EIBGetTPDU EIBGetAPDU_Src
 
-/** opens a Group communication interface
+/** Opens a Group communication interface.
  * \param con eibd connection
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if successful, -1 if error
  */
 int EIBOpen_GroupSocket (EIBConnection * con, int write_only);
 
-/** opens a Group communication interface - asynchronous
+/** Opens a Group communication interface - asynchronous.
  * \param con eibd connection
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if started, -1 if error
  */
 int EIBOpen_GroupSocket_async (EIBConnection * con, int write_only);
 
-/** sends a group APDU
+/** Sends a group APDU.
  * \param con eibd connection
  * \param dest destination address
  * \param len length of the APDU
@@ -287,18 +287,19 @@ int EIBOpen_GroupSocket_async (EIBConnection * con, int write_only);
  */
 int EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
 		  uint8_t * data);
-/** receive a group APDU with source address
+
+/** Receive a group APDU with source address (blocking).
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
- * \param src pointer, where the source address should be stored
- * \param dest pointer, where the destination address should be stored
+ * \param src pointer to where the source address should be stored
+ * \param dest pointer to where the destination address should be stored
  * \return received length or -1 if error
  */
 int EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
 		     eibaddr_t * src, eibaddr_t * dest);
 
-/** list devices in programming mode
+/** List devices in programming mode.
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
@@ -306,7 +307,8 @@ int EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
  */
 int EIB_M_ReadIndividualAddresses (EIBConnection * con, int maxlen,
 				   uint8_t * buf);
-/** list devices in programming mode - asynchronous
+
+/** List devices in programming mode - asynchronous.
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
@@ -315,116 +317,116 @@ int EIB_M_ReadIndividualAddresses (EIBConnection * con, int maxlen,
 int EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
 					 uint8_t * buf);
 
-/** turns programming mode on
+/** Turn on programming mode (connectionless).
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if successful, -1 if error
  */
 int EIB_M_Progmode_On (EIBConnection * con, eibaddr_t dest);
 
-/** turns programming mode on - asynchronous
+/** Turns on programming mode (connectionless) - asynchronous.
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if started, -1 if error
  */
 int EIB_M_Progmode_On_async (EIBConnection * con, eibaddr_t dest);
 
-/** turns programming mode off
+/** Turns off programming mode (connectionless).
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if successful, -1 if error
  */
 int EIB_M_Progmode_Off (EIBConnection * con, eibaddr_t dest);
 
-/** turns programming mode off - asynchronous
+/** Turns off programming mode (connectionless) - asynchronous.
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if started, -1 if error
  */
 int EIB_M_Progmode_Off_async (EIBConnection * con, eibaddr_t dest);
 
-/** toggle programming mode 
+/** Toggle programming mode (connectionless).
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if successful, -1 if error
  */
 int EIB_M_Progmode_Toggle (EIBConnection * con, eibaddr_t dest);
 
-/** toggle programming mode - asynchronous
+/** Toggle programming mode (connectionless) - asynchronous.
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if started, -1 if error
  */
 int EIB_M_Progmode_Toggle_async (EIBConnection * con, eibaddr_t dest);
 
-/** get programming mode status
+/** Check if a device is in programming mode (connectionless).
  * \param con eibd connection
  * \param dest address of EIB device
- * \return 0 not in programming mode, -1 if error, else programming mode
+ * \return 0 if not in programming mode, -1 if error, else programming mode
  */
 int EIB_M_Progmode_Status (EIBConnection * con, eibaddr_t dest);
 
-/** get programming mode status - asynchronous
+/** Check if a device is in programming mode (connectionless) - asynchronous.
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if started, -1 if error
  */
 int EIB_M_Progmode_Status_async (EIBConnection * con, eibaddr_t dest);
 
-/** get programming mode status
+/** Retrieve the mask version (connectionless).
  * \param con eibd connection
  * \param dest address of EIB device
  * \return -1 if error, else mask version
  */
 int EIB_M_GetMaskVersion (EIBConnection * con, eibaddr_t dest);
 
-/** get programming mode status - asynchronous
+/** Retrieve the mask version (connectionless) - asynchronous.
  * \param con eibd connection
  * \param dest address of EIB device
  * \return 0 if started, -1 if error
  */
 int EIB_M_GetMaskVersion_async (EIBConnection * con, eibaddr_t dest);
 
-/** write individual address
+/** Set individual address for device currently in programming mode.
  * \param con eibd connection
  * \param dest new address of EIB device
  * \return -1 if error, 0 if successful
  */
 int EIB_M_WriteIndividualAddress (EIBConnection * con, eibaddr_t dest);
 
-/** write individual address - asynchronous
+/** Set individual address for device currently in programming mode - asynchronous.
  * \param con eibd connection
  * \param dest new address of EIB device
  * \return 0 if started, -1 if error
  */
 int EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest);
 
-/** opens a management connection
+/** Opens a management connection.
  * \param con eibd connection
  * \param dest destionation address
  * \return 0 if successful, -1 if error
  */
 int EIB_MC_Connect (EIBConnection * con, eibaddr_t dest);
 
-/** opens a management connection - asynchronous
+/** Opens a management connection - asynchronous.
  * \param con eibd connection
  * \param dest destionation address
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest);
 
-/** read memory on a mangement connection
+/** Read BAU memory (over a management connection).
  * \param con eibd connection
- * \param addr Memory address
+ * \param addr memory address
  * \param len size to read
  * \param buf buffer
  * \return -1 if error, else read length
  */
 int EIB_MC_Read (EIBConnection * con, uint16_t addr, int len, uint8_t * buf);
 
-/** read memory on a mangement connection - asynchronous
+/** Read BAU memory (over a management connection) - asynchronous.
  * \param con eibd connection
- * \param addr Memory address
+ * \param addr memory address
  * \param len size to read
  * \param buf buffer
  * \return 0 if started, -1 if error
@@ -432,9 +434,9 @@ int EIB_MC_Read (EIBConnection * con, uint16_t addr, int len, uint8_t * buf);
 int EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len,
 		       uint8_t * buf);
 
-/** read memory on a mangement connection
+/** Write BAU memory (over a management connection).
  * \param con eibd connection
- * \param addr Memory address
+ * \param addr memory address
  * \param len size to read
  * \param buf buffer
  * \return -1 if error, else read length
@@ -442,7 +444,7 @@ int EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len,
 int EIB_MC_Write (EIBConnection * con, uint16_t addr, int len,
 		  const uint8_t * buf);
 
-/** read memory on a mangement connection - asynchronous
+/** Write BAU memory (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param addr Memory address
  * \param len size to read
@@ -452,67 +454,67 @@ int EIB_MC_Write (EIBConnection * con, uint16_t addr, int len,
 int EIB_MC_Write_async (EIBConnection * con, uint16_t addr, int len,
 			const uint8_t * buf);
 
-/** turns programming mode on on a mangement connection
+/** Turns programming mode on (over a management connection).
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIB_MC_Progmode_On (EIBConnection * con);
 
-/** turns programming mode on on a mangement connection - asynchronous
+/** Turns programming mode on (over a management connection) - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Progmode_On_async (EIBConnection * con);
 
-/** turns programming mode off on a mangement connection
+/** Turns programming mode off (over a management connection).
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIB_MC_Progmode_Off (EIBConnection * con);
 
-/** turns programming mode off on a mangement connection - asynchronous
+/** Turns programming mode off (over a management connection) - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Progmode_Off_async (EIBConnection * con);
 
-/** toggle programming mode on a mangement connection
+/** Toggles programming mode (over a management connection) - asynchronous. 
  * \param con eibd connection
  * \return 0 if successful, -1 if error
  */
 int EIB_MC_Progmode_Toggle (EIBConnection * con);
 
-/** toggle programming mode on a mangement connection - asynchronous
+/** Toggles programming mode (over a management connection) - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Progmode_Toggle_async (EIBConnection * con);
 
-/** get programming mode status on a mangement connection
+/** Check if a device is in programming mode (over a management connection).
  * \param con eibd connection
- * \return 0 not in programming mode, -1 if error, else programming mode
+ * \return 0 if not in programming mode, -1 if error, else programming mode
  */
 int EIB_MC_Progmode_Status (EIBConnection * con);
 
-/** get programming mode status on a mangement connection - asynchronous
+/** Check if a device is in programming mode (over a management connection) - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Progmode_Status_async (EIBConnection * con);
 
-/** get programming mode status on a mangement connection
+/** Retrieve the mask version (over a management connection).
  * \param con eibd connection
  * \return -1 if error, else mask version
  */
 int EIB_MC_GetMaskVersion (EIBConnection * con);
 
-/** get programming mode status on a mangement connection - asynchronous
+/** Retrieve the mask version (over a management connection) - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIB_MC_GetMaskVersion_async (EIBConnection * con);
 
-/** read a property on a mangement connection
+/** Read a property (over a management connection).
  * \param con eibd connection
  * \param obj object index
  * \param property property ID
@@ -526,7 +528,7 @@ int EIB_MC_PropertyRead (EIBConnection * con, uint8_t obj, uint8_t property,
 			 uint16_t start, uint8_t nr_of_elem, int max_len,
 			 uint8_t * buf);
 
-/** read a property on a mangement connection - asynchronous
+/** Read a property (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param obj object index
  * \param property property ID
@@ -541,7 +543,7 @@ int EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj,
 			       uint8_t nr_of_elem, int max_len,
 			       uint8_t * buf);
 
-/** write a property on a mangement connection
+/** Write a property (over a management connection).
  * \param con eibd connection
  * \param obj object index
  * \param property property ID
@@ -557,7 +559,7 @@ int EIB_MC_PropertyWrite (EIBConnection * con, uint8_t obj, uint8_t property,
 			  uint16_t start, uint8_t nr_of_elem, int len,
 			  const uint8_t * buf, int max_len, uint8_t * res);
 
-/** write a property on a mangement connection - asynchronous
+/** Write a property (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param obj object index
  * \param property property ID
@@ -575,7 +577,7 @@ int EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
 				const uint8_t * buf, int max_len,
 				uint8_t * res);
 
-/** read a property description on a mangement connection
+/** Read a property description (over a management connection)
  * \param con eibd connection
  * \param obj object index
  * \param property property ID
@@ -588,7 +590,7 @@ int EIB_MC_PropertyDesc (EIBConnection * con, uint8_t obj, uint8_t property,
 			 uint8_t * type, uint16_t * max_nr_of_elem,
 			 uint8_t * access);
 
-/** read a property description on a mangement connection - asynchronous
+/** Read a property description (over a mangement connection) - asynchronous.
  * \param con eibd connection
  * \param obj object index
  * \param property property ID
@@ -601,7 +603,7 @@ int EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj,
 			       uint8_t property, uint8_t * type,
 			       uint16_t * max_nr_of_elem, uint8_t * access);
 
-/** list properties on a management connection
+/** List properties (over a management connection).
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
@@ -609,7 +611,7 @@ int EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj,
  */
 int EIB_MC_PropertyScan (EIBConnection * con, int maxlen, uint8_t * buf);
 
-/** list properties on a management connection - asynchronous
+/** List properties (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param maxlen buffer size
  * \param buf buffer
@@ -618,19 +620,19 @@ int EIB_MC_PropertyScan (EIBConnection * con, int maxlen, uint8_t * buf);
 int EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen,
 			       uint8_t * buf);
 
-/** read PEI type on a management connection
+/** Read PEI type (over a management connection).
  * \param con eibd connection
  * \return PEI type or -1 if error
  */
 int EIB_MC_GetPEIType (EIBConnection * con);
 
-/** read PEI type on a management connection - asynchronous
+/** Read PEI type (over a management connection) - asynchronous.
  * \param con eibd connection
  * \return 0 if started, -1 if error
  */
 int EIB_MC_GetPEIType_async (EIBConnection * con);
 
-/** read ADC value on a management connection
+/** Read ADC value (over a management connection).
  * \param con eibd connection
  * \param channel ADC channel
  * \param count repeat count
@@ -640,7 +642,7 @@ int EIB_MC_GetPEIType_async (EIBConnection * con);
 int EIB_MC_ReadADC (EIBConnection * con, uint8_t channel, uint8_t count,
 		    int16_t * val);
 
-/** read ADC value on a management connection - asynchronous
+/** Read ADC value (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param channel ADC channel
  * \param count repeat count
@@ -650,37 +652,37 @@ int EIB_MC_ReadADC (EIBConnection * con, uint8_t channel, uint8_t count,
 int EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
 			  int16_t * val);
 
-/** authorize on a management connection
+/** Authorize (over a management connection).
  * \param con eibd connection
  * \param key key
  * \return -1 if error, else access level
  */
 int EIB_MC_Authorize (EIBConnection * con, uint8_t key[4]);
 
-/** authorize on a management connection - asynchronous
+/** Authorize (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param key key
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Authorize_async (EIBConnection * con, uint8_t key[4]);
 
-/** sets a key on a management connection
+/** Sets a key (over a management connection).
  * \param con eibd connection
- * \param level Level to set
+ * \param level level to set
  * \param key key
  * \return -1 if error, else 0
  */
 int EIB_MC_SetKey (EIBConnection * con, uint8_t key[4], uint8_t level);
 
-/** sets a key on a management connection - asynchronous
+/** Sets a key (over a management connection) - asynchronous.
  * \param con eibd connection
- * \param level Level to set
+ * \param level level to set
  * \param key key
  * \return 0 if started, -1 if error
  */
 int EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level);
 
-/** loads an image over an management connection
+/** Loads a BCU SDK program image (over a management connection).
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
@@ -688,7 +690,7 @@ int EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level);
  */
 BCU_LOAD_RESULT EIB_LoadImage (EIBConnection * con, const uint8_t * image,
 			       int len);
-/** loads an image over an management connection - asynchronous
+/** Loads a BCU SDK program image (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
