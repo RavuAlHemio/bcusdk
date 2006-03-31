@@ -41,6 +41,8 @@ class BCU1DriverLowLevelDriver:public LowLevelDriverInterface, private Thread
   pth_event_t getwait;
   /** semaphore to signal empty sendqueue */
   pth_sem_t send_empty;
+    /** event to wait for send finished */
+  pth_event_t send_done;
 
   void Run (pth_sem_t * stop);
 public:

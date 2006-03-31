@@ -102,6 +102,7 @@ EMI1Layer2Interface::enterBusmonitor ()
   if (mode != 0)
     return 0;
   iface->SendReset ();
+  pth_usleep (1000000);
   iface->Send_Packet (CArray (t1, sizeof (t1)));
 
   if (!iface->Send_Queue_Empty ())
@@ -133,6 +134,7 @@ EMI1Layer2Interface::leaveBusmonitor ()
       pth_event_free (e, PTH_FREE_THIS);
     }
   mode = 0;
+  pth_usleep (1000000);
   return 1;
 }
 

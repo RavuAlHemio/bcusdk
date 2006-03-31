@@ -36,6 +36,23 @@ BCU1DriverLowLevelDriver::BCU1DriverLowLevelDriver (const char *dev,
   pth_sem_init (&send_empty);
   pth_sem_set_value (&send_empty, 1);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+
+  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 1));
+  send_done = pth_event (PTH_EVENT_FD | PTH_UNTIL_FD_EXCEPTION, fd);
+  pth_event_concat (send_done, timeout, NULL);
+
+  pth_wait (send_done);
+
+  pth_event_isolate (send_done);
+  pth_event_free (timeout, PTH_FREE_THIS);
+
+  if (pth_event_status (send_done) != PTH_STATUS_OCCURRED)
+    {
+      t->TracePrintf (1, this, "Driver select extension missing");
+      pth_event_free (send_done, PTH_FREE_THIS);
+      send_done = 0;
+    }
+
   Start ();
   t->TracePrintf (1, this, "Opened");
 }
@@ -44,6 +61,9 @@ BCU1DriverLowLevelDriver::~BCU1DriverLowLevelDriver ()
 {
   t->TracePrintf (1, this, "Close");
   Stop ();
+  if (send_done)
+    pth_event_free (send_done, PTH_FREE_THIS);
+
   pth_event_free (getwait, PTH_FREE_THIS);
 
   if (fd != -1)
@@ -128,6 +148,9 @@ BCU1DriverLowLevelDriver::Run (pth_sem_t * stop1)
 	  i = pth_write_ev (fd, c.array (), c (), stop);
 	  if (i == c ())
 	    {
+	      if (send_done)
+		pth_wait (send_done);
+
 	      pth_sem_dec (&in_signal);
 	      inqueue.get ();
 	      if (inqueue.isempty ())
