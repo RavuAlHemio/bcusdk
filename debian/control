@@ -39,7 +39,7 @@ Description: sources of the eibd client programs
 
 Package: bcusdk-build
 Architecture: any
-Depends: ${shlibs:Depends}, m68hc05-gcc, xsltproc, m68hc05-runtime
+Depends: ${shlibs:Depends}, m68hc05-gcc, xsltproc, m68hc05-runtime, libxml2-utils
 Description: BCU SDK image building programs
  contains all files and programs to build BCU images
 
