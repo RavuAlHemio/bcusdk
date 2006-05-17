@@ -1,4 +1,4 @@
-AM_CPPFLAGS=-I../../common -I../struct -I../configfile $(XML_CPPFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/common -I$(top_srcdir)/bcugen/struct -I$(top_srcdir)/bcugen/configfile $(XML_CPPFLAGS)
 
 noinst_LIBRARIES=libbcugen.a libcheck1.a libcheck2.a
 libbcugen_a_SOURCES=common.h common.cpp regexp.h regexp.cpp symboltab.h symboltab.cpp \

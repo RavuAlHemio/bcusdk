@@ -4,7 +4,7 @@ READ=parser.pre parser1.pre parser2.pre scanner.pre
 dist_noinst_DATA=$(DEF)
 EXTRA_DIST=parser.pre parser1.pre parser2.pre scanner.pre
 
-AM_CPPFLAGS=-I../../common -I../struct -I../lib -I.
+AM_CPPFLAGS=-I$(top_srcdir)/common -I$(top_srcdir)/bcugen/struct -I$(top_srcdir)/bcugen/lib -I$(top_srcdir)/bcugen/configfile
 AM_YFLAGS=-d
 BUILT_SOURCES=parser1.post parser1.1.ypp parser1.1.h scanner.post scanner.1.lpp parser2.post parser2.1.ypp parser2.1.h
 CLEANFILES=parser2.post parser1.post scanner.post scanner.1.lpp parser1.1.ypp parser1.1.h parser1.1.cpp parser2.1.ypp \

@@ -1,5 +1,5 @@
 bin_PROGRAMS=bcuaddrtab bcuread
-AM_CPPFLAGS=-I../../common -I../libserver -I../backend -I../usb
+AM_CPPFLAGS=-I$(top_srcdir)/common -I$(top_srcdir)/eibd/libserver -I$(top_srcdir)/eibd/backend -I$(top_srcdir)/eibd/usb
 BACKEND_CONF= l-FT12.h l-PEI16.h l-PEI16s.h l-USB.h
 
 noinst_LIBRARIES=libbcu.a

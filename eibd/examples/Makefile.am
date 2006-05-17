@@ -1,4 +1,4 @@
-AM_CPPFLAGS=-I../include -I../../common
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/common
 
 LDADD=../client/libeibclient.a
 bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progmodetoggle progmodestatus maskver \

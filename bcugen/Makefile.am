@@ -1,5 +1,5 @@
 SUBDIRS=struct configfile lib
-AM_CPPFLAGS=-I../common -Istruct -Iconfigfile -Ilib -I../eibd/include
+AM_CPPFLAGS=-I$(top_srcdir)/common -I$(top_srcdir)/bcugen/struct -I$(top_srcdir)/bcugen/configfile -I$(top_srcdir)/bcugen/lib -I$(top_srcdir)/eibd/include
 bin_PROGRAMS=viewimage bcugen1 bcugen2 loadimage imageedit
 
 viewimage_SOURCES=viewimage.cpp

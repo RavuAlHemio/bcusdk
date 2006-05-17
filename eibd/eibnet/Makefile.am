@@ -1,4 +1,4 @@
-AM_CPPFLAGS=-I../libserver -I../include -I../../common
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/libserver -I$(top_srcdir)/eibd/include -I$(top_srcdir)/common
 
 bin_PROGRAMS=$(EIBNET)
 
