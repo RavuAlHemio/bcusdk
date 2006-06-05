@@ -1,6 +1,6 @@
 /*
     EIBD eib bus access and management daemon
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,14 +24,6 @@
 #include "busmonitor.h"
 #include "connection.h"
 #include "managementclient.h"
-
-/** deletes a client connection after its termination */
-static void
-CleanUp (void *arg)
-{
-  ClientConnection *c = (ClientConnection *) arg;
-  delete c;
-}
 
 ClientConnection::ClientConnection (Server * s, Layer3 * l3, Trace * tr,
 				    int fd)
@@ -58,7 +50,6 @@ void
 ClientConnection::Run (pth_sem_t * stop1)
 {
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  pth_cleanup_push (CleanUp, this);
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       if (readmessage (stop) == -1)
@@ -165,6 +156,7 @@ ClientConnection::Run (pth_sem_t * stop1)
 	}
     }
   pth_event_free (stop, PTH_FREE_THIS);
+  StopDelete ();
 }
 
 int

@@ -1,6 +1,6 @@
 /*
     EIBD eib bus access and management daemon
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,12 +23,15 @@ void *
 Thread::ThreadWrapper (void *arg)
 {
   ((Thread *) arg)->Run (&((Thread *) arg)->should_stop);
+  if (((Thread *) arg)->autodel)
+    delete ((Thread *) arg);
   pth_exit (0);
   return 0;
 }
 
 Thread::Thread (int Priority, Runable * o, THREADENTRY t)
 {
+  autodel = false;
   obj = o;
   entry = t;
   pth_sem_init (&should_stop);
@@ -47,8 +50,21 @@ Thread::Stop ()
   if (!tid)
     return;
   pth_sem_inc (&should_stop, TRUE);
-  pth_join (tid, 0);
-  tid = 0;
+
+  if (pth_join (tid, 0))
+    tid = 0;
+}
+
+void
+Thread::StopDelete ()
+{
+  autodel = true;
+  pth_sem_inc (&should_stop, FALSE);
+  if (!tid)
+    return;
+  pth_attr_t at = pth_attr_of (tid);
+  pth_attr_set (at, PTH_ATTR_JOINABLE, FALSE);
+  pth_attr_destroy (at);
 }
 
 void

@@ -1,6 +1,6 @@
 /*
     EIBD eib bus access and management daemon
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,8 +26,11 @@ Server::~Server ()
 {
   t->TracePrintf (8, this, "StopServer");
   Stop ();
+  for (int i = 0; i < connections (); i++)
+    connections[i]->StopDelete ();
   while (connections () != 0)
-    connections[0]->Stop ();
+    pth_yield (0);
+
   close (fd);
   t->TracePrintf (8, this, "Server ended");
 }

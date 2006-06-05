@@ -1,6 +1,6 @@
 /*
     EIBD eib bus access and management daemon
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ typedef void (Runable::*THREADENTRY) (pth_sem_t * stopcond);
 /** implements a Thread */
 class Thread
 {
+  /** delete at stop */
+  bool autodel;
   /** C entry point for the threads */
   static void *ThreadWrapper (void *arg);
   /** thread id */
@@ -67,6 +69,8 @@ public:
   void Start ();
   /** stops the thread, if it is running */
   void Stop ();
+  /** stops the thread and delete it asynchronous */
+  void StopDelete ();
 };
 
 
