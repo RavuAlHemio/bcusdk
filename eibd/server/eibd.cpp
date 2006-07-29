@@ -306,7 +306,7 @@ main (int ac, char *ag[])
   }
 
   sigset_t t1;
-  sigfillset (&t1);
+  sigemptyset (&t1);
   sigaddset (&t1, SIGINT);
   sigaddset (&t1, SIGTERM);
   signal (SIGINT, SIG_IGN);
