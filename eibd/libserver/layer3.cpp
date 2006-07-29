@@ -239,13 +239,19 @@ Layer3::registerGroupCallBack (L_Data_CallBack * c, eibaddr_t addr)
 }
 
 bool
-  Layer3::registerIndividualCallBack (L_Data_CallBack * c, eibaddr_t src,
+  Layer3::registerIndividualCallBack (L_Data_CallBack * c,
+				      Individual_Lock lock, eibaddr_t src,
 				      eibaddr_t dest)
 {
   unsigned i;
-  t->TracePrintf (3, this, "registerIndividual %08X", c);
+  t->TracePrintf (3, this, "registerIndividual %08X %d", c, lock);
   if (mode == 1)
     return 0;
+  for (i = 0; i < individual (); i++)
+    if (lock == Individual_Lock_Connection &&
+	individual[i].lock == Individual_Lock_Connection)
+      return 0;
+
   for (i = 0; i < individual (); i++)
     {
       if (individual[i].dest == dest)
@@ -258,6 +264,7 @@ bool
   individual[individual () - 1].cb = c;
   individual[individual () - 1].dest = dest;
   individual[individual () - 1].src = src;
+  individual[individual () - 1].lock = lock;
   t->TracePrintf (3, this, "registerIndividual %08X = 1", c);
   return 1;
 }

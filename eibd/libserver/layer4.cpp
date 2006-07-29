@@ -174,7 +174,8 @@ T_TPDU::T_TPDU (Layer3 * l3, Trace * tr, eibaddr_t d)
   t = tr;
   src = d;
   pth_sem_init (&sem);
-  if (!layer3->registerIndividualCallBack (this, 0, src))
+  if (!layer3->
+      registerIndividualCallBack (this, Individual_Lock_None, 0, src))
     throw Exception (L4_INIT_FAIL);
 }
 
@@ -239,7 +240,8 @@ T_Individual::T_Individual (Layer3 * l3, Trace * tr, eibaddr_t d,
   dest = d;
   pth_sem_init (&sem);
   if (!write_only)
-    if (!layer3->registerIndividualCallBack (this, dest))
+    if (!layer3->
+	registerIndividualCallBack (this, Individual_Lock_None, dest))
       throw Exception (L4_INIT_FAIL);
 }
 
@@ -314,7 +316,8 @@ T_Connection::T_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
   recvno = 0;
   sendno = 0;
   mode = 0;
-  if (!layer3->registerIndividualCallBack (this, dest))
+  if (!layer3->
+      registerIndividualCallBack (this, Individual_Lock_Connection, dest))
     throw Exception (L4_INIT_FAIL);
   Start ();
 }

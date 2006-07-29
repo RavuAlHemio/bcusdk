@@ -42,6 +42,14 @@ typedef struct
   eibaddr_t dest;
 } Group_Info;
 
+typedef enum
+{
+  /** perform no locking */
+  Individual_Lock_None,
+  /** pervent other connections of Individual_Lock_Connection */
+  Individual_Lock_Connection
+} Individual_Lock;
+
 /** stores a registered individual callback */
 typedef struct
 {
@@ -50,6 +58,8 @@ typedef struct
   eibaddr_t src;
   /** destiation address, for which the frames should be delivered */
   eibaddr_t dest;
+  /** lock of the connection */
+  Individual_Lock lock;
 } Individual_Info;
 
 typedef struct
@@ -101,9 +111,10 @@ public:
      * @param c callback
      * @param src source individual address (0 means all)
      * @param dest destination individual address (0 means default address)
+     * @param lock Locktype of the connection
      */
-  bool registerIndividualCallBack (L_Data_CallBack * c, eibaddr_t src,
-				   eibaddr_t dest = 0);
+  bool registerIndividualCallBack (L_Data_CallBack * c, Individual_Lock lock,
+				   eibaddr_t src, eibaddr_t dest = 0);
 
     /** deregister a busmonitor callback, return true, if successful*/
   bool deregisterBusmonitor (L_Busmonitor_CallBack * c);

@@ -58,7 +58,7 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 	throw Exception (DEV_OPEN_FAIL);
       if (!l3->registerGroupCallBack (this, 0))
 	throw Exception (DEV_OPEN_FAIL);
-      if (!l3->registerIndividualCallBack (this, 0, 0))
+      if (!l3->registerIndividualCallBack (this, Individual_Lock_None, 0, 0))
 	throw Exception (DEV_OPEN_FAIL);
     }
   Start ();
