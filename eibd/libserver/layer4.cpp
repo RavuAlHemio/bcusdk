@@ -568,6 +568,7 @@ T_Connection::Run (pth_sem_t * stop1)
   pth_event_free (timeout, PTH_FREE_THIS);
   SendDisconnect ();
   mode = 0;
+  layer3->deregisterIndividualCallBack (this, dest);
   out.put (CArray ());
   pth_sem_inc (&outsem, 0);
 }
