@@ -73,8 +73,23 @@ Layer7_Connection::Layer7_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
 {
   t = tr;
   dest = d;
-  l4ind = new T_Individual (l3, tr, d, 0);
-  l4 = new T_Connection (l3, tr, d);
+  l4ind = 0;
+  l4 = 0;
+  try
+  {
+    l4ind = new T_Individual (l3, tr, d, 0);
+    l4 = new T_Connection (l3, tr, d);
+  }
+  catch (Exception e)
+  {
+    if (l4ind)
+      delete l4ind;
+    if (l4)
+      delete l4;
+    l4 = 0;
+    l4ind = 0;
+    throw e;
+  }
 }
 
 Layer7_Connection::~Layer7_Connection ()
