@@ -451,7 +451,7 @@ T_Connection::Run (pth_sem_t * stop1)
   sendno = 0;
   recvno = 0;
   repcount = 0;
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 6000000));
+  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (6, 0));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED && mode != 0)
     {
       pth_event_concat (bufev, stop, timeout, NULL);
@@ -492,7 +492,7 @@ T_Connection::Run (pth_sem_t * stop1)
 		if (mode == 1)
 		  timeout =
 		    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-			       pth_timeout (0, 6000000));
+			       pth_timeout (6, 0));
 	      }
 	      break;
 	    case T_NACK:
@@ -510,7 +510,7 @@ T_Connection::Run (pth_sem_t * stop1)
 		    SendData (sendno, in.top ());
 		    timeout =
 		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (0, 3000000));
+				 pth_timeout (3, 0));
 		  }
 	      }
 	      break;
@@ -525,7 +525,7 @@ T_Connection::Run (pth_sem_t * stop1)
 		  {
 		    timeout =
 		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (0, 6000000));
+				 pth_timeout (6, 0));
 		    mode = 1;
 		    in.get ();
 		    sendno = (sendno + 1) & 0x0f;
@@ -546,7 +546,7 @@ T_Connection::Run (pth_sem_t * stop1)
 	  mode = 2;
 	  timeout =
 	    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-		       pth_timeout (0, 3000000));
+		       pth_timeout (3, 0));
 	}
       else if (pth_event_status (timeout) == PTH_STATUS_OCCURRED)
 	{
@@ -556,7 +556,7 @@ T_Connection::Run (pth_sem_t * stop1)
 	      SendData (sendno, in.top ());
 	      timeout =
 		pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-			   pth_timeout (0, 3000000));
+			   pth_timeout (3, 0));
 	    }
 	  else
 	    mode = 0;

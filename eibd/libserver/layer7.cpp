@@ -48,8 +48,7 @@ Array < eibaddr_t >
   A_IndividualAddress_Read_PDU r;
   APDU *a;
   l4->Send (r.ToPacket ());
-  pth_event_t
-    t = pth_event (PTH_EVENT_TIME, pth_timeout (0, timeout * 1000000));
+  pth_event_t t = pth_event (PTH_EVENT_TIME, pth_timeout (timeout, 0));
   while (pth_event_status (t) != PTH_STATUS_OCCURRED)
     {
       BroadcastComm *c = l4->Get (t);
