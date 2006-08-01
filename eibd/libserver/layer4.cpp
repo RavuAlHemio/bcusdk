@@ -575,7 +575,7 @@ T_Connection::Run (pth_sem_t * stop1)
 
 GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
 {
-  tr->TracePrintf (4, this, "OpenBroadcast %s", write_only ? "WO" : "RW");
+  tr->TracePrintf (4, this, "OpenGroupSocket %s", write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
   pth_sem_init (&sem);
@@ -586,7 +586,7 @@ GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
 
 GroupSocket::~GroupSocket ()
 {
-  t->TracePrintf (4, this, "CloseBroadcast");
+  t->TracePrintf (4, this, "CloseGroupSocket");
   layer3->deregisterGroupCallBack (this, 0);
 }
 
