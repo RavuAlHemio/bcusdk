@@ -249,6 +249,7 @@ bool
     return 0;
   for (i = 0; i < individual (); i++)
     if (lock == Individual_Lock_Connection &&
+	individual[i].dest == dest &&
 	individual[i].lock == Individual_Lock_Connection)
       return 0;
 
