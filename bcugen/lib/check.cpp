@@ -86,7 +86,7 @@ CheckStringParameter (Device & d, StringParameter & o)
   if (o.RegExp ())
     if (!checkRegExp (o.RegExp ()))
       die (_("line %d: invalid regular expression"), o.RegExp_lineno);
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("StringParameter", "Title", o.lineno);
   if (!o.Default ())
@@ -106,7 +106,8 @@ CheckStringParameter (Device & d, StringParameter & o)
     }
   else
     o.ID_lineno = o.lineno;
-#else
+#endif
+#ifdef CHECK2
   if (!o.Value ())
     die (_("line %d: No value defined"), o.lineno);
   if (strlen (o.Value ()) >= o.MaxLength)
@@ -130,7 +131,7 @@ CheckFloatParameter (Device & d, FloatParameter & o)
   if (o.MinValue > o.MaxValue)
     die (_("line %d: MinValue > MaxValue"), o.MaxValue_lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("FloatParameter", "Title", o.lineno);
   if (!o.Default_lineno)
@@ -149,7 +150,8 @@ CheckFloatParameter (Device & d, FloatParameter & o)
     }
   else
     o.ID_lineno = o.lineno;
-#else
+#endif
+#ifdef CHECK2
   if (!o.Value_lineno)
     die (_("line %d: No value defined"), o.lineno);
   if (o.Value < o.MinValue)
@@ -172,7 +174,7 @@ CheckIntParameter (Device & d, IntParameter & o)
   if (o.MinValue > o.MaxValue)
     die (_("line %d: MinValue > MaxValue"), o.MaxValue_lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("IntParameter", "Title", o.lineno);
   if (!o.Default_lineno)
@@ -191,7 +193,8 @@ CheckIntParameter (Device & d, IntParameter & o)
     }
   else
     o.ID_lineno = o.lineno;
-#else
+#endif
+#ifdef CHECK2
   if (!o.Value_lineno)
     die (_("line %d: No value defined"), o.lineno);
   if (o.Value < o.MinValue)
@@ -244,7 +247,7 @@ CheckListParameter (Device & d, ListParameter & o)
   if (!o.Elements ())
     die (_("line %d: no enumeration values"), o.Elements_lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("ListParameter", "Title", o.lineno);
   if (!o.Default ())
@@ -277,7 +280,8 @@ CheckListParameter (Device & d, ListParameter & o)
     o.ID_lineno = o.lineno;
 
 
-#else
+#endif
+#ifdef CHECK2
   if (!o.Value ())
     undefined ("ListParameter", "Value", o.lineno);
   for (i = 0; i < o.Elements (); i++)
@@ -301,7 +305,7 @@ CheckPollingMaster (Device & d, PollingMaster & o)
   if (!o.Name ())
     undefined ("PollingMaster", "Name", o.lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("PollingMaster", "Title", o.lineno);
 
@@ -312,7 +316,8 @@ CheckPollingMaster (Device & d, PollingMaster & o)
     }
   else
     o.ID_lineno = o.lineno;
-#else
+#endif
+#ifdef CHECK2
   if (!o.PollingAddress_lineno && o.PollingCount_lineno)
     die (_("line %d: missing PollingAddress"), o.lineno);
   if (o.PollingAddress_lineno && !o.PollingCount_lineno)
@@ -336,7 +341,7 @@ CheckPollingSlave (Device & d, PollingSlave & o)
   if (!o.Name ())
     undefined ("PollingSlave", "Name", o.lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("PollingSlave", "Title", o.lineno);
 
@@ -347,7 +352,8 @@ CheckPollingSlave (Device & d, PollingSlave & o)
     }
   else
     o.ID_lineno = o.lineno;
-#else
+#endif
+#ifdef CHECK2
   if (!o.PollingAddress_lineno && o.PollingSlot_lineno)
     die (_("line %d: missing PollingAddress"), o.lineno);
   if (o.PollingAddress_lineno && !o.PollingSlot_lineno)
@@ -405,7 +411,7 @@ CheckProperty (Device & d, Property & o, Object & o1)
       o.eeprom = 0;
     }
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("Property", "Title", o.lineno);
 
@@ -418,7 +424,8 @@ CheckProperty (Device & d, Property & o, Object & o1)
     o.ID_lineno = o.lineno;
   o.Disable = 0;
   o.ReadOnly = !o.Writeable;
-#else
+#endif
+#ifdef CHECK2
 
   if (!o.WriteAccess_lineno)
     {
@@ -461,13 +468,14 @@ CheckObject (Device & d, Object & o, int &no)
   if (!o.Name ())
     undefined ("Object", "Name", o.lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   o.ObjectIndex = no;
   o.ObjectIndex_lineno = o.lineno;
   no++;
 
   NewSymbol (o.Name, o.lineno);
-#else
+#endif
+#ifdef CHECK2
 
 #endif
 
@@ -485,11 +493,12 @@ CheckObject (Device & d, Object & o, int &no)
       if (o.Propertys[i].PropertyID == o.Propertys[j].PropertyID)
 	die (_("line %d: duplicate property ID with %s"),
 	     o.Propertys[i].lineno, o.Propertys[j].Name ());
-#ifdef PHASE1
+#ifdef CHECK1
   o.PropCount = o.Propertys ();
   o.RAccess = 3;
   o.WAccess = 3;
-#else
+#endif
+#ifdef CHECK2
   ra = 4;
   wa = 4;
   PropCount = 0;
@@ -546,7 +555,7 @@ CheckGroupObject (Device & d, GroupObject & o)
   if (!o.Type_lineno)
     undefined ("GroupObject", "Type", o.lineno);
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("GroupObject", "Title", o.lineno);
 
@@ -571,7 +580,8 @@ CheckGroupObject (Device & d, GroupObject & o)
       o.Receiving_lineno = o.lineno;
     }
 
-#else
+#endif
+#ifdef CHECK2
 
   if (!o.Priority_lineno)
     {
@@ -600,7 +610,7 @@ CheckGroupObject (Device & d, GroupObject & o)
       o.eeprom_lineno = 0;
       o.eeprom = 0;
     }
-#ifdef PHASE1
+#ifdef CHECK1
   if (o.Sending)
     NewSymbol (o.Name + "_transmit", o.lineno);
 
@@ -609,7 +619,8 @@ CheckGroupObject (Device & d, GroupObject & o)
 
   if (o.Reading && o.Sending)
     NewSymbol (o.Name + "_clear", o.lineno);
-#else
+#endif
+#ifdef CHECK2
   if (!o.Sending && o.SendAddress_lineno)
     die (_("line %d: can not send on this group object"), o.lineno);
 
@@ -627,7 +638,7 @@ void
 CheckInterface (Device & d, Interface & o)
 {
 
-#ifdef PHASE1
+#ifdef CHECK1
 
   if (!o.Reference_lineno)
     undefined ("Interface", "Reference", o.lineno);
@@ -660,7 +671,8 @@ CheckInterface (Device & d, Interface & o)
   if (o.InvisibleIf_lineno)
     CheckExpressionBool (o.InvisibleIf, o.InvisibleIf_lineno, d);
 
-#else
+#endif
+#ifdef CHECK2
 
 #endif
 
@@ -671,7 +683,7 @@ CheckFunctionalBlock (Device & d, FunctionalBlock & o)
 {
   int i;
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!o.Title ())
     undefined ("FunctionalBlock", "Title", o.lineno);
 
@@ -684,7 +696,8 @@ CheckFunctionalBlock (Device & d, FunctionalBlock & o)
   if (o.ProfileID <= 0)
     die (_("line %d: invalid ProfileID"), o.ProfileID_lineno);
 
-#else
+#endif
+#ifdef CHECK2
 
 #endif
 
@@ -1153,11 +1166,12 @@ CheckDevice (Device & d)
   if (!d.A_Event_lineno)
     d.A_Event = 1;
 
-#ifdef PHASE1
+#ifdef CHECK1
   if (!d.Title ())
     undefined ("Device", "Title", d.lineno);
 
-#else
+#endif
+#ifdef CHECK2
   if (!d.PhysicalAddress_lineno)
     undefined ("Device", "PhyiscalAddress", d.lineno);
 #endif

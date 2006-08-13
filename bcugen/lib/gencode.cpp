@@ -124,7 +124,7 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
 
       if (o.Sending)
 	{
-#ifdef PHASE1
+#ifdef BUILDMAX
 	  if (o.Sending)
 #else
 	  if (o.SendAddress_lineno)
@@ -138,7 +138,7 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
 
       if (o.Reading)
 	{
-#ifdef PHASE1
+#ifdef BUILDMAX
 	  if (o.Reading)
 #else
 	  if (o.ReadRequestAddress_lineno)
@@ -151,7 +151,7 @@ GenGroupObjectHeader (FILE * f, GroupObject & o)
 	}
       if (o.Reading && o.Sending)
 	{
-#ifdef PHASE1
+#ifdef BUILDMAX
 	  if (o.Reading && o.Sending)
 #else
 	  if (o.ReadRequestAddress_lineno && o.SendAddress_lineno)

@@ -7,5 +7,6 @@ libbcugen_a_SOURCES=common.h common.cpp regexp.h regexp.cpp symboltab.h symbolta
 	addrtab.h addrtab.cpp expr.h expr.cpp
 
 libcheck1_a_SOURCES=check.cpp check.h gencode.cpp gencode.h
-libcheck1_a_CPPFLAGS=-D PHASE1 $(AM_CPPFLAGS)
+libcheck1_a_CPPFLAGS=-D CHECK1 -D BUILDMAX $(AM_CPPFLAGS)
 libcheck2_a_SOURCES=check.cpp check.h gencode.cpp gencode.h
+libcheck2_a_CPPFLAGS=-D CHECK2 $(AM_CPPFLAGS)
