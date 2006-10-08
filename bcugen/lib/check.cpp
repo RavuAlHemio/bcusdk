@@ -728,7 +728,7 @@ CheckExpressionList (Expr * s, int l, const Device & d)
       s->id[i] = o.Elements[j].Value;
     }
   s->s = o.ID;
-  if (!o.ID ())
+  if (!o.ID_lineno)
     {
       int found = 0;
       for (i = 0; i < s->id (); i++)
@@ -761,9 +761,9 @@ GetExpressionType (Expr * s, int l, const Device & d)
       if (d.StringParameters () != i)
 	{
 	  s->s = d.StringParameters[i].ID;
-	  if (!s->s ())
+	  if (!d.StringParameters[i].ID_lineno)
 	    {
-	      s->s = d.StringParameters[i].Value;
+	      s->s = d.StringParameters[i].Default;
 	      s->Type = Expr::E_STRING;
 	    }
 	  return EX_STRING;
@@ -774,9 +774,9 @@ GetExpressionType (Expr * s, int l, const Device & d)
       if (d.IntParameters () != i)
 	{
 	  s->s = d.IntParameters[i].ID;
-	  if (!s->s ())
+	  if (!d.IntParameters[i].ID_lineno)
 	    {
-	      s->i = d.IntParameters[i].Value;
+	      s->i = d.IntParameters[i].Default;
 	      s->Type = Expr::E_INT;
 	    }
 	  return EX_INT;
@@ -787,9 +787,9 @@ GetExpressionType (Expr * s, int l, const Device & d)
       if (d.FloatParameters () != i)
 	{
 	  s->s = d.FloatParameters[i].ID;
-	  if (!s->s ())
+	  if (!d.FloatParameters[i].ID_lineno)
 	    {
-	      s->f = d.FloatParameters[i].Value;
+	      s->f = d.FloatParameters[i].Default;
 	      s->Type = Expr::E_FLOAT;
 	    }
 	  return EX_FLOAT;
