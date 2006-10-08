@@ -309,7 +309,7 @@ Layer7_Connection::X_Memory_Write (memaddr_t addr, const CArray & data)
   if (A_Memory_Read (addr, data (), d1) == -1)
     return -1;
   if (d1 != data)
-    return -1;
+    return -2;
   return 0;
 }
 
@@ -317,7 +317,7 @@ int
 Layer7_Connection::X_Memory_Write_Block (memaddr_t addr, const CArray & data)
 {
   CArray prev;
-  int i, j;
+  int i, j, k, res = 0;
   const unsigned blocksize = 12;
   if (X_Memory_Read_Block (addr, data (), prev) == -1)
     return -1;
@@ -328,12 +328,15 @@ Layer7_Connection::X_Memory_Write_Block (memaddr_t addr, const CArray & data)
       j = 0;
       while (data[i + j] != prev[i + j] && j < blocksize && i + j < data ())
 	j++;
-      if (X_Memory_Write (addr + i, CArray (data.array () + i, j)) == -1)
+      k = X_Memory_Write (addr + i, CArray (data.array () + i, j));
+      if (k == -1)
 	return -1;
+      if (k == -2)
+	res = -2;
       i += j - 1;
     }
 
-  return 0;
+  return res;
 }
 
 int

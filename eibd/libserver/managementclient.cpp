@@ -342,8 +342,10 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		    c->sendreject (stop);
 		    break;
 		  }
-		if (m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len)) !=
-		    0)
+		i = m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len));
+		if ( i == -2)
+		  c->sendreject (stop, EIB_ERROR_VERIFY);
+		else if ( i != 0)
 		  c->sendreject (stop);
 		else
 		  c->sendreject (stop, EIB_MC_WRITE);

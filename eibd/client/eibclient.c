@@ -1860,6 +1860,11 @@ MC_Write_complete (EIBConnection * con)
   i = GetRequest (con);
   if (i == -1)
     return -1;
+  if (EIBTYPE (con) == EIB_ERROR_VERIFY)
+    {
+      errno = EIO;
+      return -1;
+    }
   if (EIBTYPE (con) != EIB_MC_WRITE)
     {
       errno = ECONNRESET;
