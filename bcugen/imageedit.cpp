@@ -45,6 +45,7 @@ ImageToDevice (Image & i, Device & d)
 	    StringParameter p;
 	    STR_StringParameter *l = ((STR_StringParameter *) i.str[j]);
 	    p.ID = l->name;
+	    p.ID_lineno = 1;
 	    d.StringParameters.add (p);
 	  }
 	  break;
@@ -53,6 +54,7 @@ ImageToDevice (Image & i, Device & d)
 	    IntParameter p;
 	    STR_IntParameter *l = ((STR_IntParameter *) i.str[j]);
 	    p.ID = l->name;
+	    p.ID_lineno = 1;
 	    d.IntParameters.add (p);
 	  }
 	  break;
@@ -61,6 +63,7 @@ ImageToDevice (Image & i, Device & d)
 	    FloatParameter p;
 	    STR_FloatParameter *l = ((STR_FloatParameter *) i.str[j]);
 	    p.ID = l->name;
+	    p.ID_lineno = 1;
 	    d.FloatParameters.add (p);
 	  }
 	  break;
@@ -69,6 +72,7 @@ ImageToDevice (Image & i, Device & d)
 	    ListParameter p;
 	    STR_ListParameter *l = ((STR_ListParameter *) i.str[j]);
 	    p.ID = l->name;
+	    p.ID_lineno = 1;
 	    for (int k = 0; k < l->elements (); k++)
 	      {
 		Map m;
@@ -83,6 +87,7 @@ ImageToDevice (Image & i, Device & d)
 	    GroupObject p;
 	    STR_GroupObject *l = ((STR_GroupObject *) i.str[j]);
 	    p.ID = l->name;
+	    p.ID_lineno = 1;
 	    p.ObjNo = l->no;
 	    d.GroupObjects.add (p);
 	  }
