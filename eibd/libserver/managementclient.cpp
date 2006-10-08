@@ -342,8 +342,8 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		    c->sendreject (stop);
 		    break;
 		  }
-		if (m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len)) ==
-		    -1)
+		if (m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len)) !=
+		    0)
 		  c->sendreject (stop);
 		else
 		  c->sendreject (stop, EIB_MC_WRITE);
@@ -525,31 +525,31 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	/* set error flags in BCU (0x10D = 0x00) */
 	r = IMG_CLEAR_ERROR;
 	c = 0;
-	if (m.X_Memory_Write_Block (0x010d, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x010d, CArray (&c, 1)) != 0)
 	  goto out;
 
 	/*set length of the address tab to 1 */
 	r = IMG_RESET_ADDR_TAB;
 	c = 0x01;
-	if (m.X_Memory_Write_Block (0x0116, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x0116, CArray (&c, 1)) != 0)
 	  goto out;
 
 	/*load the data from 0x100 to 0x100 */
 	r = IMG_LOAD_HEADER;
 	c = 0xff;
-	if (m.X_Memory_Write_Block (0x0100, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x0100, CArray (&c, 1)) != 0)
 	  goto out;
 
 	/*load the data from 0x103 to 0x10C */
 	if (m.
 	    X_Memory_Write_Block (0x0103,
-				  CArray (i->code.array () + 0x03, 10)) == -1)
+				  CArray (i->code.array () + 0x03, 10)) != 0)
 	  goto out;
 
 	/*load the data from 0x10E to 0x115 */
 	if (m.
 	    X_Memory_Write_Block (0x010E,
-				  CArray (i->code.array () + 0x0E, 8)) == -1)
+				  CArray (i->code.array () + 0x0E, 8)) != 0)
 	  goto out;
 
 	/*load the data from 0x119H to eeprom end */
@@ -557,30 +557,30 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	if (m.
 	    X_Memory_Write_Block (0x119,
 				  CArray (i->code.array () + 0x19,
-					  i->code () - 0x19)) == -1)
+					  i->code () - 0x19)) != 0)
 	  goto out;
 
-	if (m.X_Memory_Write_Block (0x0100, CArray (i->code.array (), 1)) ==
-	    -1)
+	if (m.X_Memory_Write_Block (0x0100, CArray (i->code.array (), 1)) !=
+	    0)
 	  goto out;
 
 	/*erase the user RAM (0x0CE to 0x0DF) */
 	r = IMG_ZERO_RAM;
 	uchar zero[18] = { 0 };
-	if (m.X_Memory_Write_Block (0x00ce, CArray (zero, 18)) == -1)
+	if (m.X_Memory_Write_Block (0x00ce, CArray (zero, 18)) != 0)
 	  goto out;
 
 	/* set the length of the address table */
 	r = IMG_FINALIZE_ADDR_TAB;
 	if (m.
 	    X_Memory_Write_Block (0x0116,
-				  CArray (i->code.array () + 0x16, 1)) == -1)
+				  CArray (i->code.array () + 0x16, 1)) != 0)
 	  goto out;
 
 	/* reset all error flags in the BCU (0x10D = 0xFF) */
 	r = IMG_PREPARE_RUN;
 	c = 0xff;
-	if (m.X_Memory_Write_Block (0x010d, CArray (&c, 1)) == -1)
+	if (m.X_Memory_Write_Block (0x010d, CArray (&c, 1)) != 0)
 	  goto out;
 
 	r = IMG_RESTART;
@@ -632,7 +632,7 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 		  X_Memory_Write_Block (i->load[j].memaddr,
 					CArray (i->code.array () +
 						i->load[j].memaddr - 0x100,
-						i->load[j].len)) == -1)
+						i->load[j].len)) != 0)
 		goto out;
 	  }
 

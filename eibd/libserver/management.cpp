@@ -27,7 +27,7 @@ Management_Connection::X_Progmode_On ()
     return -1;
   if (!(d[0] & 0x01))
     d[0] = d[0] ^ 0x81;
-  if (X_Memory_Write (0x60, d) == -1)
+  if (X_Memory_Write (0x60, d) != 0)
     return -1;
   return 0;
 }
@@ -40,7 +40,7 @@ Management_Connection::X_Progmode_Off ()
     return -1;
   if ((d[0] & 0x01))
     d[0] = d[0] ^ 0x81;
-  if (X_Memory_Write (0x60, d) == -1)
+  if (X_Memory_Write (0x60, d) != 0)
     return -1;
   return 0;
 }
@@ -52,7 +52,7 @@ Management_Connection::X_Progmode_Toggle ()
   if (A_Memory_Read (0x60, 1, d) == -1)
     return -1;
   d[0] = d[0] ^ 0x81;
-  if (X_Memory_Write (0x60, d) == -1)
+  if (X_Memory_Write (0x60, d) != 0)
     return -1;
   return 0;
 }
