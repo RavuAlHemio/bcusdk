@@ -1,5 +1,5 @@
 DEF=class_gen.h class_init.h parser_gentoken.h parser_genunion.h parser_objectdesc.h scanner_gen.h write_gen.h
-READ=parser.pre parser1.pre parser2.pre scanner.pre
+READ=parser.pre parser1.pre parser2.pre scanner.pre class_init_ci.h class_init.ci.cpp
 
 dist_noinst_DATA=$(DEF)
 EXTRA_DIST=parser.pre parser1.pre parser2.pre scanner.pre
@@ -11,9 +11,9 @@ CLEANFILES=parser2.post parser1.post scanner.post scanner.1.lpp parser1.1.ypp pa
 	parser2.1.h parser2.1.cpp scanner.1.cpp
 noinst_LIBRARIES=libread1.a libread2.a
 
-libread1_a_SOURCES=scanner.1.lpp parser1.1.ypp readconfig.cpp readconfig.h
+libread1_a_SOURCES=scanner.1.lpp parser1.1.ypp readconfig.cpp class_init_ci.cpp readconfig.h
 
-libread2_a_SOURCES=scanner.1.lpp parser2.1.ypp readconfig.cpp readconfig.h
+libread2_a_SOURCES=scanner.1.lpp parser2.1.ypp readconfig.cpp class_init_ci.cpp readconfig.h
 
 @AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/scanner.Po@am__quote@
 @AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/parser1.Po@am__quote@

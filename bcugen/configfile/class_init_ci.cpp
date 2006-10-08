@@ -17,39 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#undef OBJECT
-#define OBJECT(A) A *A##s;
-#undef CI_OBJECT
-#define CI_OBJECT(A)
-#undef END_OBJECT
-#define END_OBJECT
-#undef ATTRIB_STRING
-#define ATTRIB_STRING(A)
-#undef ATTRIB_IDENT
-#define ATTRIB_IDENT(A)
-#undef ATTRIB_INT
-#define ATTRIB_INT(A)
-#undef ATTRIB_BOOL
-#define ATTRIB_BOOL(A)
-#undef ATTRIB_FLOAT
-#define ATTRIB_FLOAT(A)
-#undef ATTRIB_ARRAY_OBJECT
-#define ATTRIB_ARRAY_OBJECT(A)
-#undef ATTRIB_ENUM_MAP
-#define ATTRIB_ENUM_MAP(A)
+#include "classes.h"
 
-#undef ATTRIB_INT_MAP
-#define ATTRIB_INT_MAP(A,B)
-#undef ATTRIB_FLOAT_MAP
-#define ATTRIB_FLOAT_MAP(A,B)
-#undef ATTRIB_ENUM
-#define ATTRIB_ENUM(A,B,C)
-#undef ATTRIB_IDENT_ARRAY
-#define ATTRIB_IDENT_ARRAY(A)
-#undef ATTRIB_STRING_ARRAY
-#define ATTRIB_STRING_ARRAY(A)
-
-#undef PRIVATE_VAR
-#define PRIVATE_VAR(A)
-#undef ATTRIB_EXPR
-#define ATTRIB_EXPR(A)
+#include "class_init_ci.h"
+#include "Objects.lst"

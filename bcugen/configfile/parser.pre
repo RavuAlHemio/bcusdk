@@ -1,7 +1,7 @@
 %{
 /*
     BCU SDK bcu development enviroment
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ Expr* expr;
 %token<fval> FLOAT
 %token  TRUE FALSE;
 %token NEVER_OCCUR
-%token T_OR T_AND T_EQ T_NE T_GE T_LE T_RSHIFT T_LSHIFT T_IN
+%token T_OR T_AND T_EQ T_NE T_GE T_LE T_RSHIFT T_LSHIFT T_IN T_CI
 
 %type<intval> intc
 %type<fval> floatc
@@ -197,6 +197,14 @@ identarray : '{' '}' {$$=new IdentArray; }
 
 stringarray : '{' '}' {$$=new StringArray; }
 	| '{' stringarray1 ebs '}' { $$=$2;} ;
+
+#ifdef READ_INPUT
+Begin_CI : T_CI '{' ;
+End_CI : '}' ';' ;
+#else
+Begin_CI : ;
+End_CI : ;
+#endif
 
 #define PARSER_GEN
 #include "parser_objectdesc.h"

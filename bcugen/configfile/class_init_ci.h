@@ -18,38 +18,37 @@
 */
 
 #undef OBJECT
-#define OBJECT(A) A *A##s;
+#define OBJECT(A) void A::init_ci() { bool ci=false;
 #undef CI_OBJECT
-#define CI_OBJECT(A)
+#define CI_OBJECT(A) ci=true;
 #undef END_OBJECT
-#define END_OBJECT
+#define END_OBJECT }
 #undef ATTRIB_STRING
-#define ATTRIB_STRING(A)
+#define ATTRIB_STRING(A) if(ci)A##_lineno=0;
 #undef ATTRIB_IDENT
-#define ATTRIB_IDENT(A)
-#undef ATTRIB_INT
-#define ATTRIB_INT(A)
-#undef ATTRIB_BOOL
-#define ATTRIB_BOOL(A)
+#define ATTRIB_IDENT(A) if(ci)A##_lineno=0;
 #undef ATTRIB_FLOAT
-#define ATTRIB_FLOAT(A)
-#undef ATTRIB_ARRAY_OBJECT
-#define ATTRIB_ARRAY_OBJECT(A)
+#define ATTRIB_FLOAT(A) if(ci)A##_lineno=0;
+#undef ATTRIB_INT
+#define ATTRIB_INT(A) if(ci)A##_lineno=0;
+#undef ATTRIB_BOOL
+#define ATTRIB_BOOL(A) if(ci)A##_lineno=0;
 #undef ATTRIB_ENUM_MAP
-#define ATTRIB_ENUM_MAP(A)
-
+#define ATTRIB_ENUM_MAP(A) if(ci) A##_lineno=0;
+#undef ATTRIB_ARRAY_OBJECT
+#define ATTRIB_ARRAY_OBJECT(A) for(int i=0;i<A##s();i++)A##s[i].init_ci();
 #undef ATTRIB_INT_MAP
-#define ATTRIB_INT_MAP(A,B)
+#define ATTRIB_INT_MAP(A,B)A##_lineno=0;
 #undef ATTRIB_FLOAT_MAP
-#define ATTRIB_FLOAT_MAP(A,B)
+#define ATTRIB_FLOAT_MAP(A,B)A##_lineno=0;
 #undef ATTRIB_ENUM
-#define ATTRIB_ENUM(A,B,C)
+#define ATTRIB_ENUM(A,B,C) if(ci) A##_lineno=0;
 #undef ATTRIB_IDENT_ARRAY
-#define ATTRIB_IDENT_ARRAY(A)
-#undef ATTRIB_STRING_ARRAY
-#define ATTRIB_STRING_ARRAY(A)
+#define ATTRIB_IDENT_ARRAY(A) if(ci) A##_lineno=0;
+#undef ATTRIB_String_ARRAY
+#define ATTRIB_String_ARRAY(A) if(ci) A##_lineno=0;
 
 #undef PRIVATE_VAR
 #define PRIVATE_VAR(A)
 #undef ATTRIB_EXPR
-#define ATTRIB_EXPR(A)
+#define ATTRIB_EXPR(A) if(ci) A##_lineno=0;
