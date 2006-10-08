@@ -419,11 +419,13 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (!UsedbyInterface (d, o.Name))
     {
       o.ID = 0;
+      o.Disable = 0;
+      o.Disable_lineno = o.lineno;
+      o.ReadOnly = !o.Writeable;
+      o.ReadOnly_lineno = o.lineno;
     }
   else
     o.ID_lineno = o.lineno;
-  o.Disable = 0;
-  o.ReadOnly = !o.Writeable;
 #endif
 #ifdef CHECK2
 
@@ -443,6 +445,8 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (o.WriteAccess < 0 || o.WriteAccess > 3)
     die (_("line %d: invalid access level"), o.WriteAccess_lineno);
 
+#endif
+
   if (!o.Disable_lineno)
     {
       o.Disable_lineno = o.lineno;
@@ -454,8 +458,6 @@ CheckProperty (Device & d, Property & o, Object & o1)
       o.ReadOnly_lineno = o.lineno;
       o.ReadOnly = !o.Writeable;
     }
-
-#endif
 }
 
 void

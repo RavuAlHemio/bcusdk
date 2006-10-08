@@ -21,10 +21,6 @@ OBJECT(Property)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_BOOL(Disable)
-ATTRIB_BOOL(ReadOnly)
-ATTRIB_INT(ReadAccess)
-ATTRIB_INT(WriteAccess)
 #endif
 
 ATTRIB_IDENT(Name)
@@ -42,5 +38,12 @@ ATTRIB_STRING(AddInfo)
 #endif
 
 CI_OBJECT(Property)
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_BOOL(Disable)
+ATTRIB_BOOL(ReadOnly)
+ATTRIB_INT(ReadAccess)
+ATTRIB_INT(WriteAccess)
+#endif
 
 END_OBJECT
