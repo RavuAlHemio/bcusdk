@@ -21,7 +21,6 @@ OBJECT(FloatParameter)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_FLOAT(Value)
 #endif
 
 ATTRIB_IDENT(Name)
@@ -38,5 +37,7 @@ ATTRIB_FLOAT(Default)
 #endif
 
 CI_OBJECT(FloatParameter)
+
+ATTRIB_FLOAT(Value)
 
 END_OBJECT

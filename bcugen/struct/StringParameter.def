@@ -21,7 +21,6 @@ OBJECT(StringParameter)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_STRING(Value)
 #endif
 ATTRIB_IDENT(Name)
 ATTRIB_STRING(RegExp)
@@ -35,5 +34,7 @@ ATTRIB_STRING(Unit)
 #endif
 
 CI_OBJECT(StringParameter)
+
+ATTRIB_STRING(Value)
 
 END_OBJECT

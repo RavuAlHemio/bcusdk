@@ -21,7 +21,6 @@ OBJECT(ListParameter)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_IDENT(Value)
 #endif
 
 ATTRIB_IDENT(Name)
@@ -42,5 +41,7 @@ ATTRIB_IDENT(ListDefault)
 PRIVATE_VAR(int def)
 
 CI_OBJECT(ListParameter)
+
+ATTRIB_IDENT(Value)
 
 END_OBJECT

@@ -238,7 +238,7 @@ CheckIntParameter (Device & d, IntParameter & o)
 void
 CheckListParameter (Device & d, ListParameter & o)
 {
-  int i, df = -1;
+  int i, df = -1, vl = -1;
   if (!o.Name ())
     undefined ("ListParameter", "Name", o.lineno);
 
@@ -261,12 +261,20 @@ CheckListParameter (Device & d, ListParameter & o)
       o.ListElements[i].Value = o.Elements[i].Value;
       if (o.Elements[i].Name == o.Default)
 	df = i;
+      if (o.Value_lineno && o.Elements[i].Name == o.Value)
+	vl = i;
       o.Elements[i].Value = o.ListElements[i].Name;
     }
   if (df == -1)
     die (_("line %d: unknown default value"), o.Default_lineno);
 
   o.ListDefault = o.Elements[df].Value;
+
+  if (o.Value_lineno && vl == -1)
+    die (_("line %d: unknown value"), o.Value_lineno);
+
+  if (o.Value_lineno)
+    o.Value = o.Elements[vl].Value;
 
   NewSymbol (o.Name + "_t", o.lineno);
   o.ID = NewSymbol (o.Name, o.lineno);
@@ -419,7 +427,7 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (!UsedbyInterface (d, o.Name))
     {
       o.ID = 0;
-      o.Disable = 0;
+      o.Disable = 1;
       o.Disable_lineno = o.lineno;
       o.ReadOnly = !o.Writeable;
       o.ReadOnly_lineno = o.lineno;

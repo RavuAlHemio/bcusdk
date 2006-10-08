@@ -21,7 +21,6 @@ OBJECT(IntParameter)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_INT(Value)
 #endif
 
 ATTRIB_IDENT(Name)
@@ -40,5 +39,7 @@ ATTRIB_INT(Increment)
 PRIVATE_VAR(int SIZE)
 
 CI_OBJECT(IntParameter)
+
+ATTRIB_INT(Value)
 
 END_OBJECT
