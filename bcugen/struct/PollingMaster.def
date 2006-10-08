@@ -21,8 +21,6 @@ OBJECT(PollingMaster)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_INT(PollingAddress)
-ATTRIB_INT(PollingCount)
 #endif
 
 ATTRIB_IDENT(Name)
@@ -33,5 +31,10 @@ ATTRIB_STRING(AddInfo)
 #endif
 
 CI_OBJECT(PollingMaster)
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_INT(PollingAddress)
+ATTRIB_INT(PollingCount)
+#endif
 
 END_OBJECT

@@ -21,8 +21,6 @@ OBJECT(PollingSlave)
 
 #if !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_IDENT(ID)
-ATTRIB_INT(PollingAddress)
-ATTRIB_INT(PollingSlot)
 #endif
 
 ATTRIB_IDENT(Name)
@@ -33,5 +31,10 @@ ATTRIB_STRING(AddInfo)
 #endif
 
 CI_OBJECT(PollingSlave)
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_INT(PollingAddress)
+ATTRIB_INT(PollingSlot)
+#endif
 
 END_OBJECT
