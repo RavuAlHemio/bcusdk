@@ -346,7 +346,7 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		if ( i == -2)
 		  c->sendreject (stop, EIB_ERROR_VERIFY);
 		else if ( i != 0)
-		  c->sendreject (stop);
+		  c->sendreject (stop, EIB_PROCESSING_ERROR);
 		else
 		  c->sendreject (stop, EIB_MC_WRITE);
 	      }
