@@ -43,6 +43,8 @@
 #define ATTRIB_FLOAT_MAP(A,B)A##_lineno=0;
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) if(ci) A##_lineno=0;
+#undef ATTRIB_KEY_MAP
+#define ATTRIB_KEY_MAP(A) if(ci) { A.resize (0); A##_lineno=0; }
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) if(ci) A##_lineno=0;
 #undef ATTRIB_INT_ARRAY

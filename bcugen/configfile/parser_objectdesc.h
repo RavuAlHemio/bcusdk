@@ -50,6 +50,8 @@
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) TOK_##A ident ';' { ATTRIB_INIT(A);ATTRIB_CHECKDOUBLE(A); a->A=C(*$2);delete $2;}|
 
+#undef ATTRIB_KEY_MAP
+#define ATTRIB_KEY_MAP(A) TOK_##A keymaparray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) TOK_##A identarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 #undef ATTRIB_INT_ARRAY

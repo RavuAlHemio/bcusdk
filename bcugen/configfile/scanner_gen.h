@@ -44,6 +44,8 @@
 #define ATTRIB_FLOAT_MAP(A,B) A return TOK_##A;
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) A return TOK_##A;
+#undef ATTRIB_KEY_MAP
+#define ATTRIB_KEY_MAP(A) A return TOK_##A;
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) A return TOK_##A;
 #undef ATTRIB_INT_ARRAY
