@@ -34,7 +34,7 @@ typedef struct
   String Value;
 } Map;
 typedef Array < Map > IdentMap;
-typedef Array < int > IntArray;
+typedef Array < int >IntArray;
 typedef Array < String > IdentArray;
 typedef Array < String > StringArray;
 typedef unsigned short eibaddr_t;
@@ -45,11 +45,25 @@ typedef unsigned long eibkey_t;
 typedef enum
 { PRIO_LOW = 0, PRIO_NORMAL = 1, PRIO_URGENT = 2, PRIO_SYSTEM = 3 } prio_t;
 
-typedef struct
+
+class KeyMap
 {
+public:
   int level;
   eibkey_t key;
-} KeyMap;
+
+    KeyMap ()
+  {
+    level = 0;
+    key = 0;
+  }
+  KeyMap (int l, eibkey_t k)
+  {
+    level = l;
+    key = k;
+  }
+};
+typedef Array < KeyMap > KeyMapArray;
 
 typedef enum
 {
