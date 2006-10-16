@@ -21,11 +21,10 @@ for the BCU operation system have the following exception:
 
 XML Schema files as well as DTD have the requirement:
 
-    Modified version of this specification must change the namespace and
-    version.
+    Modified version of this specification must change the namespace.
 
 This means, that derived version must use a different the the
-namespace and version as the original version. It does not limit, that
+namespace as the original version. It does not limit, that
 different derived versions may use the same (not original)
 namespace/version.
 
