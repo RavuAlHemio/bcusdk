@@ -125,7 +125,7 @@ const char *argp_program_version = "eibd " VERSION;
 /** documentation */
 static char doc[] =
   "eibd -- a commonication stack for EIB\n"
-  "(C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>\n"
+  "(C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>\n"
   "supported URLs are:\n"
 #undef L2_NAME
 #define L2_NAME(a) a##_URL
