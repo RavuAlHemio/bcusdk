@@ -45,6 +45,8 @@
 #define ATTRIB_ENUM(A,B,C) %token TOK_##A;
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) %token TOK_##A;
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) %token TOK_##A;
 #undef ATTRIB_STRING_ARRAY
 #define ATTRIB_STRING_ARRAY(A) %token TOK_##A;
 

@@ -45,6 +45,8 @@
 #define ATTRIB_ENUM(A,B,C) B A;int A##_lineno;
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) IdentArray A;int A##_lineno;
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) IntArray A;int A##_lineno;
 #undef ATTRIB_STRING_ARRAY
 #define ATTRIB_STRING_ARRAY(A) StringArray A;int A##_lineno;
 

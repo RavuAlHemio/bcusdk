@@ -52,6 +52,8 @@
 
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) TOK_##A identarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) TOK_##A intarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 #undef ATTRIB_STRING_ARRAY
 #define ATTRIB_STRING_ARRAY(A) TOK_##A stringarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 

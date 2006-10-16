@@ -34,6 +34,7 @@ typedef struct
   String Value;
 } Map;
 typedef Array < Map > IdentMap;
+typedef Array < int > IntArray;
 typedef Array < String > IdentArray;
 typedef Array < String > StringArray;
 typedef unsigned short eibaddr_t;

@@ -45,6 +45,8 @@
 #define ATTRIB_ENUM(A,B,C) if(ci) A##_lineno=0;
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) if(ci) A##_lineno=0;
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) if(ci) A##_lineno=0;
 #undef ATTRIB_String_ARRAY
 #define ATTRIB_String_ARRAY(A) if(ci) A##_lineno=0;
 

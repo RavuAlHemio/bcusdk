@@ -35,6 +35,8 @@
 #define ATTRIB_INT_MAP(A,B) if(d.A##_lineno) fprintf(f,"%s %d;\n",#A,d.A);
 #undef ATTRIB_FLOAT_MAP
 #define ATTRIB_FLOAT_MAP(A,B) if(d.A##_lineno) fprintf(f,"%s %f;\n",#A,d.A);
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) if(d.A##_lineno){fprintf(f,"%s {",#A);for(i=0;i<d.A();i++) fprintf(f,"%d,",d.A[i]());fprintf(f,"};\n"); }
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) if(d.A##_lineno){fprintf(f,"%s {",#A);for(i=0;i<d.A();i++) fprintf(f,"%s,",d.A[i]());fprintf(f,"};\n"); }
 #undef ATTRIB_STRING_ARRAY

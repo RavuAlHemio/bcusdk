@@ -42,6 +42,7 @@ bool bval;
 IdentMap* map;
 IdentArray* identarray;
 IdentArray* stringarray;
+IntArray* intarray;
 Expr* expr;
 #include "parser_genunion.h"
 #include "Objects.lst"
@@ -61,6 +62,7 @@ Expr* expr;
 %type<map> identmap identmap1
 %type<identarray> identarray identarray1
 %type<stringarray> stringarray stringarray1
+%type<intarray> intarray intarray1
 %type<bval> bool;
 %type<string> string ident
 %type<expr> expr intp stringp floatp intb stringb floatb listb
@@ -186,11 +188,16 @@ identmap1 : { $$=new IdentMap; } | identmap1 ident '=' string ';' {Map m;m.Name=
 
 identmap : '{' identmap1 '}' { $$=$2;} ;
 
+intarray1 : intc { $$=new IntArray; $$->add($1); } | intarray1 ',' intc {$1->add($3); $$=$1; } 
+
 identarray1 : ident { $$=new IdentArray; $$->add(*$1); delete $1; } | identarray1 ',' ident {$1->add(*$3); delete $3; $$=$1; } 
 
 stringarray1 : string { $$=new StringArray; $$->add(*$1); delete $1; } | stringarray1 ',' ident {$1->add(*$3); delete $3; $$=$1; } 
 
 ebs : ',' | ;
+
+intarray : '{' '}' {$$=new IntArray; }
+	| '{' intarray1 ebs '}' { $$=$2;} ;
 
 identarray : '{' '}' {$$=new IdentArray; }
 	| '{' identarray1 ebs '}' { $$=$2;} ;

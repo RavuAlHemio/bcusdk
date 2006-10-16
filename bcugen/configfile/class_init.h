@@ -43,6 +43,8 @@
 #define ATTRIB_FLOAT_MAP(A,B) A=0;A##_lineno=0;
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) A##_lineno=0;
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) A##_lineno=0;
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) A##_lineno=0;
 #undef ATTRIB_String_ARRAY
