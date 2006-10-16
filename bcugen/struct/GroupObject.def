@@ -38,17 +38,20 @@ ATTRIB_BOOL(StateBased)
 #endif
 
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK)) && !(defined(PARSER_GEN)&& defined(READ_INPUT))
-ATTRIB_INT(SendAddress)
-ATTRIB_INT(ReadRequestAddress)
-ATTRIB_INT(Priority)
 #endif
 
-PRIVATE_VAR(Array<eibgaddr_t> ReceiveAddress)
-PRIVATE_VAR(Array<eibgaddr_t> ReadAddress)
-PRIVATE_VAR(Array<eibgaddr_t> UpdateAddress)
 PRIVATE_VAR(int ObjNo)
 PRIVATE_VAR(Array<eibgaddr_t> ObjAddress)
 
 CI_OBJECT(GroupObject)
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_ENUM(Priority,prio_t,Map_Prio)
+ATTRIB_INT(SendAddress)
+ATTRIB_INT(ReadRequestAddress)
+ATTRIB_INT_ARRAY(ReceiveAddress)
+ATTRIB_INT_ARRAY(ReadAddress)
+ATTRIB_INT_ARRAY(UpdateAddress)
+#endif
 
 END_OBJECT
