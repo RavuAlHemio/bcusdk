@@ -93,6 +93,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/build.img
 /usr/bin/bcugen1
 /usr/bin/bcugen2
+/usr/bin/bcugen3
 /usr/bin/embedprogid
 /usr/bin/extractprogid
 /usr/bin/gencitemplate
