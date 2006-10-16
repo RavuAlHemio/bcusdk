@@ -38,6 +38,7 @@ main (int ac, char *ag[])
   Device *d = ReadConfig (ag[1]);
   if (!d)
     die (_("read of description %s failed"), ag[1]);
+  d->init_ci ();
   CheckDevice (*d);
 
   d->ProgramID = "[!--*PROGID--]";
