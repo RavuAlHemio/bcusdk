@@ -98,6 +98,20 @@ Map_TimerResType (const String & s)
   parserError (_("unkown TimerResolution %s"), s ());
 }
 
+prio_t
+Map_Prio (const String & s)
+{
+  if (s == "system")
+    return PRIO_SYSTEM;
+  if (s == "urgent")
+    return PRIO_URGENT;
+  if (s == "normal")
+    return PRIO_NORMAL;
+  if (s == "low")
+    return PRIO_LOW;
+  parserError (_("unkown Priority %s"), s ());
+}
+
 
 #undef MAP
 #define MAP(A,B) if(s==A) return #B;
@@ -150,6 +164,24 @@ unMap_TimerResType (TimerResType s)
 
 #include "TimerResType.lst"
   die (_("unknown value %d"), s);
+}
+
+const char *
+unMap_Prio (prio_t t)
+{
+  switch (t)
+    {
+    case PRIO_SYSTEM:
+      return "system";
+    case PRIO_URGENT:
+      return "urgent";
+    case PRIO_NORMAL:
+      return "normal";
+    case PRIO_LOW:
+      return "low";
+    default:
+      return "";
+    }
 }
 
 

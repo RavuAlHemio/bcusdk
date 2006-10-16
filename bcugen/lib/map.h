@@ -31,6 +31,7 @@ itype Map_PropertyID (const String & s);
 itype Map_ObjectType (const String & s);
 TimerType Map_TimerType (const String & s);
 TimerResType Map_TimerResType (const String & s);
+prio_t Map_Prio (const String & s);
 
 String escapeString (const String & s);
 const char *unMap_GroupType (GroupType s);
@@ -38,4 +39,5 @@ const char *unMap_PropertyType (PropertyType s);
 const char *unMap_BCUType (BCUType s);
 const char *unMap_TimerType (TimerType s);
 const char *unMap_TimerResType (TimerResType s);
+const char *unMap_Prio (const String & s);
 #endif
