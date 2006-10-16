@@ -46,7 +46,7 @@
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) if(ci) A##_lineno=0;
 #undef ATTRIB_INT_ARRAY
-#define ATTRIB_INT_ARRAY(A) if(ci) A##_lineno=0;
+#define ATTRIB_INT_ARRAY(A) if(ci) { A.resize (0); A##_lineno=0; }
 #undef ATTRIB_String_ARRAY
 #define ATTRIB_String_ARRAY(A) if(ci) A##_lineno=0;
 
