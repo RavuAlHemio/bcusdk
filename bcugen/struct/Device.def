@@ -83,7 +83,6 @@ PRIVATE_VAR(Array<KeyMap> Keys)
 PRIVATE_VAR(Array<eibkey_t> Key)
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK)) && !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_INT(MaskVersion)
-ATTRIB_INT(PhysicalAddress)
 ATTRIB_INT(InstallKey)
 #endif
 
@@ -95,5 +94,9 @@ PRIVATE_VAR(int UserTimer)
 PRIVATE_VAR(int NextTimer)
 
 CI_OBJECT(Device)
+
+#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_INT(PhysicalAddress)
+#endif
 
 END_OBJECT
