@@ -79,11 +79,9 @@ ATTRIB_IDENT(on_run)
 ATTRIB_IDENT(on_init)
 ATTRIB_IDENT(on_save)
 
-PRIVATE_VAR(Array<KeyMap> Keys)
 PRIVATE_VAR(Array<eibkey_t> Key)
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK)) && !(defined(PARSER_GEN)&& defined(READ_INPUT))
 ATTRIB_INT(MaskVersion)
-ATTRIB_INT(InstallKey)
 #endif
 
 PRIVATE_VAR(int ObjCount)
@@ -96,7 +94,9 @@ PRIVATE_VAR(int NextTimer)
 CI_OBJECT(Device)
 
 #if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
+ATTRIB_KEY_MAP(Keys)
 ATTRIB_INT(PhysicalAddress)
+ATTRIB_INT(InstallKey)
 #endif
 
 END_OBJECT
