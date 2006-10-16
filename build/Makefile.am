@@ -16,8 +16,8 @@ do_subst = sed -e 's,[@]VERSION[@],$(VERSION),g' \
                  -e 's,[@]BINDIR[@],$(BINDIR),g' \
                  -e 's,[@]XMLDIR[@],$(XMLDIR),g'
 
-SCRIPT=build.ai build.img gencitemplate
-EXTRA_DIST=build.ai.in build.img.in gencitemplate.in
+SCRIPT=build.ai build.img build.dev gencitemplate
+EXTRA_DIST=build.ai.in build.img.in build.dev.in gencitemplate.in
 
 bin_SCRIPTS=$(SCRIPT)
 CLEANFILES=$(SCRIPT)
