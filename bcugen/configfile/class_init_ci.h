@@ -38,9 +38,9 @@
 #undef ATTRIB_ARRAY_OBJECT
 #define ATTRIB_ARRAY_OBJECT(A) for(int i=0;i<A##s();i++)A##s[i].init_ci();
 #undef ATTRIB_INT_MAP
-#define ATTRIB_INT_MAP(A,B)A##_lineno=0;
+#define ATTRIB_INT_MAP(A,B) if(ci) A##_lineno=0;
 #undef ATTRIB_FLOAT_MAP
-#define ATTRIB_FLOAT_MAP(A,B)A##_lineno=0;
+#define ATTRIB_FLOAT_MAP(A,B) if(ci) A##_lineno=0;
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) if(ci) A##_lineno=0;
 #undef ATTRIB_KEY_MAP
