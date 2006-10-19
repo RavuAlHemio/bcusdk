@@ -18,9 +18,9 @@
 */
 
 #undef OBJECT
-#define OBJECT(A) A##_struct :  TOK_##A '{' { A* a=new A;stack.push(a);a->lineno=yylineno; } A##_bodys '}' ';' {$$=(typeof($$))stack.pop();} ; A##_bodys :  | A##_body A##_bodys ; A##_body : A##_bodys_CI | 
+#define OBJECT(A) A##_struct :  TOK_##A '{' { A* a=new A;stack.push(a);a->lineno=yylineno; } A##_bodys '}' ';' {$$=(typeof($$))stack.pop();} ; A##_bodys :  | A##_body A##_bodys ; A##_body : A##_bodys_CI | Empty_CI | 
 #undef CI_OBJECT
-#define CI_OBJECT(A) NEVER_OCCUR { $$; } ; A##_bodys_CI : Begin_CI A##_bodys_CI_i End_CI { $$; } ; A##_bodys_CI_i : | A##_body_CI A##_bodys_CI_i; A##_body_CI :
+#define CI_OBJECT(A) NEVER_OCCUR { $$; } ; A##_bodys_CI : Begin_CI A##_bodys_CI_i End_CI { $$; } ; A##_bodys_CI_i : A##_body_CI | A##_body_CI A##_bodys_CI_i; A##_body_CI :
 #undef END_OBJECT
 #define END_OBJECT  NEVER_OCCUR { $$; } ;
 
