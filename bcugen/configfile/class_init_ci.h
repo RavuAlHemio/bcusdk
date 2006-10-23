@@ -18,41 +18,41 @@
 */
 
 #undef OBJECT
-#define OBJECT(A) %token TOK_##A; %type<A##s> A##_body A##_struct A##_bodys_CI A##_body_CI
+#define OBJECT(A) void A::init_ci() { bool ci=false;
 #undef CI_OBJECT
-#define CI_OBJECT(A)
+#define CI_OBJECT(A) ci=true;
 #undef END_OBJECT
-#define END_OBJECT
+#define END_OBJECT }
 #undef ATTRIB_STRING
-#define ATTRIB_STRING(A) %token TOK_##A;
+#define ATTRIB_STRING(A) if(ci)A##_lineno=0;
 #undef ATTRIB_IDENT
-#define ATTRIB_IDENT(A) %token TOK_##A;
-#undef ATTRIB_INT
-#define ATTRIB_INT(A) %token TOK_##A;
-#undef ATTRIB_BOOL
-#define ATTRIB_BOOL(A) %token TOK_##A;
+#define ATTRIB_IDENT(A) if(ci)A##_lineno=0;
 #undef ATTRIB_FLOAT
-#define ATTRIB_FLOAT(A) %token TOK_##A;
-#undef ATTRIB_ARRAY_OBJECT
-#define ATTRIB_ARRAY_OBJECT(A)
+#define ATTRIB_FLOAT(A) if(ci)A##_lineno=0;
+#undef ATTRIB_INT
+#define ATTRIB_INT(A) if(ci)A##_lineno=0;
+#undef ATTRIB_BOOL
+#define ATTRIB_BOOL(A) if(ci)A##_lineno=0;
 #undef ATTRIB_ENUM_MAP
-#define ATTRIB_ENUM_MAP(A) %token TOK_##A;
+#define ATTRIB_ENUM_MAP(A) if(ci) A##_lineno=0;
+#undef ATTRIB_ARRAY_OBJECT
+#define ATTRIB_ARRAY_OBJECT(A) for(int i=0;i<A##s();i++)A##s[i].init_ci();
 #undef ATTRIB_INT_MAP
-#define ATTRIB_INT_MAP(A,B) %token TOK_##A;
+#define ATTRIB_INT_MAP(A,B) if(ci) A##_lineno=0;
 #undef ATTRIB_FLOAT_MAP
-#define ATTRIB_FLOAT_MAP(A,B) %token TOK_##A;
+#define ATTRIB_FLOAT_MAP(A,B) if(ci) A##_lineno=0;
 #undef ATTRIB_ENUM
-#define ATTRIB_ENUM(A,B,C) %token TOK_##A;
+#define ATTRIB_ENUM(A,B,C) if(ci) A##_lineno=0;
 #undef ATTRIB_KEY_MAP
-#define ATTRIB_KEY_MAP(A) %token TOK_##A;
+#define ATTRIB_KEY_MAP(A) if(ci) { A.resize (0); A##_lineno=0; }
 #undef ATTRIB_IDENT_ARRAY
-#define ATTRIB_IDENT_ARRAY(A) %token TOK_##A;
+#define ATTRIB_IDENT_ARRAY(A) if(ci) A##_lineno=0;
 #undef ATTRIB_INT_ARRAY
-#define ATTRIB_INT_ARRAY(A) %token TOK_##A;
-#undef ATTRIB_STRING_ARRAY
-#define ATTRIB_STRING_ARRAY(A) %token TOK_##A;
+#define ATTRIB_INT_ARRAY(A) if(ci) { A.resize (0); A##_lineno=0; }
+#undef ATTRIB_String_ARRAY
+#define ATTRIB_String_ARRAY(A) if(ci) A##_lineno=0;
 
 #undef PRIVATE_VAR
 #define PRIVATE_VAR(A)
 #undef ATTRIB_EXPR
-#define ATTRIB_EXPR(A) %token TOK_##A;
+#define ATTRIB_EXPR(A) if(ci) A##_lineno=0;

@@ -16,9 +16,9 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-version="@VERSION@"
-BCUGEN=@BINDIR@/bcugen2
-EXTRACT=@BINDIR@/extractprogid
+version="@version@"
+BCUGEN=@BINDIR@/bcugen3
+EMBED=@BINDIR@/embedprogid
 LIB=@LIBDIR@
 SINC=@INCDIR@
 LD=@LDDIR@
@@ -35,14 +35,14 @@ usage()
 {
 cat >&2 <<END
 $progname $version Copyright 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
-creates a bcu image
+creates a bcu image using the configuration in the config file
 
-Usage: $progname [options] config_desc
+Usage: $progname [options] config_file
 Options:
-	-Dxx	uses xxx as temorary directory and keep temporary files there 
+	-Ixxx	adds xxx to the include path
+	-ixxx	stores image as xxx (default:config_file.load)
+	-Dxxx	uses xxx as temorary directory and keep temporary files there 
 		(warning: all content can be lost)
-	-cxxx   uses xxx as program id
-        -ixxx   stores image as xxx (default:config_desc.load)
 
 END
 exit 1
@@ -56,17 +56,18 @@ fi
 exit 1
 }
 
-CONF=
+INC=
 keep=0
 TMP=
 OUT=
+IN=
 
 while [ $# != 0 ]
 do
         value="`echo x\"$1\" | sed -e 's/^x-.//'`"
         case "$1" in
 	-D*) keep=1; TMP="$value" ;;
-	-c*) CONF="$value" ;;
+	-I*) INC="$INC $1" ;;
 	-i*) OUT="$value" ;;
 	
         -*) echo "$progname: unknown option $1"
@@ -77,7 +78,7 @@ do
 done
 
 if [ $# != 1 ]; then
-	echo "$progname: expect config_desc"
+	echo "$progname: expect config.file"
 	usage
 fi
 
@@ -110,27 +111,7 @@ if [ $keep != 1 ]; then
 	trap "rm -r $TMP; exit 1" 1 2 3 5 10 13 15
 fi
 
-if [ "x$CONF" == "x" ]; then
-	$EXTRACT "$IN" "$TMP/cf" || error
-
-else
-	cp "$CONF" "$TMP/cf" || error
-fi
-
-pushd "$TMP" >/dev/null || error
-$TAR x cf bcusdk-version || error
-
-if [ "x`cat bcusdk-version`" == "x0.0.0" ]; then
-$TAR x cf config || error
-$TAR x cf c.inc || error
-else
-echo "Unsupported Formatversion: `cat bcusdk-version`"
-error
-fi
-
-popd >/dev/null || error
-
-$BCUGEN "$TMP/config" "$IN" "$TMP/c.h" "$TMP/p1.s" "$TMP/p.var" || error
+$BCUGEN "$IN" "$TMP/c.h" "$TMP/c.i" "$TMP/p1.s" "$TMP/p.var" || error
 
 VAR=`cat "$TMP/p.var"`
 
@@ -138,6 +119,8 @@ if [ ! -f "$LIB/lib$VAR.a" ]; then
 echo "unknown variant $VAR"
 error
 fi
+
+$TGCC -E $INC -I. -o "$TMP/c.inc" -x c "$TMP/c.i" || error
 
 echo "#include \"c.h\"">"$TMP/c.c"
 echo "#include \"c.inc\"">>"$TMP/c.c"
@@ -156,5 +139,3 @@ if [ $keep != 1 ]; then
 fi
 echo "Done"
 exit 0
-
-

@@ -66,7 +66,7 @@ GenDeviceDesc (const Device & d)
 static xmlNodePtr
 GenInterface (const Interface & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr p;
   int count = 0;
@@ -103,7 +103,7 @@ GenInterface (const Interface & d)
 static xmlNodePtr
 GenFunctionalBlock (const FunctionalBlock & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   int count = 0;
   xmlNodePtr p;
@@ -132,7 +132,7 @@ GenFunctionalBlock (const FunctionalBlock & d)
 static xmlNodePtr
 GenGroupObject (const GroupObject & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("GroupObject");
   a (n, "id", d.ID ());
@@ -151,7 +151,7 @@ GenGroupObject (const GroupObject & d)
 static xmlNodePtr
 GenProperty (const Property & d, itype objindex)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("Property");
   a (n, "id", d.ID ());
@@ -176,7 +176,7 @@ GenProperty (const Property & d, itype objindex)
 static xmlNodePtr
 GenPollingMaster (const PollingMaster & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("PollingMaster");
   a (n, "id", d.ID ());
@@ -190,7 +190,7 @@ GenPollingMaster (const PollingMaster & d)
 static xmlNodePtr
 GenPollingSlave (const PollingSlave & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("PollingSlave");
   a (n, "id", d.ID ());
@@ -229,7 +229,7 @@ GenListParameter (const ListParameter & d)
 static xmlNodePtr
 GenIntParameter (const IntParameter & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("IntParameter");
   a (n, "id", d.ID ());
@@ -260,7 +260,7 @@ GenIntParameter (const IntParameter & d)
 static xmlNodePtr
 GenFloatParameter (const FloatParameter & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("FloatParameter");
   a (n, "id", d.ID ());
@@ -292,7 +292,7 @@ GenFloatParameter (const FloatParameter & d)
 static xmlNodePtr
 GenStringParameter (const StringParameter & d)
 {
-  if (!d.ID ())
+  if (!d.ID_lineno)
     return 0;
   xmlNodePtr n = nn ("StringParameter");
   a (n, "id", d.ID ());

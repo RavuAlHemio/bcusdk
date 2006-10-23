@@ -471,7 +471,7 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.StringParameters (); i++)
     {
       StringParameter & s = d.StringParameters[i];
-      if (!s.ID ())
+      if (!s.ID_lineno)
 	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 7);
       fprintf (f, "\t.hword %d\n", L_STRING_PAR);
@@ -482,7 +482,7 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.FloatParameters (); i++)
     {
       FloatParameter & s = d.FloatParameters[i];
-      if (!s.ID ())
+      if (!s.ID_lineno)
 	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 5);
       fprintf (f, "\t.hword %d\n", L_FLOAT_PAR);
@@ -492,7 +492,7 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.IntParameters (); i++)
     {
       IntParameter & s = d.IntParameters[i];
-      if (!s.ID ())
+      if (!s.ID_lineno)
 	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 6);
       fprintf (f, "\t.hword %d\n", L_INT_PAR);
@@ -504,7 +504,7 @@ printParameterInfo (FILE * f, Device & d)
     {
       int j, l = 0;
       ListParameter & s = d.ListParameters[i];
-      if (!s.ID ())
+      if (!s.ID_lineno)
 	continue;
       for (j = 0; j < s.Elements (); j++)
 	l += strlen (s.Elements[j].Value ()) + 1;
@@ -519,7 +519,7 @@ printParameterInfo (FILE * f, Device & d)
   for (i = 0; i < d.GroupObjects (); i++)
     {
       GroupObject & s = d.GroupObjects[i];
-      if (!s.ID ())
+      if (!s.ID_lineno)
 	continue;
       fprintf (f, "\t.hword %d\n", strlen (s.ID ()) + 4);
       fprintf (f, "\t.hword %d\n", L_GROUP_OBJECT);

@@ -114,8 +114,9 @@ parseGroupObject (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.GroupObjects (); i++)
-    if (d.GroupObjects[i].ID == id)
-      break;
+    if (d.GroupObjects[i].ID_lineno)
+      if (d.GroupObjects[i].ID == id)
+	break;
   if (i == d.GroupObjects ())
     die (_("unknown group object"));
   GroupObject & o = d.GroupObjects[i];
@@ -178,8 +179,9 @@ parseProperty (Device & d, xmlNodePtr n)
   const char *id = gp (n, "id");
   for (i = 0; i < d.Objects (); i++)
     for (j = 0; j < d.Objects[j].Propertys (); i++)
-      if (d.Objects[i].Propertys[j].ID == id)
-	goto ok;
+      if (d.Objects[i].Propertys[j].ID_lineno)
+	if (d.Objects[i].Propertys[j].ID == id)
+	  goto ok;
   die (_("unknown property"));
 ok:
   Property & o = d.Objects[i].Propertys[j];
@@ -229,8 +231,9 @@ parsePollingMaster (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.PollingMasters (); i++)
-    if (d.PollingMasters[i].ID == id)
-      break;
+    if (d.PollingMasters[i].ID_lineno)
+      if (d.PollingMasters[i].ID == id)
+	break;
   if (i == d.PollingMasters ())
     die (_("unknown polling master"));
   PollingMaster & o = d.PollingMasters[i];
@@ -267,8 +270,9 @@ parsePollingSlave (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.PollingSlaves (); i++)
-    if (d.PollingSlaves[i].ID == id)
-      break;
+    if (d.PollingSlaves[i].ID_lineno)
+      if (d.PollingSlaves[i].ID == id)
+	break;
   if (i == d.PollingSlaves ())
     die (_("unknown polling slave"));
   PollingSlave & o = d.PollingSlaves[i];
@@ -304,8 +308,9 @@ parseListParameter (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.ListParameters (); i++)
-    if (d.ListParameters[i].ID == id)
-      break;
+    if (d.ListParameters[i].ID_lineno)
+      if (d.ListParameters[i].ID == id)
+	break;
   if (i == d.ListParameters ())
     die (_("unknown list parameter"));
   ListParameter & o = d.ListParameters[i];
@@ -334,8 +339,9 @@ parseIntParameter (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.IntParameters (); i++)
-    if (d.IntParameters[i].ID == id)
-      break;
+    if (d.IntParameters[i].ID_lineno)
+      if (d.IntParameters[i].ID == id)
+	break;
   if (i == d.IntParameters ())
     die (_("unknown int parameter"));
   IntParameter & o = d.IntParameters[i];
@@ -364,8 +370,9 @@ parseFloatParameter (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.FloatParameters (); i++)
-    if (d.FloatParameters[i].ID == id)
-      break;
+    if (d.FloatParameters[i].ID_lineno)
+      if (d.FloatParameters[i].ID == id)
+	break;
   if (i == d.FloatParameters ())
     die (_("unknown float parameter"));
   FloatParameter & o = d.FloatParameters[i];
@@ -395,8 +402,9 @@ parseStringParameter (Device & d, xmlNodePtr n)
   int i;
   const char *id = gp (n, "id");
   for (i = 0; i < d.StringParameters (); i++)
-    if (d.StringParameters[i].ID == id)
-      break;
+    if (d.StringParameters[i].ID_lineno)
+      if (d.StringParameters[i].ID == id)
+	break;
   if (i == d.StringParameters ())
     die (_("unknown string parameter"));
   StringParameter & o = d.StringParameters[i];

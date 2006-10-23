@@ -1,7 +1,7 @@
 %{
 /*
     BCU SDK bcu development enviroment
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ bool bval;
 IdentMap* map;
 IdentArray* identarray;
 IdentArray* stringarray;
+IntArray* intarray;
+KeyMapArray* keymaparray;
 Expr* expr;
 #include "parser_genunion.h"
 #include "Objects.lst"
@@ -54,13 +56,15 @@ Expr* expr;
 %token<fval> FLOAT
 %token  TRUE FALSE;
 %token NEVER_OCCUR
-%token T_OR T_AND T_EQ T_NE T_GE T_LE T_RSHIFT T_LSHIFT T_IN
+%token T_OR T_AND T_EQ T_NE T_GE T_LE T_RSHIFT T_LSHIFT T_IN T_CI
 
 %type<intval> intc
 %type<fval> floatc
 %type<map> identmap identmap1
 %type<identarray> identarray identarray1
 %type<stringarray> stringarray stringarray1
+%type<intarray> intarray intarray1
+%type<keymaparray> keymaparray keymaparray1
 %type<bval> bool;
 %type<string> string ident
 %type<expr> expr intp stringp floatp intb stringb floatb listb
@@ -81,6 +85,47 @@ Expr* expr;
 #include "Objects.lst"
 
 %%
+
+intc : INT 
+    | '-' intc %prec NEG { $$=-$2; }
+    | '(' intc ')' { $$= $2; }
+    | '!' intc { $$=!$2; }
+    | '~' intc { $$=~$2; }
+    | intc '*' intc { $$=$1*$3; }
+    | intc '/' intc { $$=$1/$3; }
+    | intc '%' intc { $$=$1%$3; }
+    | intc '+' intc { $$=$1+$3; }
+    | intc '-' intc { $$=$1-$3; }
+    | intc T_LSHIFT intc { $$=$1<<$3; }
+    | intc T_RSHIFT intc { $$=$1>>$3; }
+    | intc '<' intc { $$=$1<$3; }
+    | intc T_LE intc { $$=$1<=$3; }
+    | intc '>' intc { $$=$1>$3; }
+    | intc T_GE intc { $$=$1>=$3; }
+    | intc T_EQ intc { $$=$1==$3; }
+    | intc T_NE intc { $$=$1!=$3; }
+    | floatc '<' floatc { $$=$1<$3; }
+    | floatc T_LE floatc { $$=$1<=$3; }
+    | floatc '>' floatc { $$=$1>$3; }
+    | floatc T_GE floatc { $$=$1>=$3; }
+    | floatc T_EQ floatc { $$=$1==$3; }
+    | floatc T_NE floatc { $$=$1!=$3; }
+    | intc '&' intc { $$=$1&$3; }
+    | intc '^' intc { $$=$1^$3; }
+    | intc '|' intc { $$=$1|$3; }
+    | intc T_AND intc { $$=$1&&$3; }
+    | intc T_OR intc { $$=$1||$3; }
+    | intc '?' intc ':' intc { $$=$1?$3:$5; };
+
+floatc : FLOAT 
+    | intc { $$=$1; } 
+    | '-' floatc %prec NEG { $$=-$2; }
+    | '(' floatc ')' { $$= $2; }
+    | floatc '*' floatc { $$=$1*$3; }
+    | floatc '/' floatc { $$=$1/$3; }
+    | floatc '+' floatc { $$=$1+$3; }
+    | floatc '-' floatc { $$=$1-$3; }
+    | intc '?' floatc ':' floatc { $$=$1?$3:$5; };
 
 intp : intc { $$=new Expr; $$->i=$1; $$->Type=Expr::E_INT; } 
   | '(' intp ')' { $$=$2; }
@@ -137,47 +182,6 @@ expr : expr T_AND expr { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_AND;
    | expr T_OR expr { $$=new Expr;$$->op1=$1;$$->op2=$3;$$->Type=Expr::E_OR;}
    | intb | floatb | listb | stringb ;
 
-floatc : FLOAT | intc { $$=$1; } ;
-intc : INT ;
-
-intc : '-' intc %prec NEG { $$=-$2; }
-    | '(' intc ')' { $$= $2; }
-    | '!' intc { $$=!$2; }
-    | '~' intc { $$=~$2; }
-    | intc '*' intc { $$=$1*$3; }
-    | intc '/' intc { $$=$1/$3; }
-    | intc '%' intc { $$=$1%$3; }
-    | intc '+' intc { $$=$1+$3; }
-    | intc '-' intc { $$=$1-$3; }
-    | intc T_LSHIFT intc { $$=$1<<$3; }
-    | intc T_RSHIFT intc { $$=$1>>$3; }
-    | intc '<' intc { $$=$1<$3; }
-    | intc T_LE intc { $$=$1<=$3; }
-    | intc '>' intc { $$=$1>$3; }
-    | intc T_GE intc { $$=$1>=$3; }
-    | intc T_EQ intc { $$=$1==$3; }
-    | intc T_NE intc { $$=$1!=$3; }
-    | floatc '<' floatc { $$=$1<$3; }
-    | floatc T_LE floatc { $$=$1<=$3; }
-    | floatc '>' floatc { $$=$1>$3; }
-    | floatc T_GE floatc { $$=$1>=$3; }
-    | floatc T_EQ floatc { $$=$1==$3; }
-    | floatc T_NE floatc { $$=$1!=$3; }
-    | intc '&' intc { $$=$1&$3; }
-    | intc '^' intc { $$=$1^$3; }
-    | intc '|' intc { $$=$1|$3; }
-    | intc T_AND intc { $$=$1&&$3; }
-    | intc T_OR intc { $$=$1||$3; }
-    | intc '?' intc ':' intc { $$=$1?$3:$5; };
-
-floatc : '-' floatc %prec NEG { $$=-$2; }
-    | '(' floatc ')' { $$= $2; }
-    | floatc '*' floatc { $$=$1*$3; }
-    | floatc '/' floatc { $$=$1/$3; }
-    | floatc '+' floatc { $$=$1+$3; }
-    | floatc '-' floatc { $$=$1-$3; }
-    | intc '?' floatc ':' floatc { $$=$1?$3:$5; };
-
 string : STRING {$$=unescapeString($1); } | string STRING { String* n=unescapeString($2); (*$1)+=*n;delete n; } ;
 ident : IDENT {$$=new String($1); };
 bool : TRUE { $$=1; } | FALSE { $$=0; };
@@ -186,17 +190,37 @@ identmap1 : { $$=new IdentMap; } | identmap1 ident '=' string ';' {Map m;m.Name=
 
 identmap : '{' identmap1 '}' { $$=$2;} ;
 
+keymaparray1 : intc '=' intc { $$=new KeyMapArray; $$->add(KeyMap($1,$3)); } | keymaparray1 ',' intc '=' intc {$1->add(KeyMap($3,$5)); $$=$1; } 
+
+intarray1 : intc { $$=new IntArray; $$->add($1); } | intarray1 ',' intc {$1->add($3); $$=$1; } 
+
 identarray1 : ident { $$=new IdentArray; $$->add(*$1); delete $1; } | identarray1 ',' ident {$1->add(*$3); delete $3; $$=$1; } 
 
 stringarray1 : string { $$=new StringArray; $$->add(*$1); delete $1; } | stringarray1 ',' ident {$1->add(*$3); delete $3; $$=$1; } 
 
 ebs : ',' | ;
 
+intarray : '{' '}' {$$=new IntArray; }
+	| '{' intarray1 ebs '}' { $$=$2;} ;
+
+keymaparray : '{' '}' {$$=new KeyMapArray; }
+	| '{' keymaparray1 ebs '}' { $$=$2;} ;
+
 identarray : '{' '}' {$$=new IdentArray; }
 	| '{' identarray1 ebs '}' { $$=$2;} ;
 
 stringarray : '{' '}' {$$=new StringArray; }
 	| '{' stringarray1 ebs '}' { $$=$2;} ;
+
+#ifdef READ_INPUT
+Begin_CI : T_CI '{' ;
+End_CI : '}' ';' ;
+Empty_CI : T_CI '{' '}' ';'
+#else
+Begin_CI : ;
+End_CI : ;
+Empty_CI : NEVER_OCCUR ;
+#endif
 
 #define PARSER_GEN
 #include "parser_objectdesc.h"

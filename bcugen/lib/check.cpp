@@ -238,7 +238,7 @@ CheckIntParameter (Device & d, IntParameter & o)
 void
 CheckListParameter (Device & d, ListParameter & o)
 {
-  int i, df = -1;
+  int i, df = -1, vl = -1;
   if (!o.Name ())
     undefined ("ListParameter", "Name", o.lineno);
 
@@ -261,12 +261,20 @@ CheckListParameter (Device & d, ListParameter & o)
       o.ListElements[i].Value = o.Elements[i].Value;
       if (o.Elements[i].Name == o.Default)
 	df = i;
+      if (o.Value_lineno && o.Elements[i].Name == o.Value)
+	vl = i;
       o.Elements[i].Value = o.ListElements[i].Name;
     }
   if (df == -1)
     die (_("line %d: unknown default value"), o.Default_lineno);
 
   o.ListDefault = o.Elements[df].Value;
+
+  if (o.Value_lineno && vl == -1)
+    die (_("line %d: unknown value"), o.Value_lineno);
+
+  if (o.Value_lineno)
+    o.Value = o.Elements[vl].Value;
 
   NewSymbol (o.Name + "_t", o.lineno);
   o.ID = NewSymbol (o.Name, o.lineno);
@@ -419,11 +427,13 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (!UsedbyInterface (d, o.Name))
     {
       o.ID = 0;
+      o.Disable = 1;
+      o.Disable_lineno = o.lineno;
+      o.ReadOnly = !o.Writeable;
+      o.ReadOnly_lineno = o.lineno;
     }
   else
     o.ID_lineno = o.lineno;
-  o.Disable = 0;
-  o.ReadOnly = !o.Writeable;
 #endif
 #ifdef CHECK2
 
@@ -443,6 +453,8 @@ CheckProperty (Device & d, Property & o, Object & o1)
   if (o.WriteAccess < 0 || o.WriteAccess > 3)
     die (_("line %d: invalid access level"), o.WriteAccess_lineno);
 
+#endif
+
   if (!o.Disable_lineno)
     {
       o.Disable_lineno = o.lineno;
@@ -454,8 +466,6 @@ CheckProperty (Device & d, Property & o, Object & o1)
       o.ReadOnly_lineno = o.lineno;
       o.ReadOnly = !o.Writeable;
     }
-
-#endif
 }
 
 void
@@ -728,7 +738,7 @@ CheckExpressionList (Expr * s, int l, const Device & d)
       s->id[i] = o.Elements[j].Value;
     }
   s->s = o.ID;
-  if (!o.ID ())
+  if (!o.ID_lineno)
     {
       int found = 0;
       for (i = 0; i < s->id (); i++)
@@ -761,9 +771,9 @@ GetExpressionType (Expr * s, int l, const Device & d)
       if (d.StringParameters () != i)
 	{
 	  s->s = d.StringParameters[i].ID;
-	  if (!s->s ())
+	  if (!d.StringParameters[i].ID_lineno)
 	    {
-	      s->s = d.StringParameters[i].Value;
+	      s->s = d.StringParameters[i].Default;
 	      s->Type = Expr::E_STRING;
 	    }
 	  return EX_STRING;
@@ -774,9 +784,9 @@ GetExpressionType (Expr * s, int l, const Device & d)
       if (d.IntParameters () != i)
 	{
 	  s->s = d.IntParameters[i].ID;
-	  if (!s->s ())
+	  if (!d.IntParameters[i].ID_lineno)
 	    {
-	      s->i = d.IntParameters[i].Value;
+	      s->i = d.IntParameters[i].Default;
 	      s->Type = Expr::E_INT;
 	    }
 	  return EX_INT;
@@ -787,9 +797,9 @@ GetExpressionType (Expr * s, int l, const Device & d)
       if (d.FloatParameters () != i)
 	{
 	  s->s = d.FloatParameters[i].ID;
-	  if (!s->s ())
+	  if (!d.FloatParameters[i].ID_lineno)
 	    {
-	      s->f = d.FloatParameters[i].Value;
+	      s->f = d.FloatParameters[i].Default;
 	      s->Type = Expr::E_FLOAT;
 	    }
 	  return EX_FLOAT;

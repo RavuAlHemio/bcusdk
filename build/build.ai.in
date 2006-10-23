@@ -1,6 +1,6 @@
 #!/bin/sh
 #    BCU SDK bcu development enviroment
-#    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+#    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@ progname="`basename \"$0\"`"
 usage()
 {
 cat >&2 <<END
-$progname $version Copyright 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+$progname $version Copyright 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 creates an application information for a BCU programm
 
 Usage: $progname [options] config_file
 Options:
 	-Ixxx	adds xxx to the include path
-	-Dxx	uses xxx as temorary directory and keep temporary files there 
+	-Dxxx	uses xxx as temorary directory and keep temporary files there 
 		(warning: all content can be lost)
         -ixxx   stores temporay images as xxx
         -axxx   stores application description as xxx (default:config_file.ai)

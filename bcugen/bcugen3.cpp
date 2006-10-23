@@ -29,47 +29,34 @@ int
 main (int ac, char *ag[])
 {
   FILE *f;
-  if (ac != 9)
-    die
-      ("Usage: %s description config appinfo hfile incfile cfile asmfile variant",
-       ag[0]);
+  if (ac != 6)
+    die("Usage: %s description hfile incfile asmfile variant", ag[0]);
 
   NewSymbol ("main", 0);
   Device *d = ReadConfig (ag[1]);
   if (!d)
     die (_("read of description %s failed"), ag[1]);
-  d->init_ci ();
   CheckDevice (*d);
-
-  d->ProgramID = "[!--*PROGID--]";
-  WriteConfig (ag[2], d);
-  WriteAppInfo (d, ag[3]);
-
-  f = fopen (ag[7], "w");
-  if (!f)
-    die (_("writing to %s failed"), ag[7]);
-  GenTestAsm (f, *d);
-  fclose (f);
 
   f = fopen (ag[4], "w");
   if (!f)
-    die (_("writing to %s failed"), ag[4]);
-  GenTestHeader (f, *d);
+    die (_("writing to %s failed"), ag[7]);
+  GenRealAsm (f, *d);
   fclose (f);
 
-  f = fopen (ag[5], "w");
+  f = fopen (ag[2], "w");
+  if (!f)
+    die (_("writing to %s failed"), ag[4]);
+  GenRealHeader (f, *d);
+  fclose (f);
+
+  f = fopen (ag[3], "w");
   if (!f)
     die (_("writing to %s failed"), ag[5]);
   GenInclude (f, *d);
   fclose (f);
 
-  f = fopen (ag[6], "w");
-  if (!f)
-    die (_("writing to %s failed"), ag[6]);
-  GenTestData (f, *d);
-  fclose (f);
-
-  f = fopen (ag[8], "w");
+  f = fopen (ag[5], "w");
   if (!f)
     die (_("writing to %s failed"), ag[8]);
   fprintf (f, "%s", GetVariant (*d) ());

@@ -17,29 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-OBJECT(IntParameter)
+#include "classes.h"
 
-#if !(defined(PARSER_GEN)&& defined(READ_INPUT))
-ATTRIB_IDENT(ID)
-#endif
-
-ATTRIB_IDENT(Name)
-ATTRIB_INT(MinValue)
-ATTRIB_INT(MaxValue)
-
-#if !defined(WRITE_OUTPUT) && !(defined(PARSER_GEN)&&defined(READ_BACK))
-ATTRIB_STRING(Title)
-ATTRIB_STRING(AddInfo)
-ATTRIB_INT(Default)
-ATTRIB_STRING(Unit)
-ATTRIB_INT(Precision)
-ATTRIB_INT(Increment)
-#endif
-
-PRIVATE_VAR(int SIZE)
-
-CI_OBJECT(IntParameter)
-
-ATTRIB_INT(Value)
-
-END_OBJECT
+#include "class_init_ci.h"
+#include "Objects.lst"

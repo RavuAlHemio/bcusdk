@@ -1,6 +1,6 @@
 /*
     BCU SDK bcu development enviroment
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 
 #undef OBJECT
 #define OBJECT(A) A::A() { lineno=0;
+#undef CI_OBJECT
+#define CI_OBJECT(A)
 #undef END_OBJECT
 #define END_OBJECT }
 #undef ATTRIB_STRING
@@ -41,6 +43,10 @@
 #define ATTRIB_FLOAT_MAP(A,B) A=0;A##_lineno=0;
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) A##_lineno=0;
+#undef ATTRIB_KEY_MAP
+#define ATTRIB_KEY_MAP(A) A##_lineno=0;
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) A##_lineno=0;
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) A##_lineno=0;
 #undef ATTRIB_String_ARRAY

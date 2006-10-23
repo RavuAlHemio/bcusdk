@@ -1,6 +1,6 @@
 /*
     BCU SDK bcu development enviroment
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 
 #undef OBJECT
 #define OBJECT(A) static void Write##A(FILE* f,const A&d) { int i; fprintf(f,"%s {\n",#A);
+#undef CI_OBJECT
+#define CI_OBJECT(A)
 #undef END_OBJECT
 #define END_OBJECT fprintf(f,"};\n"); }
 #undef ATTRIB_IDENT
@@ -33,6 +35,10 @@
 #define ATTRIB_INT_MAP(A,B) if(d.A##_lineno) fprintf(f,"%s %d;\n",#A,d.A);
 #undef ATTRIB_FLOAT_MAP
 #define ATTRIB_FLOAT_MAP(A,B) if(d.A##_lineno) fprintf(f,"%s %f;\n",#A,d.A);
+#undef ATTRIB_KEY_MAP
+#define ATTRIB_KEY_MAP(A) if(d.A##_lineno){fprintf(f,"%s {",#A);for(i=0;i<d.A();i++) fprintf(f,"%d=%d,",d.A[i].level,d.A[i].key);fprintf(f,"};\n"); }
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) if(d.A##_lineno){fprintf(f,"%s {",#A);for(i=0;i<d.A();i++) fprintf(f,"%d,",d.A[i]);fprintf(f,"};\n"); }
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) if(d.A##_lineno){fprintf(f,"%s {",#A);for(i=0;i<d.A();i++) fprintf(f,"%s,",d.A[i]());fprintf(f,"};\n"); }
 #undef ATTRIB_STRING_ARRAY

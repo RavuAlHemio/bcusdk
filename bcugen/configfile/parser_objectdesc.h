@@ -1,6 +1,6 @@
 /*
     BCU SDK bcu development enviroment
-    Copyright (C) 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@
 */
 
 #undef OBJECT
-#define OBJECT(A) A##_struct :  TOK_##A '{' { A* a=new A;stack.push(a);a->lineno=yylineno; } A##_bodys '}' ';' {$$=(typeof($$))stack.pop();} ; A##_bodys :  | A##_body A##_bodys ; A##_body :
+#define OBJECT(A) A##_struct :  TOK_##A '{' { A* a=new A;stack.push(a);a->lineno=yylineno; } A##_bodys '}' ';' {$$=(typeof($$))stack.pop();} ; A##_bodys :  | A##_body A##_bodys ; A##_body : A##_bodys_CI | Empty_CI | 
+#undef CI_OBJECT
+#define CI_OBJECT(A) NEVER_OCCUR { $$; } ; A##_bodys_CI : Begin_CI A##_bodys_CI_i End_CI { $$; } ; A##_bodys_CI_i : A##_body_CI | A##_body_CI A##_bodys_CI_i; A##_body_CI :
 #undef END_OBJECT
 #define END_OBJECT  NEVER_OCCUR { $$; } ;
 
@@ -48,8 +50,12 @@
 #undef ATTRIB_ENUM
 #define ATTRIB_ENUM(A,B,C) TOK_##A ident ';' { ATTRIB_INIT(A);ATTRIB_CHECKDOUBLE(A); a->A=C(*$2);delete $2;}|
 
+#undef ATTRIB_KEY_MAP
+#define ATTRIB_KEY_MAP(A) TOK_##A keymaparray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 #undef ATTRIB_IDENT_ARRAY
 #define ATTRIB_IDENT_ARRAY(A) TOK_##A identarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
+#undef ATTRIB_INT_ARRAY
+#define ATTRIB_INT_ARRAY(A) TOK_##A intarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 #undef ATTRIB_STRING_ARRAY
 #define ATTRIB_STRING_ARRAY(A) TOK_##A stringarray ';' { ATTRIB_INIT(A); ATTRIB_CHECKDOUBLE(A); a->A=*$2; delete $2; }|
 
