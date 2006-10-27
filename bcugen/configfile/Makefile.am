@@ -1,4 +1,4 @@
-DEF=class_gen.h class_init.h parser_gentoken.h parser_genunion.h parser_objectdesc.h scanner_gen.h write_gen.h
+DEF=class_gen.h class_init.h parser_gentoken.h parser_genunion.h parser_objectdesc.h scanner_gen.h write_gen.h class_init_ci.h
 READ=parser.pre parser1.pre parser2.pre scanner.pre class_init_ci.h class_init.ci.cpp
 
 dist_noinst_DATA=$(DEF)
