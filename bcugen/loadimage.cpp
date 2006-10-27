@@ -71,7 +71,10 @@ main (int ac, char *ag[])
 
   r = EIB_LoadImage (con, p.array (), p ());
 
-  printf ("%s\n", decodeBCULoadResult (r) ());
+  if (r == (BCU_LOAD_RESULT) - 1)
+    printf ("Communication with EIBD failed\n");
+  else
+    printf ("%s\n", decodeBCULoadResult (r) ());
 
   EIBClose (con);
   return 0;
