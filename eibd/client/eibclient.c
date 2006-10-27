@@ -208,6 +208,7 @@ EIBSocketRemote (const char *host, int port)
     }
   con->buflen = 0;
   con->buf = 0;
+  con->readlen = 0;
 
   return con;
 }
