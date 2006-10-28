@@ -500,7 +500,7 @@ decodeBCULoadResult (BCU_LOAD_RESULT r)
       return _("too many data for hi-ram");
       break;
     case IMG_TEXT_OVERFLOW:
-      return _("to many data for eeprom");
+      return _("too many data for eeprom");
       break;
     case IMG_IMAGE_LOADABLE:
       return _("Image is loadable");
