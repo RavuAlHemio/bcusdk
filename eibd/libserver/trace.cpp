@@ -30,7 +30,7 @@ Trace::TracePacket (int layer, void *inst, const char *msg, int Len,
   if (!(layers & (1 << layer)))
     return;
   int t = time (0);
-  printf ("Layer %d(%08X,%08X) %s(%03d):", layer, (unsigned int) inst, t, msg,
+  printf ("Layer %d(%08X,%08X) %s(%03d):", layer, (unsigned long) inst, t, msg,
 	  Len);
   for (i = 0; i < Len; i++)
     printf (" %02X", data[i]);
@@ -44,7 +44,7 @@ Trace::TracePrintf (int layer, void *inst, const char *msg, ...)
   if (!(layers & (1 << layer)))
     return;
   int t = time (0);
-  printf ("Layer %d(%08X,%08X) ", layer, (unsigned int) inst, t);
+  printf ("Layer %d(%08X,%08X) ", layer, (unsigned long) inst, t);
   va_start (ap, msg);
   vprintf (msg, ap);
   printf ("\n");
