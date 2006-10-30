@@ -99,6 +99,8 @@ struct arguments
   int tracelevel;
   /** length to write */
   int newlength;
+  /** timeout to wait */
+  int timeout;
 };
 /** storage for the arguments*/
 struct arguments arg;
@@ -113,6 +115,7 @@ static struct argp_option options[] = {
 
   {"trace", 't', "LEVEL", 0, "set trace level"},
   {"write", 'w', "SIZE", 0, "value to write"},
+  {"timeout", 'T', "SECONDS", 0, "timelimit for the operation"},
   {0}
 };
 
@@ -127,6 +130,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 't':
       arguments->tracelevel = (arg ? atoi (arg) : 0);
       break;
+    case 'T':
+      arguments->timeout = (arg ? atoi (arg) : 0);
+      break;
     case 'w':
       arguments->newlength = (arg ? atoi (arg) : 0);
       break;
@@ -134,6 +140,14 @@ parse_opt (int key, char *arg, struct argp_state *state)
       return ARGP_ERR_UNKNOWN;
     }
   return 0;
+}
+
+void *
+timeout_abort (void *)
+{
+  pth_event_t e = pth_event (PTH_EVENT_TIME, pth_timeout (arg.timeout, 0));
+  pth_wait (e);
+  die ("Request timed out");
 }
 
 /** information for the argument parser*/
@@ -168,6 +182,9 @@ main (int ac, char *ag[])
   {
     die ("initialisation failed");
   }
+
+  if (arg.timeout > 0)
+    pth_spawn (0, &timeout_abort, 0);
 
   uchar res = arg.newlength;
   if (arg.newlength == -1)
