@@ -339,18 +339,6 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 		     PTH_UNTIL_FD_WRITEABLE, recve,
 		     libusb_io_wait_handle (recvh));
 	}
-      if (recvh)
-	pth_event_concat (stop, recve, NULL);
-      if (sendh)
-	pth_event_concat (stop, sende, NULL);
-      else
-	pth_event_concat (stop, input, NULL);
-
-      pth_wait (stop);
-
-      pth_event_isolate (sende);
-      pth_event_isolate (recve);
-      pth_event_isolate (input);
 
       if (recvh && libusb_is_io_completed (recvh))
 	{
@@ -369,27 +357,26 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	    }
 	  libusb_io_free (recvh);
 	  recvh = 0;
+	  continue;
 	}
 
-      if (sendh)
+      if (sendh && libusb_is_io_completed (sendh))
 	{
-	  if (libusb_is_io_completed (sendh))
+	  if (libusb_io_comp_status (sendh) < 0)
+	    t->TracePrintf (0, this, "SendError %d",
+			    libusb_io_comp_status (sendh));
+	  else
 	    {
-	      if (libusb_io_comp_status (sendh) < 0)
-		t->TracePrintf (0, this, "SendError %d",
-				libusb_io_comp_status (sendh));
-	      else
-		{
-		  t->TracePrintf (0, this, "SendComplete %d",
-				  libusb_io_xfer_size (sendh));
-		  pth_sem_dec (&in_signal);
-		  inqueue.get ();
-		  if (inqueue.isempty ())
-		    pth_sem_set_value (&send_empty, 1);
-		}
-	      libusb_io_free (sendh);
-	      sendh = 0;
+	      t->TracePrintf (0, this, "SendComplete %d",
+			      libusb_io_xfer_size (sendh));
+	      pth_sem_dec (&in_signal);
+	      inqueue.get ();
+	      if (inqueue.isempty ())
+		pth_sem_set_value (&send_empty, 1);
 	    }
+	  libusb_io_free (sendh);
+	  sendh = 0;
+	  continue;
 	}
       if (!sendh && !inqueue.isempty ())
 	{
@@ -411,8 +398,22 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
 		     PTH_UNTIL_FD_WRITEABLE, sende,
 		     libusb_io_wait_handle (sendh));
-
+	  continue;
 	}
+
+      if (recvh)
+	pth_event_concat (stop, recve, NULL);
+      if (sendh)
+	pth_event_concat (stop, sende, NULL);
+      else
+	pth_event_concat (stop, input, NULL);
+
+      pth_wait (stop);
+
+      pth_event_isolate (sende);
+      pth_event_isolate (recve);
+      pth_event_isolate (input);
+
     }
   if (sendh)
     {
