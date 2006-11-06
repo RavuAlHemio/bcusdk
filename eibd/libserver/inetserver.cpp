@@ -27,6 +27,7 @@ InetServer::InetServer (Layer3 * la3, Trace * tr, int port):
 Server (la3, tr)
 {
   struct sockaddr_in addr;
+  int reuse = 1;
   tr->TracePrintf (8, this, "OpenInetSocket %d", port);
   memset (&addr, 0, sizeof (addr));
   addr.sin_family = AF_INET;
@@ -36,6 +37,8 @@ Server (la3, tr)
   fd = socket (AF_INET, SOCK_STREAM, 0);
   if (fd == -1)
     throw Exception (DEV_OPEN_FAIL);
+
+  setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
 
   if (bind (fd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
     throw Exception (DEV_OPEN_FAIL);
