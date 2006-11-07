@@ -10,8 +10,9 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: eibd-clients
 Description: eibd server
- eibd is a daemon, which supports connection to an EIB bus over various
- access devices and provide its services over TCP/IP or Unix domain sockets. 
+ eibd is a daemon which supports connection to an EIB (KNX) network over various
+ interfaces. It provides its services over TCP/IP or Unix domain sockets.
+ It can also act as an EIBnet/IP server. 
  Note: Some backends may crash Linux 2.6 kernels before 2.6.11.
 
 Package: eibd-clients
@@ -19,7 +20,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: eibd-server
 Description: eibd clients
- provides simple example programs to perform some management task on a EIB system.
+ Simple example programs to perform management tasks on a EIB system.
 
 
 Package: libeibclient-dev
@@ -27,27 +28,27 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: eibd-server
 Description: eibd client library
- provides a simple client library written in C to access the EIB bus over eibd. 
+ A client library written in C to access the EIB bus over eibd. 
 
 Package: eibd-client-sources
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: libeibclient-dev
-Description: sources of the eibd client programs
- provides the source of the eibd client programs as examples how to use
+Description: Sources of the eibd client programs
+ Provides the source of the eibd client programs as examples how to use
  the eibd client library.
 
 Package: bcusdk-build
 Architecture: any
 Depends: ${shlibs:Depends}, m68hc05-gcc, xsltproc, m68hc05-runtime, libxml2-utils
 Description: BCU SDK image building programs
- contains all files and programs to build BCU images
+ Contains all files and programs to build BCU images
 
 Package: bcusdk
 Architecture: all
 Depends: ${misc:Depends}, eibd-server, eibd-clients, eibd-client-sources, libeibclient-dev, bcusdk-build
 Description: BCU SDK
- installs the complete BCU SDK (meta package)
+ Installs the complete BCU SDK (meta package)
 
 
 
