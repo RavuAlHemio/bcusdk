@@ -47,7 +47,7 @@ USB =
 endif
 
 noinst_LIBRARIES = libbackend.a
-AM_CPPFLAGS=-I$(top_srcdir)/eibd/libserver -I$(top_srcdir)/common -I$(top_srcdir)/eibd/usb
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/libserver -I$(top_srcdir)/common -I$(top_srcdir)/eibd/usb $(PTH_CPPFLAGS)
 
 libbackend_a_SOURCES= $(FT12) $(PEI16) $(TPUART) $(PEI16s) $(TPUARTs) $(EIBNETIP) $(EIBNETIPTUNNEL) $(USB)
 
