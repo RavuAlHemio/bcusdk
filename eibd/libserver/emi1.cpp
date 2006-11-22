@@ -213,7 +213,8 @@ EMI1Layer2Interface::Send_L_Data (LPDU * l)
       outqueue.put (l2);
       pth_sem_inc (&out_signal, 1);
     }
-  delete l;
+  outqueue.put (l);
+  pth_sem_inc (&out_signal, 1);
 }
 
 LPDU *

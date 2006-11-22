@@ -95,7 +95,15 @@ EIBNetIPTunnel::Send_L_Data (LPDU * l)
   L_Data_PDU *l1 = (L_Data_PDU *) l;
   inqueue.put (L_Data_ToCEMI (0x11, *l1));
   pth_sem_inc (&insignal, 1);
-  delete l;
+  if (vmode)
+    {
+      L_Busmonitor_PDU *l2 = new L_Busmonitor_PDU;
+      l2->pdu.set (l->ToPacket ());
+      outqueue.put (l2);
+      pth_sem_inc (&outsignal, 1);
+    }
+  outqueue.put (l);
+  pth_sem_inc (&outsignal, 1);
 }
 
 LPDU *
