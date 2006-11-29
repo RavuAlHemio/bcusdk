@@ -1,5 +1,5 @@
 noinst_LIBRARIES = libeibstack.a
-AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/common
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/common $(PTH_CPPFLAGS)
 
 COMMON=exception.h queue.h common.h common.cpp threads.h threads.cpp trace.h trace.cpp 
 PDUs=lpdu.h lpdu.cpp tpdu.h tpdu.cpp apdu.h apdu.cpp 
