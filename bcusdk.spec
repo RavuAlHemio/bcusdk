@@ -1,5 +1,5 @@
 Name:           bcusdk
-Version:        0.0.2
+Version:        0.0.2.1
 Release:        1
 Summary:        BCU SDK
 
