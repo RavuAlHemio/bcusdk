@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #    BCU SDK bcu development enviroment - install helper
 #    Copyright (C) 2005-2006 Martin Kögler <mkoegler@auto.tuwien.ac.at>
 #
