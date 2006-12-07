@@ -20,6 +20,7 @@
 #ifndef TRACE_H
 #define TRACE_H
 
+#include <stdarg.h>
 #include "common.h"
 
 #define TRACE_LEVEL_0 0x01
@@ -51,6 +52,15 @@ public:
     layers = l;
   }
 
+  /** prints a message with a hex dump unconditional
+   * @param layer level of the message
+   * @param inst pointer to the source
+   * @param msg Message
+   * @param Len length of the data
+   * @param data pointer to the data
+   */
+  virtual void TracePacketUncond (int layer, void *inst, const char *msg,
+				  int Len, const uchar * data);
   /** prints a message with a hex dump
    * @param layer level of the message
    * @param inst pointer to the source
@@ -58,8 +68,13 @@ public:
    * @param Len length of the data
    * @param data pointer to the data
    */
-  virtual void TracePacket (int layer, void *inst, const char *msg, int Len,
-			    const uchar * data);
+  void TracePacket (int layer, void *inst, const char *msg, int Len,
+		    const uchar * data)
+  {
+    if (!(layers & (1 << layer)))
+      return;
+    TracePacketUncond (layer, inst, msg, Len, data);
+  }
   /** prints a message with a hex dump
    * @param layer level of the message
    * @param inst pointer to the source
@@ -70,6 +85,7 @@ public:
   {
     TracePacket (layer, inst, msg, c (), c.array ());
   }
+
   /** like printf for this trace
    * @param layer level of the message
    * @param inst pointer to the source

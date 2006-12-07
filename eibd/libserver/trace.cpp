@@ -23,15 +23,13 @@
 #include "trace.h"
 
 void
-Trace::TracePacket (int layer, void *inst, const char *msg, int Len,
-		    const uchar * data)
+Trace::TracePacketUncond (int layer, void *inst, const char *msg, int Len,
+			  const uchar * data)
 {
   int i;
-  if (!(layers & (1 << layer)))
-    return;
   int t = time (0);
-  printf ("Layer %d(%08X,%08X) %s(%03d):", layer, (unsigned long) inst, t, msg,
-	  Len);
+  printf ("Layer %d(%08X,%08X) %s(%03d):", layer, (unsigned long) inst, t,
+	  msg, Len);
   for (i = 0; i < Len; i++)
     printf (" %02X", data[i]);
   printf ("\n");
