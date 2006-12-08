@@ -31,7 +31,7 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
   t = tr;
   l3 = layer3;
 
-  t->TracePrintf (8, this, "Open");
+  TRACEPRINTF (t, 8, this, "Open");
   baddr.sin_family = AF_INET;
   baddr.sin_port = htons (port);
   baddr.sin_addr.s_addr = htonl (INADDR_ANY);
@@ -62,13 +62,13 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 	throw Exception (DEV_OPEN_FAIL);
     }
   Start ();
-  t->TracePrintf (8, this, "Opened");
+  TRACEPRINTF (t, 8, this, "Opened");
 }
 
 
 EIBnetServer::~EIBnetServer ()
 {
-  t->TracePrintf (8, this, "Close");
+  TRACEPRINTF (t, 8, this, "Close");
   if (route || tunnel)
     {
       l3->deregisterBroadcastCallBack (this);
@@ -84,7 +84,7 @@ EIBnetServer::Get_L_Data (L_Data_PDU * l)
 {
   if (route)
     {
-      t->TracePrintf (8, this, "Send_Route %s", l->Decode ()());
+      TRACEPRINTF (t, 8, this, "Send_Route %s", l->Decode ()());
       sock->sendaddr = maddr;
       EIBNetIPPacket p;
       p.service = ROUTING_INDICATION;
@@ -134,7 +134,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      DIB_service_Entry d;
 	      if (parseEIBnet_SearchRequest (*p1, r1))
 		goto out;
-	      t->TracePrintf (8, this, "SEARCH");
+	      TRACEPRINTF (t, 8, this, "SEARCH");
 	      r2.KNXmedium = 2;
 	      r2.devicestatus = 0;
 	      r2.individual_addr = 0;
@@ -164,7 +164,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      DIB_service_Entry d;
 	      if (parseEIBnet_DescriptionRequest (*p1, r1))
 		goto out;
-	      t->TracePrintf (8, this, "DESCRIBE");
+	      TRACEPRINTF (t, 8, this, "DESCRIBE");
 	      r2.KNXmedium = 2;
 	      r2.devicestatus = 0;
 	      r2.individual_addr = 0;
@@ -192,7 +192,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      L_Data_PDU *c = CEMI_to_L_Data (data);
 	      if (c)
 		{
-		  t->TracePrintf (8, this, "Recv_Route %s", c->Decode ()());
+		  TRACEPRINTF (t, 8, this, "Recv_Route %s", c->Decode ()());
 		  l3->send_L_Data (c);
 		}
 	    }
@@ -293,7 +293,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      EIBnet_TunnelACK r2;
 	      if (parseEIBnet_TunnelRequest (*p1, r1))
 		goto out;
-	      t->TracePrintf (8, this, "TUNNEL_REQ");
+	      TRACEPRINTF (t, 8, this, "TUNNEL_REQ");
 	      for (i = 0; i < state (); i++)
 		if (state[i].channel == r1.channel)
 		  goto reqf;
@@ -301,8 +301,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	    reqf:
 	      if (state[i].rno != r1.seqno)
 		{
-		  t->TracePrintf (8, this, "Wrong sequence %d<->%d",
-				  r1.seqno, state[i].rno);
+		  TRACEPRINTF (t, 8, this, "Wrong sequence %d<->%d",
+			       r1.seqno, state[i].rno);
 		  goto out;
 		}
 	      r2.channel = r1.channel;
@@ -335,7 +335,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      EIBnet_TunnelACK r1;
 	      if (parseEIBnet_TunnelACK (*p1, r1))
 		goto out;
-	      t->TracePrintf (8, this, "TUNNEL_ACK");
+	      TRACEPRINTF (t, 8, this, "TUNNEL_ACK");
 	      for (i = 0; i < state (); i++)
 		if (state[i].channel == r1.channel)
 		  goto reqf1;
@@ -343,18 +343,18 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	    reqf1:
 	      if (state[i].sno != r1.seqno)
 		{
-		  t->TracePrintf (8, this, "Wrong sequence %d<->%d",
-				  r1.seqno, state[i].sno);
+		  TRACEPRINTF (t, 8, this, "Wrong sequence %d<->%d",
+			       r1.seqno, state[i].sno);
 		  goto out;
 		}
 	      if (r1.status != 0)
 		{
-		  t->TracePrintf (8, this, "Wrong status %d", r1.status);
+		  TRACEPRINTF (t, 8, this, "Wrong status %d", r1.status);
 		  goto out;
 		}
 	      if (!state[i].state)
 		{
-		  t->TracePrintf (8, this, "Unexpected ACK");
+		  TRACEPRINTF (t, 8, this, "Unexpected ACK");
 		  goto out;
 		}
 	      state[i].sno++;
@@ -384,7 +384,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	       PTH_STATUS_OCCURRED) || (!state[i].state
 					&& !state[i].out.isempty ()))
 	    {
-	      t->TracePrintf (8, this, "TunnelSend %d", state[i].channel);
+	      TRACEPRINTF (t, 8, this, "TunnelSend %d", state[i].channel);
 	      state[i].state++;
 	      if (state[i].state > 10)
 		{

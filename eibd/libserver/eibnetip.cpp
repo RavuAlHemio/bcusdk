@@ -219,7 +219,7 @@ EIBNetIPSocket::EIBNetIPSocket (struct sockaddr_in bindaddr, bool reuseaddr,
 {
   int i;
   t = tr;
-  t->TracePrintf (0, this, "Open");
+  TRACEPRINTF (t, 0, this, "Open");
   multicast = 0;
   pth_sem_init (&insignal);
   pth_sem_init (&outsignal);
@@ -243,12 +243,12 @@ EIBNetIPSocket::EIBNetIPSocket (struct sockaddr_in bindaddr, bool reuseaddr,
     throw Exception (DEV_OPEN_FAIL);
 
   Start ();
-  t->TracePrintf (0, this, "Openend");
+  TRACEPRINTF (t, 0, this, "Openend");
 }
 
 EIBNetIPSocket::~EIBNetIPSocket ()
 {
-  t->TracePrintf (0, this, "Close");
+  TRACEPRINTF (t, 0, this, "Close");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
   if (fd != -1)

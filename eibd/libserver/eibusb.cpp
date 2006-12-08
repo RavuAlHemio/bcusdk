@@ -102,7 +102,7 @@ initUSBDriver (LowLevelDriverInterface * i, Trace * tr)
 	new USBConverterInterface (i, tr, LowLevelDriverInterface::vCEMI);
       break;
     default:
-      tr->TracePrintf (1, i, "Unsupported EMI %02x %02x", r1[12], r1[13]);
+      TRACEPRINTF (tr, 1, i, "Unsupported EMI %02x %02x", r1[12], r1[13]);
       throw Exception (DEV_OPEN_FAIL);
       break;
     }
@@ -118,16 +118,16 @@ USBConverterInterface::USBConverterInterface (LowLevelDriverInterface * iface,
   switch (v)
     {
     case vEMI1:
-      t->TracePrintf (1, this, "EMI1");
+      TRACEPRINTF (t, 1, this, "EMI1");
       break;
     case vEMI2:
-      t->TracePrintf (1, this, "EMI2");
+      TRACEPRINTF (t, 1, this, "EMI2");
       break;
     case vCEMI:
-      t->TracePrintf (1, this, "CEMI");
+      TRACEPRINTF (t, 1, this, "CEMI");
       break;
     default:
-      t->TracePrintf (1, this, "Unknown EMI");
+      TRACEPRINTF (t, 1, this, "Unknown EMI");
     }
 }
 
@@ -269,7 +269,7 @@ USBLayer2Interface::USBLayer2Interface (LowLevelDriverInterface * i,
       emi = new EMI2Layer2Interface (iface, tr);
       break;
     default:
-      tr->TracePrintf (2, this, "Unsupported EMI");
+      TRACEPRINTF (tr, 2, this, "Unsupported EMI");
       throw Exception (DEV_OPEN_FAIL);
     }
 }

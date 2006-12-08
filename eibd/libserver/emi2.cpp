@@ -73,7 +73,7 @@ EMI2Layer2Interface::closeVBusmonitor ()
 EMI2Layer2Interface::EMI2Layer2Interface (LowLevelDriverInterface * i,
 					  Trace * tr)
 {
-  tr->TracePrintf (2, this, "Open");
+  TRACEPRINTF (tr, 2, this, "Open");
   iface = i;
   t = tr;
   mode = 0;
@@ -81,12 +81,12 @@ EMI2Layer2Interface::EMI2Layer2Interface (LowLevelDriverInterface * i,
   pth_sem_init (&out_signal);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
-  tr->TracePrintf (2, this, "Opened");
+  TRACEPRINTF (tr, 2, this, "Opened");
 }
 
 EMI2Layer2Interface::~EMI2Layer2Interface ()
 {
-  t->TracePrintf (2, this, "Destroy");
+  TRACEPRINTF (t, 2, this, "Destroy");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
   while (!outqueue.isempty ())
@@ -99,7 +99,7 @@ EMI2Layer2Interface::enterBusmonitor ()
 {
   const uchar t1[] = { 0xa9, 0x1E, 0x12, 0x34, 0x56, 0x78, 0x9a };
   const uchar t2[] = { 0xa9, 0x90, 0x18, 0x34, 0x45, 0x67, 0x8a };
-  t->TracePrintf (2, this, "OpenBusmon");
+  TRACEPRINTF (t, 2, this, "OpenBusmon");
   if (mode != 0)
     return 0;
   iface->SendReset ();
@@ -122,7 +122,7 @@ EMI2Layer2Interface::leaveBusmonitor ()
 {
   if (mode != 1)
     return 0;
-  t->TracePrintf (2, this, "CloseBusmon");
+  TRACEPRINTF (t, 2, this, "CloseBusmon");
   uchar t[] =
   {
   0xa9, 0x1E, 0x12, 0x34, 0x56, 0x78, 0x9a};
@@ -143,7 +143,7 @@ EMI2Layer2Interface::Open ()
 {
   const uchar t1[] = { 0xa9, 0x1E, 0x12, 0x34, 0x56, 0x78, 0x9a };
   const uchar t2[] = { 0xa9, 0x00, 0x18, 0x34, 0x56, 0x78, 0x0a };
-  t->TracePrintf (2, this, "OpenL2");
+  TRACEPRINTF (t, 2, this, "OpenL2");
   if (mode != 0)
     return 0;
   iface->SendReset ();
@@ -166,7 +166,7 @@ EMI2Layer2Interface::Close ()
 {
   if (mode != 2)
     return 0;
-  t->TracePrintf (2, this, "CloseL2");
+  TRACEPRINTF (t, 2, this, "CloseL2");
   uchar t[] =
   {
   0xa9, 0x1E, 0x12, 0x34, 0x56, 0x78, 0x9a};
@@ -192,7 +192,7 @@ EMI2Layer2Interface::Send_Queue_Empty ()
 void
 EMI2Layer2Interface::Send_L_Data (LPDU * l)
 {
-  t->TracePrintf (2, this, "Send %s", l->Decode ()());
+  TRACEPRINTF (t, 2, this, "Send %s", l->Decode ()());
   if (l->getType () != L_Data)
     {
       delete l;
@@ -234,7 +234,7 @@ EMI2Layer2Interface::Get_L_Data (pth_event_t stop)
     {
       pth_sem_dec (&out_signal);
       LPDU *l = outqueue.get ();
-      t->TracePrintf (2, this, "Recv %s", l->Decode ()());
+      TRACEPRINTF (t, 2, this, "Recv %s", l->Decode ()());
       return l;
     }
   else
@@ -258,7 +258,7 @@ EMI2Layer2Interface::Run (pth_sem_t * stop1)
 	      delete c;
 	      if (p->AddrType == IndividualAddress)
 		p->dest = 0;
-	      t->TracePrintf (2, this, "Recv %s", p->Decode ()());
+	      TRACEPRINTF (t, 2, this, "Recv %s", p->Decode ()());
 	      if (vmode)
 		{
 		  L_Busmonitor_PDU *l2 = new L_Busmonitor_PDU;
@@ -276,7 +276,7 @@ EMI2Layer2Interface::Run (pth_sem_t * stop1)
 	  L_Busmonitor_PDU *p = new L_Busmonitor_PDU;
 	  p->pdu.set (c->array () + 4, c->len () - 4);
 	  delete c;
-	  t->TracePrintf (2, this, "Recv %s", p->Decode ()());
+	  TRACEPRINTF (t, 2, this, "Recv %s", p->Decode ()());
 	  outqueue.put (p);
 	  pth_sem_inc (&out_signal, 1);
 	  continue;
