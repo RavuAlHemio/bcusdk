@@ -28,7 +28,7 @@
 ClientConnection::ClientConnection (Server * s, Layer3 * l3, Trace * tr,
 				    int fd)
 {
-  tr->TracePrintf (8, this, "ClientConnection Init");
+  TRACEPRINTF (tr, 8, this, "ClientConnection Init");
   this->fd = fd;
   this->t = tr;
   this->l3 = l3;
@@ -39,7 +39,7 @@ ClientConnection::ClientConnection (Server * s, Layer3 * l3, Trace * tr,
 
 ClientConnection::~ClientConnection ()
 {
-  t->TracePrintf (8, this, "ClientConnection closed");
+  TRACEPRINTF (t, 8, this, "ClientConnection closed");
   s->deregister (this);
   if (buf)
     delete buf;

@@ -22,7 +22,7 @@
 A_Broadcast::A_Broadcast (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
   t = tr;
-  t->TracePrintf (7, this, "OpenBroadcast");
+  TRACEPRINTF (t, 7, this, "OpenBroadcast");
   layer3 = l3;
   con = cc;
   c = 0;
@@ -44,7 +44,7 @@ A_Broadcast::A_Broadcast (Layer3 * l3, Trace * tr, ClientConnection * cc)
 A_Group::A_Group (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
   t = tr;
-  t->TracePrintf (7, this, "OpenGroup");
+  TRACEPRINTF (t, 7, this, "OpenGroup");
   layer3 = l3;
   con = cc;
   c = 0;
@@ -68,7 +68,7 @@ A_Group::A_Group (Layer3 * l3, Trace * tr, ClientConnection * cc)
 A_TPDU::A_TPDU (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
   t = tr;
-  t->TracePrintf (7, this, "OpenTPDU");
+  TRACEPRINTF (t, 7, this, "OpenTPDU");
   layer3 = l3;
   con = cc;
   c = 0;
@@ -90,7 +90,7 @@ A_TPDU::A_TPDU (Layer3 * l3, Trace * tr, ClientConnection * cc)
 A_Individual::A_Individual (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
   t = tr;
-  t->TracePrintf (7, this, "OpenIndividual");
+  TRACEPRINTF (t, 7, this, "OpenIndividual");
   layer3 = l3;
   con = cc;
   c = 0;
@@ -114,7 +114,7 @@ A_Individual::A_Individual (Layer3 * l3, Trace * tr, ClientConnection * cc)
 A_Connection::A_Connection (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
   t = tr;
-  t->TracePrintf (7, this, "OpenGroup");
+  TRACEPRINTF (t, 7, this, "OpenGroup");
   layer3 = l3;
   con = cc;
   c = 0;
@@ -136,7 +136,7 @@ A_Connection::A_Connection (Layer3 * l3, Trace * tr, ClientConnection * cc)
 A_GroupSocket::A_GroupSocket (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
   t = tr;
-  t->TracePrintf (7, this, "OpenGroupSocket");
+  TRACEPRINTF (t, 7, this, "OpenGroupSocket");
   layer3 = l3;
   con = cc;
   c = 0;
@@ -157,7 +157,7 @@ A_GroupSocket::A_GroupSocket (Layer3 * l3, Trace * tr, ClientConnection * cc)
 
 A_Broadcast::~A_Broadcast ()
 {
-  t->TracePrintf (7, this, "CloseBroadcast");
+  TRACEPRINTF (t, 7, this, "CloseBroadcast");
   Stop ();
   if (c)
     delete c;
@@ -165,7 +165,7 @@ A_Broadcast::~A_Broadcast ()
 
 A_Group::~A_Group ()
 {
-  t->TracePrintf (7, this, "CloseGroup");
+  TRACEPRINTF (t, 7, this, "CloseGroup");
   Stop ();
   if (c)
     delete c;
@@ -173,7 +173,7 @@ A_Group::~A_Group ()
 
 A_TPDU::~A_TPDU ()
 {
-  t->TracePrintf (7, this, "CloseTPDU");
+  TRACEPRINTF (t, 7, this, "CloseTPDU");
   Stop ();
   if (c)
     delete c;
@@ -181,7 +181,7 @@ A_TPDU::~A_TPDU ()
 
 A_Individual::~A_Individual ()
 {
-  t->TracePrintf (7, this, "CloseIndividual");
+  TRACEPRINTF (t, 7, this, "CloseIndividual");
   Stop ();
   if (c)
     delete c;
@@ -189,7 +189,7 @@ A_Individual::~A_Individual ()
 
 A_Connection::~A_Connection ()
 {
-  t->TracePrintf (7, this, "CloseConnection");
+  TRACEPRINTF (t, 7, this, "CloseConnection");
   Stop ();
   if (c)
     delete c;
@@ -197,7 +197,7 @@ A_Connection::~A_Connection ()
 
 A_GroupSocket::~A_GroupSocket ()
 {
-  t->TracePrintf (7, this, "CloseGroupSocket");
+  TRACEPRINTF (t, 7, this, "CloseGroupSocket");
   Stop ();
   if (c)
     delete c;

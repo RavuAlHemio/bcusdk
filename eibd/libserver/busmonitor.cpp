@@ -21,7 +21,7 @@
 
 A_Busmonitor::~A_Busmonitor ()
 {
-  t->TracePrintf (7, this, "Close A_Busmonitor");
+  TRACEPRINTF (t, 7, this, "Close A_Busmonitor");
   Stop ();
   if (v)
     l3->deregisterVBusmonitor (this);
@@ -36,7 +36,7 @@ A_Busmonitor::~A_Busmonitor ()
 A_Busmonitor::A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr,
 			    bool virt)
 {
-  tr->TracePrintf (7, this, "Open A_Busmonitor");
+  TRACEPRINTF (tr, 7, this, "Open A_Busmonitor");
   this->l3 = l3;
   t = tr;
   con = c;
@@ -84,7 +84,7 @@ A_Busmonitor::Run (pth_sem_t * stop1)
       if (pth_event_status (sem_ev) == PTH_STATUS_OCCURRED)
 	{
 	  pth_sem_dec (&sem);
-	  t->TracePrintf (7, this, "Send Busmonitor-Packet");
+	  TRACEPRINTF (t, 7, this, "Send Busmonitor-Packet");
 	  if (sendResponse (data.get (), stop) == -1)
 	    break;
 	}
