@@ -22,7 +22,7 @@
 
 T_Broadcast::T_Broadcast (Layer3 * l3, Trace * tr, int write_only)
 {
-  tr->TracePrintf (4, this, "OpenBroadcast %s", write_only ? "WO" : "RW");
+  TRACEPRINTF (tr, 4, this, "OpenBroadcast %s", write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
   pth_sem_init (&sem);
@@ -33,7 +33,7 @@ T_Broadcast::T_Broadcast (Layer3 * l3, Trace * tr, int write_only)
 
 T_Broadcast::~T_Broadcast ()
 {
-  t->TracePrintf (4, this, "CloseBroadcast");
+  TRACEPRINTF (t, 4, this, "CloseBroadcast");
   layer3->deregisterBroadcastCallBack (this);
 }
 
@@ -59,7 +59,7 @@ T_Broadcast::Send (const CArray & c)
   T_DATA_XXX_REQ_PDU t;
   t.data = c;
   String s = t.Decode ();
-  this->t->TracePrintf (4, this, "Send Broadcast %s", s ());
+  TRACEPRINTF (this->t, 4, this, "Send Broadcast %s", s ());
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
   l->dest = 0;
@@ -92,9 +92,8 @@ T_Broadcast::Get (pth_event_t stop)
 
 T_Group::T_Group (Layer3 * l3, Trace * tr, eibaddr_t group, int write_only)
 {
-  tr->TracePrintf (4, this, "OpenGroup %d/%d/%d %s", (group >> 11) & 0x1f,
-		   (group >> 8) & 0x07, (group) & 0xff,
-		   write_only ? "WO" : "RW");
+  TRACEPRINTF (tr, 4, this, "OpenGroup %d/%d/%d %s", (group >> 11) & 0x1f,
+	       (group >> 8) & 0x07, (group) & 0xff, write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
   groupaddr = group;
@@ -129,7 +128,7 @@ T_Group::Send (const CArray & c)
   T_DATA_XXX_REQ_PDU t;
   t.data = c;
   String s = t.Decode ();
-  this->t->TracePrintf (4, this, "Send Group %s", s ());
+  TRACEPRINTF (this->t, 4, this, "Send Group %s", s ());
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
   l->dest = groupaddr;
@@ -140,7 +139,7 @@ T_Group::Send (const CArray & c)
 
 T_Group::~T_Group ()
 {
-  t->TracePrintf (4, this, "CloseGroup");
+  TRACEPRINTF (t, 4, this, "CloseGroup");
   layer3->deregisterGroupCallBack (this, groupaddr);
 }
 
@@ -168,8 +167,8 @@ T_Group::Get (pth_event_t stop)
 
 T_TPDU::T_TPDU (Layer3 * l3, Trace * tr, eibaddr_t d)
 {
-  tr->TracePrintf (4, this, "OpenTPDU %d.%d.%d", (d >> 12) & 0x0f,
-		   (d >> 8) & 0x0f, (d) & 0xff);
+  TRACEPRINTF (tr, 4, this, "OpenTPDU %d.%d.%d", (d >> 12) & 0x0f,
+	       (d >> 8) & 0x0f, (d) & 0xff);
   layer3 = l3;
   t = tr;
   src = d;
@@ -193,7 +192,7 @@ T_TPDU::Get_L_Data (L_Data_PDU * l)
 void
 T_TPDU::Send (const TpduComm & c)
 {
-  this->t->TracePrintf (4, this, "Send TPDU %s", c.data ());
+  TRACEPRINTF (this->t, 4, this, "Send TPDU %s", c.data ());
   L_Data_PDU *l = new L_Data_PDU;
   l->source = src;
   l->dest = c.addr;
@@ -204,7 +203,7 @@ T_TPDU::Send (const TpduComm & c)
 
 T_TPDU::~T_TPDU ()
 {
-  t->TracePrintf (4, this, "CloseTPDU");
+  TRACEPRINTF (t, 4, this, "CloseTPDU");
   layer3->deregisterIndividualCallBack (this, 0, src);
 }
 
@@ -233,8 +232,8 @@ T_TPDU::Get (pth_event_t stop)
 T_Individual::T_Individual (Layer3 * l3, Trace * tr, eibaddr_t d,
 			    int write_only)
 {
-  tr->TracePrintf (4, this, "OpenIndividual %d.%d.%d %s", (d >> 12) & 0x0f,
-		   (d >> 8) & 0x0f, (d) & 0xff, write_only ? "WO" : "RW");
+  TRACEPRINTF (tr, 4, this, "OpenIndividual %d.%d.%d %s", (d >> 12) & 0x0f,
+	       (d >> 8) & 0x0f, (d) & 0xff, write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
   dest = d;
@@ -266,7 +265,7 @@ T_Individual::Send (const CArray & c)
   T_DATA_XXX_REQ_PDU t;
   t.data = c;
   String s = t.Decode ();
-  this->t->TracePrintf (4, this, "Send Individual %s", s ());
+  TRACEPRINTF (this->t, 4, this, "Send Individual %s", s ());
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
   l->dest = dest;
@@ -277,7 +276,7 @@ T_Individual::Send (const CArray & c)
 
 T_Individual::~T_Individual ()
 {
-  t->TracePrintf (4, this, "CloseIndividual");
+  TRACEPRINTF (t, 4, this, "CloseIndividual");
   layer3->deregisterIndividualCallBack (this, dest);
 }
 
@@ -305,8 +304,8 @@ T_Individual::Get (pth_event_t stop)
 
 T_Connection::T_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
 {
-  tr->TracePrintf (4, this, "OpenConnection %d.%d.%d", (d >> 12) & 0x0f,
-		   (d >> 8) & 0x0f, (d) & 0xff);
+  TRACEPRINTF (tr, 4, this, "OpenConnection %d.%d.%d", (d >> 12) & 0x0f,
+	       (d >> 8) & 0x0f, (d) & 0xff);
   layer3 = l3;
   t = tr;
   dest = d;
@@ -324,7 +323,7 @@ T_Connection::T_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
 
 T_Connection::~T_Connection ()
 {
-  t->TracePrintf (4, this, "CloseConnection");
+  TRACEPRINTF (t, 4, this, "CloseConnection");
   Stop ();
   while (!buf.isempty ())
     delete buf.get ();
@@ -371,7 +370,7 @@ T_Connection::Get (pth_event_t stop)
 void
 T_Connection::SendConnect ()
 {
-  t->TracePrintf (4, this, "SendConnect");
+  TRACEPRINTF (t, 4, this, "SendConnect");
   T_CONNECT_REQ_PDU p;
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
@@ -385,7 +384,7 @@ T_Connection::SendConnect ()
 void
 T_Connection::SendDisconnect ()
 {
-  t->TracePrintf (4, this, "SendDisconnect");
+  TRACEPRINTF (t, 4, this, "SendDisconnect");
   T_DISCONNECT_REQ_PDU p;
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
@@ -399,7 +398,7 @@ T_Connection::SendDisconnect ()
 void
 T_Connection::SendAck (int serno)
 {
-  t->TracePrintf (4, this, "SendACK %d", serno);
+  TRACEPRINTF (t, 4, this, "SendACK %d", serno);
   T_ACK_PDU p;
   p.serno = serno;
   L_Data_PDU *l = new L_Data_PDU;
@@ -416,7 +415,7 @@ T_Connection::SendData (int serno, const CArray & c)
   T_DATA_CONNECTED_REQ_PDU p;
   p.data = c;
   p.serno = serno;
-  t->TracePrintf (4, this, "SendData %s", p.Decode ()());
+  TRACEPRINTF (t, 4, this, "SendData %s", p.Decode ()());
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
   l->dest = dest;
@@ -575,7 +574,7 @@ T_Connection::Run (pth_sem_t * stop1)
 
 GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
 {
-  tr->TracePrintf (4, this, "OpenGroupSocket %s", write_only ? "WO" : "RW");
+  TRACEPRINTF (tr, 4, this, "OpenGroupSocket %s", write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
   pth_sem_init (&sem);
@@ -586,7 +585,7 @@ GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
 
 GroupSocket::~GroupSocket ()
 {
-  t->TracePrintf (4, this, "CloseGroupSocket");
+  TRACEPRINTF (t, 4, this, "CloseGroupSocket");
   layer3->deregisterGroupCallBack (this, 0);
 }
 
@@ -613,7 +612,7 @@ GroupSocket::Send (const GroupAPDU & c)
   T_DATA_XXX_REQ_PDU t;
   t.data = c.data;
   String s = t.Decode ();
-  this->t->TracePrintf (4, this, "Send GroupSocket %s", s ());
+  TRACEPRINTF (this->t, 4, this, "Send GroupSocket %s", s ());
   L_Data_PDU *l = new L_Data_PDU;
   l->source = 0;
   l->dest = c.dst;

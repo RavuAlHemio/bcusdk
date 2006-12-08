@@ -23,13 +23,13 @@
 Layer7_Broadcast::Layer7_Broadcast (Layer3 * l3, Trace * tr)
 {
   t = tr;
-  t->TracePrintf (5, this, "L7Broadcast Open");
+  TRACEPRINTF (t, 5, this, "L7Broadcast Open");
   l4 = new T_Broadcast (l3, tr, 0);
 }
 
 Layer7_Broadcast::~Layer7_Broadcast ()
 {
-  t->TracePrintf (5, this, "L7Broadcast Close");
+  TRACEPRINTF (t, 5, this, "L7Broadcast Close");
   delete l4;
 }
 
