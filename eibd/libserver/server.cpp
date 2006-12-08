@@ -24,7 +24,7 @@
 
 Server::~Server ()
 {
-  t->TracePrintf (8, this, "StopServer");
+  TRACEPRINTF (t, 8, this, "StopServer");
   Stop ();
   for (int i = 0; i < connections (); i++)
     connections[i]->StopDelete ();
@@ -32,7 +32,7 @@ Server::~Server ()
     pth_yield (0);
 
   close (fd);
-  t->TracePrintf (8, this, "Server ended");
+  TRACEPRINTF (t, 8, this, "Server ended");
 }
 
 bool
@@ -63,7 +63,7 @@ Server::Run (pth_sem_t * stop1)
       cfd = pth_accept_ev (fd, 0, 0, stop);
       if (cfd != -1)
 	{
-	  t->TracePrintf (8, this, "New Connection");
+	  TRACEPRINTF (t, 8, this, "New Connection");
 	  ClientConnection *c = new ClientConnection (this, l3, t, cfd);
 	  connections.setpart (&c, connections (), 1);
 	  c->Start ();

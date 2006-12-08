@@ -26,7 +26,7 @@ LocalServer::LocalServer (Layer3 * la3, Trace * tr, const char *path):
 Server (la3, tr)
 {
   struct sockaddr_un addr;
-  tr->TracePrintf (8, this, "OpenLocalSocket");
+  TRACEPRINTF (tr, 8, this, "OpenLocalSocket");
   addr.sun_family = AF_LOCAL;
   strncpy (addr.sun_path, path, sizeof (addr.sun_path));
 
@@ -41,6 +41,6 @@ Server (la3, tr)
   if (listen (fd, 10) == -1)
     throw Exception (DEV_OPEN_FAIL);
 
-  tr->TracePrintf (8, this, "LocalSocket opened");
+  TRACEPRINTF (tr, 8, this, "LocalSocket opened");
   Start ();
 }
