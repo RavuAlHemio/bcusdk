@@ -39,8 +39,6 @@ void
 Trace::TracePrintf (int layer, void *inst, const char *msg, ...)
 {
   va_list ap;
-  if (!(layers & (1 << layer)))
-    return;
   int t = time (0);
   printf ("Layer %d(%08X,%08X) ", layer, (unsigned long) inst, t);
   va_start (ap, msg);

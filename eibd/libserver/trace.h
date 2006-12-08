@@ -71,7 +71,7 @@ public:
   void TracePacket (int layer, void *inst, const char *msg, int Len,
 		    const uchar * data)
   {
-    if (!(layers & (1 << layer)))
+    if (!ShowPrint (layer))
       return;
     TracePacketUncond (layer, inst, msg, Len, data);
   }
@@ -92,6 +92,20 @@ public:
    * @param msg Message
    */
   virtual void TracePrintf (int layer, void *inst, const char *msg, ...);
+
+  /** should trace message be written
+   * @parm layer level of the message
+   * @return bool
+   */
+  bool ShowPrint (int layer)
+  {
+    if (layers & (1 << layer))
+      return 0;
+    else
+      return 1;
+  }
 };
+
+#define TRACEPRINTF(trace, layer, msg, args...) do { if ((trace)->ShowPrint(layer)) (trace)->TracePrintf(layer, msg, ##args); } while (0)
 
 #endif
