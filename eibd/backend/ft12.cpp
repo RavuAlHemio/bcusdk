@@ -28,7 +28,7 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
   struct termios t1;
   t = tr;
 
-  t->TracePrintf (1, this, "Open");
+  TRACEPRINTF (t, 1, this, "Open");
   fd = open (dev, O_RDWR | O_NOCTTY);
   if (fd == -1)
     throw Exception (DEV_OPEN_FAIL);
@@ -55,7 +55,7 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
   pth_sem_set_value (&send_empty, 1);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
-  t->TracePrintf (1, this, "Opened");
+  TRACEPRINTF (t, 1, this, "Opened");
 }
 
 FT12LowLevelDriver::~FT12LowLevelDriver ()
@@ -66,7 +66,7 @@ FT12LowLevelDriver::~FT12LowLevelDriver ()
   while (!outqueue.isempty ())
     delete outqueue.get ();
 
-  t->TracePrintf (1, this, "Close");
+  TRACEPRINTF (t, 1, this, "Close");
   if (fd != -1)
     {
       tcsetattr (fd, TCSAFLUSH, &old);
@@ -110,7 +110,7 @@ void
 FT12LowLevelDriver::SendReset ()
 {
   CArray pdu;
-  t->TracePrintf (1, this, "SendReset");
+  TRACEPRINTF (t, 1, this, "SendReset");
   pdu.resize (4);
   pdu[0] = 0x10;
   pdu[1] = 0x40;
@@ -254,11 +254,11 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 		{
 		  if (CArray (akt.array () + 5, akt[1] - 1) != last)
 		    {
-		      t->TracePrintf (0, this, "Sequence jump");
+		      TRACEPRINTF (t, 0, this, "Sequence jump");
 		      recvflag = !recvflag;
 		    }
 		  else
-		    t->TracePrintf (0, this, "Wrong Sequence");
+		    TRACEPRINTF (t, 0, this, "Wrong Sequence");
 		}
 
 	      if ((akt[4] == 0xF3 && !recvflag) ||

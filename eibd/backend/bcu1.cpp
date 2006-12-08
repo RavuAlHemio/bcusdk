@@ -26,7 +26,7 @@ BCU1DriverLowLevelDriver::BCU1DriverLowLevelDriver (const char *dev,
 						    Trace * tr)
 {
   t = tr;
-  t->TracePrintf (1, this, "Open");
+  TRACEPRINTF (t, 1, this, "Open");
   fd = open (dev, O_RDWR);
   if (fd == -1)
     throw Exception (DEV_OPEN_FAIL);
@@ -48,18 +48,18 @@ BCU1DriverLowLevelDriver::BCU1DriverLowLevelDriver (const char *dev,
 
   if (pth_event_status (send_done) != PTH_STATUS_OCCURRED)
     {
-      t->TracePrintf (1, this, "Driver select extension missing");
+      TRACEPRINTF (t, 1, this, "Driver select extension missing");
       pth_event_free (send_done, PTH_FREE_THIS);
       send_done = 0;
     }
 
   Start ();
-  t->TracePrintf (1, this, "Opened");
+  TRACEPRINTF (t, 1, this, "Opened");
 }
 
 BCU1DriverLowLevelDriver::~BCU1DriverLowLevelDriver ()
 {
-  t->TracePrintf (1, this, "Close");
+  TRACEPRINTF (t, 1, this, "Close");
   Stop ();
   if (send_done)
     pth_event_free (send_done, PTH_FREE_THIS);

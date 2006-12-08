@@ -43,7 +43,7 @@ TPUARTLayer2Driver::TPUARTLayer2Driver (int version, const char *device,
 					eibaddr_t a, Trace * tr)
 {
   t = tr;
-  t->TracePrintf (2, this, "Open");
+  TRACEPRINTF (t, 2, this, "Open");
   addr = a;
   ver = version;
 
@@ -59,12 +59,12 @@ TPUARTLayer2Driver::TPUARTLayer2Driver (int version, const char *device,
   mode = 0;
   vmode = 0;
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
-  t->TracePrintf (2, this, "Opened");
+  TRACEPRINTF (t, 2, this, "Opened");
 }
 
 TPUARTLayer2Driver::~TPUARTLayer2Driver ()
 {
-  t->TracePrintf (2, this, "Close");
+  TRACEPRINTF (t, 2, this, "Close");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
   while (!inqueue.isempty ())
@@ -153,7 +153,7 @@ bool TPUARTLayer2Driver::Send_Queue_Empty ()
 void
 TPUARTLayer2Driver::Send_L_Data (LPDU * l)
 {
-  t->TracePrintf (2, this, "Send %s", l->Decode ()());
+  TRACEPRINTF (t, 2, this, "Send %s", l->Decode ()());
   inqueue.put (l);
   pth_sem_inc (&in_signal, 1);
 }
@@ -173,7 +173,7 @@ TPUARTLayer2Driver::Get_L_Data (pth_event_t stop)
     {
       pth_sem_dec (&out_signal);
       LPDU *l = outqueue.get ();
-      t->TracePrintf (2, this, "Recv %s", l->Decode ()());
+      TRACEPRINTF (t, 2, this, "Recv %s", l->Decode ()());
       return l;
     }
   else

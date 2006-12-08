@@ -44,7 +44,7 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
 {
   struct termios t1;
   t = tr;
-  t->TracePrintf (2, this, "Open");
+  TRACEPRINTF (t, 2, this, "Open");
 
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
@@ -83,12 +83,12 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
   Start ();
-  t->TracePrintf (2, this, "Openend");
+  TRACEPRINTF (t, 2, this, "Openend");
 }
 
 TPUARTSerialLayer2Driver::~TPUARTSerialLayer2Driver ()
 {
-  t->TracePrintf (2, this, "Close");
+  TRACEPRINTF (t, 2, this, "Close");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
 
@@ -190,7 +190,7 @@ TPUARTSerialLayer2Driver::Send_Queue_Empty ()
 void
 TPUARTSerialLayer2Driver::Send_L_Data (LPDU * l)
 {
-  t->TracePrintf (2, this, "Send %s", l->Decode ()());
+  TRACEPRINTF (t, 2, this, "Send %s", l->Decode ()());
   inqueue.put (l);
   pth_sem_inc (&in_signal, 1);
 }
@@ -210,7 +210,7 @@ TPUARTSerialLayer2Driver::Get_L_Data (pth_event_t stop)
     {
       pth_sem_dec (&out_signal);
       LPDU *l = outqueue.get ();
-      t->TracePrintf (2, this, "Recv %s", l->Decode ()());
+      TRACEPRINTF (t, 2, this, "Recv %s", l->Decode ()());
       return l;
     }
   else
@@ -338,7 +338,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		    }
 		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
 		    break;
-		  t->TracePrintf (0, this, "Remove1 %02X", in[0]);
+		  TRACEPRINTF (t, 0, this, "Remove1 %02X", in[0]);
 		  in.deletepart (0, 1);
 		  continue;
 		}
@@ -357,7 +357,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 			if (groupaddr[i] == (in[3] << 8) | in[4])
 			  c |= 0x1;
 		    }
-		  t->TracePrintf (0, this, "SendAck %02X", c);
+		  TRACEPRINTF (t, 0, this, "SendAck %02X", c);
 		  pth_write_ev (fd, &c, 1, stop);
 		  acked = 1;
 		}
@@ -373,7 +373,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		    }
 		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
 		    break;
-		  t->TracePrintf (0, this, "Remove2 %02X", in[0]);
+		  TRACEPRINTF (t, 0, this, "Remove2 %02X", in[0]);
 		  in.deletepart (0, 1);
 		  continue;
 		}
@@ -384,7 +384,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	  else
 	    {
 	      acked = 0;
-	      t->TracePrintf (0, this, "Remove %02X", in[0]);
+	      TRACEPRINTF (t, 0, this, "Remove %02X", in[0]);
 	      in.deletepart (0, 1);
 	    }
 	  to = 0;

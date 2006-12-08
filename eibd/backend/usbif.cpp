@@ -204,25 +204,25 @@ USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
   unsigned char devnum;
 
   t = tr;
-  t->TracePrintf (1, this, "Detect");
+  TRACEPRINTF (t, 1, this, "Detect");
   USBEndpoint e = parseUSBEndpoint (Dev);
   d = detectUSBEndpoint (e);
   if (d.dev == -1)
     throw Exception (DEV_OPEN_FAIL);
   libusb_get_devnum (d.dev, &devnum);
   libusb_get_bus_id (d.dev, &bus);
-  t->TracePrintf (1, this, "Using %d (%d:%d:%d:%d) (%d:%d)", d.dev,
-		  libusb_get_busnum (bus),
-		  devnum, d.config, d.interface, d.sendep, d.recvep);
+  TRACEPRINTF (t, 1, this, "Using %d (%d:%d:%d:%d) (%d:%d)", d.dev,
+	       libusb_get_busnum (bus),
+	       devnum, d.config, d.interface, d.sendep, d.recvep);
   if (libusb_open (d.dev, &dev) < 0)
     throw Exception (DEV_OPEN_FAIL);
-  t->TracePrintf (1, this, "Open");
+  TRACEPRINTF (t, 1, this, "Open");
   libusb_detach_kernel_driver_np (dev, d.interface);
   if (libusb_set_configuration (dev, d.config) < 0)
     throw Exception (DEV_OPEN_FAIL);
   if (libusb_claim_interface (dev, d.interface) < 0)
     throw Exception (DEV_OPEN_FAIL);
-  t->TracePrintf (1, this, "Claimed");
+  TRACEPRINTF (t, 1, this, "Claimed");
 
   pth_sem_init (&in_signal);
   pth_sem_init (&out_signal);
@@ -230,19 +230,19 @@ USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
   pth_sem_set_value (&send_empty, 1);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
-  t->TracePrintf (1, this, "Opened");
+  TRACEPRINTF (t, 1, this, "Opened");
 }
 
 USBLowLevelDriver::~USBLowLevelDriver ()
 {
-  t->TracePrintf (1, this, "Close");
+  TRACEPRINTF (t, 1, this, "Close");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
 
-  t->TracePrintf (1, this, "Release");
+  TRACEPRINTF (t, 1, this, "Release");
   libusb_release_interface (dev, d.interface);
   libusb_attach_kernel_driver_np (dev, d.interface);
-  t->TracePrintf (1, this, "Close");
+  TRACEPRINTF (t, 1, this, "Close");
   libusb_close (dev);
 }
 
@@ -331,10 +331,10 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 					  sizeof (recvbuf), 1000, 0);
 	  if (!recvh)
 	    {
-	      t->TracePrintf (0, this, "Error StartRecv");
+	      TRACEPRINTF (t, 0, this, "Error StartRecv");
 	      break;
 	    }
-	  t->TracePrintf (0, this, "StartRecv");
+	  TRACEPRINTF (t, 0, this, "StartRecv");
 	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
 		     PTH_UNTIL_FD_WRITEABLE, recve,
 		     libusb_io_wait_handle (recvh));
@@ -343,12 +343,12 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
       if (recvh && libusb_is_io_completed (recvh))
 	{
 	  if (libusb_io_comp_status (recvh) < 0)
-	    t->TracePrintf (0, this, "RecvError %d",
-			    libusb_io_comp_status (recvh));
+	    TRACEPRINTF (t, 0, this, "RecvError %d",
+			 libusb_io_comp_status (recvh));
 	  else
 	    {
-	      t->TracePrintf (0, this, "RecvComplete %d",
-			      libusb_io_xfer_size (recvh));
+	      TRACEPRINTF (t, 0, this, "RecvComplete %d",
+			   libusb_io_xfer_size (recvh));
 	      CArray res;
 	      res.set (recvbuf, sizeof (recvbuf));
 	      t->TracePacket (0, this, "RecvUSB", res);
@@ -363,12 +363,12 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
       if (sendh && libusb_is_io_completed (sendh))
 	{
 	  if (libusb_io_comp_status (sendh) < 0)
-	    t->TracePrintf (0, this, "SendError %d",
-			    libusb_io_comp_status (sendh));
+	    TRACEPRINTF (t, 0, this, "SendError %d",
+			 libusb_io_comp_status (sendh));
 	  else
 	    {
-	      t->TracePrintf (0, this, "SendComplete %d",
-			      libusb_io_xfer_size (sendh));
+	      TRACEPRINTF (t, 0, this, "SendComplete %d",
+			   libusb_io_xfer_size (sendh));
 	      pth_sem_dec (&in_signal);
 	      inqueue.get ();
 	      if (inqueue.isempty ())
@@ -391,10 +391,10 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 					   sizeof (sendbuf), 1000, 0);
 	  if (!sendh)
 	    {
-	      t->TracePrintf (0, this, "Error StartSend");
+	      TRACEPRINTF (t, 0, this, "Error StartSend");
 	      break;
 	    }
-	  t->TracePrintf (0, this, "StartSend");
+	  TRACEPRINTF (t, 0, this, "StartSend");
 	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
 		     PTH_UNTIL_FD_WRITEABLE, sende,
 		     libusb_io_wait_handle (sendh));

@@ -26,7 +26,7 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
   struct sockaddr_in baddr;
   struct ip_mreq mcfg;
   t = tr;
-  t->TracePrintf (2, this, "Open");
+  TRACEPRINTF (t, 2, this, "Open");
   addr = a;
   mode = 0;
   vmode = 0;
@@ -46,12 +46,12 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
   pth_sem_init (&out_signal);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
-  t->TracePrintf (2, this, "Opened");
+  TRACEPRINTF (t, 2, this, "Opened");
 }
 
 EIBNetIPRouter::~EIBNetIPRouter ()
 {
-  t->TracePrintf (2, this, "Destroy");
+  TRACEPRINTF (t, 2, this, "Destroy");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
   while (!outqueue.isempty ())
@@ -62,7 +62,7 @@ EIBNetIPRouter::~EIBNetIPRouter ()
 void
 EIBNetIPRouter::Send_L_Data (LPDU * l)
 {
-  t->TracePrintf (2, this, "Send %s", l->Decode ()());
+  TRACEPRINTF (t, 2, this, "Send %s", l->Decode ()());
   if (l->getType () != L_Data)
     {
       delete l;
@@ -91,7 +91,7 @@ EIBNetIPRouter::Get_L_Data (pth_event_t stop)
     {
       pth_sem_dec (&out_signal);
       LPDU *l = outqueue.get ();
-      t->TracePrintf (2, this, "Recv %s", l->Decode ()());
+      TRACEPRINTF (t, 2, this, "Recv %s", l->Decode ()());
       return l;
     }
   else
@@ -123,7 +123,7 @@ EIBNetIPRouter::Run (pth_sem_t * stop1)
 	  L_Data_PDU *c = CEMI_to_L_Data (data);
 	  if (c)
 	    {
-	      t->TracePrintf (2, this, "Recv %s", c->Decode ()());
+	      TRACEPRINTF (t, 2, this, "Recv %s", c->Decode ()());
 	      if (mode == 0)
 		{
 		  if (vmode)

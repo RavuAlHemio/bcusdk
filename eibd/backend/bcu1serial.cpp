@@ -85,7 +85,7 @@ BCU1SerialLowLevelDriver::BCU1SerialLowLevelDriver (const char *dev,
   struct termios ti;
 
   t = tr;
-  t->TracePrintf (1, this, "Open");
+  TRACEPRINTF (t, 1, this, "Open");
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
     throw Exception (DEV_OPEN_FAIL);
@@ -118,12 +118,12 @@ BCU1SerialLowLevelDriver::BCU1SerialLowLevelDriver (const char *dev,
   pth_sem_set_value (&send_empty, 1);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
-  t->TracePrintf (1, this, "Opened");
+  TRACEPRINTF (t, 1, this, "Opened");
 }
 
 BCU1SerialLowLevelDriver::~BCU1SerialLowLevelDriver ()
 {
-  t->TracePrintf (1, this, "Close");
+  TRACEPRINTF (t, 1, this, "Close");
   Stop ();
   pth_event_free (getwait, PTH_FREE_THIS);
 
@@ -172,7 +172,7 @@ BCU1SerialLowLevelDriver::startsync ()
       if (to > 0x10000)
 	throw (int) 1;
     }
-  t->TracePrintf (0, this, "Startsync");
+  TRACEPRINTF (t, 0, this, "Startsync");
 }
 
 void
@@ -188,7 +188,7 @@ BCU1SerialLowLevelDriver::endsync ()
       if (to > 0x10000)
 	throw (int) 2;
     }
-  t->TracePrintf (0, this, "Endsync");
+  TRACEPRINTF (t, 0, this, "Endsync");
 }
 
 uchar
@@ -205,7 +205,7 @@ BCU1SerialLowLevelDriver::exchange (uchar c, pth_event_t stop)
       if (to > 0x10000)
 	throw (int) 3;
     }
-  t->TracePrintf (0, this, "exchange %02X <->%02X", c, s);
+  TRACEPRINTF (t, 0, this, "exchange %02X <->%02X", c, s);
   return s;
 }
 
@@ -265,7 +265,7 @@ BCU1SerialLowLevelDriver::Run (pth_sem_t * stop1)
 	    if (s != 0x00)
 	      throw 10;
 	    inqueue.get ();
-	    t->TracePrintf (0, this, "Sent");
+	    TRACEPRINTF (t, 0, this, "Sent");
 	    pth_sem_dec (&in_signal);
 	    if (inqueue.isempty ())
 	      pth_sem_set_value (&send_empty, 1);
@@ -279,25 +279,25 @@ BCU1SerialLowLevelDriver::Run (pth_sem_t * stop1)
 		r[i] = exchange (0, stop);
 		endsync ();
 	      }
-	    t->TracePrintf (0, this, "Recv");
+	    TRACEPRINTF (t, 0, this, "Recv");
 	    outqueue.put (new CArray (r));
 	    pth_sem_inc (&out_signal, 1);
 	  }
 	gettimeofday (&v2, 0);
-	t->TracePrintf (1, this, "Recvtime: %d",
-			v2.tv_sec * 1000000L + v2.tv_usec -
-			(v1.tv_sec * 1000000L + v1.tv_usec));
+	TRACEPRINTF (t, 1, this, "Recvtime: %d",
+		     v2.tv_sec * 1000000L + v2.tv_usec -
+		     (v1.tv_sec * 1000000L + v1.tv_usec));
       }
       catch (int x)
       {
 	gettimeofday (&v2, 0);
-	t->TracePrintf (1, this, "ERecvtime: %d",
-			v2.tv_sec * 1000000L + v2.tv_usec -
-			(v1.tv_sec * 1000000L + v1.tv_usec));
+	TRACEPRINTF (t, 1, this, "ERecvtime: %d",
+		     v2.tv_sec * 1000000L + v2.tv_usec -
+		     (v1.tv_sec * 1000000L + v1.tv_usec));
 	setstat (getstat () & ~(TIOCM_RTS | TIOCM_CTS));
 	pth_usleep (2000);
 	while ((getstat () & TIOCM_CTS));
-	t->TracePrintf (0, this, "Restart %d", x);
+	TRACEPRINTF (t, 0, this, "Restart %d", x);
       }
 
       pth_event_isolate (timeout);
