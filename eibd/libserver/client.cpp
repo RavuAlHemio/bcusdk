@@ -42,7 +42,7 @@ ClientConnection::~ClientConnection ()
   TRACEPRINTF (t, 8, this, "ClientConnection closed");
   s->deregister (this);
   if (buf)
-    delete buf;
+    delete[] buf;
   close (fd);
 }
 
@@ -220,7 +220,7 @@ ClientConnection::readmessage (pth_event_t stop)
   if (size > buflen)
     {
       if (buf)
-	delete buf;
+	delete[] buf;
       buf = new uchar[size];
       buflen = size;
     }
