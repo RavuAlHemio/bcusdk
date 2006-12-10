@@ -100,9 +100,9 @@ public:
   bool ShowPrint (int layer)
   {
     if (layers & (1 << layer))
-      return 0;
-    else
       return 1;
+    else
+      return 0;
   }
 };
 
