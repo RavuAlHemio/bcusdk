@@ -50,6 +50,7 @@ T_Broadcast::Get_L_Data (L_Data_PDU * l)
       outqueue.put (c);
       pth_sem_inc (&sem, 0);
     }
+  delete t;
   delete l;
 }
 
@@ -119,6 +120,7 @@ T_Group::Get_L_Data (L_Data_PDU * l)
       outqueue.put (c);
       pth_sem_inc (&sem, 0);
     }
+  delete t;
   delete l;
 }
 
@@ -256,6 +258,7 @@ T_Individual::Get_L_Data (L_Data_PDU * l)
       outqueue.put (c);
       pth_sem_inc (&sem, 0);
     }
+  delete t;
   delete l;
 }
 
@@ -603,6 +606,7 @@ GroupSocket::Get_L_Data (L_Data_PDU * l)
       outqueue.put (c);
       pth_sem_inc (&sem, 0);
     }
+  delete t;
   delete l;
 }
 
