@@ -302,6 +302,19 @@ static int
 CheckRequest (EIBConnection * con)
 {
   int i;
+  struct timeval tv;
+  fd_set readset;
+
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+  FD_ZERO (&readset);
+  FD_SET (con->fd, &readset);
+  if (select (con->fd + 1, &readset, 0, 0, &tv) == -1)
+    return -1;
+
+  if (!FD_ISSET (con->fd, &readset))
+    return 0;
+
   if (con->readlen < 2)
     {
       uchar head[2];
