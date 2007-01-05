@@ -120,7 +120,7 @@ PatchImage (Image & i, Device & d)
 	      die (_("missing parameter value for %s"), p.ID ());
 	    if (strlen (p.Value ()) + 1 > l->length)
 	      die (_("string value for %s too long"), p.ID ());
-	    strcpy ((char *) c + l->addr, p.Value ());
+	    strcpy ((char *) c + l->addr - 0x100, p.Value ());
 	  }
 	  break;
 	case S_IntParameter:
@@ -136,30 +136,30 @@ PatchImage (Image & i, Device & d)
 	      {
 	      case 1:
 	      case -1:
-		c[l->addr] = p.Value & 0xff;
+		c[l->addr - 0x100] = p.Value & 0xff;
 		break;
 	      case 2:
 	      case -2:
-		c[l->addr + 0] = (p.Value >> 8) & 0xff;
-		c[l->addr + 1] = p.Value & 0xff;
+		c[l->addr + 0 - 0x100] = (p.Value >> 8) & 0xff;
+		c[l->addr + 1 - 0x100] = p.Value & 0xff;
 		break;
 	      case 3:
 	      case -3:
-		c[l->addr + 0] = (p.Value >> 24) & 0xff;
-		c[l->addr + 1] = (p.Value >> 16) & 0xff;
-		c[l->addr + 2] = (p.Value >> 8) & 0xff;
-		c[l->addr + 3] = p.Value & 0xff;
+		c[l->addr + 0 - 0x100] = (p.Value >> 24) & 0xff;
+		c[l->addr + 1 - 0x100] = (p.Value >> 16) & 0xff;
+		c[l->addr + 2 - 0x100] = (p.Value >> 8) & 0xff;
+		c[l->addr + 3 - 0x100] = p.Value & 0xff;
 		break;
 	      case 4:
 	      case -4:
-		c[l->addr + 0] = (p.Value >> 56) & 0xff;
-		c[l->addr + 1] = (p.Value >> 48) & 0xff;
-		c[l->addr + 2] = (p.Value >> 40) & 0xff;
-		c[l->addr + 3] = (p.Value >> 32) & 0xff;
-		c[l->addr + 4] = (p.Value >> 24) & 0xff;
-		c[l->addr + 5] = (p.Value >> 16) & 0xff;
-		c[l->addr + 6] = (p.Value >> 8) & 0xff;
-		c[l->addr + 7] = p.Value & 0xff;
+		c[l->addr + 0 - 0x100] = (p.Value >> 56) & 0xff;
+		c[l->addr + 1 - 0x100] = (p.Value >> 48) & 0xff;
+		c[l->addr + 2 - 0x100] = (p.Value >> 40) & 0xff;
+		c[l->addr + 3 - 0x100] = (p.Value >> 32) & 0xff;
+		c[l->addr + 4 - 0x100] = (p.Value >> 24) & 0xff;
+		c[l->addr + 5 - 0x100] = (p.Value >> 16) & 0xff;
+		c[l->addr + 6 - 0x100] = (p.Value >> 8) & 0xff;
+		c[l->addr + 7 - 0x100] = p.Value & 0xff;
 		break;
 	      default:
 		die (_("unknown type %d for parameter %s"), l->type, p.ID ());
@@ -178,7 +178,7 @@ PatchImage (Image & i, Device & d)
 	    float f = p.Value;
 	    uchar v[4];
 	    ToTargetFloat (v, f);
-	    memcpy (c + l->addr, v, 4);
+	    memcpy (c + l->addr - 0x100, v, 4);
 	  }
 	  break;
 	case S_ListParameter:
@@ -199,12 +199,12 @@ PatchImage (Image & i, Device & d)
 		   p.ID ());
 	    if (i < 0x100)
 	      {
-		c[l->addr] = i & 0xff;
+		c[l->addr - 0x100] = i & 0xff;
 	      }
 	    else
 	      {
-		c[l->addr + 0] = (i >> 8) & 0xff;
-		c[l->addr + 1] = i & 0xff;
+		c[l->addr + 0 - 0x100] = (i >> 8) & 0xff;
+		c[l->addr + 1 - 0x100] = i & 0xff;
 	      }
 	  }
 	  break;
