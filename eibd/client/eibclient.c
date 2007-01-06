@@ -299,21 +299,24 @@ lp2:
 }
 
 static int
-CheckRequest (EIBConnection * con)
+CheckRequest (EIBConnection * con, int block)
 {
   int i;
   struct timeval tv;
   fd_set readset;
 
-  tv.tv_sec = 0;
-  tv.tv_usec = 0;
-  FD_ZERO (&readset);
-  FD_SET (con->fd, &readset);
-  if (select (con->fd + 1, &readset, 0, 0, &tv) == -1)
-    return -1;
+  if (!block)
+    {
+      tv.tv_sec = 0;
+      tv.tv_usec = 0;
+      FD_ZERO (&readset);
+      FD_SET (con->fd, &readset);
+      if (select (con->fd + 1, &readset, 0, 0, &tv) == -1)
+	return -1;
 
-  if (!FD_ISSET (con->fd, &readset))
-    return 0;
+      if (!FD_ISSET (con->fd, &readset))
+	return 0;
+    }
 
   if (con->readlen < 2)
     {
@@ -376,7 +379,7 @@ GetRequest (EIBConnection * con)
 {
   do
     {
-      if (CheckRequest (con) == -1)
+      if (CheckRequest (con, 1) == -1)
 	return -1;
     }
   while (con->readlen < 2
@@ -395,7 +398,7 @@ EIB_Poll_Complete (EIBConnection * con)
       errno = EINVAL;
       return -1;
     }
-  if (CheckRequest (con) == -1)
+  if (CheckRequest (con, 0) == -1)
     return -1;
   return (con->readlen >= 2 && con->readlen >= con->size + 2) ? 1 : 0;
 }
