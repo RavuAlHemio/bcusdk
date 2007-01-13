@@ -152,7 +152,8 @@ static struct argp_option options[] = {
   {"daemon", 'd', "FILE", OPTION_ARG_OPTIONAL,
    "start the programm as daemon, the output will be written to FILE, if the argument present"},
 #ifdef HAVE_EIBNETIPSERVER
-  {"Tunnelling", 'T', 0, 0, "enable EIBnet/IP Tunneling in the EIBnet/IP server"},
+  {"Tunnelling", 'T', 0, 0,
+   "enable EIBnet/IP Tunneling in the EIBnet/IP server"},
   {"Routing", 'R', 0, 0, "enable EIBnet/IP Routing in the EIBnet/IP server"},
   {"Discovery", 'D', 0, 0,
    "enable the EIBnet/IP server to answer discovery and description requests (SEARCH, DESCRIPTION)"},
@@ -208,6 +209,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 /** information for the argument parser*/
 static struct argp argp = { options, parse_opt, args_doc, doc };
 
+#ifdef HAVE_EIBNETIPSERVER
 EIBnetServer *
 startServer (Layer3 * l3, Trace * t)
 {
@@ -235,6 +237,7 @@ startServer (Layer3 * l3, Trace * t)
   free (a);
   return c;
 }
+#endif
 
 int
 main (int ac, char *ag[])
@@ -243,7 +246,9 @@ main (int ac, char *ag[])
   Queue < Server * >server;
   Layer2Interface *l2;
   Layer3 *l3;
+#ifdef HAVE_EIBNETIPSERVER
   EIBnetServer *serv = 0;
+#endif
 
   memset (&arg, 0, sizeof (arg));
   arg.addr = 0x0001;
@@ -298,7 +303,9 @@ main (int ac, char *ag[])
       server.put (new InetServer (l3, &t, arg.port));
     if (arg.name)
       server.put (new LocalServer (l3, &t, arg.name));
+#ifdef HAVE_EIBNETIPSERVER
     serv = startServer (l3, &t);
+#endif
   }
   catch (Exception e)
   {
@@ -320,8 +327,10 @@ main (int ac, char *ag[])
 
   while (!server.isempty ())
     delete server.get ();
+#ifdef HAVE_EIBNETIPSERVER
   if (serv)
     delete serv;
+#endif
 
   delete l3;
 
