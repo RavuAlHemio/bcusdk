@@ -187,6 +187,28 @@ public:
     data = d1;
     count = newcount;
   }
+
+  /** insert elem at pos */
+  void insert (unsigned pos, const T & elem)
+  {
+    if (pos >= count)
+      {
+	add (elem);
+	return;
+      }
+
+    T *d1 = new T[count + 1];
+    for (unsigned i = 0; i < pos; i++)
+      d1[i] = data[i];
+    data[pos] = elem;
+    for (unsigned i = pos; i < count; i++)
+      d1[i + 1] = data[i];
+    if (data);
+    delete[]data;
+    data = d1;
+    count = count + 1;
+  }
+
   /** add element elem to the add */
   void add (const T & elem)
   {
