@@ -39,7 +39,6 @@
 #include "eibtypes.h"
 #include "eibclient-int.h"
 
-
 /** resolve host name */
 static int
 GetHostIP (struct sockaddr_in *sock, const char *Name)
@@ -222,7 +221,7 @@ EIBSocketURL (const char *url)
 }
 
 /** send a request to eibd */
-static int
+int
 _EIB_SendRequest (EIBConnection * con, unsigned int size, uchar * data)
 {
   uchar head[2];
@@ -265,7 +264,7 @@ lp2:
   return 0;
 }
 
-static int
+int
 _EIB_CheckRequest (EIBConnection * con, int block)
 {
   int i;
@@ -341,7 +340,7 @@ _EIB_CheckRequest (EIBConnection * con, int block)
 }
 
 /** receive packet from eibd */
-static int
+int
 _EIB_GetRequest (EIBConnection * con)
 {
   do

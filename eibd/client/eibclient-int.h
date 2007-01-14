@@ -63,4 +63,8 @@ struct _EIBConnection
 /** set EIB address */
 #define EIBSETADDR(buf,type) do{(buf)[0]=(type>>8)&0xff;(buf)[1]=(type)&0xff;}while(0)
 
+int _EIB_SendRequest (EIBConnection * con, unsigned int size, uchar * data);
+int _EIB_CheckRequest (EIBConnection * con, int block);
+int _EIB_GetRequest (EIBConnection * con);
+
 #endif
