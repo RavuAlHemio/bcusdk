@@ -256,7 +256,7 @@ EIBSocketURL (const char *url)
 
 /** send a request to eibd */
 static int
-SendRequest (EIBConnection * con, unsigned int size, uchar * data)
+_EIB_SendRequest (EIBConnection * con, unsigned int size, uchar * data)
 {
   uchar head[2];
   int i, start;
@@ -299,7 +299,7 @@ lp2:
 }
 
 static int
-CheckRequest (EIBConnection * con, int block)
+_EIB_CheckRequest (EIBConnection * con, int block)
 {
   int i;
   struct timeval tv;
@@ -375,11 +375,11 @@ CheckRequest (EIBConnection * con, int block)
 
 /** receive packet from eibd */
 static int
-GetRequest (EIBConnection * con)
+_EIB_GetRequest (EIBConnection * con)
 {
   do
     {
-      if (CheckRequest (con, 1) == -1)
+      if (_EIB_CheckRequest (con, 1) == -1)
 	return -1;
     }
   while (con->readlen < 2
@@ -398,7 +398,7 @@ EIB_Poll_Complete (EIBConnection * con)
       errno = EINVAL;
       return -1;
     }
-  if (CheckRequest (con, 0) == -1)
+  if (_EIB_CheckRequest (con, 0) == -1)
     return -1;
   return (con->readlen >= 2 && con->readlen >= con->size + 2) ? 1 : 0;
 }
@@ -429,7 +429,7 @@ static int
 OpenBusmonitor_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -457,7 +457,7 @@ EIBOpenBusmonitor_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (head, EIB_OPEN_BUSMONITOR);
-  i = SendRequest (con, 2, head);
+  i = _EIB_SendRequest (con, 2, head);
   if (i == -1)
     return -1;
 
@@ -477,7 +477,7 @@ static int
 OpenBusmonitorText_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -505,7 +505,7 @@ EIBOpenBusmonitorText_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (head, EIB_OPEN_BUSMONITOR_TEXT);
-  i = SendRequest (con, 2, head);
+  i = _EIB_SendRequest (con, 2, head);
   if (i == -1)
     return -1;
   con->complete = OpenBusmonitorText_complete;
@@ -524,7 +524,7 @@ static int
 OpenVBusmonitor_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -552,7 +552,7 @@ EIBOpenVBusmonitor_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (head, EIB_OPEN_VBUSMONITOR);
-  i = SendRequest (con, 2, head);
+  i = _EIB_SendRequest (con, 2, head);
   if (i == -1)
     return -1;
   con->complete = OpenVBusmonitor_complete;
@@ -571,7 +571,7 @@ static int
 OpenVBusmonitorText_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -599,7 +599,7 @@ EIBOpenVBusmonitorText_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (head, EIB_OPEN_VBUSMONITOR_TEXT);
-  i = SendRequest (con, 2, head);
+  i = _EIB_SendRequest (con, 2, head);
   if (i == -1)
     return -1;
   con->complete = OpenVBusmonitorText_complete;
@@ -624,7 +624,7 @@ EIBGetBusmonitorPacket (EIBConnection * con, int maxlen, uint8_t * buf)
       return -1;
     }
 
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -644,7 +644,7 @@ static int
 OpenT_Connection_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -668,7 +668,7 @@ EIBOpenT_Connection_async (EIBConnection * con, eibaddr_t dest)
     }
   EIBSETTYPE (head, EIB_OPEN_T_CONNECTION);
   EIBSETADDR (head + 2, dest);
-  i = SendRequest (con, 5, head);
+  i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
   con->complete = OpenT_Connection_complete;
@@ -687,7 +687,7 @@ static int
 OpenT_TPDU_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -711,7 +711,7 @@ EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src)
     }
   EIBSETTYPE (head, EIB_OPEN_T_TPDU);
   EIBSETADDR (head + 2, src);
-  i = SendRequest (con, 5, head);
+  i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
   con->complete = OpenT_TPDU_complete;
@@ -730,7 +730,7 @@ static int
 OpenT_Individual_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -756,7 +756,7 @@ EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
   EIBSETTYPE (head, EIB_OPEN_T_INDIVIDUAL);
   EIBSETADDR (head + 2, dest);
   head[4] = (write_only ? 0xff : 0);
-  i = SendRequest (con, 5, head);
+  i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
   con->complete = OpenT_Individual_complete;
@@ -775,7 +775,7 @@ static int
 OpenT_Group_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -800,7 +800,7 @@ EIBOpenT_Group_async (EIBConnection * con, eibaddr_t dest, int write_only)
   EIBSETTYPE (head, EIB_OPEN_T_GROUP);
   EIBSETADDR (head + 2, dest);
   head[4] = (write_only ? 0xff : 0);
-  i = SendRequest (con, 5, head);
+  i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
   con->complete = OpenT_Group_complete;
@@ -819,7 +819,7 @@ static int
 OpenT_Broadcast_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -843,7 +843,7 @@ EIBOpenT_Broadcast_async (EIBConnection * con, int write_only)
     }
   EIBSETTYPE (head, EIB_OPEN_T_BROADCAST);
   head[4] = (write_only ? 0xff : 0);
-  i = SendRequest (con, 5, head);
+  i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
   con->complete = OpenT_Broadcast_complete;
@@ -882,7 +882,7 @@ EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len, uint8_t * data)
   EIBSETTYPE (ibuf, EIB_APDU_PACKET);
   EIBSETADDR (ibuf + 2, dest);
   memcpy (ibuf + 4, data, len);
-  i = SendRequest (con, len + 4, ibuf);
+  i = _EIB_SendRequest (con, len + 4, ibuf);
   free (ibuf);
   return i;
 }
@@ -910,7 +910,7 @@ EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
     }
   EIBSETTYPE (ibuf, EIB_APDU_PACKET);
   memcpy (ibuf + 2, data, len);
-  i = SendRequest (con, len + 2, ibuf);
+  i = _EIB_SendRequest (con, len + 2, ibuf);
   free (ibuf);
   return i;
 }
@@ -925,7 +925,7 @@ EIBGetAPDU (EIBConnection * con, int maxlen, uint8_t * buf)
       return -1;
     }
 
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -952,7 +952,7 @@ EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
       return -1;
     }
 
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -974,7 +974,7 @@ static int
 Open_GroupSocket_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -998,7 +998,7 @@ EIBOpen_GroupSocket_async (EIBConnection * con, int write_only)
     }
   EIBSETTYPE (head, EIB_OPEN_GROUPCON);
   head[4] = (write_only ? 0xff : 0);
-  i = SendRequest (con, 5, head);
+  i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
   con->complete = Open_GroupSocket_complete;
@@ -1024,7 +1024,7 @@ EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
       return -1;
     }
 
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -1068,7 +1068,7 @@ EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len, uint8_t * data)
   EIBSETTYPE (ibuf, EIB_GROUP_PACKET);
   EIBSETADDR (ibuf + 2, dest);
   memcpy (ibuf + 4, data, len);
-  i = SendRequest (con, len + 4, ibuf);
+  i = _EIB_SendRequest (con, len + 4, ibuf);
   free (ibuf);
   return i;
 }
@@ -1077,7 +1077,7 @@ static int
 M_ReadIndividualAddresses_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_M_INDIVIDUAL_ADDRESS_READ)
@@ -1105,7 +1105,7 @@ EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
   con->req.len = maxlen;
   con->req.buf = buf;
   EIBSETTYPE (head, EIB_M_INDIVIDUAL_ADDRESS_READ);
-  if (SendRequest (con, 2, head) == -1)
+  if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
   con->complete = M_ReadIndividualAddresses_complete;
   return 0;
@@ -1123,7 +1123,7 @@ static int
 M_Progmode_On_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_PROG_MODE)
@@ -1146,7 +1146,7 @@ EIB_M_Progmode_On_async (EIBConnection * con, eibaddr_t dest)
   EIBSETTYPE (head, EIB_PROG_MODE);
   EIBSETADDR (head + 2, dest);
   head[4] = 1;
-  if (SendRequest (con, 5, head) == -1)
+  if (_EIB_SendRequest (con, 5, head) == -1)
     return -1;
   con->complete = M_Progmode_On_complete;
   return 0;
@@ -1164,7 +1164,7 @@ static int
 M_Progmode_Off_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_PROG_MODE)
@@ -1187,7 +1187,7 @@ EIB_M_Progmode_Off_async (EIBConnection * con, eibaddr_t dest)
   EIBSETTYPE (head, EIB_PROG_MODE);
   EIBSETADDR (head + 2, dest);
   head[4] = 0;
-  if (SendRequest (con, 5, head) == -1)
+  if (_EIB_SendRequest (con, 5, head) == -1)
     return -1;
   con->complete = M_Progmode_Off_complete;
   return 0;
@@ -1205,7 +1205,7 @@ static int
 M_Progmode_Toggle_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_PROG_MODE)
@@ -1228,7 +1228,7 @@ EIB_M_Progmode_Toggle_async (EIBConnection * con, eibaddr_t dest)
   EIBSETTYPE (head, EIB_PROG_MODE);
   EIBSETADDR (head + 2, dest);
   head[4] = 2;
-  if (SendRequest (con, 5, head) == -1)
+  if (_EIB_SendRequest (con, 5, head) == -1)
     return -1;
   con->complete = M_Progmode_Toggle_complete;
   return 0;
@@ -1246,7 +1246,7 @@ static int
 M_Progmode_Status_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_PROG_MODE || con->size < 3)
@@ -1269,7 +1269,7 @@ EIB_M_Progmode_Status_async (EIBConnection * con, eibaddr_t dest)
   EIBSETTYPE (head, EIB_PROG_MODE);
   EIBSETADDR (head + 2, dest);
   head[4] = 3;
-  if (SendRequest (con, 5, head) == -1)
+  if (_EIB_SendRequest (con, 5, head) == -1)
     return -1;
   con->complete = M_Progmode_Status_complete;
   return 0;
@@ -1287,7 +1287,7 @@ static int
 M_GetMaskVersion_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MASK_VERSION || con->size < 4)
@@ -1309,7 +1309,7 @@ EIB_M_GetMaskVersion_async (EIBConnection * con, eibaddr_t dest)
     }
   EIBSETTYPE (head, EIB_MASK_VERSION);
   EIBSETADDR (head + 2, dest);
-  if (SendRequest (con, 4, head) == -1)
+  if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
   con->complete = M_GetMaskVersion_complete;
   return 0;
@@ -1327,7 +1327,7 @@ static int
 M_WriteIndividualAddress_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) == EIB_ERROR_ADDR_EXISTS)
@@ -1364,7 +1364,7 @@ EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest)
     }
   EIBSETTYPE (head, EIB_M_INDIVIDUAL_ADDRESS_WRITE);
   EIBSETADDR (head + 2, dest);
-  if (SendRequest (con, 4, head) == -1)
+  if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
   con->complete = M_WriteIndividualAddress_complete;
   return 0;
@@ -1382,7 +1382,7 @@ static int
 MC_Connect_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
 
@@ -1406,7 +1406,7 @@ EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest)
     }
   EIBSETTYPE (head, EIB_MC_CONNECTION);
   EIBSETADDR (head + 2, dest);
-  i = SendRequest (con, 4, head);
+  i = _EIB_SendRequest (con, 4, head);
   if (i == -1)
     return -1;
 
@@ -1426,7 +1426,7 @@ static int
 MC_Progmode_On_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROG_MODE)
@@ -1448,7 +1448,7 @@ EIB_MC_Progmode_On_async (EIBConnection * con)
     }
   EIBSETTYPE (head, EIB_MC_PROG_MODE);
   head[2] = 1;
-  if (SendRequest (con, 3, head) == -1)
+  if (_EIB_SendRequest (con, 3, head) == -1)
     return -1;
   con->complete = MC_Progmode_On_complete;
   return 0;
@@ -1466,7 +1466,7 @@ static int
 MC_Progmode_Off_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROG_MODE)
@@ -1488,7 +1488,7 @@ EIB_MC_Progmode_Off_async (EIBConnection * con)
     }
   EIBSETTYPE (head, EIB_MC_PROG_MODE);
   head[2] = 0;
-  if (SendRequest (con, 3, head) == -1)
+  if (_EIB_SendRequest (con, 3, head) == -1)
     return -1;
   con->complete = MC_Progmode_Off_complete;
   return 0;
@@ -1506,7 +1506,7 @@ static int
 MC_Progmode_Toggle_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROG_MODE)
@@ -1528,7 +1528,7 @@ EIB_MC_Progmode_Toggle_async (EIBConnection * con)
     }
   EIBSETTYPE (head, EIB_MC_PROG_MODE);
   head[2] = 2;
-  if (SendRequest (con, 3, head) == -1)
+  if (_EIB_SendRequest (con, 3, head) == -1)
     return -1;
   con->complete = MC_Progmode_Toggle_complete;
   return 0;
@@ -1546,7 +1546,7 @@ static int
 MC_Progmode_Status_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROG_MODE || con->size < 3)
@@ -1568,7 +1568,7 @@ EIB_MC_Progmode_Status_async (EIBConnection * con)
     }
   EIBSETTYPE (head, EIB_MC_PROG_MODE);
   head[2] = 3;
-  if (SendRequest (con, 3, head) == -1)
+  if (_EIB_SendRequest (con, 3, head) == -1)
     return -1;
   con->complete = MC_Progmode_Status_complete;
   return 0;
@@ -1586,7 +1586,7 @@ static int
 MC_GetMaskVersion_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_MASK_VERSION || con->size < 4)
@@ -1607,7 +1607,7 @@ EIB_MC_GetMaskVersion_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (head, EIB_MC_MASK_VERSION);
-  if (SendRequest (con, 2, head) == -1)
+  if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
   con->complete = MC_GetMaskVersion_complete;
   return 0;
@@ -1625,7 +1625,7 @@ static int
 MC_GetPEIType_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PEI_TYPE || con->size < 4)
@@ -1646,7 +1646,7 @@ EIB_MC_GetPEIType_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (head, EIB_MC_PEI_TYPE);
-  if (SendRequest (con, 2, head) == -1)
+  if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
   con->complete = MC_GetPEIType_complete;
   return 0;
@@ -1664,7 +1664,7 @@ static int
 MC_ReadADC_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_ADC_READ || con->size < 4)
@@ -1691,7 +1691,7 @@ EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
   EIBSETTYPE (head, EIB_MC_ADC_READ);
   head[2] = channel;
   head[3] = count;
-  if (SendRequest (con, 4, head) == -1)
+  if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
   con->complete = MC_ReadADC_complete;
   return 0;
@@ -1710,7 +1710,7 @@ static int
 MC_PropertyRead_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROP_READ)
@@ -1749,7 +1749,7 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
   head[4] = (start >> 8) & 0xff;
   head[5] = (start) & 0xff;
   head[6] = nr_of_elem;
-  if (SendRequest (con, 7, head) == -1)
+  if (_EIB_SendRequest (con, 7, head) == -1)
     return -1;
   con->complete = MC_PropertyRead_complete;
   return 0;
@@ -1770,7 +1770,7 @@ static int
 MC_Read_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_READ)
@@ -1806,7 +1806,7 @@ EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
   head[3] = (addr) & 0xff;
   head[4] = (len >> 8) & 0xff;
   head[5] = (len) & 0xff;
-  if (SendRequest (con, 6, head) == -1)
+  if (_EIB_SendRequest (con, 6, head) == -1)
     return -1;
   con->complete = MC_Read_complete;
   return 0;
@@ -1824,7 +1824,7 @@ static int
 MC_PropertyWrite_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROP_WRITE)
@@ -1872,7 +1872,7 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
   ibuf[5] = (start) & 0xff;
   ibuf[6] = nr_of_elem;
   memcpy (ibuf + 7, buf, len);
-  i = SendRequest (con, len + 7, ibuf);
+  i = _EIB_SendRequest (con, len + 7, ibuf);
   free (ibuf);
   if (i == -1)
     return -1;
@@ -1894,7 +1894,7 @@ static int
 MC_Write_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) == EIB_ERROR_VERIFY)
@@ -1939,7 +1939,7 @@ EIB_MC_Write_async (EIBConnection * con, uint16_t addr, int len,
   ibuf[4] = (len >> 8) & 0xff;
   ibuf[5] = (len) & 0xff;
   memcpy (ibuf + 6, buf, len);
-  i = SendRequest (con, len + 6, ibuf);
+  i = _EIB_SendRequest (con, len + 6, ibuf);
   free (ibuf);
   if (i == -1)
     return -1;
@@ -1960,7 +1960,7 @@ static int
 MC_PropertyDesc_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROP_DESC || con->size < 6)
@@ -1997,7 +1997,7 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
   EIBSETTYPE (head, EIB_MC_PROP_DESC);
   head[2] = obj;
   head[3] = property;
-  if (SendRequest (con, 4, head) == -1)
+  if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
   con->complete = MC_PropertyDesc_complete;
   return 0;
@@ -2018,7 +2018,7 @@ static int
 MC_Authorize_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_AUTHORIZE || con->size < 3)
@@ -2040,7 +2040,7 @@ EIB_MC_Authorize_async (EIBConnection * con, uint8_t key[4])
     }
   EIBSETTYPE (head, EIB_MC_AUTHORIZE);
   memcpy (head + 2, key, 4);
-  if (SendRequest (con, 6, head) == -1)
+  if (_EIB_SendRequest (con, 6, head) == -1)
     return -1;
   con->complete = MC_Authorize_complete;
   return 0;
@@ -2058,7 +2058,7 @@ static int
 MC_SetKey_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) == EIB_PROCESSING_ERROR)
@@ -2086,7 +2086,7 @@ EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
   EIBSETTYPE (head, EIB_MC_KEY_WRITE);
   memcpy (head + 2, key, 4);
   head[6] = level;
-  if (SendRequest (con, 7, head) == -1)
+  if (_EIB_SendRequest (con, 7, head) == -1)
     return -1;
   con->complete = MC_SetKey_complete;
   return 0;
@@ -2104,7 +2104,7 @@ static int
 MC_PropertyScan_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_MC_PROP_SCAN)
@@ -2131,7 +2131,7 @@ EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
   con->req.len = maxlen;
   con->req.buf = buf;
   EIBSETTYPE (head, EIB_MC_PROP_SCAN);
-  if (SendRequest (con, 2, head) == -1)
+  if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
   con->complete = MC_PropertyScan_complete;
   return 0;
@@ -2149,7 +2149,7 @@ static int
 LoadImage_complete (EIBConnection * con)
 {
   int i;
-  i = GetRequest (con);
+  i = _EIB_GetRequest (con);
   if (i == -1)
     return -1;
   if (EIBTYPE (con) != EIB_LOAD_IMAGE || con->size < 4)
@@ -2183,7 +2183,7 @@ EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
     }
   EIBSETTYPE (ibuf, EIB_LOAD_IMAGE);
   memcpy (ibuf + 2, image, len);
-  i = SendRequest (con, len + 2, ibuf);
+  i = _EIB_SendRequest (con, len + 2, ibuf);
   free (ibuf);
   if (i == -1)
     return -1;
