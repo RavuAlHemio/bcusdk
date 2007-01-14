@@ -433,6 +433,11 @@ OpenBusmonitor_complete (EIBConnection * con)
   if (i == -1)
     return -1;
 
+  if (EIBTYPE (con) == EIB_CONNECTION_INUSE)
+    {
+      errno = EBUSY;
+      return -1;
+    }
   if (EIBTYPE (con) != EIB_OPEN_BUSMONITOR)
     {
       errno = ECONNRESET;
@@ -476,6 +481,11 @@ OpenBusmonitorText_complete (EIBConnection * con)
   if (i == -1)
     return -1;
 
+  if (EIBTYPE (con) == EIB_CONNECTION_INUSE)
+    {
+      errno = EBUSY;
+      return -1;
+    }
   if (EIBTYPE (con) != EIB_OPEN_BUSMONITOR_TEXT)
     {
       errno = ECONNRESET;
@@ -518,6 +528,11 @@ OpenVBusmonitor_complete (EIBConnection * con)
   if (i == -1)
     return -1;
 
+  if (EIBTYPE (con) == EIB_CONNECTION_INUSE)
+    {
+      errno = EBUSY;
+      return -1;
+    }
   if (EIBTYPE (con) != EIB_OPEN_VBUSMONITOR)
     {
       errno = ECONNRESET;
@@ -560,6 +575,11 @@ OpenVBusmonitorText_complete (EIBConnection * con)
   if (i == -1)
     return -1;
 
+  if (EIBTYPE (con) == EIB_CONNECTION_INUSE)
+    {
+      errno = EBUSY;
+      return -1;
+    }
   if (EIBTYPE (con) != EIB_OPEN_VBUSMONITOR_TEXT)
     {
       errno = ECONNRESET;
