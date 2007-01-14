@@ -28,3 +28,45 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
+static int
+OpenT_TPDU_complete (EIBConnection * con)
+{
+  int i;
+  i = _EIB_GetRequest (con);
+  if (i == -1)
+    return -1;
+
+  if (EIBTYPE (con) != EIB_OPEN_T_TPDU)
+    {
+      errno = ECONNRESET;
+      return -1;
+    }
+  return 0;
+}
+
+int
+EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src)
+{
+  uchar head[5];
+  int i;
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  EIBSETTYPE (head, EIB_OPEN_T_TPDU);
+  EIBSETADDR (head + 2, src);
+  i = _EIB_SendRequest (con, 5, head);
+  if (i == -1)
+    return -1;
+  con->complete = OpenT_TPDU_complete;
+  return 0;
+}
+
+int
+EIBOpenT_TPDU (EIBConnection * con, eibaddr_t src)
+{
+  if (EIBOpenT_TPDU_async (con, src) == -1)
+    return -1;
+  return EIBComplete (con);
+}

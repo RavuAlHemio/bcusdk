@@ -28,3 +28,60 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
+static int
+MC_PropertyDesc_complete (EIBConnection * con)
+{
+  int i;
+  i = _EIB_GetRequest (con);
+  if (i == -1)
+    return -1;
+  if (EIBTYPE (con) != EIB_MC_PROP_DESC || con->size < 6)
+    {
+      errno = ECONNRESET;
+      return -1;
+    }
+  /* Type */
+  if (con->req.ptr2)
+    *con->req.ptr2 = con->buf[2];
+  /* max_nr_of_elem */
+  if (con->req.ptr4)
+    *con->req.ptr4 = (con->buf[3] << 8) | (con->buf[4]);
+  /* access */
+  if (con->req.ptr3)
+    *con->req.ptr3 = con->buf[5];
+  return 0;
+}
+
+int
+EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
+			   uint8_t * type, uint16_t * max_nr_of_elem,
+			   uint8_t * access)
+{
+  uchar head[5];
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  con->req.ptr2 = type;
+  con->req.ptr4 = max_nr_of_elem;
+  con->req.ptr3 = access;
+  EIBSETTYPE (head, EIB_MC_PROP_DESC);
+  head[2] = obj;
+  head[3] = property;
+  if (_EIB_SendRequest (con, 4, head) == -1)
+    return -1;
+  con->complete = MC_PropertyDesc_complete;
+  return 0;
+}
+
+int
+EIB_MC_PropertyDesc (EIBConnection * con, uint8_t obj, uint8_t property,
+		     uint8_t * type, uint16_t * max_nr_of_elem,
+		     uint8_t * access)
+{
+  if (EIB_MC_PropertyDesc_async
+      (con, obj, property, type, max_nr_of_elem, access) == -1)
+    return -1;
+  return EIBComplete (con);
+}

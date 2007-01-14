@@ -28,3 +28,47 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
+static int
+MC_PropertyScan_complete (EIBConnection * con)
+{
+  int i;
+  i = _EIB_GetRequest (con);
+  if (i == -1)
+    return -1;
+  if (EIBTYPE (con) != EIB_MC_PROP_SCAN)
+    {
+      errno = ECONNRESET;
+      return -1;
+    }
+  i = con->size - 2;
+  if (i > con->req.len)
+    i = con->req.len;
+  memcpy (con->req.buf, con->buf + 2, i);
+  return i;
+}
+
+int
+EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
+{
+  uchar head[2];
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  con->req.len = maxlen;
+  con->req.buf = buf;
+  EIBSETTYPE (head, EIB_MC_PROP_SCAN);
+  if (_EIB_SendRequest (con, 2, head) == -1)
+    return -1;
+  con->complete = MC_PropertyScan_complete;
+  return 0;
+}
+
+int
+EIB_MC_PropertyScan (EIBConnection * con, int maxlen, uint8_t * buf)
+{
+  if (EIB_MC_PropertyScan_async (con, maxlen, buf) == -1)
+    return -1;
+  return EIBComplete (con);
+}

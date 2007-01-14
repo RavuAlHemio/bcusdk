@@ -28,3 +28,48 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
+static int
+MC_SetKey_complete (EIBConnection * con)
+{
+  int i;
+  i = _EIB_GetRequest (con);
+  if (i == -1)
+    return -1;
+  if (EIBTYPE (con) == EIB_PROCESSING_ERROR)
+    {
+      errno = EPERM;
+      return -1;
+    }
+  if (EIBTYPE (con) != EIB_MC_KEY_WRITE)
+    {
+      errno = ECONNRESET;
+      return -1;
+    }
+  return 0;
+}
+
+int
+EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
+{
+  uchar head[7];
+  if (!con)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  EIBSETTYPE (head, EIB_MC_KEY_WRITE);
+  memcpy (head + 2, key, 4);
+  head[6] = level;
+  if (_EIB_SendRequest (con, 7, head) == -1)
+    return -1;
+  con->complete = MC_SetKey_complete;
+  return 0;
+}
+
+int
+EIB_MC_SetKey (EIBConnection * con, uint8_t key[4], uint8_t level)
+{
+  if (EIB_MC_SetKey_async (con, key, level) == -1)
+    return -1;
+  return EIBComplete (con);
+}

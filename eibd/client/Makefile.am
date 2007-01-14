@@ -11,4 +11,5 @@ libeibclient_a_SOURCES=eibclient.c \
  mcprogmodetoggle.c mcpropertyread.c mcpropertywrite.c mcread.c \
  mcreadadc.c mcwrite.c mgetmaskversion.c mprogmodeoff.c mprogmodeon.c \
  mprogmodestatus.c mprogmodetoggle.c mreadindividualaddresses.c \
- mwriteindividualaddress.c 
+ mwriteindividualaddress.c loadimage.c mcpropertydesc.c \
+ mcpropertyscan.c mcsetkey.c openttpdu.c
