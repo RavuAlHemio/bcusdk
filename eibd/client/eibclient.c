@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <string.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
@@ -102,41 +102,6 @@ EIBClose (EIBConnection * con)
   return 0;
 }
 
-EIBConnection *
-EIBSocketLocal (const char *path)
-{
-  EIBConnection *con = (EIBConnection *) malloc (sizeof (EIBConnection));
-  struct sockaddr_un addr;
-  if (!con)
-    {
-      errno = ENOMEM;
-      return 0;
-    }
-  addr.sun_family = AF_LOCAL;
-  strncpy (addr.sun_path, path, sizeof (addr.sun_path));
-  addr.sun_path[sizeof (addr.sun_path) - 1] = 0;
-
-  con->fd = socket (AF_LOCAL, SOCK_STREAM, 0);
-  if (con->fd == -1)
-    {
-      free (con);
-      return 0;
-    }
-
-  if (connect (con->fd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
-    {
-      int saveerr = errno;
-      close (con->fd);
-      free (con);
-      errno = saveerr;
-      return 0;
-    }
-  con->buflen = 0;
-  con->buf = 0;
-  con->readlen = 0;
-
-  return con;
-}
 
 EIBConnection *
 EIBSocketRemote (const char *host, int port)
