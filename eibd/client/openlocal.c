@@ -27,7 +27,6 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <errno.h>
 
 #include "eibclient.h"
 #include "eibclient-int.h"

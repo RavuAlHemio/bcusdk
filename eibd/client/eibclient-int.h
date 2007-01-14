@@ -28,6 +28,13 @@
 #ifndef EIBCLIENT_INT_H
 #define EIBCLIENT_INT_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#include "eibtypes.h"
+
 /** unsigned char */
 typedef uint8_t uchar;
 
