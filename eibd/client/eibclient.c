@@ -24,68 +24,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <string.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <errno.h>
-
-#include "config.h"
 
 #include "eibclient.h"
-#include "eibtypes.h"
 #include "eibclient-int.h"
-
-/** resolve host name */
-static int
-GetHostIP (struct sockaddr_in *sock, const char *Name)
-{
-#ifdef HAVE_GETHOSTBYNAME_R
-  int len = 2000;
-  struct hostent host;
-  char *buf = (char *) malloc (len);
-  int res;
-  int err;
-#endif
-  struct hostent *h;
-  if (!Name)
-    return 0;
-  memset (sock, 0, sizeof (*sock));
-#ifdef HAVE_GETHOSTBYNAME_R
-  do
-    {
-      res = gethostbyname_r (Name, &host, buf, len, &h, &err);
-      if (res == ERANGE)
-	{
-	  len += 2000;
-	  buf = (char *) realloc (buf, len);
-	}
-      if (!buf)
-	return 0;
-    }
-  while (res == ERANGE);
-
-  if (res || !h)
-    {
-      free (buf);
-      return 0;
-    }
-#else
-  h = gethostbyname (Name);
-  if (!h)
-    return 0;
-#endif
-  sock->sin_family = h->h_addrtype;
-  sock->sin_addr.s_addr = (*((unsigned long *) h->h_addr_list[0]));
-#ifdef HAVE_GETHOSTBYNAME_R
-  if (buf)
-    free (buf);
-#endif
-  return 1;
-}
 
 int
 EIBClose (EIBConnection * con)
@@ -103,46 +44,6 @@ EIBClose (EIBConnection * con)
 }
 
 
-EIBConnection *
-EIBSocketRemote (const char *host, int port)
-{
-  EIBConnection *con = (EIBConnection *) malloc (sizeof (EIBConnection));
-  struct sockaddr_in addr;
-  if (!con)
-    {
-      errno = ENOMEM;
-      return 0;
-    }
-
-  if (!GetHostIP (&addr, host))
-    {
-      free (con);
-      errno = ECONNREFUSED;
-      return 0;
-    }
-  addr.sin_port = htons (port);
-
-  con->fd = socket (addr.sin_family, SOCK_STREAM, 0);
-  if (con->fd == -1)
-    {
-      free (con);
-      return 0;
-    }
-
-  if (connect (con->fd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
-    {
-      int saveerr = errno;
-      close (con->fd);
-      free (con);
-      errno = saveerr;
-      return 0;
-    }
-  con->buflen = 0;
-  con->buf = 0;
-  con->readlen = 0;
-
-  return con;
-}
 
 EIBConnection *
 EIBSocketURL (const char *url)
