@@ -29,64 +29,6 @@
 #include "eibclient-int.h"
 
 int
-EIBClose (EIBConnection * con)
-{
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
-  close (con->fd);
-  if (con->buf)
-    free (con->buf);
-  free (con);
-  return 0;
-}
-
-
-
-EIBConnection *
-EIBSocketURL (const char *url)
-{
-  if (!url)
-    {
-      errno = EINVAL;
-      return 0;
-    }
-  if (!strncmp (url, "local:", 6))
-    {
-      return EIBSocketLocal (url + 6);
-    }
-  if (!strncmp (url, "ip:", 3))
-    {
-      char *a = strdup (url + 3);
-      char *b;
-      int port;
-      EIBConnection *c;
-      if (!a)
-	{
-	  errno = ENOMEM;
-	  return 0;
-	}
-      for (b = a; *b; b++)
-	if (*b == ':')
-	  break;
-      if (*b == ':')
-	{
-	  *b = 0;
-	  port = atoi (b + 1);
-	}
-      else
-	port = 6720;
-      c = EIBSocketRemote (a, port);
-      free (a);
-      return c;
-    }
-  errno = EINVAL;
-  return 0;
-}
-
-int
 EIB_Poll_Complete (EIBConnection * con)
 {
   if (!con)
