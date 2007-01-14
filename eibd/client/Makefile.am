@@ -6,4 +6,9 @@ libeibclient_a_SOURCES=eibclient.c \
  openvbusmonitor.c openvbusmonitortext.c getbusmonitorpacket.c \
  mcauthorize.c getapdu.c getapdusrc.c getgroupsrc.c opengroupsocket.c \
  opentbroadcast.c opentconnection.c opentgroup.c opentindividual.c \
- sendapdu.c sendgroup.c sendtpdu.c
+ sendapdu.c sendgroup.c sendtpdu.c mcconnect.c mcgetmaskversion.c \
+ mcgetpeitype.c mcprogmodeoff.c mcprogmodeon.c mcprogmodestatus.c \
+ mcprogmodetoggle.c mcpropertyread.c mcpropertywrite.c mcread.c \
+ mcreadadc.c mcwrite.c mgetmaskversion.c mprogmodeoff.c mprogmodeon.c \
+ mprogmodestatus.c mprogmodetoggle.c mreadindividualaddresses.c \
+ mwriteindividualaddress.c 
