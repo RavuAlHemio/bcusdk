@@ -37,41 +37,8 @@
 
 #include "eibclient.h"
 #include "eibtypes.h"
+#include "eibclient-int.h"
 
-/** unsigned char */
-typedef uint8_t uchar;
-
-/** EIB Connection internal */
-struct _EIBConnection
-{
-  int (*complete) (EIBConnection *);
-  /** file descriptor */
-  int fd;
-  unsigned readlen;
-  /** buffer */
-  uchar *buf;
-  /** buffer size */
-  unsigned buflen;
-  /** used buffer */
-  unsigned size;
-  struct
-  {
-    int len;
-    uint8_t *buf;
-    int16_t *ptr1;
-    uint8_t *ptr2;
-    uint8_t *ptr3;
-    uint16_t *ptr4;
-  } req;
-};
-
-/** extracts TYPE code of an eibd packet */
-#define EIBTYPE(con) (((con)->buf[0]<<8)|((con)->buf[1]))
-/** sets TYPE code for an eibd packet*/
-#define EIBSETTYPE(buf,type) do{(buf)[0]=(type>>8)&0xff;(buf)[1]=(type)&0xff;}while(0)
-
-/** set EIB address */
-#define EIBSETADDR(buf,type) do{(buf)[0]=(type>>8)&0xff;(buf)[1]=(type)&0xff;}while(0)
 
 /** resolve host name */
 static int
