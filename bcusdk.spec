@@ -149,6 +149,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/msetkey
 /usr/bin/groupsocketlisten
 /usr/bin/groupsocketread
+/usr/bin/groupreadresponse
 
 %files -n libeibclient-devel
 %defattr(-,root,root,-)

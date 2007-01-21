@@ -33,4 +33,5 @@ usr/bin/mpeitype
 usr/bin/msetkey
 usr/bin/groupsocketlisten
 usr/bin/groupsocketread
+usr/bin/groupreadresponse
 
