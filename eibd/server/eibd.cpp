@@ -28,6 +28,7 @@
 #include "localserver.h"
 #include "inetserver.h"
 #include "eibnetserver.h"
+#include "groupcacheclient.h"
 
 /** structure to store the arguments */
 struct arguments
@@ -48,6 +49,7 @@ struct arguments
   bool tunnel;
   bool route;
   bool discover;
+  bool groupcache;
   const char *serverip;
 };
 /** storage for the arguments*/
@@ -160,6 +162,10 @@ static struct argp_option options[] = {
   {"Server", 'S', "ip[:port]", OPTION_ARG_OPTIONAL,
    "starts the EIBnet/IP server part"},
 #endif
+#ifdef HAVE_GROUPCACHE
+  {"GroupCache", 'c', 0, 0,
+   "enable caching of group communication network state"},
+#endif
   {0}
 };
 
@@ -199,6 +205,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
       break;
     case 'd':
       arguments->daemon = (char *) (arg ? arg : "/dev/null");
+      break;
+    case 'c':
+      arguments->groupcache = 1;
       break;
     default:
       return ARGP_ERR_UNKNOWN;
@@ -306,6 +315,9 @@ main (int ac, char *ag[])
 #ifdef HAVE_EIBNETIPSERVER
     serv = startServer (l3, &t);
 #endif
+#ifdef HAVE_GROUPCACHE
+    CreateGroupCache (l3, &t, arg.groupcache);
+#endif
   }
   catch (Exception e)
   {
@@ -330,6 +342,9 @@ main (int ac, char *ag[])
 #ifdef HAVE_EIBNETIPSERVER
   if (serv)
     delete serv;
+#endif
+#ifdef HAVE_GROUPCACHE
+  DeleteGroupCache ();
 #endif
 
   delete l3;
