@@ -24,6 +24,8 @@
 #include "busmonitor.h"
 #include "connection.h"
 #include "managementclient.h"
+#include "groupcacheclient.h"
+#include "config.h"
 
 ClientConnection::ClientConnection (Server * s, Layer3 * l3, Trace * tr,
 				    int fd)
@@ -42,7 +44,7 @@ ClientConnection::~ClientConnection ()
   TRACEPRINTF (t, 8, this, "ClientConnection closed");
   s->deregister (this);
   if (buf)
-    delete[] buf;
+    delete[]buf;
   close (fd);
 }
 
@@ -151,6 +153,19 @@ ClientConnection::Run (pth_sem_t * stop1)
 	  LoadImage (l3, t, this, stop);
 	  break;
 
+	case EIB_CACHE_ENABLE:
+	case EIB_CACHE_DISABLE:
+	case EIB_CACHE_CLEAR:
+	case EIB_CACHE_REMOVE:
+	case EIB_CACHE_READ:
+	case EIB_CACHE_READ_NOWAIT:
+#ifdef HAVE_GROUPCACHE
+	  GroupCacheRequest (l3, t, this, stop);
+#else
+	  sendreject (stop);
+#endif
+	  break;
+
 	default:
 	  sendreject (stop);
 	}
@@ -220,7 +235,7 @@ ClientConnection::readmessage (pth_event_t stop)
   if (size > buflen)
     {
       if (buf)
-	delete[] buf;
+	delete[]buf;
       buf = new uchar[size];
       buflen = size;
     }
