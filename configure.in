@@ -168,6 +168,17 @@ if test x$eibnetipserver = xtrue ; then
  AC_DEFINE(HAVE_EIBNETIPSERVER, 1 , [EIBnet/IP server enabled])
 fi
 
+AC_ARG_ENABLE(groupcache,
+[  --enable-groupcache		enable Group Cache],
+[case "${enableval}" in
+ yes) groupcache=true ;;
+  no)  groupcache=false ;;
+   *) AC_MSG_ERROR(bad value ${enableval} for --enable-groupcache) ;;
+ esac],[groupcache=false])
+if test x$groupcache = xtrue ; then
+ AC_DEFINE(HAVE_GROUPCACHE, 1 , [Group Cache enabled])
+fi
+
 
 AM_CONDITIONAL(HAVE_SOURCE_INFO, test x$have_source_info = xyes )
 
