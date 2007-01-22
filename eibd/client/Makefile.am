@@ -12,4 +12,5 @@ libeibclient_a_SOURCES=eibclient.c \
  mcreadadc.c mcwrite.c mgetmaskversion.c mprogmodeoff.c mprogmodeon.c \
  mprogmodestatus.c mprogmodetoggle.c mreadindividualaddresses.c \
  mwriteindividualaddress.c loadimage.c mcpropertydesc.c \
- mcpropertyscan.c mcsetkey.c openttpdu.c
+ mcpropertyscan.c mcsetkey.c openttpdu.c groupcacheenable.c groupcachedisable.c \
+ groupcacheclear.c groupcacheremove.c groupcacheread.c groupcachereadsync.c
