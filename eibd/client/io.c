@@ -166,4 +166,3 @@ _EIB_GetRequest (EIBConnection * con)
 
   return 0;
 }
-
