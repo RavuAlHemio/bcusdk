@@ -72,4 +72,11 @@
 #define EIB_MC_PROP_SCAN                0x0062
 #define EIB_LOAD_IMAGE                  0x0063
 
+#define EIB_CACHE_ENABLE                0x0070
+#define EIB_CACHE_DISABLE               0x0071
+#define EIB_CACHE_CLEAR                 0x0072
+#define EIB_CACHE_REMOVE                0x0073
+#define EIB_CACHE_READ                  0x0074
+#define EIB_CACHE_READ_NOWAIT           0x0075
+
 #endif
