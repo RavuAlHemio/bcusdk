@@ -59,6 +59,7 @@ struct _EIBConnection
     uint8_t *ptr2;
     uint8_t *ptr3;
     uint16_t *ptr4;
+    eibaddr_t *ptr5;
   } req;
 };
 
