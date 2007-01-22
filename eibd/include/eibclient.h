@@ -698,5 +698,101 @@ BCU_LOAD_RESULT EIB_LoadImage (EIBConnection * con, const uint8_t * image,
  */
 int EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len);
 
+
+/** Enable Group Cache
+ * \param con eibd connection
+ * \return 0 if successful, -1 if error (EBUSY if it is blocked eg. by a busmonitor)
+ */
+int EIB_Cache_Enable (EIBConnection * con);
+
+/** Disable Group Cache
+ * \param con eibd connection
+ * \return 0 if successful, -1 if error
+ */
+int EIB_Cache_Disable (EIBConnection * con);
+
+/** Clear Group Cache
+ * \param con eibd connection
+ * \return 0 if successful, -1 if error
+ */
+int EIB_Cache_Clear (EIBConnection * con);
+
+/** Remove all cache data for a group address
+ * \param con eibd connection
+ * \param dest group address
+ * \return 0 if successful, -1 if error
+ */
+int EIB_Cache_Remove (EIBConnection * con, eibaddr_t dest);
+
+/** Query the last sent value of a group address (and try to get it via A_GroupValue_Read, if not cache)
+ * \param con eibd connection
+ * \param dest group address
+ * \param src source address of the last APDU
+ * \param max_len buffer size
+ * \param buf buffer for last APDU
+ * \return -1 if error (ENODEV=group cache not enabled, ENOENT=no telegram available), else length of APDU
+ */
+int EIB_Cache_Read_Sync (EIBConnection * con, eibaddr_t dest, eibaddr_t * src,
+			 int max_len, uint8_t * buf);
+
+/** Query the last sent value of a group address
+ * \param con eibd connection
+ * \param dest group address
+ * \param src source address of the last APDU
+ * \param max_len buffer size
+ * \param buf buffer for last APDU
+ * \return -1 if error (ENODEV=group cache not enabled, ENOENT=no telegram available), else length of APDU
+ */
+int EIB_Cache_Read (EIBConnection * con, eibaddr_t dest,
+		    eibaddr_t * src, int max_len, uint8_t * buf);
+
+/** Enable Group Cache - asynchronous.
+ * \param con eibd connection
+ * \return 0 if started, -1 if error
+ */
+int EIB_Cache_Enable_async (EIBConnection * con);
+
+/** Disable Group Cache - asynchronous.
+ * \param con eibd connection
+ * \return 0 if started, -1 if error
+ */
+int EIB_Cache_Disable_async (EIBConnection * con);
+
+/** Clear Group Cache - asynchronous.
+ * \param con eibd connection
+ * \return 0 if started, -1 if error
+ */
+int EIB_Cache_Clear_async (EIBConnection * con);
+
+/** Remove all cache data for a group address - asynchronous.
+ * \param con eibd connection
+ * \param dest group address
+ * \return 0 if started, -1 if error
+ */
+int EIB_Cache_Remove_async (EIBConnection * con, eibaddr_t dest);
+
+/** Query the last sent value of a group address (and try to get it via A_GroupValue_Read, if not cache) - asynchronous.
+ * \param con eibd connection
+ * \param dest group address
+ * \param src source address of the last APDU
+ * \param max_len buffer size
+ * \param buf buffer for last APDU
+ * \return 0 if started, -1 if error
+ */
+int EIB_Cache_Read_Sync_async (EIBConnection * con, eibaddr_t dest,
+			       eibaddr_t * src, int max_len, uint8_t * buf);
+
+/** Query the last sent value of a group address - asynchronous.
+ * \param con eibd connection
+ * \param dest group address
+ * \param src source address of the last APDU
+ * \param max_len buffer size
+ * \param buf buffer for last APDU
+ * \return 0 if started, -1 if error
+ */
+int EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dest,
+			  eibaddr_t * src, int max_len, uint8_t * buf);
+
+
 __END_DECLS
 #endif
