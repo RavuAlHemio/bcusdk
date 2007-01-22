@@ -66,7 +66,7 @@ contains all files and programs to build BCU images
 
 %build
 %configure --enable-ft12 --enable-pei16 --enable-tpuart --enable-pei16s --enable-tpuarts \
-   --enable-eibnetip --enable-eibnetipserver --enable-eibnetiptunnel --enable-usb
+   --enable-eibnetip --enable-eibnetipserver --enable-eibnetiptunnel --enable-usb --enable-groupcache
 make %{?_smp_mflags}
 
 
@@ -150,6 +150,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/groupsocketlisten
 /usr/bin/groupsocketread
 /usr/bin/groupreadresponse
+/usr/bin/groupcacheenable
+/usr/bin/groupcachedisable
+/usr/bin/groupcacheclear
+/usr/bin/groupcacheremove
+/usr/bin/groupcachereadsync
+/usr/bin/groupcacheread
 
 %files -n libeibclient-devel
 %defattr(-,root,root,-)

@@ -34,4 +34,10 @@ usr/bin/msetkey
 usr/bin/groupsocketlisten
 usr/bin/groupsocketread
 usr/bin/groupreadresponse
+usr/bin/groupcacheenable
+usr/bin/groupcachedisable
+usr/bin/groupcacheclear
+usr/bin/groupcacheremove
+usr/bin/groupcachereadsync
+usr/bin/groupcacheread
 
