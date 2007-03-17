@@ -79,6 +79,7 @@ _limit_1ff = . ;
 	*(.init.1)
 	*(.eibobjects)
         *(.text)
+	*(.eibpeihandler)
         *(.rodata)
         _text_end = . ;
 }
