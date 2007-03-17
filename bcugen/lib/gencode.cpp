@@ -21,6 +21,7 @@
 #include "map.h"
 #include "addrtab.h"
 #include "loadctl.h"
+#include "check.h"
 
 static const char *
 inttype (int i)
@@ -246,6 +247,71 @@ GenCommonHeader (FILE * f, Device & d)
     fprintf (f, "static void %s();\n", d.on_run ());
   if (d.on_save ())
     fprintf (f, "static void %s();\n", d.on_save ());
+
+  if (d.on_pei_init ())
+    fprintf (f, "static void %s();\n", d.on_pei_init ());
+  if (d.on_pei_message ())
+    fprintf (f, "static void %s();\n", d.on_pei_message ());
+  if (d.on_pei_cycle ())
+    fprintf (f, "static void %s();\n", d.on_pei_cycle ());
+  if (d.on_pei_user ())
+    fprintf (f, "static void %s(uchar event);\n", d.on_pei_user ());
+  if (d.on_pei_rc_even ())
+    fprintf (f, "static void %s();\n", d.on_pei_rc_even ());
+  if (d.on_pei_rc_odd ())
+    fprintf (f, "static void %s();\n", d.on_pei_rc_odd ());
+  if (d.on_pei_tc ())
+    fprintf (f, "static void %s();\n", d.on_pei_tc ());
+  if (d.on_pei_tdre ())
+    fprintf (f, "static void %s();\n", d.on_pei_tdre ());
+  if (d.on_pei_sci_idle ())
+    fprintf (f, "static void %s();\n", d.on_pei_sci_idle ());
+  if (d.on_pei_spif ())
+    fprintf (f, "static void %s();\n", d.on_pei_spif ());
+  if (d.on_pei_oca ())
+    fprintf (f, "static void %s();\n", d.on_pei_oca ());
+  if (d.on_pei_ocb ())
+    fprintf (f, "static void %s();\n", d.on_pei_ocb ());
+  if (d.on_pei_ica ())
+    fprintf (f, "static void %s();\n", d.on_pei_ica ());
+  if (d.on_pei_icb ())
+    fprintf (f, "static void %s();\n", d.on_pei_icb ());
+
+  if (UsePEI (d))
+    {
+      fprintf (f,
+	       "NOSAVE(void _PEI_Handler_stub())\n{\nuchar event=__tmp_space[0];\n");
+      if (d.on_pei_init ())
+	fprintf (f, "if (event==PM_INIT) %s();\n", d.on_pei_init ());
+      if (d.on_pei_message ())
+	fprintf (f, "if (event==PM_MESSAGE) %s();\n", d.on_pei_message ());
+      if (d.on_pei_cycle ())
+	fprintf (f, "if (event==PM_CYCLE) %s();\n", d.on_pei_cycle ());
+      if (d.on_pei_rc_even ())
+	fprintf (f, "if (event==PM_rc_even) %s();\n", d.on_pei_rc_even ());
+      if (d.on_pei_rc_odd ())
+	fprintf (f, "if (event==PM_rc_odd) %s();\n", d.on_pei_rc_odd ());
+      if (d.on_pei_tc ())
+	fprintf (f, "if (event==PM_rc_tc) %s();\n", d.on_pei_tc ());
+      if (d.on_pei_tdre ())
+	fprintf (f, "if (event==PM_tdre) %s();\n", d.on_pei_tdre ());
+      if (d.on_pei_sci_idle ())
+	fprintf (f, "if (event==PM_sci_idle) %s();\n", d.on_pei_sci_idle ());
+      if (d.on_pei_spif ())
+	fprintf (f, "if (event==PM_spif) %s();\n", d.on_pei_spif ());
+      if (d.on_pei_oca ())
+	fprintf (f, "if (event==PM_OCA) %s();\n", d.on_pei_oca ());
+      if (d.on_pei_ocb ())
+	fprintf (f, "if (event==PM_OCB) %s();\n", d.on_pei_ocb ());
+      if (d.on_pei_ica ())
+	fprintf (f, "if (event==PM_ICA) %s();\n", d.on_pei_ica ());
+      if (d.on_pei_icb ())
+	fprintf (f, "if (event==PM_ICB) %s();\n", d.on_pei_icb ());
+      if (d.on_pei_user ())
+	fprintf (f, "%s(uchar event);\n", d.on_pei_user ());
+      fprintf (f, "}\n\n");
+    }
+
   if (d.on_init ())
     fprintf (f, "NOSAVE(void %s_stub()) {%s();}\n",
 	     d.on_init (), d.on_init ());
@@ -596,7 +662,10 @@ GenBCUHeader (FILE * f, Device & d)
       fprintf (f, "\t.hword commobjs\n");
       fprintf (f, "\t.hword ram_start\n");
       fprintf (f, "\t.hword eeprom_start\n");
-      fprintf (f, "\t.hword 0x0000 #SPHandler\n");
+      if (UsePEI (d))
+	fprintf (f, "\t.hword peihandler #SPHandler\n");
+      else
+	fprintf (f, "\t.hword 0x0000 #SPHandler\n");
 
       fprintf (f, "\t.hword _UserInit\n");
       fprintf (f, "\t.hword _UserRun\n");
@@ -723,6 +792,13 @@ GenAsmEntry (FILE * f, Device & d)
   for (i = 0; i < j; i++)
     fprintf (f, "\t.byte 0\n");
 
+  fprintf (f, "\t.section .eibpeihandler\n");
+  if (UsePEI (d))
+    {
+      fprintf (f, "peihandler:\n");
+      fprintf (f, "\tsta __tmp_space\n");
+      fprintf (f, "\tjmp _PEI_Handler_stub\n");
+    }
   fprintf (f, "\t.section .eibobjects\n");
   fprintf (f, "eibobjects:\n");
   for (i = 0; i < d.Objects (); i++)
