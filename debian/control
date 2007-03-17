@@ -31,7 +31,7 @@ Description: eibd client library
  A client library written in C to access the EIB bus over eibd. 
 
 Package: eibd-client-sources
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: libeibclient-dev
 Description: Sources of the eibd client programs
