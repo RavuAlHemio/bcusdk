@@ -22,6 +22,8 @@
 
 #include "classes.h"
 
+bool UsePEI (const Device & d);
+
 int UsedbyInterface (const Device & d, const String & name);
 void CheckDevice (Device & d);
 

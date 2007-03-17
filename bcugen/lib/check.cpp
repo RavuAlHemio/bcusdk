@@ -22,6 +22,23 @@
 #include "regexp.h"
 #include "symboltab.h"
 
+bool
+UsePEI (const Device & d)
+{
+  return d.on_pei_init () || d.on_pei_message ()
+    || d.on_pei_cycle ()
+    || d.on_pei_user ()
+    || d.on_pei_rc_even ()
+    || d.on_pei_rc_odd ()
+    || d.on_pei_tc ()
+    || d.on_pei_tdre ()
+    || d.on_pei_sci_idle ()
+    || d.on_pei_spif ()
+    || d.on_pei_oca ()
+    || d.on_pei_ocb () || d.on_pei_ica () || d.on_pei_icb ();
+}
+
+
 int
 UsedbyInterface (const Device & d, const String & name)
 {
@@ -1197,7 +1214,10 @@ CheckDevice (Device & d)
   if (d.BCU == BCU_bcu12 && d.InstallKey_lineno)
     die (_("installkey not supported"));
   if (d.BCU == BCU_bcu12 && d.Keys ())
-    die (_("bcu1 supports no access protection"));
+    die (_("BCU1 supports no access protection"));
+
+  if (d.BCU == BCU_bcu12 && UsePEI (d))
+    die (_("BCU1 supports no custom PEI handler"));
 
   if (d.BCU != BCU_bcu12)
     {
