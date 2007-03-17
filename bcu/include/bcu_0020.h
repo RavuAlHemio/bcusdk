@@ -33,4 +33,21 @@
 #define BCU_0020_H
 #include "bcu_funcs.h"
 
+/* PEI Events */
+
+#define PM_INIT 0xF3
+#define PM_MESSAGE 0xF1
+#define PM_CYCLE 0xF2
+
+#define PM_rc_even 0x03
+#define PM_rc_odd 0x13
+#define PM_rc_tc 0x14
+#define PM_tdre 0x05
+#define PM_sci_idle 0x06
+#define PM_spif 0x08
+#define PM_OCA 0x10
+#define PM_OCB 0x20
+#define PM_ICA 0x30
+#define PM_ICB 0x40
+
 #endif
