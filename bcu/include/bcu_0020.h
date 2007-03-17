@@ -55,4 +55,14 @@ extern uchar PEI_Info;
 extern uchar PEI_RecBuf[25];
 extern uchar PEI_SndBuf[25];
 
+#define TASK_LL_ID 1
+#define TASK_NL_ID 2
+#define TASK_TL_ID 3
+#define TASK_TC_ID 4
+#define TASK_LC_ID 5
+#define TASK_AL_ID 6
+#define TASK_MG_ID 7
+#define TASK_PM_ID 8
+#define TASK_US_ID 9
+
 #endif

@@ -844,7 +844,7 @@ _U_TS_Del (uchar val)
 }
 
 static void inline
-_U_MS_Post (uchar msgid, uchar pointer)
+_U_MS_Post (uchar msgid, uchar_loptr pointer)
 {
   if (!__builtin_constant_p (msgid))
     {
