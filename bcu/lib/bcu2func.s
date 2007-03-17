@@ -33,6 +33,7 @@
 	.global AL_SAPcallback, EE_WriteBlock, U_GetAccess, U_SetPollingRsp, U_Char_Out
 	.global U_TS_Set, U_TS_Del, U_TS_Seti, U_MS_Post, U_MS_Switch, FP_Flt2Int, FP_Int2Flt
 	.global U_FT12_Reset, U_FT12_GetStatus, U_SCI_Init, U_SPI_Init
+	.global PEI_Interface, PEI_Info, PEI_SndBuf, PEI_RecBuf
 #only with mask version 2.1
 	.global U_EE_WriteHI
 
@@ -99,7 +100,12 @@
 	.set U_FT12_GetStatus,	0x509F
 	.set U_SCI_Init,	0x50A2
 	.set U_SPI_Init,	0x50A5
-	
+
+	.set PEI_Interface,     0x00C4
+	.set PEI_Info,          0x00C5
+	.set PEI_RecBuf,        0x098A
+	.set PEI_SndBuf,        0x09A3
+		
 #mask-version 2.1
 	.set U_EE_WriteHI,	0x50B2
 	

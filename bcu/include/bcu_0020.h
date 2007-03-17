@@ -50,4 +50,9 @@
 #define PM_ICA 0x30
 #define PM_ICB 0x40
 
+extern uchar PEI_Interface;
+extern uchar PEI_Info;
+extern uchar PEI_RecBuf[25];
+extern uchar PEI_SndBuf[25];
+
 #endif
