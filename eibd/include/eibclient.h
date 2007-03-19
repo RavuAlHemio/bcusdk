@@ -63,6 +63,11 @@ EIBConnection *EIBSocketRemote (const char *host, int port);
  */
 int EIBClose (EIBConnection * con);
 
+/** Closes and frees a connection and wait, until all resources are freed.
+ * \param con eibd connection
+ */
+int EIBClose_sync (EIBConnection * con);
+
 /** Finish an asynchronous request (and block until then).
  * \param con eibd connection
  * \return return value, as returned by the synchronous function call
@@ -86,6 +91,18 @@ int EIB_Poll_Complete (EIBConnection * con);
  * \return -1 if any error, else file descriptor
  */
 int EIB_Poll_FD (EIBConnection * con);
+
+/** Switches the connection to pristine state
+ * \param con eibd connection
+ * \return 0 if successful, -1 if error
+ */
+int EIBReset (EIBConnection * con);
+
+/** Switches the connection to pristine state - asynchronous.
+ * \param con eibd connection
+ * \return 0 if started, -1 if error
+ */
+int EIBReset_async (EIBConnection * con);
 
 /** Switches the connection to binary busmonitor mode.
  * \param con eibd connection
