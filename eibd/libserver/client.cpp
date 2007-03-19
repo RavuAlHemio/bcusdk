@@ -166,9 +166,16 @@ ClientConnection::Run (pth_sem_t * stop1)
 #endif
 	  break;
 
+	case EIB_RESET_CONNECTION:
+	  sendreject (stop, EIB_RESET_CONNECTION);
+	  EIBSETTYPE (buf, EIB_INVALID_REQUEST);
+	  break;
+
 	default:
 	  sendreject (stop);
 	}
+      if (EIBTYPE (buf) == EIB_RESET_CONNECTION)
+	sendreject (stop, EIB_RESET_CONNECTION);
     }
   pth_event_free (stop, PTH_FREE_THIS);
   StopDelete ();
