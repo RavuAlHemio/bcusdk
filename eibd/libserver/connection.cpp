@@ -217,6 +217,8 @@ A_Broadcast::Do (pth_event_t stop)
     {
       if (con->readmessage (stop) == -1)
 	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
+	break;
       if (con->size >= 2)
 	{
 	  if (EIBTYPE (con->buf) != EIB_APDU_PACKET)
@@ -241,6 +243,8 @@ A_Group::Do (pth_event_t stop)
     {
       if (con->readmessage (stop) == -1)
 	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
+	break;
       if (con->size >= 2)
 	{
 	  if (EIBTYPE (con->buf) != EIB_APDU_PACKET)
@@ -264,6 +268,8 @@ A_TPDU::Do (pth_event_t stop)
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       if (con->readmessage (stop) == -1)
+	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
       if (con->size >= 4)
 	{
@@ -292,6 +298,8 @@ A_Individual::Do (pth_event_t stop)
     {
       if (con->readmessage (stop) == -1)
 	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
+	break;
       if (con->size >= 2)
 	{
 	  if (EIBTYPE (con->buf) != EIB_APDU_PACKET)
@@ -316,6 +324,8 @@ A_Connection::Do (pth_event_t stop)
     {
       if (con->readmessage (stop) == -1)
 	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
+	break;
       if (con->size >= 2)
 	{
 	  if (EIBTYPE (con->buf) != EIB_APDU_PACKET)
@@ -339,6 +349,8 @@ A_GroupSocket::Do (pth_event_t stop)
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       if (con->readmessage (stop) == -1)
+	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
       if (con->size >= 4)
 	{
