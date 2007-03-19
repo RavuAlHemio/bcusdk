@@ -97,7 +97,13 @@ A_Busmonitor::Run (pth_sem_t * stop1)
 void
 A_Busmonitor::Do (pth_event_t stop)
 {
-  con->readmessage (stop);
+  while (1)
+    {
+      if (con->readmessage (stop) == -1)
+	break;
+      if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
+	break;
+    }
 }
 
 int
