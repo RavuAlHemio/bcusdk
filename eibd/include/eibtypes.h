@@ -31,6 +31,7 @@
 #define EIB_CONNECTION_INUSE            0x0001
 #define EIB_PROCESSING_ERROR            0x0002
 #define EIB_CLOSED                      0x0003
+#define EIB_RESET_CONNECTION            0x0004
 
 #define EIB_OPEN_BUSMONITOR             0x0010
 #define EIB_OPEN_BUSMONITOR_TEXT        0x0011
