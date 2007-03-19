@@ -343,9 +343,9 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		    break;
 		  }
 		i = m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len));
-		if ( i == -2)
+		if (i == -2)
 		  c->sendreject (stop, EIB_ERROR_VERIFY);
-		else if ( i != 0)
+		else if (i != 0)
 		  c->sendreject (stop, EIB_PROCESSING_ERROR);
 		else
 		  c->sendreject (stop, EIB_MC_WRITE);
@@ -475,6 +475,10 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		    c->sendmessage (erg (), erg.array (), stop);
 		  }
 	      }
+	      break;
+
+	    case EIB_RESET_CONNECTION:
+	      i = -1;
 	      break;
 
 	    default:
