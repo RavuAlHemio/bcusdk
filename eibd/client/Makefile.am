@@ -13,4 +13,6 @@ libeibclient_a_SOURCES=eibclient.c \
  mprogmodestatus.c mprogmodetoggle.c mreadindividualaddresses.c \
  mwriteindividualaddress.c loadimage.c mcpropertydesc.c \
  mcpropertyscan.c mcsetkey.c openttpdu.c groupcacheenable.c groupcachedisable.c \
- groupcacheclear.c groupcacheremove.c groupcacheread.c groupcachereadsync.c
+ groupcacheclear.c groupcacheremove.c groupcacheread.c groupcachereadsync.c \
+ reset.c closesync.c
+
