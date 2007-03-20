@@ -491,6 +491,9 @@ T_Connection::Run (pth_sem_t * stop1)
 		    SendAck (recvno);
 		    recvno = (recvno + 1) & 0x0f;
 		  }
+		else if (t1->serno == (recvno - 1) & 0x0f)
+		  SendAck (t1->serno);
+
 		if (mode == 1)
 		  timeout =
 		    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
