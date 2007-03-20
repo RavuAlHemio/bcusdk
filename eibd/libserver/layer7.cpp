@@ -111,7 +111,7 @@ Layer7_Connection::Request_Response (APDU * r)
   APDU *a;
   CArray *c;
   l4->Send (r->ToPacket ());
-  pth_event_t t = pth_event (PTH_EVENT_TIME, pth_timeout (3, 0));
+  pth_event_t t = pth_event (PTH_EVENT_TIME, pth_timeout (6, 100));
   while (pth_event_status (t) != PTH_STATUS_OCCURRED)
     {
       c = l4->Get (t);
