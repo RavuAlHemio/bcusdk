@@ -481,7 +481,7 @@ T_Connection::Run (pth_sem_t * stop1)
 	    case T_DATA_CONNECTED_REQ:
 	      {
 		T_DATA_CONNECTED_REQ_PDU *t1 = (T_DATA_CONNECTED_REQ_PDU *) t;
-		if (t1->serno != recvno && (t1->serno != (recvno - 1) & 0x0f))
+		if (t1->serno != recvno && t1->serno != ((recvno - 1) & 0x0f))
 		  mode = 0;
 		else if (t1->serno == recvno)
 		  {
@@ -491,7 +491,7 @@ T_Connection::Run (pth_sem_t * stop1)
 		    SendAck (recvno);
 		    recvno = (recvno + 1) & 0x0f;
 		  }
-		else if (t1->serno == (recvno - 1) & 0x0f)
+		else if (t1->serno == ((recvno - 1) & 0x0f))
 		  SendAck (t1->serno);
 
 		if (mode == 1)
