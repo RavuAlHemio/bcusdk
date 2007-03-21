@@ -20,7 +20,9 @@
 #ifndef GROUPCACHECLIENT_H
 #define GROUPCACHECLIENT_H
 
-#include "client.h"
+#include "layer3.h"
+
+class ClientConnection;
 
 void CreateGroupCache (Layer3 * l3, Trace * t, bool enable);
 void DeleteGroupCache ();

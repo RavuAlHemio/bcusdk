@@ -19,6 +19,7 @@
 
 #include "groupcacheclient.h"
 #include "groupcache.h"
+#include "client.h"
 
 static GroupCache *cache = 0;
 
