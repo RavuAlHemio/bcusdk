@@ -90,6 +90,8 @@ public:
   int X_Memory_Write_Block (memaddr_t addr, const CArray & data);
   /** read arbitray memory block*/
   int X_Memory_Read_Block (memaddr_t addr, int len, CArray & erg);
+  /** write arbitray memory block without verify */
+  int A_Memory_Write_Block (memaddr_t addr, const CArray & data);
 };
 
 

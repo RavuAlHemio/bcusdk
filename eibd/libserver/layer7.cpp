@@ -362,3 +362,23 @@ Layer7_Connection::X_Memory_Read_Block (memaddr_t addr, int len, CArray & erg)
     }
   return 0;
 }
+
+int
+Layer7_Connection::A_Memory_Write_Block (memaddr_t addr, const CArray & data)
+{
+  CArray prev;
+  int i, j, k, res = 0;
+  const unsigned blocksize = 12;
+
+  for (i = 0; i < data (); i += blocksize)
+    {
+      j = blocksize;
+      if (i + j > data ())
+	j = data () - i;
+      k = A_Memory_Write (addr + i, CArray (data.array () + i, j));
+      if (k == -1)
+	return -1;
+    }
+
+  return res;
+}
