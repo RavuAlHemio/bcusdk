@@ -481,6 +481,33 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 	      i = -1;
 	      break;
 
+	    case EIB_MC_RESTART:
+	      m.A_Restart ();
+	      c->sendreject (stop, EIB_MC_RESTART);
+	      break;
+
+	    case EIB_MC_WRITE_NOVERIFY:
+	      if (c->size < 6)
+		{
+		  c->sendreject (stop);
+		  break;
+		}
+	      {
+		memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
+		unsigned len = (c->buf[4] << 8) | (c->buf[5]);
+		if (c->size < len + 6)
+		  {
+		    c->sendreject (stop);
+		    break;
+		  }
+		i = m.A_Memory_Write_Block (addr, CArray (c->buf + 6, len));
+		if (i != 0)
+		  c->sendreject (stop, EIB_PROCESSING_ERROR);
+		else
+		  c->sendreject (stop, EIB_MC_WRITE_NOVERIFY);
+	      }
+	      break;
+
 	    default:
 	      c->sendreject (stop);
 	    }
