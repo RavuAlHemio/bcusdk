@@ -68,6 +68,8 @@
 #define EIB_MC_AUTHORIZE                0x0057
 #define EIB_MC_KEY_WRITE                0x0058
 #define EIB_MC_MASK_VERSION             0x0059
+#define EIB_MC_RESTART                  0x005a
+#define EIB_MC_WRITE_NOVERIFY           0x005b
 #define EIB_MC_PROG_MODE                0x0060
 #define EIB_MC_PROP_DESC                0x0061
 #define EIB_MC_PROP_SCAN                0x0062
