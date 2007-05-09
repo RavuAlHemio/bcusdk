@@ -699,6 +699,39 @@ int EIB_MC_SetKey (EIBConnection * con, uint8_t key[4], uint8_t level);
  */
 int EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level);
 
+/** Restarts EIB device (management connection will not be useable after this any more) - asynchronous.
+ * \param con eibd connection
+ * \return 0 if started, -1 if error
+ */
+int EIB_MC_Restart_async (EIBConnection * con);
+
+/** Restarts EIB device (management connection will not be useable after this any more).
+ * \param con eibd connection
+ * \return 0 if successful, -1 if error
+ */
+int EIB_MC_Restart (EIBConnection * con);
+
+/** Write BAU memory without doing verify (over a management connection).
+ * \param con eibd connection
+ * \param addr memory address
+ * \param len size to read
+ * \param buf buffer
+ * \return -1 if error, else read length
+ */
+int EIB_MC_Write_Plain (EIBConnection * con, uint16_t addr, int len,
+			const uint8_t * buf);
+
+/** Write BAU memory without doing verify (over a management connection) - asynchronous.
+ * \param con eibd connection
+ * \param addr Memory address
+ * \param len size to read
+ * \param buf buffer
+ * \return 0 if started, -1 if error
+ */
+int EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
+			      const uint8_t * buf);
+
+
 /** Loads a BCU SDK program image (over a management connection).
  * \param con eibd connection
  * \param image pointer to image
