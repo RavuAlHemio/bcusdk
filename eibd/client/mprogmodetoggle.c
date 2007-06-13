@@ -64,7 +64,7 @@ EIB_M_Progmode_Toggle_async (EIBConnection * con, eibaddr_t dest)
 int
 EIB_M_Progmode_Toggle (EIBConnection * con, eibaddr_t dest)
 {
-  if (EIB_M_Progmode_Toggle (con, dest) == -1)
+  if (EIB_M_Progmode_Toggle_async (con, dest) == -1)
     return -1;
   return EIBComplete (con);
 }
