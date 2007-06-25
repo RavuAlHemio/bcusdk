@@ -7,7 +7,7 @@ else
 BUILDDIRS = xml bcu bcugen archive build 
 endif
 
-SUBDIRS=. common eibd $(BUILDDIRS) debian
+SUBDIRS=. common eibd $(BUILDDIRS) debian contrib
 
 BUILT_SOURCES=path.h
 CLEANFILES=path.h

@@ -1,0 +1,3 @@
+This directory contains contributed things:
+
+* swig 	python bindings for eib client library (requries SWIG)

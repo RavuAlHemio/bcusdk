@@ -191,6 +191,7 @@ xml/Makefile xml/gui/Makefile xml/gui/examples/Makefile
 bcu/Makefile bcu/lib/Makefile bcu/include/Makefile bcu/ldscripts/Makefile
 bcugen/Makefile bcugen/struct/Makefile bcugen/configfile/Makefile bcugen/lib/Makefile
 archive/Makefile build/Makefile
+contrib/Makefile
 debian/Makefile
 )
 
