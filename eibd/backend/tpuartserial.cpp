@@ -288,6 +288,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
   int to = 0;
   int waitconfirm = 0;
   int acked = 0;
+  int retry = 0;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
@@ -318,6 +319,24 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  waitconfirm = 0;
 		  delete inqueue.get ();
 		  pth_sem_dec (&in_signal);
+		  retry = 0;
+		}
+	      in.deletepart (0, 1);
+	    }
+	  else if (in[0] == 0x0B)
+	    {
+	      if (waitconfirm)
+		{
+		  retry++;
+		  waitconfirm = 0;
+		  TRACEPRINTF (t, 0, this, "NACK");
+		  if (retry > 3)
+		    {
+		      TRACEPRINTF (t, 0, this, "Drop NACK");
+		      delete inqueue.get ();
+		      pth_sem_dec (&in_signal);
+		      retry = 0;
+		    }
 		}
 	      in.deletepart (0, 1);
 	    }
@@ -326,7 +345,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	      RecvLPDU (in.array (), 1);
 	      in.deletepart (0, 1);
 	    }
-	  else if ((in[0] & 0x80) == 0x80)
+	  else if ((in[0] & 0xD0) == 0x90)
 	    {
 	      if (in () < 6)
 		{
@@ -381,6 +400,61 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	      RecvLPDU (in.array (), len);
 	      in.deletepart (0, len);
 	    }
+	  else if ((in[0] & 0xD0) == 0x10)
+	    {
+	      if (in () < 7)
+		{
+		  if (!to)
+		    {
+		      to = 1;
+		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
+				 pth_timeout (0, 300000));
+		    }
+		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
+		    break;
+		  TRACEPRINTF (t, 0, this, "Remove1 %02X", in[0]);
+		  in.deletepart (0, 1);
+		  continue;
+		}
+	      if (!acked)
+		{
+		  uchar c = 0x10;
+		  if ((in[1] & 0x80) == 0)
+		    {
+		      for (unsigned i = 0; i < indaddr (); i++)
+			if (indaddr[i] == (in[4] << 8) | in[5])
+			  c |= 0x1;
+		    }
+		  else
+		    {
+		      for (unsigned i = 0; i < groupaddr (); i++)
+			if (groupaddr[i] == (in[4] << 8) | in[5])
+			  c |= 0x1;
+		    }
+		  TRACEPRINTF (t, 0, this, "SendAck %02X", c);
+		  pth_write_ev (fd, &c, 1, stop);
+		  acked = 1;
+		}
+	      unsigned len = in[6] & 0xff;
+	      len += 7 + 2;
+	      if (in () < len)
+		{
+		  if (!to || 1)
+		    {
+		      to = 1;
+		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
+				 pth_timeout (0, 300000));
+		    }
+		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
+		    break;
+		  TRACEPRINTF (t, 0, this, "Remove2 %02X", in[0]);
+		  in.deletepart (0, 1);
+		  continue;
+		}
+	      acked = 0;
+	      RecvLPDU (in.array (), len);
+	      in.deletepart (0, len);
+	    }
 	  else
 	    {
 	      acked = 0;
@@ -391,7 +465,16 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	}
       if (waitconfirm
 	  && pth_event_status (sendtimeout) == PTH_STATUS_OCCURRED)
-	waitconfirm = 0;
+	{
+	  retry++;
+	  waitconfirm = 0;
+	  if (retry >= 3)
+	    {
+	      TRACEPRINTF (t, 0, this, "Drop Send");
+	      delete inqueue.get ();
+	      pth_sem_dec (&in_signal);
+	    }
+	}
       if (in () == 0 && !inqueue.isempty () && !waitconfirm)
 	{
 	  LPDU *l = (LPDU *) inqueue.top ();
