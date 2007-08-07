@@ -439,7 +439,7 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	      len += 7 + 2;
 	      if (in () < len)
 		{
-		  if (!to || 1)
+		  if (!to)
 		    {
 		      to = 1;
 		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
