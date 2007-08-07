@@ -289,9 +289,11 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
   int waitconfirm = 0;
   int acked = 0;
   int retry = 0;
+  int watch = 0;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
+  pth_event_t watchdog = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
   pth_event_t sendtimeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
@@ -301,10 +303,13 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	pth_event_concat (stop, timeout, NULL);
       if (waitconfirm)
 	pth_event_concat (stop, sendtimeout, NULL);
+      if (watch)
+	pth_event_concat (stop, watchdog, NULL);
       i = pth_read_ev (fd, buf, sizeof (buf), stop);
       pth_event_isolate (stop);
       pth_event_isolate (timeout);
       pth_event_isolate (sendtimeout);
+      pth_event_isolate (watchdog);
       if (i > 0)
 	{
 	  t->TracePacket (0, this, "Recv", i, buf);
@@ -338,6 +343,14 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		      retry = 0;
 		    }
 		}
+	      in.deletepart (0, 1);
+	    }
+	  else if ((in[0] & 0x07) == 0x07)
+	    {
+	      TRACEPRINTF (t, 0, this, "RecvWatchdog: %02X", in[0]);
+	      watch = 2;
+	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, watchdog,
+			 pth_timeout (10, 0));
 	      in.deletepart (0, 1);
 	    }
 	  else if (in[0] == 0xCC || in[0] == 0xC0 || in[0] == 0x0C)
@@ -475,6 +488,15 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	      pth_sem_dec (&in_signal);
 	    }
 	}
+      if (watch == 1 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED)
+	{
+	  uchar c = 0x01;
+	  t->TracePacket (2, this, "Watchdog Reset", 1, &c);
+	  write (fd, &c, 1);
+	  watch = 0;
+	}
+      if (watch == 2 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED)
+	watch = 0;
       if (in () == 0 && !inqueue.isempty () && !waitconfirm)
 	{
 	  LPDU *l = (LPDU *) inqueue.top ();
@@ -495,9 +517,19 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, sendtimeout,
 		     pth_timeout (0, 600000));
 	}
+      else if (in () == 0 && !waitconfirm && !watch && mode == 0 && !to)
+	{
+	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, watchdog,
+		     pth_timeout (10, 0));
+	  watch = 1;
+	  uchar c = 0x02;
+	  t->TracePacket (2, this, "Watchdog Status", 1, &c);
+	  write (fd, &c, 1);
+	}
     }
   pth_event_free (stop, PTH_FREE_THIS);
   pth_event_free (input, PTH_FREE_THIS);
   pth_event_free (timeout, PTH_FREE_THIS);
+  pth_event_free (watchdog, PTH_FREE_THIS);
   pth_event_free (sendtimeout, PTH_FREE_THIS);
 }
