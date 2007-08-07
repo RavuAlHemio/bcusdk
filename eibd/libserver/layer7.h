@@ -45,7 +45,6 @@ class Layer7_Connection
 {
   Trace *t;
   T_Connection *l4;
-  T_Individual *l4ind;
   /** destination address */
   eibaddr_t dest;
 
