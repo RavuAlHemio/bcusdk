@@ -432,6 +432,13 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	{
 	  mod = 1;
 	  retry++;
+	  if (retry > 3)
+	    {
+	      TRACEPRINTF (t, 1, this, "Drop");
+	      pth_sem_dec (&insignal);
+	      inqueue.get ();
+	      retry = 0;
+	    }
 	}
       if (mod != 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
 	{
