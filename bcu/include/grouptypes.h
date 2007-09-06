@@ -44,4 +44,7 @@ typedef double GROUP12_T;
 typedef unsigned char GROUP13_T[10];
 typedef unsigned char GROUP14_T[14];
 
+typedef uint4 GROUP256_T;
+typedef uint8 GROUP257_T;
+
 #endif
