@@ -1,7 +1,7 @@
 bcusdk - A free development environment for BCU1 and BCU2
 ---------------------------------------------------------
 
-Copyright (C) 2005-2007 Martin Kögler <mkoegler@auto.tuwien.ac.at>
+Copyright (C) 2005-2007 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 http://www.auto.tuwien.ac.at/~mkoegler/
 
 In order to justify continuing development, it is helpful to have 
@@ -89,6 +89,6 @@ find this software useful.
 Please note, that this is not requirement to use/modify/distribute the
 software.
 
-Martin Kögler
+Martin Koegler
 mkoegler@auto.tuwien.ac.at
 http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcus

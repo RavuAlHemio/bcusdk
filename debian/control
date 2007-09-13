@@ -1,7 +1,7 @@
 Source: bcusdk
 Section: devel
 Priority: extra
-Maintainer: Martin Kögler <mkoegler@auto.tuwien.ac.at>
+Maintainer: Martin Koegler <mkoegler@auto.tuwien.ac.at>
 Build-Depends: debhelper (>= 4.0.0), dbs, bzip2, bison, flex, m68hc05-gcc, libxml2-dev (>= 2.6.16), pthsem-dev (>=2.0.4)
 Standards-Version: 3.6.1
 

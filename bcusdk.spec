@@ -169,5 +169,5 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Sat Jul 30 2005 Martin Kögler <mkoegler@auto.tuwien.ac.at> - 0:0.0.0-3
+* Sat Jul 30 2005 Martin Koegler <mkoegler@auto.tuwien.ac.at> - 0:0.0.0-3
 - first version
