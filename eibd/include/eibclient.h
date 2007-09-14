@@ -736,7 +736,7 @@ int EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
- * \return result
+ * \return result, -1 if communication error with eibd
  */
 BCU_LOAD_RESULT EIB_LoadImage (EIBConnection * con, const uint8_t * image,
 			       int len);
