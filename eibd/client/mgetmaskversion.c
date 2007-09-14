@@ -31,10 +31,8 @@
 static int
 M_GetMaskVersion_complete (EIBConnection * con)
 {
-  int i;
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  EIBC_GETREQUEST
+
   if (EIBTYPE (con) != EIB_MASK_VERSION || con->size < 4)
     {
       errno = ECONNRESET;

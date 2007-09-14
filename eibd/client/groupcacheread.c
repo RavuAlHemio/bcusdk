@@ -31,11 +31,8 @@
 static int
 EIB_Cache_Read_complete (EIBConnection * con)
 {
-  int i;
   unsigned int j;
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  EIBC_GETREQUEST
 
   if (EIBTYPE (con) != EIB_CACHE_READ_NOWAIT)
     {

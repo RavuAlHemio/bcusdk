@@ -75,4 +75,10 @@ int _EIB_SendRequest (EIBConnection * con, unsigned int size, uchar * data);
 int _EIB_CheckRequest (EIBConnection * con, int block);
 int _EIB_GetRequest (EIBConnection * con);
 
+#define EIBC_GETREQUEST \
+	int i; \
+	i = _EIB_GetRequest (con); \
+	if (i == -1) \
+	     return -1;
+
 #endif

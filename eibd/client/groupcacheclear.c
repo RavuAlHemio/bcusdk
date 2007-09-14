@@ -31,10 +31,7 @@
 static int
 EIB_Cache_Clear_complete (EIBConnection * con)
 {
-  int i;
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  EIBC_GETREQUEST
 
   if (EIBTYPE (con) != EIB_CACHE_CLEAR)
     {

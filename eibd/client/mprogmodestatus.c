@@ -31,10 +31,8 @@
 static int
 M_Progmode_Status_complete (EIBConnection * con)
 {
-  int i;
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  EIBC_GETREQUEST
+
   if (EIBTYPE (con) != EIB_PROG_MODE || con->size < 3)
     {
       errno = ECONNRESET;
