@@ -81,4 +81,12 @@ int _EIB_GetRequest (EIBConnection * con);
 	if (i == -1) \
 	     return -1;
 
+#define EIBC_RETURNERROR (msg, error) \
+	if (EIBTYPE (con) == msg) \
+	  { \
+	    errno = error; \
+	    return -1; \
+	  } 
+
+
 #endif

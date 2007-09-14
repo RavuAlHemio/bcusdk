@@ -32,12 +32,8 @@ static int
 OpenBusmonitorText_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
+  EIBC_RETURNERROR (EIB_CONNECTION_INUSE, EBUSY)
 
-  if (EIBTYPE (con) == EIB_CONNECTION_INUSE)
-    {
-      errno = EBUSY;
-      return -1;
-    }
   if (EIBTYPE (con) != EIB_OPEN_BUSMONITOR_TEXT)
     {
       errno = ECONNRESET;

@@ -32,28 +32,16 @@ static int
 M_WriteIndividualAddress_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
+  EIBC_RETURNERROR (EIB_ERROR_ADDR_EXISTS, EADDRINUSE)
+  EIBC_RETURNERROR (EIB_ERROR_TIMEOUT, ETIMEDOUT)
+  EIBC_RETURNERROR (EIB_ERROR_MORE_DEVICE, EADDRNOTAVAIL)
 
-  if (EIBTYPE (con) == EIB_ERROR_ADDR_EXISTS)
+  if (EIBTYPE (con) != EIB_M_INDIVIDUAL_ADDRESS_WRITE)
     {
-      errno = EADDRINUSE;
+      errno = ECONNRESET;
       return -1;
     }
-  if (EIBTYPE (con) == EIB_M_INDIVIDUAL_ADDRESS_WRITE)
-    {
-      return 0;
-    }
-  if (EIBTYPE (con) == EIB_ERROR_TIMEOUT)
-    {
-      errno = ETIMEDOUT;
-      return -1;
-    }
-  if (EIBTYPE (con) == EIB_ERROR_MORE_DEVICE)
-    {
-      errno = EADDRNOTAVAIL;
-      return -1;
-    }
-  errno = ECONNRESET;
-  return -1;
+  return 0;
 }
 
 int

@@ -32,12 +32,8 @@ static int
 MC_SetKey_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
+  EIBC_RETURNERROR (EIB_PROCESSING_ERROR, EPERM)
 
-  if (EIBTYPE (con) == EIB_PROCESSING_ERROR)
-    {
-      errno = EPERM;
-      return -1;
-    }
   if (EIBTYPE (con) != EIB_MC_KEY_WRITE)
     {
       errno = ECONNRESET;
