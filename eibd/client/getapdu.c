@@ -42,11 +42,7 @@ EIBGetAPDU (EIBConnection * con, int maxlen, uint8_t * buf)
   if (i == -1)
     return -1;
 
-  if (EIBTYPE (con) != EIB_APDU_PACKET)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_APDU_PACKET, 2)
   i = con->size - 2;
   if (i > maxlen)
     i = maxlen;

@@ -32,12 +32,7 @@ static int
 MC_PropertyDesc_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_PROP_DESC || con->size < 6)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_PROP_DESC, 6)
   /* Type */
   if (con->req.ptr2)
     *con->req.ptr2 = con->buf[2];

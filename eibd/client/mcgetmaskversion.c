@@ -32,12 +32,7 @@ static int
 MC_GetMaskVersion_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_MASK_VERSION || con->size < 4)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_MASK_VERSION, 4)
   return (con->buf[2] << 8) | (con->buf[3]);
 }
 

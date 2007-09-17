@@ -81,12 +81,19 @@ int _EIB_GetRequest (EIBConnection * con);
 	if (i == -1) \
 	     return -1;
 
-#define EIBC_RETURNERROR (msg, error) \
+#define EIBC_RETURNERROR(msg, error) \
 	if (EIBTYPE (con) == msg) \
 	  { \
 	    errno = error; \
 	    return -1; \
 	  } 
+
+#define EIBC_CHECKRESULT(msg, msgsize) \
+	if (EIBTYPE (con) != msg || con->size < msgsize) \
+	  { \
+	    errno = ECONNRESET; \
+	    return -1; \
+	  }
 
 
 #endif

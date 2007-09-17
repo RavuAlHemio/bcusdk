@@ -33,12 +33,7 @@ EIB_Cache_Enable_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_CONNECTION_INUSE, EBUSY)
-
-  if (EIBTYPE (con) != EIB_CACHE_ENABLE)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_CACHE_ENABLE, 2)
   return 0;
 }
 

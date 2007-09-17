@@ -32,12 +32,7 @@ static int
 MC_Authorize_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_AUTHORIZE || con->size < 3)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_AUTHORIZE, 3)
   return con->buf[2];
 }
 

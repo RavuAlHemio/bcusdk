@@ -32,12 +32,7 @@ static int
 LoadImage_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_LOAD_IMAGE || con->size < 4)
-    {
-      errno = ECONNRESET;
-      return IMG_UNKNOWN_ERROR;
-    }
+  EIBC_CHECKRESULT (EIB_LOAD_IMAGE, 4)
   return (con->buf[2] << 8) | con->buf[3];
 }
 

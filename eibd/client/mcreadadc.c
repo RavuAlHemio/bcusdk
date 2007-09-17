@@ -32,12 +32,7 @@ static int
 MC_ReadADC_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_ADC_READ || con->size < 4)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_ADC_READ, 4)
   if (con->req.ptr1)
     *con->req.ptr1 = (con->buf[2] << 8) | (con->buf[3]);
   return 0;

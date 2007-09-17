@@ -32,12 +32,7 @@ static int
 MC_Read_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_READ)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_READ, 2)
   i = con->size - 2;
   if (i > con->req.len)
     i = con->req.len;

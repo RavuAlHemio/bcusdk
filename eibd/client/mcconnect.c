@@ -32,12 +32,7 @@ static int
 MC_Connect_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_CONNECTION)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_CONNECTION, 2)
   return 0;
 }
 

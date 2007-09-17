@@ -32,12 +32,7 @@ static int
 OpenT_TPDU_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_OPEN_T_TPDU)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_OPEN_T_TPDU, 2)
   return 0;
 }
 

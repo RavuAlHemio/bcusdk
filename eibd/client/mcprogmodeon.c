@@ -32,12 +32,7 @@ static int
 MC_Progmode_On_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_PROG_MODE)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_PROG_MODE, 2)
   return 0;
 }
 

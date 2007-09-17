@@ -33,12 +33,7 @@ MC_Write_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_ERROR_VERIFY, EIO)
-
-  if (EIBTYPE (con) != EIB_MC_WRITE)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_WRITE, 2)
   return con->req.len;
 }
 

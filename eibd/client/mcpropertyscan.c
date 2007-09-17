@@ -32,12 +32,7 @@ static int
 MC_PropertyScan_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_PROP_SCAN)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_PROP_SCAN, 2)
   i = con->size - 2;
   if (i > con->req.len)
     i = con->req.len;

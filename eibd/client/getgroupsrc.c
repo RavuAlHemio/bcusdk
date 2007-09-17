@@ -43,11 +43,7 @@ EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
   if (i == -1)
     return -1;
 
-  if (EIBTYPE (con) != EIB_GROUP_PACKET || con->size < 6)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_GROUP_PACKET, 6)
   i = con->size - 6;
   if (i > maxlen)
     i = maxlen;

@@ -32,12 +32,7 @@ static int
 OpenT_Individual_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_OPEN_T_INDIVIDUAL)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_OPEN_T_INDIVIDUAL, 2)
   return 0;
 }
 

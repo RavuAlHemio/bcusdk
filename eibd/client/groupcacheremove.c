@@ -32,12 +32,7 @@ static int
 EIB_Cache_Remove_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_CACHE_REMOVE)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_CACHE_REMOVE, 2)
   return 0;
 }
 

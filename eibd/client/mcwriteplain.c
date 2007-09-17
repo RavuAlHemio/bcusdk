@@ -32,12 +32,7 @@ static int
 MC_Write_Plain_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_MC_WRITE_NOVERIFY)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_MC_WRITE_NOVERIFY, 2)
   return con->req.len;
 }
 

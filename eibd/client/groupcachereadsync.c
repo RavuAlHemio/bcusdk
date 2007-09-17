@@ -33,12 +33,7 @@ EIB_Cache_Read_Sync_complete (EIBConnection * con)
 {
   unsigned int j;
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_CACHE_READ)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_CACHE_READ, 2)
   if (!con->buf[4] && !con->buf[5])
     {
       errno = ENODEV;

@@ -32,12 +32,7 @@ static int
 Reset_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
-
-  if (EIBTYPE (con) != EIB_RESET_CONNECTION)
-    {
-      errno = ECONNRESET;
-      return -1;
-    }
+  EIBC_CHECKRESULT (EIB_RESET_CONNECTION, 2)
   return 0;
 }
 
