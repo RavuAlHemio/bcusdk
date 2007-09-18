@@ -33,11 +33,7 @@ MC_PropertyWrite_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROP_WRITE, 2)
-  i = con->size - 2;
-  if (i > con->req.len)
-    i = con->req.len;
-  memcpy (con->req.buf, con->buf + 2, i);
-  return i;
+  EIBC_RETURN_BUF (2)
 }
 
 int

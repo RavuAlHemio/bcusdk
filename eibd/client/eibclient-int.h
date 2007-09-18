@@ -96,5 +96,12 @@ int _EIB_GetRequest (EIBConnection * con);
 	    return -1; \
 	  }
 
+#define EIBC_RETURN_BUF(offset) \
+	i = con->size - offset; \
+	if (i > con->req.len) \
+	  i = con->req.len; \
+	memcpy (con->req.buf, con->buf + offset, i); \
+	return i;
+
 
 #endif

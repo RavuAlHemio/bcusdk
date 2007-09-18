@@ -46,11 +46,7 @@ EIB_Cache_Read_complete (EIBConnection * con)
     }
   if (con->req.ptr5)
     *con->req.ptr5 = (con->buf[2] << 8) | con->buf[3];
-  j = con->size - 6;
-  if (j > con->req.len)
-    j = con->req.len;
-  memcpy (con->req.buf, con->buf + 6, j);
-  return j;
+  EIBC_RETURN_BUF (6)
 }
 
 int
