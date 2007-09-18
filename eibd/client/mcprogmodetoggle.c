@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_Progmode_Toggle_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_Progmode_Toggle,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROG_MODE, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_MC_Progmode_Toggle_async (EIBConnection * con)
@@ -49,7 +47,7 @@ EIB_MC_Progmode_Toggle_async (EIBConnection * con)
   head[2] = 2;
   if (_EIB_SendRequest (con, 3, head) == -1)
     return -1;
-  con->complete = MC_Progmode_Toggle_complete;
+  con->complete = EIB_MC_Progmode_Toggle_complete;
   return 0;
 }
 

@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-EIB_Cache_Clear_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_Cache_Clear,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_CACHE_CLEAR, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_Cache_Clear_async (EIBConnection * con)

@@ -28,14 +28,12 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-EIBGetAPDU_Src_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBGetAPDU_Src,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_APDU_PACKET, 4)
   EIBC_RETURN_PTR5 (2)
   EIBC_RETURN_BUF (4)
-}
+)
 
 int
 EIBGetAPDU_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,

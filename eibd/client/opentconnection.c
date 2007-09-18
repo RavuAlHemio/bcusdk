@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-OpenT_Connection_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBOpenT_Connection,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_OPEN_T_CONNECTION, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIBOpenT_Connection_async (EIBConnection * con, eibaddr_t dest)
@@ -51,7 +49,7 @@ EIBOpenT_Connection_async (EIBConnection * con, eibaddr_t dest)
   i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
-  con->complete = OpenT_Connection_complete;
+  con->complete = EIBOpenT_Connection_complete;
   return 0;
 }
 

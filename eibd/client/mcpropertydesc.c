@@ -28,16 +28,14 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_PropertyDesc_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_PropertyDesc,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROP_DESC, 6)
   EIBC_RETURN_PTR2 (2)
   EIBC_RETURN_PTR4 (3)
   EIBC_RETURN_PTR3 (5)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
@@ -58,7 +56,7 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
   head[3] = property;
   if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
-  con->complete = MC_PropertyDesc_complete;
+  con->complete = EIB_MC_PropertyDesc_complete;
   return 0;
 }
 

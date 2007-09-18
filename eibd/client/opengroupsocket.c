@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-Open_GroupSocket_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBOpen_GroupSocket,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_OPEN_GROUPCON, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIBOpen_GroupSocket_async (EIBConnection * con, int write_only)
@@ -51,7 +49,7 @@ EIBOpen_GroupSocket_async (EIBConnection * con, int write_only)
   i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
-  con->complete = Open_GroupSocket_complete;
+  con->complete = EIBOpen_GroupSocket_complete;
   return 0;
 }
 

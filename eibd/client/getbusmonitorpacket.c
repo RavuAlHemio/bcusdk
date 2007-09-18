@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-EIBGetBusmonitorPacket_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBGetBusmonitorPacket,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_BUSMONITOR_PACKET, 2)
   EIBC_RETURN_BUF (2)
-}
+)
 
 int
 EIBGetBusmonitorPacket_async (EIBConnection * con, int maxlen, uint8_t * buf)

@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_PropertyWrite_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_PropertyWrite,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROP_WRITE, 2)
   EIBC_RETURN_BUF (2)
-}
+)
 
 int
 EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
@@ -73,7 +71,7 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
   free (ibuf);
   if (i == -1)
     return -1;
-  con->complete = MC_PropertyWrite_complete;
+  con->complete = EIB_MC_PropertyWrite_complete;
   return 0;
 }
 

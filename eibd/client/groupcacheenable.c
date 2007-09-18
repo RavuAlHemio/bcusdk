@@ -28,14 +28,12 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-EIB_Cache_Enable_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_Cache_Enable,
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_CONNECTION_INUSE, EBUSY)
   EIBC_CHECKRESULT (EIB_CACHE_ENABLE, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_Cache_Enable_async (EIBConnection * con)

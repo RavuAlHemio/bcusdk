@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-Reset_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBReset,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_RESET_CONNECTION, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIBReset_async (EIBConnection * con)
@@ -51,7 +49,7 @@ EIBReset_async (EIBConnection * con)
   if (i == -1)
     return -1;
 
-  con->complete = Reset_complete;
+  con->complete = EIBReset_complete;
   return 0;
 }
 

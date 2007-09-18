@@ -28,14 +28,12 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-OpenBusmonitor_complete (EIBConnection * con)
-{
+EIBC_COMPLETE(EIBOpenBusmonitor,
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_CONNECTION_INUSE, EBUSY)
   EIBC_CHECKRESULT (EIB_OPEN_BUSMONITOR, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIBOpenBusmonitor_async (EIBConnection * con)
@@ -52,7 +50,7 @@ EIBOpenBusmonitor_async (EIBConnection * con)
   if (i == -1)
     return -1;
 
-  con->complete = OpenBusmonitor_complete;
+  con->complete = EIBOpenBusmonitor_complete;
   return 0;
 }
 

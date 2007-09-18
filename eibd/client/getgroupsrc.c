@@ -28,15 +28,13 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-EIBGetGroup_Src_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBGetGroup_Src,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_GROUP_PACKET, 6)
   EIBC_RETURN_PTR5 (2)
   EIBC_RETURN_PTR6 (4)
   EIBC_RETURN_BUF (6)
-}
+)
 
 int
 EIBGetGroup_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,

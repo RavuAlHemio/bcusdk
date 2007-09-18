@@ -28,14 +28,12 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_SetKey_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_SetKey,
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_PROCESSING_ERROR, EPERM)
   EIBC_CHECKRESULT (EIB_MC_KEY_WRITE, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
@@ -51,7 +49,7 @@ EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
   head[6] = level;
   if (_EIB_SendRequest (con, 7, head) == -1)
     return -1;
-  con->complete = MC_SetKey_complete;
+  con->complete = EIB_MC_SetKey_complete;
   return 0;
 }
 

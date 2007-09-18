@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-M_ReadIndividualAddresses_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_M_ReadIndividualAddresses,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_M_INDIVIDUAL_ADDRESS_READ, 2)
   EIBC_RETURN_BUF (2)
-}
+)
 
 int
 EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
@@ -51,7 +49,7 @@ EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
   EIBSETTYPE (head, EIB_M_INDIVIDUAL_ADDRESS_READ);
   if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
-  con->complete = M_ReadIndividualAddresses_complete;
+  con->complete = EIB_M_ReadIndividualAddresses_complete;
   return 0;
 }
 

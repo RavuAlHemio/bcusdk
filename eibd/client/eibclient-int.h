@@ -130,4 +130,11 @@ int _EIB_GetRequest (EIBConnection * con);
 	if (con->req.ptr6) \
 	  *con->req.ptr6 = (con->buf[offset] << 8) | (con->buf[offset+1]);
 
+#define EIBC_COMPLETE(name, body) \
+	static int \
+	name ## _complete (EIBConnection * con) \
+	{ \
+	  body \
+	}
+
 #endif

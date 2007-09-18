@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_PropertyRead_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_PropertyRead,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROP_READ, 2)
   EIBC_RETURN_BUF (2)
-}
+)
 
 int
 EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
@@ -62,7 +60,7 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
   head[6] = nr_of_elem;
   if (_EIB_SendRequest (con, 7, head) == -1)
     return -1;
-  con->complete = MC_PropertyRead_complete;
+  con->complete = EIB_MC_PropertyRead_complete;
   return 0;
 }
 

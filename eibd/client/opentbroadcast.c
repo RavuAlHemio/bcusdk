@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-OpenT_Broadcast_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIBOpenT_Broadcast,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_OPEN_T_BROADCAST, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIBOpenT_Broadcast_async (EIBConnection * con, int write_only)
@@ -51,7 +49,7 @@ EIBOpenT_Broadcast_async (EIBConnection * con, int write_only)
   i = _EIB_SendRequest (con, 5, head);
   if (i == -1)
     return -1;
-  con->complete = OpenT_Broadcast_complete;
+  con->complete = EIBOpenT_Broadcast_complete;
   return 0;
 }
 

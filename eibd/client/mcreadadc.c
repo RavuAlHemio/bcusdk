@@ -28,14 +28,12 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_ReadADC_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_ReadADC,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_ADC_READ, 4)
   EIBC_RETURN_PTR1 (2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
@@ -53,7 +51,7 @@ EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
   head[3] = count;
   if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
-  con->complete = MC_ReadADC_complete;
+  con->complete = EIB_MC_ReadADC_complete;
   return 0;
 }
 

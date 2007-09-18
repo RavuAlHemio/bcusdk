@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_PropertyScan_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_PropertyScan,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROP_SCAN, 2)
   EIBC_RETURN_BUF (2)
-}
+)
 
 int
 EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
@@ -50,7 +48,7 @@ EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
   EIBSETTYPE (head, EIB_MC_PROP_SCAN);
   if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
-  con->complete = MC_PropertyScan_complete;
+  con->complete = EIB_MC_PropertyScan_complete;
   return 0;
 }
 

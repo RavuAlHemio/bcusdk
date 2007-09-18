@@ -28,16 +28,14 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-M_WriteIndividualAddress_complete (EIBConnection * con)
-{
+EIBC_COMPLETE(EIB_M_WriteIndividualAddress,
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_ERROR_ADDR_EXISTS, EADDRINUSE)
   EIBC_RETURNERROR (EIB_ERROR_TIMEOUT, ETIMEDOUT)
   EIBC_RETURNERROR (EIB_ERROR_MORE_DEVICE, EADDRNOTAVAIL)
   EIBC_CHECKRESULT (EIB_M_INDIVIDUAL_ADDRESS_WRITE, 2)
   EIBC_RETURN_OK
-}
+)
 
 int
 EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest)
@@ -52,7 +50,7 @@ EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest)
   EIBSETADDR (head + 2, dest);
   if (_EIB_SendRequest (con, 4, head) == -1)
     return -1;
-  con->complete = M_WriteIndividualAddress_complete;
+  con->complete = EIB_M_WriteIndividualAddress_complete;
   return 0;
 }
 
