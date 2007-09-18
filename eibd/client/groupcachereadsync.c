@@ -33,16 +33,8 @@ EIB_Cache_Read_Sync_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_CACHE_READ, 2)
-  if (!con->buf[4] && !con->buf[5])
-    {
-      errno = ENODEV;
-      return -1;
-    }
-  if (con->size <= 6)
-    {
-      errno = ENOENT;
-      return -1;
-    }
+  EIBC_RETURNERROR_UINT16 (4, ENODEV)
+  EIBC_RETURNERROR_SIZE (6, ENOENT)
   EIBC_RETURN_PTR5 (2)
   EIBC_RETURN_BUF (6)
 }

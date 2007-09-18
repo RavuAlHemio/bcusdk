@@ -89,6 +89,20 @@ int _EIB_GetRequest (EIBConnection * con);
 	    return -1; \
 	  } 
 
+#define EIBC_RETURNERROR_UINT16(offset, error) \
+	if (!con->buf[offset] && !con->buf[offset+1]) \
+	  { \
+	    errno = error; \
+	    return -1; \
+	  }
+
+#define EIBC_RETURNERROR_SIZE(length, error) \
+	if (con->size <= length) \
+	  { \
+	    errno = error; \
+	    return -1; \
+	  }
+
 #define EIBC_CHECKRESULT(msg, msgsize) \
 	if (EIBTYPE (con) != msg || con->size < msgsize) \
 	  { \
