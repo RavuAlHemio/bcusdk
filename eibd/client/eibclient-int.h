@@ -106,4 +106,28 @@ int _EIB_GetRequest (EIBConnection * con);
 #define EIBC_RETURN_OK \
 	return 0;
 
+#define EIBC_RETURN_PTR1(offset) \
+	if (con->req.ptr1) \
+	  *con->req.ptr1 = (con->buf[offset] << 8) | (con->buf[offset+1]);
+
+#define EIBC_RETURN_PTR2(offset) \
+	if (con->req.ptr2) \
+	  *con->req.ptr2 = con->buf[offset];
+
+#define EIBC_RETURN_PTR3(offset) \
+	if (con->req.ptr3) \
+	  *con->req.ptr3 = con->buf[offset];
+
+#define EIBC_RETURN_PTR4(offset) \
+	if (con->req.ptr4) \
+	  *con->req.ptr4 = (con->buf[offset] << 8) | (con->buf[offset+1]);
+
+#define EIBC_RETURN_PTR5(offset) \
+	if (con->req.ptr5) \
+	  *con->req.ptr5 = (con->buf[offset] << 8) | (con->buf[offset+1]);
+
+#define EIBC_RETURN_PTR6(offset) \
+	if (con->req.ptr6) \
+	  *con->req.ptr6 = (con->buf[offset] << 8) | (con->buf[offset+1]);
+
 #endif

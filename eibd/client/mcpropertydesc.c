@@ -33,15 +33,9 @@ MC_PropertyDesc_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROP_DESC, 6)
-  /* Type */
-  if (con->req.ptr2)
-    *con->req.ptr2 = con->buf[2];
-  /* max_nr_of_elem */
-  if (con->req.ptr4)
-    *con->req.ptr4 = (con->buf[3] << 8) | (con->buf[4]);
-  /* access */
-  if (con->req.ptr3)
-    *con->req.ptr3 = con->buf[5];
+  EIBC_RETURN_PTR2 (2)
+  EIBC_RETURN_PTR4 (3)
+  EIBC_RETURN_PTR3 (5)
   EIBC_RETURN_OK
 }
 

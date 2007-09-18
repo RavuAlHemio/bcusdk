@@ -43,8 +43,7 @@ EIB_Cache_Read_complete (EIBConnection * con)
       errno = ENOENT;
       return -1;
     }
-  if (con->req.ptr5)
-    *con->req.ptr5 = (con->buf[2] << 8) | con->buf[3];
+  EIBC_RETURN_PTR5 (2)
   EIBC_RETURN_BUF (6)
 }
 

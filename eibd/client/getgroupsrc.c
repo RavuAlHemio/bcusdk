@@ -33,10 +33,8 @@ EIBGetGroup_Src_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_GROUP_PACKET, 6)
-  if (con->req.ptr5)
-    *con->req.ptr5 = (con->buf[2] << 8) | (con->buf[3]);
-  if (con->req.ptr6)
-    *con->req.ptr6 = (con->buf[4] << 8) | (con->buf[5]);
+  EIBC_RETURN_PTR5 (2)
+  EIBC_RETURN_PTR6 (4)
   EIBC_RETURN_BUF (6)
 }
 
