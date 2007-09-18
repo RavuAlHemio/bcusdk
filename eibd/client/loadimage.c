@@ -33,7 +33,7 @@ LoadImage_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_LOAD_IMAGE, 4)
-  return (con->buf[2] << 8) | con->buf[3];
+  EIBC_RETURN_UINT16 (2)
 }
 
 int
