@@ -31,7 +31,6 @@
 static int
 EIB_Cache_Read_Sync_complete (EIBConnection * con)
 {
-  unsigned int j;
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_CACHE_READ, 2)
   if (!con->buf[4] && !con->buf[5])
