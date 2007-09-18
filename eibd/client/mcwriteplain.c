@@ -33,7 +33,7 @@ MC_Write_Plain_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_WRITE_NOVERIFY, 2)
-  return con->req.len;
+  EIBC_RETURN_LEN
 }
 
 int

@@ -34,7 +34,7 @@ MC_Write_complete (EIBConnection * con)
   EIBC_GETREQUEST
   EIBC_RETURNERROR (EIB_ERROR_VERIFY, EIO)
   EIBC_CHECKRESULT (EIB_MC_WRITE, 2)
-  return con->req.len;
+  EIBC_RETURN_LEN
 }
 
 int

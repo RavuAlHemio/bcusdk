@@ -106,6 +106,9 @@ int _EIB_GetRequest (EIBConnection * con);
 #define EIBC_RETURN_OK \
 	return 0;
 
+#define EIBC_RETURN_LEN \
+	return con->req.len;
+
 #define EIBC_RETURN_PTR1(offset) \
 	if (con->req.ptr1) \
 	  *con->req.ptr1 = (con->buf[offset] << 8) | (con->buf[offset+1]);
