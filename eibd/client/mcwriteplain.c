@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_Write_Plain_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_Write_Plain,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_WRITE_NOVERIFY, 2)
   EIBC_RETURN_LEN
-}
+)
 
 int
 EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
@@ -69,7 +67,7 @@ EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
   free (ibuf);
   if (i == -1)
     return -1;
-  con->complete = MC_Write_Plain_complete;
+  con->complete = EIB_MC_Write_Plain_complete;
   return 0;
 }
 

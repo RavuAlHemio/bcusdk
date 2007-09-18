@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_GetMaskVersion_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_GetMaskVersion,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_MASK_VERSION, 4)
   EIBC_RETURN_UINT16 (2)
-}
+)
 
 int
 EIB_MC_GetMaskVersion_async (EIBConnection * con)
@@ -48,7 +46,7 @@ EIB_MC_GetMaskVersion_async (EIBConnection * con)
   EIBSETTYPE (head, EIB_MC_MASK_VERSION);
   if (_EIB_SendRequest (con, 2, head) == -1)
     return -1;
-  con->complete = MC_GetMaskVersion_complete;
+  con->complete = EIB_MC_GetMaskVersion_complete;
   return 0;
 }
 

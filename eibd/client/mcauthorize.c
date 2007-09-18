@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_Authorize_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_Authorize,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_AUTHORIZE, 3)
   EIBC_RETURN_UINT8 (2)
-}
+)
 
 int
 EIB_MC_Authorize_async (EIBConnection * con, uint8_t key[4])
@@ -49,7 +47,7 @@ EIB_MC_Authorize_async (EIBConnection * con, uint8_t key[4])
   memcpy (head + 2, key, 4);
   if (_EIB_SendRequest (con, 6, head) == -1)
     return -1;
-  con->complete = MC_Authorize_complete;
+  con->complete = EIB_MC_Authorize_complete;
   return 0;
 }
 

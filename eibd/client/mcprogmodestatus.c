@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-MC_Progmode_Status_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_MC_Progmode_Status,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_PROG_MODE, 3)
   EIBC_RETURN_UINT8 (2)
-}
+)
 
 int
 EIB_MC_Progmode_Status_async (EIBConnection * con)
@@ -49,7 +47,7 @@ EIB_MC_Progmode_Status_async (EIBConnection * con)
   head[2] = 3;
   if (_EIB_SendRequest (con, 3, head) == -1)
     return -1;
-  con->complete = MC_Progmode_Status_complete;
+  con->complete = EIB_MC_Progmode_Status_complete;
   return 0;
 }
 

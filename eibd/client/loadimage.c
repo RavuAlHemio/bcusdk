@@ -28,13 +28,11 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-static int
-LoadImage_complete (EIBConnection * con)
-{
+EIBC_COMPLETE (EIB_LoadImage,
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_LOAD_IMAGE, 4)
   EIBC_RETURN_UINT16 (2)
-}
+)
 
 int
 EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
@@ -63,7 +61,7 @@ EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
   free (ibuf);
   if (i == -1)
     return -1;
-  con->complete = LoadImage_complete;
+  con->complete = EIB_LoadImage_complete;
   return 0;
 }
 
