@@ -33,7 +33,7 @@ EIB_Cache_Clear_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_CACHE_CLEAR, 2)
-  return 0;
+  EIBC_RETURN_OK
 }
 
 int

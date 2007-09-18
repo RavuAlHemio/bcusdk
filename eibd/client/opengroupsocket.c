@@ -33,7 +33,7 @@ Open_GroupSocket_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_OPEN_GROUPCON, 2)
-  return 0;
+  EIBC_RETURN_OK
 }
 
 int

@@ -42,7 +42,7 @@ MC_PropertyDesc_complete (EIBConnection * con)
   /* access */
   if (con->req.ptr3)
     *con->req.ptr3 = con->buf[5];
-  return 0;
+  EIBC_RETURN_OK
 }
 
 int

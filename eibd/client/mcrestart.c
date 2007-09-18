@@ -33,7 +33,7 @@ MC_Restart_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_MC_RESTART, 2)
-  return 0;
+  EIBC_RETURN_OK
 }
 
 int

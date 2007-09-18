@@ -103,5 +103,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	memcpy (con->req.buf, con->buf + offset, i); \
 	return i;
 
+#define EIBC_RETURN_OK \
+	return 0;
 
 #endif

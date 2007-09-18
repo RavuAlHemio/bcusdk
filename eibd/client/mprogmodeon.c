@@ -33,7 +33,7 @@ M_Progmode_On_complete (EIBConnection * con)
 {
   EIBC_GETREQUEST
   EIBC_CHECKRESULT (EIB_PROG_MODE, 2)
-  return 0;
+  EIBC_RETURN_OK
 }
 
 int

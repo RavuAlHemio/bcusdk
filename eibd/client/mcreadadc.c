@@ -35,7 +35,7 @@ MC_ReadADC_complete (EIBConnection * con)
   EIBC_CHECKRESULT (EIB_MC_ADC_READ, 4)
   if (con->req.ptr1)
     *con->req.ptr1 = (con->buf[2] << 8) | (con->buf[3]);
-  return 0;
+  EIBC_RETURN_OK
 }
 
 int
