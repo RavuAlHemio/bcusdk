@@ -28,27 +28,42 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-int
-EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
-		eibaddr_t * src)
+static int
+EIBGetAPDU_Src_complete (EIBConnection * con)
 {
-  int i;
+  EIBC_GETREQUEST
+  EIBC_CHECKRESULT (EIB_APDU_PACKET, 4)
+  i = con->size - 4;
+  if (i > con->req.len)
+    i = con->req.len;
+  memcpy (con->req.buf, con->buf + 4, i);
+  if (con->req.ptr5)
+    *con->req.ptr5 = (con->buf[2] << 8) | (con->buf[3]);
+  return i;
+}
+
+int
+EIBGetAPDU_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,
+		      eibaddr_t * src)
+{
   if (!con || !buf)
     {
       errno = EINVAL;
       return -1;
     }
 
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  con->req.buf = buf;
+  con->req.len = maxlen;
+  con->req.ptr5 = src;
+  con->complete = EIBGetAPDU_Src_complete;
+  return 0;
+}
 
-  EIBC_CHECKRESULT (EIB_APDU_PACKET, 4)
-  i = con->size - 4;
-  if (i > maxlen)
-    i = maxlen;
-  memcpy (buf, con->buf + 4, i);
-  if (src)
-    *src = (con->buf[2] << 8) | (con->buf[3]);
-  return i;
+int
+EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
+		eibaddr_t * src)
+{
+  if (EIBGetAPDU_Src_async (con, maxlen, buf, src) == -1)
+    return -1;
+  return EIBComplete (con);
 }

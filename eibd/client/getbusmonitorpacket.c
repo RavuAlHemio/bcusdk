@@ -28,24 +28,37 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-int
-EIBGetBusmonitorPacket (EIBConnection * con, int maxlen, uint8_t * buf)
+static int
+EIBGetBusmonitorPacket_complete (EIBConnection * con)
 {
-  int i;
+  EIBC_GETREQUEST
+  EIBC_CHECKRESULT (EIB_BUSMONITOR_PACKET, 2)
+  i = con->size - 2;
+  if (i > con->req.len)
+    i = con->req.len;
+  memcpy (con->req.buf, con->buf + 2, i);
+  return i;
+}
+
+int
+EIBGetBusmonitorPacket_async (EIBConnection * con, int maxlen, uint8_t * buf)
+{
   if (!con || !buf)
     {
       errno = EINVAL;
       return -1;
     }
 
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  con->req.buf = buf;
+  con->req.len = maxlen;
+  con->complete = EIBGetBusmonitorPacket_complete;
+  return 0;
+}
 
-  EIBC_CHECKRESULT (EIB_BUSMONITOR_PACKET, 2)
-  i = con->size - 2;
-  if (i > maxlen)
-    i = maxlen;
-  memcpy (buf, con->buf + 2, i);
-  return i;
+int
+EIBGetBusmonitorPacket (EIBConnection * con, int maxlen, uint8_t * buf)
+{
+  if (EIBGetBusmonitorPacket_async (con, maxlen, buf) == -1)
+    return -1;
+  return EIBComplete (con);
 }

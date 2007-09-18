@@ -28,29 +28,45 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-int
-EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
-		 eibaddr_t * src, eibaddr_t * dest)
+static int
+EIBGetGroup_Src_complete (EIBConnection * con)
 {
-  int i;
+  EIBC_GETREQUEST
+  EIBC_CHECKRESULT (EIB_GROUP_PACKET, 6)
+  i = con->size - 6;
+  if (i > con->req.len)
+    i = con->req.len;
+  memcpy (con->req.buf, con->buf + 6, i);
+  if (con->req.ptr5)
+    *con->req.ptr5 = (con->buf[2] << 8) | (con->buf[3]);
+  if (con->req.ptr6)
+    *con->req.ptr6 = (con->buf[4] << 8) | (con->buf[5]);
+  return i;
+}
+
+int
+EIBGetGroup_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,
+		       eibaddr_t * src, eibaddr_t * dest)
+{
   if (!con || !buf)
     {
       errno = EINVAL;
       return -1;
     }
 
-  i = _EIB_GetRequest (con);
-  if (i == -1)
-    return -1;
+  con->req.buf = buf;
+  con->req.len = maxlen;
+  con->req.ptr5 = src;
+  con->req.ptr6 = dest;
+  con->complete = EIBGetGroup_Src_complete;
+  return 0;
+}
 
-  EIBC_CHECKRESULT (EIB_GROUP_PACKET, 6)
-  i = con->size - 6;
-  if (i > maxlen)
-    i = maxlen;
-  memcpy (buf, con->buf + 6, i);
-  if (src)
-    *src = (con->buf[2] << 8) | (con->buf[3]);
-  if (dest)
-    *dest = (con->buf[4] << 8) | (con->buf[5]);
-  return i;
+int
+EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
+		 eibaddr_t * src, eibaddr_t * dest)
+{
+  if (EIBGetGroup_Src_async (con, maxlen, buf, src, dest) == -1)
+    return -1;
+  return EIBComplete (con);
 }
