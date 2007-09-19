@@ -67,8 +67,7 @@ EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
   free (ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIB_MC_Write_Plain_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_Write_Plain)
 }
 
 int

@@ -45,9 +45,7 @@ EIBGetAPDU_async (EIBConnection * con, int maxlen, uint8_t * buf)
 
   con->req.buf = buf;
   con->req.len = maxlen;
-  con->complete = EIBGetAPDU_complete;
-
-  return 0;
+  EIBC_INIT_COMPLETE (EIBGetAPDU)
 }
 
 int

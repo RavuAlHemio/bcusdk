@@ -50,9 +50,7 @@ EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest)
   i = _EIB_SendRequest (con, 4, ibuf);
   if (i == -1)
     return -1;
-
-  con->complete = EIB_MC_Connect_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_Connect)
 }
 
 int

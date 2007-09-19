@@ -50,8 +50,7 @@ EIBOpen_GroupSocket_async (EIBConnection * con, int write_only)
   i = _EIB_SendRequest (con, 5, ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIBOpen_GroupSocket_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBOpen_GroupSocket)
 }
 
 int

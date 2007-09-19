@@ -50,8 +50,7 @@ EIB_Cache_Remove_async (EIBConnection * con, eibaddr_t dest)
   i = _EIB_SendRequest (con, 4, ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIB_Cache_Remove_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_Cache_Remove)
 }
 
 int

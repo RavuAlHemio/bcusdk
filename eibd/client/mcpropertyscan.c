@@ -49,8 +49,7 @@ EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
   EIBSETTYPE (ibuf, EIB_MC_PROP_SCAN);
   if (_EIB_SendRequest (con, 2, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_PropertyScan_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_PropertyScan)
 }
 
 int

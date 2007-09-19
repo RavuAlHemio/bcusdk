@@ -160,4 +160,8 @@ int _EIB_GetRequest (EIBConnection * con);
 	  body \
 	}
 
+#define EIBC_INIT_COMPLETE(name) \
+	con->complete = name ## _complete; \
+	return 0;
+
 #endif

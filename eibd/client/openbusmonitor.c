@@ -50,9 +50,7 @@ EIBOpenBusmonitor_async (EIBConnection * con)
   i = _EIB_SendRequest (con, 2, ibuf);
   if (i == -1)
     return -1;
-
-  con->complete = EIBOpenBusmonitor_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBOpenBusmonitor)
 }
 
 int

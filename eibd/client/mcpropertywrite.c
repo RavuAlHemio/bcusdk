@@ -71,8 +71,7 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
   free (ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIB_MC_PropertyWrite_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_PropertyWrite)
 }
 
 int

@@ -50,8 +50,7 @@ EIBOpenVBusmonitor_async (EIBConnection * con)
   i = _EIB_SendRequest (con, 2, ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIBOpenVBusmonitor_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBOpenVBusmonitor)
 }
 
 int

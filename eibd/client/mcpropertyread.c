@@ -61,8 +61,7 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
   ibuf[6] = nr_of_elem;
   if (_EIB_SendRequest (con, 7, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_PropertyRead_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_PropertyRead)
 }
 
 int

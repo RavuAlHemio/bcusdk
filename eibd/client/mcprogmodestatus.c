@@ -48,8 +48,7 @@ EIB_MC_Progmode_Status_async (EIBConnection * con)
   ibuf[2] = 3;
   if (_EIB_SendRequest (con, 3, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_Progmode_Status_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_Progmode_Status)
 }
 
 int

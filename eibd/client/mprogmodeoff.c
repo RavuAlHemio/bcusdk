@@ -49,8 +49,7 @@ EIB_M_Progmode_Off_async (EIBConnection * con, eibaddr_t dest)
   ibuf[4] = 0;
   if (_EIB_SendRequest (con, 5, ibuf) == -1)
     return -1;
-  con->complete = EIB_M_Progmode_Off_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_M_Progmode_Off)
 }
 
 int

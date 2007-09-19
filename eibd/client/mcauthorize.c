@@ -48,8 +48,7 @@ EIB_MC_Authorize_async (EIBConnection * con, uint8_t key[4])
   memcpy (ibuf + 2, key, 4);
   if (_EIB_SendRequest (con, 6, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_Authorize_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_Authorize)
 }
 
 int

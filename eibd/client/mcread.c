@@ -58,8 +58,7 @@ EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
   ibuf[5] = (len) & 0xff;
   if (_EIB_SendRequest (con, 6, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_Read_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_Read)
 }
 
 int

@@ -48,8 +48,7 @@ EIBGetAPDU_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,
   con->req.buf = buf;
   con->req.len = maxlen;
   con->req.ptr5 = src;
-  con->complete = EIBGetAPDU_Src_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBGetAPDU_Src)
 }
 
 int

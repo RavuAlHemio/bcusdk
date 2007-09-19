@@ -52,8 +52,7 @@ EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
   ibuf[3] = count;
   if (_EIB_SendRequest (con, 4, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_ReadADC_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_ReadADC)
 }
 
 int

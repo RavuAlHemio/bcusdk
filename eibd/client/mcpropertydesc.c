@@ -57,8 +57,7 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
   ibuf[3] = property;
   if (_EIB_SendRequest (con, 4, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_PropertyDesc_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_PropertyDesc)
 }
 
 int

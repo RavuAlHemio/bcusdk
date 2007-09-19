@@ -50,8 +50,7 @@ EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src)
   i = _EIB_SendRequest (con, 5, ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIBOpenT_TPDU_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBOpenT_TPDU)
 }
 
 int

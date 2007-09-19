@@ -50,8 +50,7 @@ EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
   ibuf[6] = level;
   if (_EIB_SendRequest (con, 7, ibuf) == -1)
     return -1;
-  con->complete = EIB_MC_SetKey_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_MC_SetKey)
 }
 
 int

@@ -52,8 +52,7 @@ EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
   i = _EIB_SendRequest (con, 5, ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIBOpenT_Individual_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBOpenT_Individual)
 }
 
 int

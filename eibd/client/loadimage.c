@@ -61,8 +61,7 @@ EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
   free (ibuf);
   if (i == -1)
     return -1;
-  con->complete = EIB_LoadImage_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIB_LoadImage)
 }
 
 BCU_LOAD_RESULT

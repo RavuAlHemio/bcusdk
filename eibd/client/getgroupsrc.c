@@ -50,8 +50,7 @@ EIBGetGroup_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,
   con->req.len = maxlen;
   con->req.ptr5 = src;
   con->req.ptr6 = dest;
-  con->complete = EIBGetGroup_Src_complete;
-  return 0;
+  EIBC_INIT_COMPLETE (EIBGetGroup_Src)
 }
 
 int
