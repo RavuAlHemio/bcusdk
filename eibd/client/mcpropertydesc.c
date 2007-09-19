@@ -42,8 +42,9 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
 			   uint8_t * type, uint16_t * max_nr_of_elem,
 			   uint8_t * access)
 {
-  uchar head[5];
+  uchar head[4];
   uchar *ibuf = head;
+  unsigned int ilen = 4;
   if (!con)
     {
       errno = EINVAL;
@@ -55,7 +56,7 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
   EIBSETTYPE (ibuf, EIB_MC_PROP_DESC);
   ibuf[2] = obj;
   ibuf[3] = property;
-  if (_EIB_SendRequest (con, 4, ibuf) == -1)
+  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIB_MC_PropertyDesc)
 }

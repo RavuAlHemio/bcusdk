@@ -39,6 +39,7 @@ EIBOpenT_Broadcast_async (EIBConnection * con, int write_only)
 {
   uchar head[5];
   uchar *ibuf = head;
+  unsigned int ilen = 5;
   int i;
   if (!con)
     {
@@ -47,7 +48,7 @@ EIBOpenT_Broadcast_async (EIBConnection * con, int write_only)
     }
   EIBSETTYPE (ibuf, EIB_OPEN_T_BROADCAST);
   ibuf[4] = (write_only ? 0xff : 0);
-  i = _EIB_SendRequest (con, 5, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   if (i == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIBOpenT_Broadcast)

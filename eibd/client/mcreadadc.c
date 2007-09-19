@@ -41,6 +41,7 @@ EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
 {
   uchar head[4];
   uchar *ibuf = head;
+  unsigned int ilen = 4;
   if (!con)
     {
       errno = EINVAL;
@@ -50,7 +51,7 @@ EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
   EIBSETTYPE (ibuf, EIB_MC_ADC_READ);
   ibuf[2] = channel;
   ibuf[3] = count;
-  if (_EIB_SendRequest (con, 4, ibuf) == -1)
+  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIB_MC_ReadADC)
 }

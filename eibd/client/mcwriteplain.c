@@ -39,6 +39,7 @@ EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
 			  const uint8_t * buf)
 {
   uchar *ibuf;
+  unsigned int ilen = 6;
   int i;
   if (!con)
     {
@@ -51,7 +52,8 @@ EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
       errno = EINVAL;
       return -1;
     }
-  ibuf = (uchar *) malloc (len + 6);
+  ilen = len + 6;
+  ibuf = (uchar *) malloc (ilen);
   if (!ibuf)
     {
       errno = ENOMEM;
@@ -63,7 +65,7 @@ EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
   ibuf[4] = (len >> 8) & 0xff;
   ibuf[5] = (len) & 0xff;
   memcpy (ibuf + 6, buf, len);
-  i = _EIB_SendRequest (con, len + 6, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   if (i == -1)
     return -1;

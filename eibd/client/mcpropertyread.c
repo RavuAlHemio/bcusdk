@@ -41,6 +41,7 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
 {
   uchar head[7];
   uchar *ibuf = head;
+  unsigned int ilen = 7;
   if (!con)
     {
       errno = EINVAL;
@@ -59,7 +60,7 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
   ibuf[4] = (start >> 8) & 0xff;
   ibuf[5] = (start) & 0xff;
   ibuf[6] = nr_of_elem;
-  if (_EIB_SendRequest (con, 7, ibuf) == -1)
+  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIB_MC_PropertyRead)
 }

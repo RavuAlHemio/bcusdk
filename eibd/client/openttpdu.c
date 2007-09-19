@@ -39,6 +39,7 @@ EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src)
 {
   uchar head[5];
   uchar *ibuf = head;
+  unsigned int ilen = 5;
   int i;
   if (!con)
     {
@@ -47,7 +48,7 @@ EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src)
     }
   EIBSETTYPE (ibuf, EIB_OPEN_T_TPDU);
   EIBSETADDR (ibuf + 2, src);
-  i = _EIB_SendRequest (con, 5, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   if (i == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIBOpenT_TPDU)

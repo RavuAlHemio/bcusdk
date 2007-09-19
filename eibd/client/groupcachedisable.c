@@ -39,6 +39,7 @@ EIB_Cache_Disable_async (EIBConnection * con)
 {
   uchar head[2];
   uchar *ibuf = head;
+  unsigned int ilen = 2;
   int i;
   if (!con)
     {
@@ -46,7 +47,7 @@ EIB_Cache_Disable_async (EIBConnection * con)
       return -1;
     }
   EIBSETTYPE (ibuf, EIB_CACHE_DISABLE);
-  i = _EIB_SendRequest (con, 2, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   if (i == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIB_Cache_Disable)

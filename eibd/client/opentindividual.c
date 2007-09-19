@@ -40,6 +40,7 @@ EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
 {
   uchar head[5];
   uchar *ibuf = head;
+  unsigned int ilen = 5;
   int i;
   if (!con)
     {
@@ -49,7 +50,7 @@ EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
   EIBSETTYPE (ibuf, EIB_OPEN_T_INDIVIDUAL);
   EIBSETADDR (ibuf + 2, dest);
   ibuf[4] = (write_only ? 0xff : 0);
-  i = _EIB_SendRequest (con, 5, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   if (i == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIBOpenT_Individual)

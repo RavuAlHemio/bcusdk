@@ -39,6 +39,7 @@ EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
 {
   uchar head[2];
   uchar *ibuf = head;
+  unsigned int ilen = 2;
   if (!con)
     {
       errno = EINVAL;
@@ -47,7 +48,7 @@ EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
   con->req.len = maxlen;
   con->req.buf = buf;
   EIBSETTYPE (ibuf, EIB_MC_PROP_SCAN);
-  if (_EIB_SendRequest (con, 2, ibuf) == -1)
+  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIB_MC_PropertyScan)
 }

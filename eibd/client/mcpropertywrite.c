@@ -41,6 +41,7 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
 			    int max_len, uint8_t * res)
 {
   uchar *ibuf;
+  unsigned int ilen = 7;
   int i;
   if (!con)
     {
@@ -54,7 +55,8 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
     }
   con->req.len = max_len;
   con->req.buf = res;
-  ibuf = (uchar *) malloc (len + 7);
+  ilen = len + 7;
+  ibuf = (uchar *) malloc (ilen);
   if (!ibuf)
     {
       errno = ENOMEM;
@@ -67,7 +69,7 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
   ibuf[5] = (start) & 0xff;
   ibuf[6] = nr_of_elem;
   memcpy (ibuf + 7, buf, len);
-  i = _EIB_SendRequest (con, len + 7, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   if (i == -1)
     return -1;

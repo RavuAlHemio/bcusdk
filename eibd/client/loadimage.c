@@ -38,6 +38,7 @@ int
 EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
 {
   uchar *ibuf;
+  unsigned int ilen = 2;
   int i;
   if (!con)
     {
@@ -49,7 +50,8 @@ EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
       errno = EINVAL;
       return -1;
     }
-  ibuf = (uchar *) malloc (len + 2);
+  ilen = len + 2;
+  ibuf = (uchar *) malloc (ilen);
   if (!ibuf)
     {
       errno = ENOMEM;
@@ -57,7 +59,7 @@ EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
     }
   EIBSETTYPE (ibuf, EIB_LOAD_IMAGE);
   memcpy (ibuf + 2, image, len);
-  i = _EIB_SendRequest (con, len + 2, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   if (i == -1)
     return -1;

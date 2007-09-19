@@ -32,6 +32,7 @@ int
 EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
 {
   uchar *ibuf;
+  unsigned int ilen = 2;
   int i;
   if (!con)
     {
@@ -43,7 +44,8 @@ EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
       errno = EINVAL;
       return -1;
     }
-  ibuf = (uchar *) malloc (len + 2);
+  ilen = len + 2;
+  ibuf = (uchar *) malloc (ilen);
   if (!ibuf)
     {
       errno = ENOMEM;
@@ -51,7 +53,7 @@ EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
     }
   EIBSETTYPE (ibuf, EIB_APDU_PACKET);
   memcpy (ibuf + 2, data, len);
-  i = _EIB_SendRequest (con, len + 2, ibuf);
+  i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   return i;
 }

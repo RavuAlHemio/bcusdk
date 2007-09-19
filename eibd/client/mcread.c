@@ -39,6 +39,7 @@ EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
 {
   uchar head[6];
   uchar *ibuf = head;
+  unsigned int ilen = 6;
   if (!con)
     {
       errno = EINVAL;
@@ -56,7 +57,7 @@ EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
   ibuf[3] = (addr) & 0xff;
   ibuf[4] = (len >> 8) & 0xff;
   ibuf[5] = (len) & 0xff;
-  if (_EIB_SendRequest (con, 6, ibuf) == -1)
+  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
     return -1;
   EIBC_INIT_COMPLETE (EIB_MC_Read)
 }
