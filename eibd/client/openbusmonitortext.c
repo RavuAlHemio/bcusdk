@@ -38,15 +38,7 @@ EIBC_COMPLETE (EIBOpenBusmonitorText,
 int
 EIBOpenBusmonitorText_async (EIBConnection * con)
 {
-  uchar head[2];
-  uchar *ibuf = head;
-  unsigned int ilen = 2;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (2)
   EIBSETTYPE (ibuf, EIB_OPEN_BUSMONITOR_TEXT);
   i = _EIB_SendRequest (con, ilen, ibuf);
   if (i == -1)

@@ -39,14 +39,7 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
 			   uint16_t start, uint8_t nr_of_elem, int max_len,
 			   uint8_t * buf)
 {
-  uchar head[7];
-  uchar *ibuf = head;
-  unsigned int ilen = 7;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (7)
   con->req.buf = buf;
   con->req.len = max_len;
   if (!buf)

@@ -37,15 +37,7 @@ EIBC_COMPLETE (EIB_MC_Connect,
 int
 EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest)
 {
-  uchar head[4];
-  uchar *ibuf = head;
-  unsigned int ilen = 4;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (4)
   EIBSETTYPE (ibuf, EIB_MC_CONNECTION);
   EIBSETADDR (ibuf + 2, dest);
   i = _EIB_SendRequest (con, ilen, ibuf);

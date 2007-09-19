@@ -37,14 +37,7 @@ EIBC_COMPLETE (EIB_LoadImage,
 int
 EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
 {
-  uchar *ibuf;
-  unsigned int ilen = 2;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (2)
   if (!image)
     {
       errno = EINVAL;

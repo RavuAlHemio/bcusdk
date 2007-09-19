@@ -42,14 +42,7 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
 			   uint8_t * type, uint16_t * max_nr_of_elem,
 			   uint8_t * access)
 {
-  uchar head[4];
-  uchar *ibuf = head;
-  unsigned int ilen = 4;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (4)
   con->req.ptr2 = type;
   con->req.ptr4 = max_nr_of_elem;
   con->req.ptr3 = access;

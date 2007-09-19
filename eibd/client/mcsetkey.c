@@ -38,14 +38,7 @@ EIBC_COMPLETE (EIB_MC_SetKey,
 int
 EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
 {
-  uchar head[7];
-  uchar *ibuf = head;
-  unsigned int ilen = 7;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (7)
   EIBSETTYPE (ibuf, EIB_MC_KEY_WRITE);
   memcpy (ibuf + 2, key, 4);
   ibuf[6] = level;

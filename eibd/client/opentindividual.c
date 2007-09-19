@@ -38,15 +38,7 @@ int
 EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
 			   int write_only)
 {
-  uchar head[5];
-  uchar *ibuf = head;
-  unsigned int ilen = 5;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (5)
   EIBSETTYPE (ibuf, EIB_OPEN_T_INDIVIDUAL);
   EIBSETADDR (ibuf + 2, dest);
   ibuf[4] = (write_only ? 0xff : 0);

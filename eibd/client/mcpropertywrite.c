@@ -40,14 +40,7 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
 			    uint8_t nr_of_elem, int len, const uint8_t * buf,
 			    int max_len, uint8_t * res)
 {
-  uchar *ibuf;
-  unsigned int ilen = 7;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (7)
   if (!buf || !res)
     {
       errno = EINVAL;

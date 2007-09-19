@@ -37,7 +37,8 @@ EIBC_COMPLETE (EIBGetAPDU,
 int
 EIBGetAPDU_async (EIBConnection * con, int maxlen, uint8_t * buf)
 {
-  if (!con || !buf)
+  EIBC_INIT_SEND (2)
+  if (!buf)
     {
       errno = EINVAL;
       return -1;

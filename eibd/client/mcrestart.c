@@ -37,14 +37,7 @@ EIBC_COMPLETE (EIB_MC_Restart,
 int
 EIB_MC_Restart_async (EIBConnection * con)
 {
-  uchar head[2];
-  uchar *ibuf = head;
-  unsigned int ilen = 2;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (2)
   EIBSETTYPE (ibuf, EIB_MC_RESTART);
   if (_EIB_SendRequest (con, ilen, ibuf) == -1)
     return -1;

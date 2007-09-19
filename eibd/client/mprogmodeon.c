@@ -37,14 +37,7 @@ EIBC_COMPLETE (EIB_M_Progmode_On,
 int
 EIB_M_Progmode_On_async (EIBConnection * con, eibaddr_t dest)
 {
-  uchar head[5];
-  uchar *ibuf = head;
-  unsigned int ilen = 5;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (5)
   EIBSETTYPE (ibuf, EIB_PROG_MODE);
   EIBSETADDR (ibuf + 2, dest);
   ibuf[4] = 1;

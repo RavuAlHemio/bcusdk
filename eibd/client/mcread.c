@@ -37,14 +37,7 @@ EIBC_COMPLETE (EIB_MC_Read,
 int
 EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
 {
-  uchar head[6];
-  uchar *ibuf = head;
-  unsigned int ilen = 6;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (6)
   if (!buf)
     {
       errno = EINVAL;

@@ -37,14 +37,7 @@ EIBC_COMPLETE (EIB_MC_Progmode_Status,
 int
 EIB_MC_Progmode_Status_async (EIBConnection * con)
 {
-  uchar head[3];
-  uchar *ibuf = head;
-  unsigned int ilen = 3;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (3)
   EIBSETTYPE (ibuf, EIB_MC_PROG_MODE);
   ibuf[2] = 3;
   if (_EIB_SendRequest (con, ilen, ibuf) == -1)

@@ -41,15 +41,7 @@ int
 EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dst,
 		      eibaddr_t * src, int max_len, uint8_t * buf)
 {
-  uchar head[4];
-  uchar *ibuf = head;
-  unsigned int ilen = 4;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (4)
   con->req.len = max_len;
   con->req.buf = buf;
   con->req.ptr5 = src;

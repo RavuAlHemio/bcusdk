@@ -31,14 +31,7 @@
 int
 EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
 {
-  uchar *ibuf;
-  unsigned int ilen = 2;
-  int i;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (2)
   if (len < 2 || !data)
     {
       errno = EINVAL;

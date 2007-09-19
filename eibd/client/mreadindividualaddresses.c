@@ -38,14 +38,7 @@ int
 EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
 				     uint8_t * buf)
 {
-  uchar head[2];
-  uchar *ibuf = head;
-  unsigned int ilen = 2;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (2)
   con->req.len = maxlen;
   con->req.buf = buf;
   EIBSETTYPE (ibuf, EIB_M_INDIVIDUAL_ADDRESS_READ);

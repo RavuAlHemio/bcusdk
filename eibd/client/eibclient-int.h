@@ -164,4 +164,15 @@ int _EIB_GetRequest (EIBConnection * con);
 	con->complete = name ## _complete; \
 	return 0;
 
+#define EIBC_INIT_SEND(length) \
+	uchar head[length]; \
+	uchar *ibuf = head; \
+	unsigned int ilen = length; \
+	int i; \
+	if (!con) \
+	  { \
+	    errno = EINVAL; \
+	    return -1; \
+	  } 
+
 #endif

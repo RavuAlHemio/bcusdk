@@ -39,14 +39,7 @@ int
 EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
 		      int16_t * val)
 {
-  uchar head[4];
-  uchar *ibuf = head;
-  unsigned int ilen = 4;
-  if (!con)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_INIT_SEND (4)
   con->req.ptr1 = val;
   EIBSETTYPE (ibuf, EIB_MC_ADC_READ);
   ibuf[2] = channel;
