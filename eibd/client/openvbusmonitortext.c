@@ -39,14 +39,15 @@ int
 EIBOpenVBusmonitorText_async (EIBConnection * con)
 {
   uchar head[2];
+  uchar *ibuf = head;
   int i;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_OPEN_VBUSMONITOR_TEXT);
-  i = _EIB_SendRequest (con, 2, head);
+  EIBSETTYPE (ibuf, EIB_OPEN_VBUSMONITOR_TEXT);
+  i = _EIB_SendRequest (con, 2, ibuf);
   if (i == -1)
     return -1;
   con->complete = EIBOpenVBusmonitorText_complete;

@@ -41,14 +41,15 @@ int
 EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest)
 {
   uchar head[4];
+  uchar *ibuf = head;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_M_INDIVIDUAL_ADDRESS_WRITE);
-  EIBSETADDR (head + 2, dest);
-  if (_EIB_SendRequest (con, 4, head) == -1)
+  EIBSETTYPE (ibuf, EIB_M_INDIVIDUAL_ADDRESS_WRITE);
+  EIBSETADDR (ibuf + 2, dest);
+  if (_EIB_SendRequest (con, 4, ibuf) == -1)
     return -1;
   con->complete = EIB_M_WriteIndividualAddress_complete;
   return 0;

@@ -38,14 +38,15 @@ int
 EIB_Cache_Disable_async (EIBConnection * con)
 {
   uchar head[2];
+  uchar *ibuf = head;
   int i;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_CACHE_DISABLE);
-  i = _EIB_SendRequest (con, 2, head);
+  EIBSETTYPE (ibuf, EIB_CACHE_DISABLE);
+  i = _EIB_SendRequest (con, 2, ibuf);
   if (i == -1)
     return -1;
 

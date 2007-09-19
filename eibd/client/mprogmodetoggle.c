@@ -38,15 +38,16 @@ int
 EIB_M_Progmode_Toggle_async (EIBConnection * con, eibaddr_t dest)
 {
   uchar head[5];
+  uchar *ibuf = head;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_PROG_MODE);
-  EIBSETADDR (head + 2, dest);
-  head[4] = 2;
-  if (_EIB_SendRequest (con, 5, head) == -1)
+  EIBSETTYPE (ibuf, EIB_PROG_MODE);
+  EIBSETADDR (ibuf + 2, dest);
+  ibuf[4] = 2;
+  if (_EIB_SendRequest (con, 5, ibuf) == -1)
     return -1;
   con->complete = EIB_M_Progmode_Toggle_complete;
   return 0;

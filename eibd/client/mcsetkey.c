@@ -39,15 +39,16 @@ int
 EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
 {
   uchar head[7];
+  uchar *ibuf = head;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_MC_KEY_WRITE);
-  memcpy (head + 2, key, 4);
-  head[6] = level;
-  if (_EIB_SendRequest (con, 7, head) == -1)
+  EIBSETTYPE (ibuf, EIB_MC_KEY_WRITE);
+  memcpy (ibuf + 2, key, 4);
+  ibuf[6] = level;
+  if (_EIB_SendRequest (con, 7, ibuf) == -1)
     return -1;
   con->complete = EIB_MC_SetKey_complete;
   return 0;

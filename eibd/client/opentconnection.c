@@ -38,15 +38,16 @@ int
 EIBOpenT_Connection_async (EIBConnection * con, eibaddr_t dest)
 {
   uchar head[5];
+  uchar *ibuf = head;
   int i;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_OPEN_T_CONNECTION);
-  EIBSETADDR (head + 2, dest);
-  i = _EIB_SendRequest (con, 5, head);
+  EIBSETTYPE (ibuf, EIB_OPEN_T_CONNECTION);
+  EIBSETADDR (ibuf + 2, dest);
+  i = _EIB_SendRequest (con, 5, ibuf);
   if (i == -1)
     return -1;
   con->complete = EIBOpenT_Connection_complete;

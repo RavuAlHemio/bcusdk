@@ -39,6 +39,7 @@ EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
 				     uint8_t * buf)
 {
   uchar head[2];
+  uchar *ibuf = head;
   if (!con)
     {
       errno = EINVAL;
@@ -46,8 +47,8 @@ EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
     }
   con->req.len = maxlen;
   con->req.buf = buf;
-  EIBSETTYPE (head, EIB_M_INDIVIDUAL_ADDRESS_READ);
-  if (_EIB_SendRequest (con, 2, head) == -1)
+  EIBSETTYPE (ibuf, EIB_M_INDIVIDUAL_ADDRESS_READ);
+  if (_EIB_SendRequest (con, 2, ibuf) == -1)
     return -1;
   con->complete = EIB_M_ReadIndividualAddresses_complete;
   return 0;

@@ -42,6 +42,7 @@ EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dst,
 		      eibaddr_t * src, int max_len, uint8_t * buf)
 {
   uchar head[4];
+  uchar *ibuf = head;
   int i;
   if (!con)
     {
@@ -51,9 +52,9 @@ EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dst,
   con->req.len = max_len;
   con->req.buf = buf;
   con->req.ptr5 = src;
-  EIBSETTYPE (head, EIB_CACHE_READ_NOWAIT);
-  EIBSETADDR (head + 2, dst);
-  i = _EIB_SendRequest (con, 4, head);
+  EIBSETTYPE (ibuf, EIB_CACHE_READ_NOWAIT);
+  EIBSETADDR (ibuf + 2, dst);
+  i = _EIB_SendRequest (con, 4, ibuf);
   if (i == -1)
     return -1;
   con->complete = EIB_Cache_Read_complete;

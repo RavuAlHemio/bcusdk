@@ -38,13 +38,14 @@ int
 EIB_MC_GetMaskVersion_async (EIBConnection * con)
 {
   uchar head[2];
+  uchar *ibuf = head;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_MC_MASK_VERSION);
-  if (_EIB_SendRequest (con, 2, head) == -1)
+  EIBSETTYPE (ibuf, EIB_MC_MASK_VERSION);
+  if (_EIB_SendRequest (con, 2, ibuf) == -1)
     return -1;
   con->complete = EIB_MC_GetMaskVersion_complete;
   return 0;

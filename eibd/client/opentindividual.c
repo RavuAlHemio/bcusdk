@@ -39,16 +39,17 @@ EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
 			   int write_only)
 {
   uchar head[5];
+  uchar *ibuf = head;
   int i;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_OPEN_T_INDIVIDUAL);
-  EIBSETADDR (head + 2, dest);
-  head[4] = (write_only ? 0xff : 0);
-  i = _EIB_SendRequest (con, 5, head);
+  EIBSETTYPE (ibuf, EIB_OPEN_T_INDIVIDUAL);
+  EIBSETADDR (ibuf + 2, dest);
+  ibuf[4] = (write_only ? 0xff : 0);
+  i = _EIB_SendRequest (con, 5, ibuf);
   if (i == -1)
     return -1;
   con->complete = EIBOpenT_Individual_complete;

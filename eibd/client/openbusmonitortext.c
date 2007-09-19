@@ -39,14 +39,15 @@ int
 EIBOpenBusmonitorText_async (EIBConnection * con)
 {
   uchar head[2];
+  uchar *ibuf = head;
   int i;
   if (!con)
     {
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (head, EIB_OPEN_BUSMONITOR_TEXT);
-  i = _EIB_SendRequest (con, 2, head);
+  EIBSETTYPE (ibuf, EIB_OPEN_BUSMONITOR_TEXT);
+  i = _EIB_SendRequest (con, 2, ibuf);
   if (i == -1)
     return -1;
   con->complete = EIBOpenBusmonitorText_complete;
