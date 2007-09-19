@@ -40,9 +40,7 @@ EIB_MC_PropertyScan_async (EIBConnection * con, int maxlen, uint8_t * buf)
   EIBC_INIT_SEND (2)
   con->req.len = maxlen;
   con->req.buf = buf;
-  EIBSETTYPE (ibuf, EIB_MC_PROP_SCAN);
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_PROP_SCAN)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyScan)
 }
 

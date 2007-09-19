@@ -38,10 +38,8 @@ int
 EIB_MC_Progmode_Off_async (EIBConnection * con)
 {
   EIBC_INIT_SEND (3)
-  EIBSETTYPE (ibuf, EIB_MC_PROG_MODE);
   ibuf[2] = 0;
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_MC_Progmode_Off)
 }
 

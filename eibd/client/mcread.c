@@ -45,13 +45,11 @@ EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
     }
   con->req.len = len;
   con->req.buf = buf;
-  EIBSETTYPE (ibuf, EIB_MC_READ);
   ibuf[2] = (addr >> 8) & 0xff;
   ibuf[3] = (addr) & 0xff;
   ibuf[4] = (len >> 8) & 0xff;
   ibuf[5] = (len) & 0xff;
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_READ)
   EIBC_INIT_COMPLETE (EIB_MC_Read)
 }
 

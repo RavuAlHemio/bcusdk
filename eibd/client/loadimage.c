@@ -50,8 +50,8 @@ EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
       errno = ENOMEM;
       return -1;
     }
-  EIBSETTYPE (ibuf, EIB_LOAD_IMAGE);
   memcpy (ibuf + 2, image, len);
+  EIBSETTYPE (ibuf, EIB_LOAD_IMAGE);
   i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   if (i == -1)

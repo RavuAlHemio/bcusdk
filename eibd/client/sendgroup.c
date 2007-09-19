@@ -44,9 +44,9 @@ EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len, uint8_t * data)
       errno = ENOMEM;
       return -1;
     }
-  EIBSETTYPE (ibuf, EIB_GROUP_PACKET);
   EIBSETADDR (ibuf + 2, dest);
   memcpy (ibuf + 4, data, len);
+  EIBSETTYPE (ibuf, EIB_GROUP_PACKET);
   i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   return i;

@@ -39,10 +39,7 @@ int
 EIBOpenVBusmonitorText_async (EIBConnection * con)
 {
   EIBC_INIT_SEND (2)
-  EIBSETTYPE (ibuf, EIB_OPEN_VBUSMONITOR_TEXT);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND (EIB_OPEN_VBUSMONITOR_TEXT)
   EIBC_INIT_COMPLETE (EIBOpenVBusmonitorText)
 }
 

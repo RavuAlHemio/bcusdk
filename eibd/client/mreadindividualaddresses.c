@@ -41,9 +41,7 @@ EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
   EIBC_INIT_SEND (2)
   con->req.len = maxlen;
   con->req.buf = buf;
-  EIBSETTYPE (ibuf, EIB_M_INDIVIDUAL_ADDRESS_READ);
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_M_INDIVIDUAL_ADDRESS_READ)
   EIBC_INIT_COMPLETE (EIB_M_ReadIndividualAddresses)
 }
 

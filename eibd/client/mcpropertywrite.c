@@ -55,13 +55,13 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
       errno = ENOMEM;
       return -1;
     }
-  EIBSETTYPE (ibuf, EIB_MC_PROP_WRITE);
   ibuf[2] = obj;
   ibuf[3] = property;
   ibuf[4] = (start >> 8) & 0xff;
   ibuf[5] = (start) & 0xff;
   ibuf[6] = nr_of_elem;
   memcpy (ibuf + 7, buf, len);
+  EIBSETTYPE (ibuf, EIB_MC_PROP_WRITE);
   i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   if (i == -1)

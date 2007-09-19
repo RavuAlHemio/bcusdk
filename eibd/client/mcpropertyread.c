@@ -47,14 +47,12 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
       errno = EINVAL;
       return -1;
     }
-  EIBSETTYPE (ibuf, EIB_MC_PROP_READ);
   ibuf[2] = obj;
   ibuf[3] = property;
   ibuf[4] = (start >> 8) & 0xff;
   ibuf[5] = (start) & 0xff;
   ibuf[6] = nr_of_elem;
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_PROP_READ)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyRead)
 }
 

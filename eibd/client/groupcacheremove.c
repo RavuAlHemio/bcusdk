@@ -38,11 +38,8 @@ int
 EIB_Cache_Remove_async (EIBConnection * con, eibaddr_t dest)
 {
   EIBC_INIT_SEND (4)
-  EIBSETTYPE (ibuf, EIB_CACHE_REMOVE);
   EIBSETADDR (ibuf + 2, dest);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND (EIB_CACHE_REMOVE)
   EIBC_INIT_COMPLETE (EIB_Cache_Remove)
 }
 

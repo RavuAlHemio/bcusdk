@@ -44,8 +44,8 @@ EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
       errno = ENOMEM;
       return -1;
     }
-  EIBSETTYPE (ibuf, EIB_APDU_PACKET);
   memcpy (ibuf + 2, data, len);
+  EIBSETTYPE (ibuf, EIB_APDU_PACKET);
   i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   return i;

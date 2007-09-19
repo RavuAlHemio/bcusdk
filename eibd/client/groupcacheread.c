@@ -45,11 +45,8 @@ EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dst,
   con->req.len = max_len;
   con->req.buf = buf;
   con->req.ptr5 = src;
-  EIBSETTYPE (ibuf, EIB_CACHE_READ_NOWAIT);
   EIBSETADDR (ibuf + 2, dst);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND (EIB_CACHE_READ_NOWAIT)
   EIBC_INIT_COMPLETE (EIB_Cache_Read)
 }
 

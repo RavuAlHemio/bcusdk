@@ -175,4 +175,10 @@ int _EIB_GetRequest (EIBConnection * con);
 	    return -1; \
 	  } 
 
+#define EIBC_SEND(msg) \
+	EIBSETTYPE (ibuf, msg); \
+	i = _EIB_SendRequest (con, ilen, ibuf); \
+	if (i == -1) \
+	  return -1;
+
 #endif

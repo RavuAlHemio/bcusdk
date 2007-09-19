@@ -38,11 +38,8 @@ int
 EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest)
 {
   EIBC_INIT_SEND (4)
-  EIBSETTYPE (ibuf, EIB_MC_CONNECTION);
   EIBSETADDR (ibuf + 2, dest);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_CONNECTION)
   EIBC_INIT_COMPLETE (EIB_MC_Connect)
 }
 

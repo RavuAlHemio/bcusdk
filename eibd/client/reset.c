@@ -38,10 +38,7 @@ int
 EIBReset_async (EIBConnection * con)
 {
   EIBC_INIT_SEND (2)
-  EIBSETTYPE (ibuf, EIB_RESET_CONNECTION);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND (EIB_RESET_CONNECTION)
   EIBC_INIT_COMPLETE (EIBReset)
 }
 

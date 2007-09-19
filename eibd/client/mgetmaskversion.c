@@ -38,10 +38,8 @@ int
 EIB_M_GetMaskVersion_async (EIBConnection * con, eibaddr_t dest)
 {
   EIBC_INIT_SEND (4)
-  EIBSETTYPE (ibuf, EIB_MASK_VERSION);
   EIBSETADDR (ibuf + 2, dest);
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MASK_VERSION)
   EIBC_INIT_COMPLETE (EIB_M_GetMaskVersion)
 }
 

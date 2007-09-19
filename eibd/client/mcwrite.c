@@ -53,12 +53,12 @@ EIB_MC_Write_async (EIBConnection * con, uint16_t addr, int len,
       errno = ENOMEM;
       return -1;
     }
-  EIBSETTYPE (ibuf, EIB_MC_WRITE);
   ibuf[2] = (addr >> 8) & 0xff;
   ibuf[3] = (addr) & 0xff;
   ibuf[4] = (len >> 8) & 0xff;
   ibuf[5] = (len) & 0xff;
   memcpy (ibuf + 6, buf, len);
+  EIBSETTYPE (ibuf, EIB_MC_WRITE);
   i = _EIB_SendRequest (con, ilen, ibuf);
   free (ibuf);
   if (i == -1)

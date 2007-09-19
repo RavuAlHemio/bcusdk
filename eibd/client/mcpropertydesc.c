@@ -46,11 +46,9 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
   con->req.ptr2 = type;
   con->req.ptr4 = max_nr_of_elem;
   con->req.ptr3 = access;
-  EIBSETTYPE (ibuf, EIB_MC_PROP_DESC);
   ibuf[2] = obj;
   ibuf[3] = property;
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_PROP_DESC)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyDesc)
 }
 

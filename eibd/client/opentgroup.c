@@ -38,12 +38,9 @@ int
 EIBOpenT_Group_async (EIBConnection * con, eibaddr_t dest, int write_only)
 {
   EIBC_INIT_SEND (5)
-  EIBSETTYPE (ibuf, EIB_OPEN_T_GROUP);
   EIBSETADDR (ibuf + 2, dest);
   ibuf[4] = (write_only ? 0xff : 0);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND (EIB_OPEN_T_GROUP)
   EIBC_INIT_COMPLETE (EIBOpenT_Group)
 }
 

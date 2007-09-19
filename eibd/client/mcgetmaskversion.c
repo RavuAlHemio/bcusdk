@@ -38,9 +38,7 @@ int
 EIB_MC_GetMaskVersion_async (EIBConnection * con)
 {
   EIBC_INIT_SEND (2)
-  EIBSETTYPE (ibuf, EIB_MC_MASK_VERSION);
-  if (_EIB_SendRequest (con, ilen, ibuf) == -1)
-    return -1;
+  EIBC_SEND (EIB_MC_MASK_VERSION)
   EIBC_INIT_COMPLETE (EIB_MC_GetMaskVersion)
 }
 
