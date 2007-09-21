@@ -34,18 +34,8 @@ EIBC_COMPLETE (EIB_MC_GetMaskVersion,
   EIBC_RETURN_UINT16 (2)
 )
 
-int
-EIB_MC_GetMaskVersion_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIB_MC_GetMaskVersion, ARG_NONE,
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_MC_MASK_VERSION)
   EIBC_INIT_COMPLETE (EIB_MC_GetMaskVersion)
-}
-
-int
-EIB_MC_GetMaskVersion (EIBConnection * con)
-{
-  if (EIB_MC_GetMaskVersion_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

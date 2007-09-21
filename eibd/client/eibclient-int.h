@@ -253,4 +253,23 @@ int _EIB_GetRequest (EIBConnection * con);
 #define EIBC_SETKEY(value, offset) \
 	memcpy (ibuf + offset, value, 4);
 
+#define EIBC_ASYNC(name, args, body) \
+	int \
+	name ##_async (EIBConnection * con AG##args) \
+	{ \
+	  body \
+	} \
+	 \
+	int \
+	name (EIBConnection * con AG##args) \
+	{ \
+	  if (name ## _async (con AL##args) == -1) \
+	    return -1; \
+	  return EIBComplete (con); \
+	}
+
+#define AGARG_NONE
+
+#define ALARG_NONE
+
 #endif

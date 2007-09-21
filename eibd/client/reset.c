@@ -34,18 +34,8 @@ EIBC_COMPLETE (EIBReset,
   EIBC_RETURN_OK
 )
 
-int
-EIBReset_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIBReset, ARG_NONE, 
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_RESET_CONNECTION)
   EIBC_INIT_COMPLETE (EIBReset)
-}
-
-int
-EIBReset (EIBConnection * con)
-{
-  if (EIBReset_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

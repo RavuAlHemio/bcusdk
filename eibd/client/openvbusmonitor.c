@@ -35,18 +35,8 @@ EIBC_COMPLETE (EIBOpenVBusmonitor,
   EIBC_RETURN_OK
 )
 
-int
-EIBOpenVBusmonitor_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIBOpenVBusmonitor, ARG_NONE,
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_OPEN_VBUSMONITOR)
   EIBC_INIT_COMPLETE (EIBOpenVBusmonitor)
-}
-
-int
-EIBOpenVBusmonitor (EIBConnection * con)
-{
-  if (EIBOpenVBusmonitor_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

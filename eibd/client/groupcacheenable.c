@@ -35,18 +35,8 @@ EIBC_COMPLETE (EIB_Cache_Enable,
   EIBC_RETURN_OK
 )
 
-int
-EIB_Cache_Enable_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIB_Cache_Enable, ARG_NONE,
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_CACHE_ENABLE)
   EIBC_INIT_COMPLETE (EIB_Cache_Enable)
-}
-
-int
-EIB_Cache_Enable (EIBConnection * con)
-{
-  if (EIB_Cache_Enable_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

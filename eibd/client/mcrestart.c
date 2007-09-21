@@ -34,18 +34,8 @@ EIBC_COMPLETE (EIB_MC_Restart,
   EIBC_RETURN_OK
 )
 
-int
-EIB_MC_Restart_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIB_MC_Restart, ARG_NONE, 
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_MC_RESTART)
   EIBC_INIT_COMPLETE (EIB_MC_Restart)
-}
-
-int
-EIB_MC_Restart (EIBConnection * con)
-{
-  if (EIB_MC_Restart_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

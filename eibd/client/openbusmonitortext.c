@@ -35,18 +35,8 @@ EIBC_COMPLETE (EIBOpenBusmonitorText,
   EIBC_RETURN_OK
 )
 
-int
-EIBOpenBusmonitorText_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIBOpenBusmonitorText, ARG_NONE,
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_OPEN_BUSMONITOR_TEXT)
   EIBC_INIT_COMPLETE (EIBOpenBusmonitorText)
-}
-
-int
-EIBOpenBusmonitorText (EIBConnection * con)
-{
-  if (EIBOpenBusmonitorText_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

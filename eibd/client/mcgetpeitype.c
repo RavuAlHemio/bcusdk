@@ -34,18 +34,8 @@ EIBC_COMPLETE (EIB_MC_GetPEIType,
   EIBC_RETURN_UINT16 (2)
 )
 
-int
-EIB_MC_GetPEIType_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIB_MC_GetPEIType, ARG_NONE,
   EIBC_INIT_SEND (2)
   EIBC_SEND (EIB_MC_PEI_TYPE)
   EIBC_INIT_COMPLETE (EIB_MC_GetPEIType)
-}
-
-int
-EIB_MC_GetPEIType (EIBConnection * con)
-{
-  if (EIB_MC_GetPEIType_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

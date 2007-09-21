@@ -34,19 +34,9 @@ EIBC_COMPLETE (EIB_MC_Progmode_Toggle,
   EIBC_RETURN_OK
 )
 
-int
-EIB_MC_Progmode_Toggle_async (EIBConnection * con)
-{
+EIBC_ASYNC (EIB_MC_Progmode_Toggle, ARG_NONE,
   EIBC_INIT_SEND (3)
   EIBC_SETUINT8 (2, 2)
   EIBC_SEND (EIB_MC_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_MC_Progmode_Toggle)
-}
-
-int
-EIB_MC_Progmode_Toggle (EIBConnection * con)
-{
-  if (EIB_MC_Progmode_Toggle_async (con) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)
