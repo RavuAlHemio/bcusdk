@@ -35,27 +35,16 @@ EIBC_COMPLETE (EIB_LoadImage,
 )
 
 int
-EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len)
+EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int image_len)
 {
   EIBC_INIT_SEND (2)
-  if (!image)
+  if (!image || image_len < 0)
     {
       errno = EINVAL;
       return -1;
     }
-  ilen = len + 2;
-  ibuf = (uchar *) malloc (ilen);
-  if (!ibuf)
-    {
-      errno = ENOMEM;
-      return -1;
-    }
-  memcpy (ibuf + 2, image, len);
-  EIBSETTYPE (ibuf, EIB_LOAD_IMAGE);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  free (ibuf);
-  if (i == -1)
-    return -1;
+  EIBC_SEND_BUF (image)
+  EIBC_SEND (EIB_LOAD_IMAGE)
   EIBC_INIT_COMPLETE (EIB_LoadImage)
 }
 

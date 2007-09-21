@@ -168,6 +168,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	uchar head[length]; \
 	uchar *ibuf = head; \
 	unsigned int ilen = length; \
+	int dyn = 0; \
 	int i; \
 	if (!con) \
 	  { \
@@ -175,9 +176,23 @@ int _EIB_GetRequest (EIBConnection * con);
 	    return -1; \
 	  } 
 
+#define EIBC_SEND_BUF(name) \
+	dyn = 1; \
+	ibuf = (uchar *) malloc (ilen + name ## _len); \
+	if (!ibuf) \
+	  { \
+	    errno = ENOMEM; \
+	    return -1; \
+	  } \
+	memcpy (ibuf, head, ilen); \
+	memcpy (ibuf + ilen, name, name ## _len); \
+	ilen = ilen + name ## _len;
+
 #define EIBC_SEND(msg) \
 	EIBSETTYPE (ibuf, msg); \
 	i = _EIB_SendRequest (con, ilen, ibuf); \
+	if (dyn) \
+	  free (ibuf); \
 	if (i == -1) \
 	  return -1;
 

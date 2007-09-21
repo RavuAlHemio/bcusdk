@@ -36,33 +36,22 @@ EIBC_COMPLETE (EIB_MC_Write,
 )
 
 int
-EIB_MC_Write_async (EIBConnection * con, uint16_t addr, int len,
+EIB_MC_Write_async (EIBConnection * con, uint16_t addr, int buf_len,
 		    const uint8_t * buf)
 {
   EIBC_INIT_SEND (6)
-  con->req.len = len;
-  if (!buf)
+  con->req.len = buf_len;
+  if (!buf || buf_len < 0)
     {
       errno = EINVAL;
       return -1;
     }
-  ilen = len + 6;
-  ibuf = (uchar *) malloc (ilen);
-  if (!ibuf)
-    {
-      errno = ENOMEM;
-      return -1;
-    }
   ibuf[2] = (addr >> 8) & 0xff;
   ibuf[3] = (addr) & 0xff;
-  ibuf[4] = (len >> 8) & 0xff;
-  ibuf[5] = (len) & 0xff;
-  memcpy (ibuf + 6, buf, len);
-  EIBSETTYPE (ibuf, EIB_MC_WRITE);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  free (ibuf);
-  if (i == -1)
-    return -1;
+  ibuf[4] = (buf_len >> 8) & 0xff;
+  ibuf[5] = (buf_len) & 0xff;
+  EIBC_SEND_BUF (buf)
+  EIBC_SEND (EIB_MC_WRITE)
   EIBC_INIT_COMPLETE (EIB_MC_Write)
 }
 

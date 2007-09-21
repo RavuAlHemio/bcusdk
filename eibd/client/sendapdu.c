@@ -29,24 +29,15 @@
 #include "eibclient-int.h"
 
 int
-EIBSendAPDU (EIBConnection * con, int len, uint8_t * data)
+EIBSendAPDU (EIBConnection * con, int data_len, uint8_t * data)
 {
   EIBC_INIT_SEND (2)
-  if (len < 2 || !data)
+  if (data_len < 2 || !data)
     {
       errno = EINVAL;
       return -1;
     }
-  ilen = len + 2;
-  ibuf = (uchar *) malloc (ilen);
-  if (!ibuf)
-    {
-      errno = ENOMEM;
-      return -1;
-    }
-  memcpy (ibuf + 2, data, len);
-  EIBSETTYPE (ibuf, EIB_APDU_PACKET);
-  i = _EIB_SendRequest (con, ilen, ibuf);
-  free (ibuf);
-  return i;
+  EIBC_SEND_BUF (data)
+  EIBC_SEND (EIB_APDU_PACKET)
+  return 0;
 }
