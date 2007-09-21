@@ -34,19 +34,9 @@ EIBC_COMPLETE (EIB_MC_PropertyScan,
   EIBC_RETURN_BUF (2)
 )
 
-int
-EIB_MC_PropertyScan_async (EIBConnection * con, int buf_maxlen, uint8_t * buf)
-{
+EIBC_ASYNC (EIB_MC_PropertyScan, ARG_OUTBUF (buf, ARG_NONE),
   EIBC_INIT_SEND (2)
   EIBC_READ_BUF (buf)
   EIBC_SEND (EIB_MC_PROP_SCAN)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyScan)
-}
-
-int
-EIB_MC_PropertyScan (EIBConnection * con, int maxlen, uint8_t * buf)
-{
-  if (EIB_MC_PropertyScan_async (con, maxlen, buf) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

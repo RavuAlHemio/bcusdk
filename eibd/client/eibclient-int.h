@@ -271,9 +271,13 @@ int _EIB_GetRequest (EIBConnection * con);
 #define AGARG_NONE
 #define AGARG_BOOL(name, args) , int name AG##args
 #define AGARG_ADDR(name, args) , eibaddr_t name AG##args
+#define AGARG_INBUF(name, args) , int name##_len, uint8_t *name AG##args
+#define AGARG_OUTBUF(name, args) , int name##_maxlen, uint8_t *name AG##args
 
 #define ALARG_NONE
 #define ALARG_BOOL(name, args) , name AL##args
 #define ALARG_ADDR(name, args) , name AL##args
+#define ALARG_INBUF(name, args) , name##_len, name AL##args
+#define ALARG_OUTBUF(name, args) , name##_maxlen, name AL##args
 
 #endif
