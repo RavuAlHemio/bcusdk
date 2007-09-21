@@ -196,6 +196,8 @@ int _EIB_GetRequest (EIBConnection * con);
 	memcpy (ibuf + ilen, name, name ## _len); \
 	ilen = ilen + name ## _len;
 
+#define EIBC_SEND_LEN(name) (name ## _len)
+
 #define EIBC_SEND(msg) \
 	EIBSETTYPE (ibuf, msg); \
 	i = _EIB_SendRequest (con, ilen, ibuf); \
@@ -214,6 +216,8 @@ int _EIB_GetRequest (EIBConnection * con);
 	  } \
 	con->req.buf = buffer; \
 	con->req.len = buffer ## _maxlen;
+
+#define EIBC_READ_LEN(buffer) (buffer ## _maxlen)
 
 #define EIBC_PTR1(name) \
 	con->req.ptr1 = name;

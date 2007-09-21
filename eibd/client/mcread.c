@@ -40,8 +40,7 @@ EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int buf_maxlen, uint8_t *
   EIBC_INIT_SEND (6)
   EIBC_READ_BUF (buf)
   EIBC_SETUINT16 (addr, 2)
-  ibuf[4] = (buf_maxlen >> 8) & 0xff;
-  ibuf[5] = (buf_maxlen) & 0xff;
+  EIBC_SETUINT16 (EIBC_READ_LEN (buf), 4)
   EIBC_SEND (EIB_MC_READ)
   EIBC_INIT_COMPLETE (EIB_MC_Read)
 }
