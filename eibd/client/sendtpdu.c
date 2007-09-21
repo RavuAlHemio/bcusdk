@@ -32,13 +32,8 @@ int
 EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int data_len, uint8_t * data)
 {
   EIBC_INIT_SEND (4)
-  if (data_len < 2 || !data)
-    {
-      errno = EINVAL;
-      return -1;
-    }
   EIBSETADDR (ibuf + 2, dest);
-  EIBC_SEND_BUF (data)
+  EIBC_SEND_BUF_LEN (data, 2)
   EIBC_SEND (EIB_APDU_PACKET)
   return 0;
 }

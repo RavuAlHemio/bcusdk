@@ -39,12 +39,6 @@ EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int buf_len,
 			  const uint8_t * buf)
 {
   EIBC_INIT_SEND (6)
-  con->req.len = buf_len;
-  if (!buf || buf_len < 0)
-    {
-      errno = EINVAL;
-      return -1;
-    }
   ibuf[2] = (addr >> 8) & 0xff;
   ibuf[3] = (addr) & 0xff;
   ibuf[4] = (buf_len >> 8) & 0xff;

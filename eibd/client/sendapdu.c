@@ -32,12 +32,7 @@ int
 EIBSendAPDU (EIBConnection * con, int data_len, uint8_t * data)
 {
   EIBC_INIT_SEND (2)
-  if (data_len < 2 || !data)
-    {
-      errno = EINVAL;
-      return -1;
-    }
-  EIBC_SEND_BUF (data)
+  EIBC_SEND_BUF_LEN (data, 2)
   EIBC_SEND (EIB_APDU_PACKET)
   return 0;
 }

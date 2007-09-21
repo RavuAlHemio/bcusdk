@@ -38,11 +38,6 @@ int
 EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int image_len)
 {
   EIBC_INIT_SEND (2)
-  if (!image || image_len < 0)
-    {
-      errno = EINVAL;
-      return -1;
-    }
   EIBC_SEND_BUF (image)
   EIBC_SEND (EIB_LOAD_IMAGE)
   EIBC_INIT_COMPLETE (EIB_LoadImage)

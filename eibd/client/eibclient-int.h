@@ -176,7 +176,15 @@ int _EIB_GetRequest (EIBConnection * con);
 	    return -1; \
 	  } 
 
-#define EIBC_SEND_BUF(name) \
+#define EIBC_SEND_BUF(name) EIBC_SEND_BUF_LEN (name, 0)
+
+#define EIBC_SEND_BUF_LEN(name, length) \
+	if (!name || name ## _len < length) \
+	  { \
+	    errno = EINVAL; \
+	    return -1; \
+	  } \
+	con->req.len = name ## _len; \
 	dyn = 1; \
 	ibuf = (uchar *) malloc (ilen + name ## _len); \
 	if (!ibuf) \

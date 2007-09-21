@@ -41,11 +41,6 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
 			    int res_maxlen, uint8_t * res)
 {
   EIBC_INIT_SEND (7)
-  if (!buf || buf_len < 0)
-    {
-      errno = EINVAL;
-      return -1;
-    }
   ibuf[2] = obj;
   ibuf[3] = property;
   ibuf[4] = (start >> 8) & 0xff;
