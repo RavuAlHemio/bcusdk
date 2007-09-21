@@ -36,17 +36,11 @@ EIBC_COMPLETE (EIB_MC_PropertyRead,
 
 int
 EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
-			   uint16_t start, uint8_t nr_of_elem, int max_len,
+			   uint16_t start, uint8_t nr_of_elem, int buf_maxlen,
 			   uint8_t * buf)
 {
   EIBC_INIT_SEND (7)
-  con->req.buf = buf;
-  con->req.len = max_len;
-  if (!buf)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+  EIBC_READ_BUF (buf)
   ibuf[2] = obj;
   ibuf[3] = property;
   ibuf[4] = (start >> 8) & 0xff;

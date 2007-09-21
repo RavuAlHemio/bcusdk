@@ -35,17 +35,10 @@ EIBC_COMPLETE (EIBGetBusmonitorPacket,
 )
 
 int
-EIBGetBusmonitorPacket_async (EIBConnection * con, int maxlen, uint8_t * buf)
+EIBGetBusmonitorPacket_async (EIBConnection * con, int buf_maxlen, uint8_t * buf)
 {
   EIBC_INIT_SEND (2)
-  if (!buf)
-    {
-      errno = EINVAL;
-      return -1;
-    }
-
-  con->req.buf = buf;
-  con->req.len = maxlen;
+  EIBC_READ_BUF (buf)
   EIBC_INIT_COMPLETE (EIBGetBusmonitorPacket)
 }
 

@@ -35,12 +35,11 @@ EIBC_COMPLETE (EIB_M_ReadIndividualAddresses,
 )
 
 int
-EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int maxlen,
+EIB_M_ReadIndividualAddresses_async (EIBConnection * con, int buf_maxlen,
 				     uint8_t * buf)
 {
   EIBC_INIT_SEND (2)
-  con->req.len = maxlen;
-  con->req.buf = buf;
+  EIBC_READ_BUF (buf)
   EIBC_SEND (EIB_M_INDIVIDUAL_ADDRESS_READ)
   EIBC_INIT_COMPLETE (EIB_M_ReadIndividualAddresses)
 }

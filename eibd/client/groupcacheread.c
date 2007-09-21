@@ -39,11 +39,10 @@ EIBC_COMPLETE (EIB_Cache_Read,
 
 int
 EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dst,
-		      eibaddr_t * src, int max_len, uint8_t * buf)
+		      eibaddr_t * src, int buf_maxlen, uint8_t * buf)
 {
   EIBC_INIT_SEND (4)
-  con->req.len = max_len;
-  con->req.buf = buf;
+  EIBC_READ_BUF (buf)
   con->req.ptr5 = src;
   EIBSETADDR (ibuf + 2, dst);
   EIBC_SEND (EIB_CACHE_READ_NOWAIT)

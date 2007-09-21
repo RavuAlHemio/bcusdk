@@ -35,20 +35,14 @@ EIBC_COMPLETE (EIB_MC_Read,
 )
 
 int
-EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len, uint8_t * buf)
+EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int buf_maxlen, uint8_t * buf)
 {
   EIBC_INIT_SEND (6)
-  if (!buf)
-    {
-      errno = EINVAL;
-      return -1;
-    }
-  con->req.len = len;
-  con->req.buf = buf;
+  EIBC_READ_BUF (buf)
   ibuf[2] = (addr >> 8) & 0xff;
   ibuf[3] = (addr) & 0xff;
-  ibuf[4] = (len >> 8) & 0xff;
-  ibuf[5] = (len) & 0xff;
+  ibuf[4] = (buf_maxlen >> 8) & 0xff;
+  ibuf[5] = (buf_maxlen) & 0xff;
   EIBC_SEND (EIB_MC_READ)
   EIBC_INIT_COMPLETE (EIB_MC_Read)
 }

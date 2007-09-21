@@ -38,10 +38,10 @@ int
 EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
 			    uint8_t property, uint16_t start,
 			    uint8_t nr_of_elem, int buf_len, const uint8_t * buf,
-			    int max_len, uint8_t * res)
+			    int res_maxlen, uint8_t * res)
 {
   EIBC_INIT_SEND (7)
-  if (!buf || !res || buf_len < 0)
+  if (!buf || buf_len < 0)
     {
       errno = EINVAL;
       return -1;
@@ -51,9 +51,8 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
   ibuf[4] = (start >> 8) & 0xff;
   ibuf[5] = (start) & 0xff;
   ibuf[6] = nr_of_elem;
-  con->req.len = max_len;
-  con->req.buf = res;
   EIBC_SEND_BUF (buf)
+  EIBC_READ_BUF (res) 
   EIBC_SEND (EIB_MC_PROP_WRITE)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyWrite)
 }

@@ -37,18 +37,11 @@ EIBC_COMPLETE (EIBGetGroup_Src,
 )
 
 int
-EIBGetGroup_Src_async (EIBConnection * con, int maxlen, uint8_t * buf,
+EIBGetGroup_Src_async (EIBConnection * con, int buf_maxlen, uint8_t * buf,
 		       eibaddr_t * src, eibaddr_t * dest)
 {
   EIBC_INIT_SEND (2)
-  if (!buf)
-    {
-      errno = EINVAL;
-      return -1;
-    }
-
-  con->req.buf = buf;
-  con->req.len = maxlen;
+  EIBC_READ_BUF (buf)
   con->req.ptr5 = src;
   con->req.ptr6 = dest;
   EIBC_INIT_COMPLETE (EIBGetGroup_Src)

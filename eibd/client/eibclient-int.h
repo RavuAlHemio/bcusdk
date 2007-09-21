@@ -196,4 +196,15 @@ int _EIB_GetRequest (EIBConnection * con);
 	if (i == -1) \
 	  return -1;
 
+#define EIBC_READ_BUF(buffer) \
+	if (!buffer || buffer ## _maxlen < 0) \
+	  { \
+	    if (dyn) \
+	      free (ibuf); \
+	    errno = EINVAL; \
+	    return -1; \
+	  } \
+	con->req.buf = buffer; \
+	con->req.len = buffer ## _maxlen;
+
 #endif
