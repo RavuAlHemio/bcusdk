@@ -41,7 +41,7 @@ EIBGetAPDU_Src_async (EIBConnection * con, int buf_maxlen, uint8_t * buf,
 {
   EIBC_INIT_SEND (2)
   EIBC_READ_BUF (buf)
-  con->req.ptr5 = src;
+  EIBC_PTR5 (src)
   EIBC_INIT_COMPLETE (EIBGetAPDU_Src)
 }
 

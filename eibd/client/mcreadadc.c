@@ -40,7 +40,7 @@ EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
 		      int16_t * val)
 {
   EIBC_INIT_SEND (4)
-  con->req.ptr1 = val;
+  EIBC_PTR1 (val)
   ibuf[2] = channel;
   ibuf[3] = count;
   EIBC_SEND (EIB_MC_ADC_READ)

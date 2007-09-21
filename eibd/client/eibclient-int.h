@@ -215,4 +215,22 @@ int _EIB_GetRequest (EIBConnection * con);
 	con->req.buf = buffer; \
 	con->req.len = buffer ## _maxlen;
 
+#define EIBC_PTR1(name) \
+	con->req.ptr1 = name;
+
+#define EIBC_PTR2(name) \
+	con->req.ptr2 = name;
+
+#define EIBC_PTR3(name) \
+	con->req.ptr3 = name;
+
+#define EIBC_PTR4(name) \
+	con->req.ptr4 = name;
+
+#define EIBC_PTR5(name) \
+	con->req.ptr5 = name;
+
+#define EIBC_PTR6(name) \
+	con->req.ptr6 = name;
+
 #endif
