@@ -44,7 +44,7 @@ EIB_Cache_Read_Sync_async (EIBConnection * con, eibaddr_t dst,
   EIBC_INIT_SEND (4)
   EIBC_READ_BUF (buf)
   EIBC_PTR5 (src)
-  EIBSETADDR (ibuf + 2, dst);
+  EIBC_SETADDR (dst, 2)
   EIBC_SEND (EIB_CACHE_READ)
   EIBC_INIT_COMPLETE (EIB_Cache_Read_Sync)
 }

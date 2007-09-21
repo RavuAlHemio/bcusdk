@@ -38,7 +38,7 @@ int
 EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest)
 {
   EIBC_INIT_SEND (4)
-  EIBSETADDR (ibuf + 2, dest);
+  EIBC_SETADDR (dest, 2)
   EIBC_SEND (EIB_MC_CONNECTION)
   EIBC_INIT_COMPLETE (EIB_MC_Connect)
 }

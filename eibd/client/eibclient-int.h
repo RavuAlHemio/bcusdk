@@ -233,4 +233,7 @@ int _EIB_GetRequest (EIBConnection * con);
 #define EIBC_PTR6(name) \
 	con->req.ptr6 = name;
 
+#define EIBC_SETADDR(name, offset) \
+	EIBSETADDR (ibuf + offset, name);
+
 #endif

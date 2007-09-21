@@ -38,7 +38,7 @@ int
 EIBOpenT_Group_async (EIBConnection * con, eibaddr_t dest, int write_only)
 {
   EIBC_INIT_SEND (5)
-  EIBSETADDR (ibuf + 2, dest);
+  EIBC_SETADDR (dest, 2)
   ibuf[4] = (write_only ? 0xff : 0);
   EIBC_SEND (EIB_OPEN_T_GROUP)
   EIBC_INIT_COMPLETE (EIBOpenT_Group)

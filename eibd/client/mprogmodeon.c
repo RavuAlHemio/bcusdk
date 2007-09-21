@@ -38,7 +38,7 @@ int
 EIB_M_Progmode_On_async (EIBConnection * con, eibaddr_t dest)
 {
   EIBC_INIT_SEND (5)
-  EIBSETADDR (ibuf + 2, dest);
+  EIBC_SETADDR (dest, 2)
   ibuf[4] = 1;
   EIBC_SEND (EIB_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_M_Progmode_On)
