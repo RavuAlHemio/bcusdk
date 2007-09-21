@@ -40,7 +40,7 @@ EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
 {
   EIBC_INIT_SEND (7)
   memcpy (ibuf + 2, key, 4);
-  ibuf[6] = level;
+  EIBC_SETUINT8 (level, 6)
   EIBC_SEND (EIB_MC_KEY_WRITE)
   EIBC_INIT_COMPLETE (EIB_MC_SetKey)
 }

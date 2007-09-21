@@ -41,11 +41,10 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
 {
   EIBC_INIT_SEND (7)
   EIBC_READ_BUF (buf)
-  ibuf[2] = obj;
-  ibuf[3] = property;
-  ibuf[4] = (start >> 8) & 0xff;
-  ibuf[5] = (start) & 0xff;
-  ibuf[6] = nr_of_elem;
+  EIBC_SETUINT8 (obj, 2)
+  EIBC_SETUINT8 (property, 3)
+  EIBC_SETUINT16 (start, 4)
+  EIBC_SETUINT8 (nr_of_elem, 6)
   EIBC_SEND (EIB_MC_PROP_READ)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyRead)
 }

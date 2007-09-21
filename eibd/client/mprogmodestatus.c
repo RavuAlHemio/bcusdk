@@ -39,7 +39,7 @@ EIB_M_Progmode_Status_async (EIBConnection * con, eibaddr_t dest)
 {
   EIBC_INIT_SEND (5)
   EIBC_SETADDR (dest, 2)
-  ibuf[4] = 3;
+  EIBC_SETUINT8 (3, 4)
   EIBC_SEND (EIB_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_M_Progmode_Status)
 }

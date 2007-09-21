@@ -38,7 +38,7 @@ int
 EIB_MC_Progmode_Status_async (EIBConnection * con)
 {
   EIBC_INIT_SEND (3)
-  ibuf[2] = 3;
+  EIBC_SETUINT8 (3, 2)
   EIBC_SEND (EIB_MC_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_MC_Progmode_Status)
 }
