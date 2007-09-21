@@ -34,19 +34,9 @@ EIBC_COMPLETE (EIB_MC_Connect,
   EIBC_RETURN_OK
 )
 
-int
-EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest)
-{
+EIBC_ASYNC (EIB_MC_Connect, ARG_ADDR (dest, ARG_NONE),
   EIBC_INIT_SEND (4)
   EIBC_SETADDR (dest, 2)
   EIBC_SEND (EIB_MC_CONNECTION)
   EIBC_INIT_COMPLETE (EIB_MC_Connect)
-}
-
-int
-EIB_MC_Connect (EIBConnection * con, eibaddr_t dest)
-{
-  if (EIB_MC_Connect_async (con, dest) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

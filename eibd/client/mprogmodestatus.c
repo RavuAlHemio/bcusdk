@@ -34,20 +34,10 @@ EIBC_COMPLETE (EIB_M_Progmode_Status,
   EIBC_RETURN_UINT8 (2)
 )
 
-int
-EIB_M_Progmode_Status_async (EIBConnection * con, eibaddr_t dest)
-{
+EIBC_ASYNC (EIB_M_Progmode_Status, ARG_ADDR (dest, ARG_NONE),
   EIBC_INIT_SEND (5)
   EIBC_SETADDR (dest, 2)
   EIBC_SETUINT8 (3, 4)
   EIBC_SEND (EIB_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_M_Progmode_Status)
-}
-
-int
-EIB_M_Progmode_Status (EIBConnection * con, eibaddr_t dest)
-{
-  if (EIB_M_Progmode_Status_async (con, dest) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

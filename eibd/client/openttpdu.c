@@ -34,19 +34,9 @@ EIBC_COMPLETE (EIBOpenT_TPDU,
   EIBC_RETURN_OK
 )
 
-int
-EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src)
-{
+EIBC_ASYNC (EIBOpenT_TPDU, ARG_ADDR (src, ARG_NONE),
   EIBC_INIT_SEND (5)
   EIBC_SETADDR (src, 2)
   EIBC_SEND (EIB_OPEN_T_TPDU)
   EIBC_INIT_COMPLETE (EIBOpenT_TPDU)
-}
-
-int
-EIBOpenT_TPDU (EIBConnection * con, eibaddr_t src)
-{
-  if (EIBOpenT_TPDU_async (con, src) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

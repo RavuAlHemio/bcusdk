@@ -37,19 +37,9 @@ EIBC_COMPLETE(EIB_M_WriteIndividualAddress,
   EIBC_RETURN_OK
 )
 
-int
-EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest)
-{
+EIBC_ASYNC (EIB_M_WriteIndividualAddress, ARG_ADDR (dest, ARG_NONE),
   EIBC_INIT_SEND (4)
   EIBC_SETADDR (dest, 2)
   EIBC_SEND (EIB_M_INDIVIDUAL_ADDRESS_WRITE)
   EIBC_INIT_COMPLETE (EIB_M_WriteIndividualAddress)
-}
-
-int
-EIB_M_WriteIndividualAddress (EIBConnection * con, eibaddr_t dest)
-{
-  if (EIB_M_WriteIndividualAddress_async (con, dest) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

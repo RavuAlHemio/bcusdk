@@ -34,21 +34,11 @@ EIBC_COMPLETE (EIBOpenT_Individual,
   EIBC_RETURN_OK
 )
 
-int
-EIBOpenT_Individual_async (EIBConnection * con, eibaddr_t dest,
-			   int write_only)
-{
+
+EIBC_ASYNC (EIBOpenT_Individual, ARG_ADDR (dest, ARG_BOOL (write_only, ARG_NONE)),
   EIBC_INIT_SEND (5)
   EIBC_SETADDR (dest, 2)
   EIBC_SETBOOL (write_only, 4)
   EIBC_SEND (EIB_OPEN_T_INDIVIDUAL)
   EIBC_INIT_COMPLETE (EIBOpenT_Individual)
-}
-
-int
-EIBOpenT_Individual (EIBConnection * con, eibaddr_t dest, int write_only)
-{
-  if (EIBOpenT_Individual_async (con, dest, write_only) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

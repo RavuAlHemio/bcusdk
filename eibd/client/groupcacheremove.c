@@ -34,19 +34,9 @@ EIBC_COMPLETE (EIB_Cache_Remove,
   EIBC_RETURN_OK
 )
 
-int
-EIB_Cache_Remove_async (EIBConnection * con, eibaddr_t dest)
-{
+EIBC_ASYNC (EIB_Cache_Remove, ARG_ADDR (dest, ARG_NONE),
   EIBC_INIT_SEND (4)
   EIBC_SETADDR (dest, 2)
   EIBC_SEND (EIB_CACHE_REMOVE)
   EIBC_INIT_COMPLETE (EIB_Cache_Remove)
-}
-
-int
-EIB_Cache_Remove (EIBConnection * con, eibaddr_t dest)
-{
-  if (EIB_Cache_Remove_async (con, dest) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)
