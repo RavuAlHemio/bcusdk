@@ -38,7 +38,7 @@ int
 EIBOpen_GroupSocket_async (EIBConnection * con, int write_only)
 {
   EIBC_INIT_SEND (5)
-  ibuf[4] = (write_only ? 0xff : 0);
+  EIBC_SETBOOL (write_only, 4)
   EIBC_SEND (EIB_OPEN_GROUPCON)
   EIBC_INIT_COMPLETE (EIBOpen_GroupSocket)
 }
