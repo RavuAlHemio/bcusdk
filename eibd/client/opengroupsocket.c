@@ -34,19 +34,10 @@ EIBC_COMPLETE (EIBOpen_GroupSocket,
   EIBC_RETURN_OK
 )
 
-int
-EIBOpen_GroupSocket_async (EIBConnection * con, int write_only)
-{
+
+EIBC_ASYNC (EIBOpen_GroupSocket, ARG_BOOL (write_only, ARG_NONE),
   EIBC_INIT_SEND (5)
   EIBC_SETBOOL (write_only, 4)
   EIBC_SEND (EIB_OPEN_GROUPCON)
   EIBC_INIT_COMPLETE (EIBOpen_GroupSocket)
-}
-
-int
-EIBOpen_GroupSocket (EIBConnection * con, int write_only)
-{
-  if (EIBOpen_GroupSocket_async (con, write_only) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

@@ -269,7 +269,9 @@ int _EIB_GetRequest (EIBConnection * con);
 	}
 
 #define AGARG_NONE
+#define AGARG_BOOL(name, args) , int name AG##args
 
 #define ALARG_NONE
+#define ALARG_BOOL(name, args) , name AL##args
 
 #endif
