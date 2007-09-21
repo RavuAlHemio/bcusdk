@@ -34,5 +34,5 @@ EIBSendAPDU (EIBConnection * con, int data_len, uint8_t * data)
   EIBC_INIT_SEND (2)
   EIBC_SEND_BUF_LEN (data, 2)
   EIBC_SEND (EIB_APDU_PACKET)
-  return 0;
+  EIBC_RETURN_OK
 }

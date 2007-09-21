@@ -35,5 +35,5 @@ EIBSendGroup (EIBConnection * con, eibaddr_t dest, int data_len, uint8_t * data)
   EIBC_SETADDR (dest, 2)
   EIBC_SEND_BUF_LEN (data, 2)
   EIBC_SEND (EIB_GROUP_PACKET)
-  return 0;
+  EIBC_RETURN_OK
 }
