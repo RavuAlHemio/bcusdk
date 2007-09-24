@@ -34,19 +34,9 @@ EIBC_COMPLETE (EIB_LoadImage,
   EIBC_RETURN_UINT16 (2)
 )
 
-int
-EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int image_len)
-{
+EIBC_ASYNC (EIB_LoadImage, ARG_INBUF (image, ARG_NONE),
   EIBC_INIT_SEND (2)
   EIBC_SEND_BUF (image)
   EIBC_SEND (EIB_LOAD_IMAGE)
   EIBC_INIT_COMPLETE (EIB_LoadImage)
-}
-
-BCU_LOAD_RESULT
-EIB_LoadImage (EIBConnection * con, const uint8_t * image, int len)
-{
-  if (EIB_LoadImage_async (con, image, len) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

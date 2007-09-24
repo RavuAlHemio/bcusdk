@@ -736,17 +736,17 @@ int EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
- * \return result, -1 if communication error with eibd
+ * \return result (for values see IMG_* constants), -1 if communication error with eibd
  */
-BCU_LOAD_RESULT EIB_LoadImage (EIBConnection * con, const uint8_t * image,
-			       int len);
+int EIB_LoadImage (EIBConnection * con, int len, const uint8_t * image);
+
 /** Loads a BCU SDK program image (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
  * \return 0 if started, -1 if error
  */
-int EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len);
+int EIB_LoadImage_async (EIBConnection * con, int len, const uint8_t * image);
 
 
 /** Enable Group Cache

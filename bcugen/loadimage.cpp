@@ -56,6 +56,7 @@ main (int ac, char *ag[])
     printf ("%s", HexDump (p) ());
 
   BCUImage *i;
+  int res;
 
   BCU_LOAD_RESULT r = PrepareLoadImage (p, i);
 
@@ -69,12 +70,12 @@ main (int ac, char *ag[])
   if (!con)
     die ("Open failed");
 
-  r = EIB_LoadImage (con, p.array (), p ());
+  res = EIB_LoadImage (con, p (), p.array ());
 
-  if (r == (BCU_LOAD_RESULT) - 1)
+  if (res == - 1)
     printf ("Communication with EIBD failed\n");
   else
-    printf ("%s\n", decodeBCULoadResult (r) ());
+    printf ("%s\n", decodeBCULoadResult (res) ());
 
   EIBClose (con);
   return 0;
