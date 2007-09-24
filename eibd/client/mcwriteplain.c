@@ -34,23 +34,11 @@ EIBC_COMPLETE (EIB_MC_Write_Plain,
   EIBC_RETURN_LEN
 )
 
-int
-EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int buf_len,
-			  const uint8_t * buf)
-{
+EIBC_ASYNC (EIB_MC_Write_Plain, ARG_UINT16 (addr, ARG_INBUF (buf, ARG_NONE)),
   EIBC_INIT_SEND (6)
   EIBC_SETUINT16 (addr, 2)
   EIBC_SETUINT16 (EIBC_SEND_LEN (buf), 4)
   EIBC_SEND_BUF (buf)
   EIBC_SEND (EIB_MC_WRITE_NOVERIFY)
   EIBC_INIT_COMPLETE (EIB_MC_Write_Plain)
-}
-
-int
-EIB_MC_Write_Plain (EIBConnection * con, uint16_t addr, int len,
-		    const uint8_t * buf)
-{
-  if (EIB_MC_Write_Plain_async (con, addr, len, buf) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

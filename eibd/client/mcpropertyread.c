@@ -34,11 +34,7 @@ EIBC_COMPLETE (EIB_MC_PropertyRead,
   EIBC_RETURN_BUF (2)
 )
 
-int
-EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
-			   uint16_t start, uint8_t nr_of_elem, int buf_maxlen,
-			   uint8_t * buf)
-{
+EIBC_ASYNC (EIB_MC_PropertyRead, ARG_UINT8 (obj, ARG_UINT8a (property, ARG_UINT16 (start, ARG_UINT8b (nr_of_elem, ARG_OUTBUF (buf, ARG_NONE))))),
   EIBC_INIT_SEND (7)
   EIBC_READ_BUF (buf)
   EIBC_SETUINT8 (obj, 2)
@@ -47,15 +43,4 @@ EIB_MC_PropertyRead_async (EIBConnection * con, uint8_t obj, uint8_t property,
   EIBC_SETUINT8 (nr_of_elem, 6)
   EIBC_SEND (EIB_MC_PROP_READ)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyRead)
-}
-
-int
-EIB_MC_PropertyRead (EIBConnection * con, uint8_t obj, uint8_t property,
-		     uint16_t start, uint8_t nr_of_elem, int max_len,
-		     uint8_t * buf)
-{
-  if (EIB_MC_PropertyRead_async
-      (con, obj, property, start, nr_of_elem, max_len, buf) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

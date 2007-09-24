@@ -34,12 +34,7 @@ EIBC_COMPLETE (EIB_MC_PropertyWrite,
   EIBC_RETURN_BUF (2)
 )
 
-int
-EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
-			    uint8_t property, uint16_t start,
-			    uint8_t nr_of_elem, int buf_len, const uint8_t * buf,
-			    int res_maxlen, uint8_t * res)
-{
+EIBC_ASYNC (EIB_MC_PropertyWrite, ARG_UINT8 (obj, ARG_UINT8a (property, ARG_UINT16 (start, ARG_UINT8b (nr_of_elem, ARG_INBUF (buf, ARG_OUTBUF (res, ARG_NONE)))))),
   EIBC_INIT_SEND (7)
   EIBC_SETUINT8 (obj, 2)
   EIBC_SETUINT8 (property, 3)
@@ -49,15 +44,4 @@ EIB_MC_PropertyWrite_async (EIBConnection * con, uint8_t obj,
   EIBC_READ_BUF (res) 
   EIBC_SEND (EIB_MC_PROP_WRITE)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyWrite)
-}
-
-int
-EIB_MC_PropertyWrite (EIBConnection * con, uint8_t obj, uint8_t property,
-		      uint16_t start, uint8_t nr_of_elem, int len,
-		      const uint8_t * buf, int max_len, uint8_t * res)
-{
-  if (EIB_MC_PropertyWrite_async
-      (con, obj, property, start, nr_of_elem, len, buf, max_len, res) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)
