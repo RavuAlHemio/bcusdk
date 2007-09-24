@@ -28,70 +28,69 @@
 #ifndef EIB_LOAD_RESULT_H
 #define EIB_LOAD_RESULT_H
 
-typedef enum
-{
-  IMG_UNKNOWN_ERROR = 0,
-  IMG_UNRECOG_FORMAT,
-  IMG_INVALID_FORMAT,
-  IMG_NO_BCUTYPE,
-  IMG_UNKNOWN_BCUTYPE,
-  IMG_NO_CODE,
-  IMG_NO_SIZE,
-  IMG_LODATA_OVERFLOW,
-  IMG_HIDATA_OVERFLOW,
-  IMG_TEXT_OVERFLOW,
-  IMG_NO_ADDRESS,
-  IMG_WRONG_SIZE,
-  IMG_IMAGE_LOADABLE,
-  IMG_NO_DEVICE_CONNECTION,
-  IMG_MASK_READ_FAILED,
-  IMG_WRONG_MASK_VERSION,
-  IMG_CLEAR_ERROR,
-  IMG_RESET_ADDR_TAB,
-  IMG_LOAD_HEADER,
-  IMG_LOAD_MAIN,
-  IMG_ZERO_RAM,
-  IMG_FINALIZE_ADDR_TAB,
-  IMG_PREPARE_RUN,
-  IMG_RESTART,
-  IMG_LOADED,
-  IMG_NO_START,
-  IMG_WRONG_ADDRTAB,
-  IMG_ADDRTAB_OVERFLOW,
-  IMG_OVERLAP_ASSOCTAB,
-  IMG_OVERLAP_TEXT,
-  IMG_NEGATIV_TEXT_SIZE,
-  IMG_OVERLAP_PARAM,
-  IMG_OVERLAP_EEPROM,
-  IMG_OBJTAB_OVERFLOW,
-  IMG_WRONG_LOADCTL,
-  IMG_UNLOAD_ADDR,
-  IMG_UNLOAD_ASSOC,
-  IMG_UNLOAD_PROG,
-  IMG_LOAD_ADDR,
-  IMG_WRITE_ADDR,
-  IMG_SET_ADDR,
-  IMG_FINISH_ADDR,
-  IMG_LOAD_ASSOC,
-  IMG_WRITE_ASSOC,
-  IMG_SET_ASSOC,
-  IMG_FINISH_ASSOC,
-  IMG_LOAD_PROG,
-  IMG_ALLOC_LORAM,
-  IMG_ALLOC_HIRAM,
-  IMG_ALLOC_INIT,
-  IMG_ALLOC_RO,
-  IMG_ALLOC_EEPROM,
-  IMG_ALLOC_PARAM,
-  IMG_SET_PROG,
-  IMG_SET_TASK_PTR,
-  IMG_SET_OBJ,
-  IMG_SET_TASK2,
-  IMG_FINISH_PROC,
-  IMG_WRONG_CHECKLIM,
-  IMG_INVALID_KEY,
-  IMG_AUTHORIZATION_FAILED,
-  IMG_KEY_WRITE,
-} BCU_LOAD_RESULT;
+#define IMG_UNKNOWN_ERROR             0
+#define IMG_UNRECOG_FORMAT            1
+#define IMG_INVALID_FORMAT            2
+#define IMG_NO_BCUTYPE                3
+#define IMG_UNKNOWN_BCUTYPE           4
+#define IMG_NO_CODE                   5
+#define IMG_NO_SIZE                   6
+#define IMG_LODATA_OVERFLOW           7
+#define IMG_HIDATA_OVERFLOW           8
+#define IMG_TEXT_OVERFLOW             9
+#define IMG_NO_ADDRESS               10
+#define IMG_WRONG_SIZE               11
+#define IMG_IMAGE_LOADABLE           12
+#define IMG_NO_DEVICE_CONNECTION     13
+#define IMG_MASK_READ_FAILED         14
+#define IMG_WRONG_MASK_VERSION       15
+#define IMG_CLEAR_ERROR              16
+#define IMG_RESET_ADDR_TAB           17
+#define IMG_LOAD_HEADER              18
+#define IMG_LOAD_MAIN                19
+#define IMG_ZERO_RAM                 20
+#define IMG_FINALIZE_ADDR_TAB        21
+#define IMG_PREPARE_RUN              22
+#define IMG_RESTART                  23
+#define IMG_LOADED                   24
+#define IMG_NO_START                 25
+#define IMG_WRONG_ADDRTAB            26
+#define IMG_ADDRTAB_OVERFLOW         27
+#define IMG_OVERLAP_ASSOCTAB         28
+#define IMG_OVERLAP_TEXT             29
+#define IMG_NEGATIV_TEXT_SIZE        30
+#define IMG_OVERLAP_PARAM            31
+#define IMG_OVERLAP_EEPROM           32
+#define IMG_OBJTAB_OVERFLOW          33
+#define IMG_WRONG_LOADCTL            34
+#define IMG_UNLOAD_ADDR              35
+#define IMG_UNLOAD_ASSOC             36
+#define IMG_UNLOAD_PROG              37
+#define IMG_LOAD_ADDR                38
+#define IMG_WRITE_ADDR               39
+#define IMG_SET_ADDR                 40
+#define IMG_FINISH_ADDR              41
+#define IMG_LOAD_ASSOC               42
+#define IMG_WRITE_ASSOC              43
+#define IMG_SET_ASSOC                44
+#define IMG_FINISH_ASSOC             45
+#define IMG_LOAD_PROG                46
+#define IMG_ALLOC_LORAM              47
+#define IMG_ALLOC_HIRAM              48
+#define IMG_ALLOC_INIT               49
+#define IMG_ALLOC_RO                 50
+#define IMG_ALLOC_EEPROM             51
+#define IMG_ALLOC_PARAM              52
+#define IMG_SET_PROG                 53
+#define IMG_SET_TASK_PTR             54
+#define IMG_SET_OBJ                  55
+#define IMG_SET_TASK2                56
+#define IMG_FINISH_PROC              57
+#define IMG_WRONG_CHECKLIM           58
+#define IMG_INVALID_KEY              59
+#define IMG_AUTHORIZATION_FAILED     60
+#define IMG_KEY_WRITE                61
+
+typedef int BCU_LOAD_RESULT;
 
 #endif
