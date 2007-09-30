@@ -35,23 +35,11 @@ EIBC_COMPLETE (EIB_MC_ReadADC,
   EIBC_RETURN_OK
 )
 
-int
-EIB_MC_ReadADC_async (EIBConnection * con, uint8_t channel, uint8_t count,
-		      int16_t * val)
-{
+EIBC_ASYNC (EIB_MC_ReadADC, ARG_UINT8 (channel, ARG_UINT8a (count, ARG_OUTINT16 (val, ARG_NONE))),
   EIBC_INIT_SEND (4)
   EIBC_PTR1 (val)
   EIBC_SETUINT8 (channel, 2)
   EIBC_SETUINT8 (count, 3)
   EIBC_SEND (EIB_MC_ADC_READ)
   EIBC_INIT_COMPLETE (EIB_MC_ReadADC)
-}
-
-int
-EIB_MC_ReadADC (EIBConnection * con, uint8_t channel, uint8_t count,
-		int16_t * val)
-{
-  if (EIB_MC_ReadADC_async (con, channel, count, val) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

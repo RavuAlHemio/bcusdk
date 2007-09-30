@@ -274,6 +274,10 @@ int _EIB_GetRequest (EIBConnection * con);
 #define AGARG_UINT8a(name, args) , uint8_t name AG##args
 #define AGARG_UINT8b(name, args) , uint8_t name AG##args
 #define AGARG_UINT16(name, args) , uint16_t name AG##args
+#define AGARG_OUTUINT8(name, args) , uint8_t *name AG##args
+#define AGARG_OUTUINT8a(name, args) , uint8_t *name AG##args
+#define AGARG_OUTUINT16(name, args) , uint16_t *name AG##args
+#define AGARG_OUTINT16(name, args) , int16_t *name AG##args
 #define AGARG_ADDR(name, args) , eibaddr_t name AG##args
 #define AGARG_OUTADDR(name, args) , eibaddr_t *name AG##args
 #define AGARG_OUTADDRa(name, args) , eibaddr_t *name AG##args
@@ -287,6 +291,10 @@ int _EIB_GetRequest (EIBConnection * con);
 #define ALARG_UINT8a(name, args) , name AL##args
 #define ALARG_UINT8b(name, args) , name AL##args
 #define ALARG_UINT16(name, args) , name AL##args
+#define ALARG_OUTUINT8(name, args) , name AL##args
+#define ALARG_OUTUINT8a(name, args) , name AL##args
+#define ALARG_OUTUINT16(name, args) , name AL##args
+#define ALARG_OUTINT16(name, args) , name AL##args
 #define ALARG_ADDR(name, args) , name AL##args
 #define ALARG_OUTADDR(name, args) , name AL##args
 #define ALARG_OUTADDRa(name, args) , name AL##args

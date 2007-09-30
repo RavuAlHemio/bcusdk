@@ -37,11 +37,7 @@ EIBC_COMPLETE (EIB_MC_PropertyDesc,
   EIBC_RETURN_OK
 )
 
-int
-EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
-			   uint8_t * type, uint16_t * max_nr_of_elem,
-			   uint8_t * access)
-{
+EIBC_ASYNC (EIB_MC_PropertyDesc, ARG_UINT8 (obj, ARG_UINT8a (property, ARG_OUTUINT8 (type, ARG_OUTUINT16 (max_nr_of_elem, ARG_OUTUINT8a (access, ARG_NONE))))),
   EIBC_INIT_SEND (4)
   EIBC_PTR2 (type)
   EIBC_PTR4 (max_nr_of_elem)
@@ -50,15 +46,4 @@ EIB_MC_PropertyDesc_async (EIBConnection * con, uint8_t obj, uint8_t property,
   EIBC_SETUINT8 (property, 3)
   EIBC_SEND (EIB_MC_PROP_DESC)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyDesc)
-}
-
-int
-EIB_MC_PropertyDesc (EIBConnection * con, uint8_t obj, uint8_t property,
-		     uint8_t * type, uint16_t * max_nr_of_elem,
-		     uint8_t * access)
-{
-  if (EIB_MC_PropertyDesc_async
-      (con, obj, property, type, max_nr_of_elem, access) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)
