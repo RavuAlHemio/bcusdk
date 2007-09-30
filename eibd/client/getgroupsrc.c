@@ -36,22 +36,10 @@ EIBC_COMPLETE (EIBGetGroup_Src,
   EIBC_RETURN_BUF (6)
 )
 
-int
-EIBGetGroup_Src_async (EIBConnection * con, int buf_maxlen, uint8_t * buf,
-		       eibaddr_t * src, eibaddr_t * dest)
-{
+EIBC_ASYNC (EIBGetGroup_Src, ARG_OUTBUF(buf, ARG_OUTADDR (src, ARG_OUTADDRa (dest, ARG_NONE))),
   EIBC_INIT_SEND (2)
   EIBC_READ_BUF (buf)
   EIBC_PTR5 (src)
   EIBC_PTR6 (dest)
   EIBC_INIT_COMPLETE (EIBGetGroup_Src)
-}
-
-int
-EIBGetGroup_Src (EIBConnection * con, int maxlen, uint8_t * buf,
-		 eibaddr_t * src, eibaddr_t * dest)
-{
-  if (EIBGetGroup_Src_async (con, maxlen, buf, src, dest) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

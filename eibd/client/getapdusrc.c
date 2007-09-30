@@ -35,21 +35,9 @@ EIBC_COMPLETE (EIBGetAPDU_Src,
   EIBC_RETURN_BUF (4)
 )
 
-int
-EIBGetAPDU_Src_async (EIBConnection * con, int buf_maxlen, uint8_t * buf,
-		      eibaddr_t * src)
-{
+EIBC_ASYNC (EIBGetAPDU_Src, ARG_OUTBUF (buf, ARG_OUTADDR (src, ARG_NONE)),
   EIBC_INIT_SEND (2)
   EIBC_READ_BUF (buf)
   EIBC_PTR5 (src)
   EIBC_INIT_COMPLETE (EIBGetAPDU_Src)
-}
-
-int
-EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
-		eibaddr_t * src)
-{
-  if (EIBGetAPDU_Src_async (con, maxlen, buf, src) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)

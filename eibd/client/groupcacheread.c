@@ -37,24 +37,11 @@ EIBC_COMPLETE (EIB_Cache_Read,
   EIBC_RETURN_BUF (6)
 )
 
-int
-EIB_Cache_Read_async (EIBConnection * con, eibaddr_t dst,
-		      eibaddr_t * src, int buf_maxlen, uint8_t * buf)
-{
+EIBC_ASYNC (EIB_Cache_Read, ARG_ADDR (dst, ARG_OUTADDR (src, ARG_OUTBUF (buf, ARG_NONE))),
   EIBC_INIT_SEND (4)
   EIBC_READ_BUF (buf)
   EIBC_PTR5 (src)
   EIBC_SETADDR (dst, 2)
   EIBC_SEND (EIB_CACHE_READ_NOWAIT)
   EIBC_INIT_COMPLETE (EIB_Cache_Read)
-}
-
-
-int
-EIB_Cache_Read (EIBConnection * con, eibaddr_t dst,
-		eibaddr_t * src, int max_len, uint8_t * buf)
-{
-  if (EIB_Cache_Read_async (con, dst, src, max_len, buf) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)
