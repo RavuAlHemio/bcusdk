@@ -35,20 +35,11 @@ EIBC_COMPLETE (EIB_MC_SetKey,
   EIBC_RETURN_OK
 )
 
-int
-EIB_MC_SetKey_async (EIBConnection * con, uint8_t key[4], uint8_t level)
-{
+
+EIBC_ASYNC (EIB_MC_SetKey, ARG_KEY (key, ARG_UINT8 (level, ARG_NONE)),
   EIBC_INIT_SEND (7)
   EIBC_SETKEY (key, 2)
   EIBC_SETUINT8 (level, 6)
   EIBC_SEND (EIB_MC_KEY_WRITE)
   EIBC_INIT_COMPLETE (EIB_MC_SetKey)
-}
-
-int
-EIB_MC_SetKey (EIBConnection * con, uint8_t key[4], uint8_t level)
-{
-  if (EIB_MC_SetKey_async (con, key, level) == -1)
-    return -1;
-  return EIBComplete (con);
-}
+)
