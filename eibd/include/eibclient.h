@@ -242,7 +242,7 @@ int EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src);
  * \param data buffer with APDU
  * \return tranmited length or -1 if error
  */
-int EIBSendAPDU (EIBConnection * con, int len, uint8_t * data);
+int EIBSendAPDU (EIBConnection * con, int len, const uint8_t * data);
 
 /** Receive an APDU (blocking).
  * \param con eibd connection
@@ -270,7 +270,7 @@ int EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
  * \return tranmited length or -1 if error
  */
 int EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len,
-		 uint8_t * data);
+		 const uint8_t * data);
 
 /** Receive a TPDU with source address.
  * \param con eibd connection
@@ -303,7 +303,7 @@ int EIBOpen_GroupSocket_async (EIBConnection * con, int write_only);
  * \return tranmited length or -1 if error
  */
 int EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
-		  uint8_t * data);
+		  const uint8_t * data);
 
 /** Receive a group APDU with source address (blocking).
  * \param con eibd connection

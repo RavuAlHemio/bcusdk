@@ -268,6 +268,13 @@ int _EIB_GetRequest (EIBConnection * con);
 	  return EIBComplete (con); \
 	}
 
+#define EIBC_SYNC(name, args, body) \
+	int \
+	name (EIBConnection * con AG##args) \
+	{ \
+	  body \
+	}
+
 #define AGARG_NONE
 #define AGARG_BOOL(name, args) , int name AG##args
 #define AGARG_UINT8(name, args) , uint8_t name AG##args

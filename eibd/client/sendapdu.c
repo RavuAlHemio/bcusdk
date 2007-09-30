@@ -28,11 +28,9 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-int
-EIBSendAPDU (EIBConnection * con, int data_len, uint8_t * data)
-{
+EIBC_SYNC (EIBSendAPDU, ARG_INBUF (data, ARG_NONE),
   EIBC_INIT_SEND (2)
   EIBC_SEND_BUF_LEN (data, 2)
   EIBC_SEND (EIB_APDU_PACKET)
   EIBC_RETURN_OK
-}
+)

@@ -28,12 +28,10 @@
 #include "eibclient.h"
 #include "eibclient-int.h"
 
-int
-EIBSendGroup (EIBConnection * con, eibaddr_t dest, int data_len, uint8_t * data)
-{
+EIBC_SYNC (EIBSendGroup, ARG_ADDR (dest, ARG_INBUF (data, ARG_NONE)),
   EIBC_INIT_SEND (4)
   EIBC_SETADDR (dest, 2)
   EIBC_SEND_BUF_LEN (data, 2)
   EIBC_SEND (EIB_GROUP_PACKET)
   EIBC_RETURN_OK
-}
+)
