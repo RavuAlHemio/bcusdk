@@ -15,7 +15,7 @@ bcugen3_SOURCES=bcugen3.cpp
 bcugen3_LDADD=../common/libcommon.a configfile/libread1.a lib/libcheck3.a lib/libbcugen.a $(XML_LIBS)
 
 loadimage_SOURCES=loadimage.cpp
-loadimage_LDADD=../common/libcommon.a ../eibd/client/libeibclient.a lib/libbcugen.a
+loadimage_LDADD=../common/libcommon.a ../eibd/client/c/libeibclient.a lib/libbcugen.a
 
 imageedit_SOURCES=imageedit.cpp
 imageedit_LDADD=../common/libcommon.a lib/libbcugen.a lib/libbcugen.a $(XML_LIBS)

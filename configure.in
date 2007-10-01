@@ -186,6 +186,7 @@ AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT(Makefile 
 common/Makefile
 eibd/Makefile eibd/include/Makefile  eibd/client/Makefile eibd/examples/Makefile eibd/libserver/Makefile eibd/server/Makefile eibd/backend/Makefile
+eibd/client/def/Makefile eibd/client/c/Makefile 
 eibd/eibnet/Makefile eibd/bcu/Makefile eibd/usb/Makefile
 xml/Makefile xml/gui/Makefile xml/gui/examples/Makefile
 bcu/Makefile bcu/lib/Makefile bcu/include/Makefile bcu/ldscripts/Makefile
