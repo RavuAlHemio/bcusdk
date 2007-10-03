@@ -294,6 +294,7 @@ int _EIB_GetRequest (EIBConnection * con);
 #define AGARG_OUTADDRa(name, args) , eibaddr_t *name AG##args
 #define AGARG_INBUF(name, args) , int name##_len, const uint8_t *name AG##args
 #define AGARG_OUTBUF(name, args) , int name##_maxlen, uint8_t *name AG##args
+#define AGARG_OUTBUF_LEN(name, args) , int name##_maxlen, uint8_t *name AG##args
 #define AGARG_KEY(name, args) , uint8_t name[4] AG##args
 
 #define ALARG_NONE
@@ -311,6 +312,7 @@ int _EIB_GetRequest (EIBConnection * con);
 #define ALARG_OUTADDRa(name, args) , name AL##args
 #define ALARG_INBUF(name, args) , name##_len, name AL##args
 #define ALARG_OUTBUF(name, args) , name##_maxlen, name AL##args
+#define ALARG_OUTBUF_LEN(name, args) , name##_maxlen, name AL##args
 #define ALARG_KEY(name, args) , name AL##args
 
 #endif
