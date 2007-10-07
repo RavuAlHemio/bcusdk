@@ -1,4 +1,4 @@
-EXTRA_DIST= \
+EXTRA_DIST= all.lst \
   getapdu.inc              loadimage.inc         mcpropertyread.inc   mprogmodeoff.inc              opentconnection.inc \
   getapdusrc.inc           mcauthorize.inc       mcpropertyscan.inc   mprogmodeon.inc               opentgroup.inc \
   getbusmonitorpacket.inc  mcconnect.inc         mcpropertywrite.inc  mprogmodestatus.inc           opentindividual.inc \
