@@ -259,60 +259,62 @@ int _EIB_GetRequest (EIBConnection * con);
 
 #define EIBC_ASYNC(name, args, body) \
 	int \
-	name ##_async (EIBConnection * con AG##args) \
+	name ##_async (EIBConnection * con KAG ## args) \
 	{ \
 	  body \
 	} \
 	 \
 	int \
-	name (EIBConnection * con AG##args) \
+	name (EIBConnection * con KAG ## args) \
 	{ \
-	  if (name ## _async (con AL##args) == -1) \
+	  if (name ## _async (con KAL ## args) == -1) \
 	    return -1; \
 	  return EIBComplete (con); \
 	}
 
 #define EIBC_SYNC(name, args, body) \
 	int \
-	name (EIBConnection * con AG##args) \
+	name (EIBConnection * con KAG ## args) \
 	{ \
 	  body \
 	}
 
 #define AGARG_NONE
-#define AGARG_BOOL(name, args) , int name AG##args
-#define AGARG_UINT8(name, args) , uint8_t name AG##args
-#define AGARG_UINT8a(name, args) , uint8_t name AG##args
-#define AGARG_UINT8b(name, args) , uint8_t name AG##args
-#define AGARG_UINT16(name, args) , uint16_t name AG##args
-#define AGARG_OUTUINT8(name, args) , uint8_t *name AG##args
-#define AGARG_OUTUINT8a(name, args) , uint8_t *name AG##args
-#define AGARG_OUTUINT16(name, args) , uint16_t *name AG##args
-#define AGARG_OUTINT16(name, args) , int16_t *name AG##args
-#define AGARG_ADDR(name, args) , eibaddr_t name AG##args
-#define AGARG_OUTADDR(name, args) , eibaddr_t *name AG##args
-#define AGARG_OUTADDRa(name, args) , eibaddr_t *name AG##args
-#define AGARG_INBUF(name, args) , int name##_len, const uint8_t *name AG##args
-#define AGARG_OUTBUF(name, args) , int name##_maxlen, uint8_t *name AG##args
-#define AGARG_OUTBUF_LEN(name, args) , int name##_maxlen, uint8_t *name AG##args
-#define AGARG_KEY(name, args) , uint8_t name[4] AG##args
+#define AGARG_BOOL(name, args) int name KAG ## args
+#define AGARG_UINT8(name, args) uint8_t name KAG ## args
+#define AGARG_UINT8a(name, args) uint8_t name KAG ## args
+#define AGARG_UINT8b(name, args) uint8_t name KAG ## args
+#define AGARG_UINT16(name, args) uint16_t name KAG ## args
+#define AGARG_OUTUINT8(name, args) uint8_t *name KAG ## args
+#define AGARG_OUTUINT8a(name, args) uint8_t *name KAG ## args
+#define AGARG_OUTUINT16(name, args) uint16_t *name KAG ## args
+#define AGARG_OUTINT16(name, args) int16_t *name KAG ## args
+#define AGARG_ADDR(name, args) eibaddr_t name KAG ## args
+#define AGARG_OUTADDR(name, args) eibaddr_t *name KAG ## args
+#define AGARG_OUTADDRa(name, args) eibaddr_t *name KAG ## args
+#define AGARG_INBUF(name, args) int name##_len, const uint8_t *name KAG ## args
+#define AGARG_OUTBUF(name, args) int name##_maxlen, uint8_t *name KAG ## args
+#define AGARG_OUTBUF_LEN(name, args) int name##_maxlen, uint8_t *name KAG ## args
+#define AGARG_KEY(name, args) uint8_t name[4] KAG ## args
 
 #define ALARG_NONE
-#define ALARG_BOOL(name, args) , name AL##args
-#define ALARG_UINT8(name, args) , name AL##args
-#define ALARG_UINT8a(name, args) , name AL##args
-#define ALARG_UINT8b(name, args) , name AL##args
-#define ALARG_UINT16(name, args) , name AL##args
-#define ALARG_OUTUINT8(name, args) , name AL##args
-#define ALARG_OUTUINT8a(name, args) , name AL##args
-#define ALARG_OUTUINT16(name, args) , name AL##args
-#define ALARG_OUTINT16(name, args) , name AL##args
-#define ALARG_ADDR(name, args) , name AL##args
-#define ALARG_OUTADDR(name, args) , name AL##args
-#define ALARG_OUTADDRa(name, args) , name AL##args
-#define ALARG_INBUF(name, args) , name##_len, name AL##args
-#define ALARG_OUTBUF(name, args) , name##_maxlen, name AL##args
-#define ALARG_OUTBUF_LEN(name, args) , name##_maxlen, name AL##args
-#define ALARG_KEY(name, args) , name AL##args
+#define ALARG_BOOL(name, args) name KAL ## args
+#define ALARG_UINT8(name, args) name KAL ## args
+#define ALARG_UINT8a(name, args) name KAL ## args
+#define ALARG_UINT8b(name, args) name KAL ## args
+#define ALARG_UINT16(name, args) name KAL ## args
+#define ALARG_OUTUINT8(name, args) name KAL ## args
+#define ALARG_OUTUINT8a(name, args) name KAL ## args
+#define ALARG_OUTUINT16(name, args) name KAL ## args
+#define ALARG_OUTINT16(name, args) name KAL ## args
+#define ALARG_ADDR(name, args) name KAL ## args
+#define ALARG_OUTADDR(name, args) name KAL ## args
+#define ALARG_OUTADDRa(name, args) name KAL ## args
+#define ALARG_INBUF(name, args) name##_len, name KAL ## args
+#define ALARG_OUTBUF(name, args) name##_maxlen, name KAL ## args
+#define ALARG_OUTBUF_LEN(name, args) name##_maxlen, name KAL ## args
+#define ALARG_KEY(name, args) name KAL ## args
+
+#include "def/karg.def"
 
 #endif
