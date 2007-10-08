@@ -135,8 +135,9 @@ bool
 GroupCache::Start ()
 {
   TRACEPRINTF (t, 4, this, "GroupCacheEnable");
-  if (!layer3->registerGroupCallBack (this, 0))
-    return false;
+  if (!enable)
+    if (!layer3->registerGroupCallBack (this, 0))
+      return false;
   enable = 1;
   return true;
 }
