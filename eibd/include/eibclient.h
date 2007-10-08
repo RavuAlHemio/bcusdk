@@ -279,7 +279,8 @@ int EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len,
  * \param src pointer to where the source address should be stored
  * \return received length or -1 if error
  */
-#define EIBGetTPDU EIBGetAPDU_Src
+int EIBGetTPDU (EIBConnection * con, int maxlen, uint8_t * buf,
+		eibaddr_t * src);
 
 /** Opens a Group communication interface.
  * \param con eibd connection
