@@ -8,5 +8,6 @@ EXTRA_DIST= all.lst karg.def \
   groupcacheenable.inc     mcprogmodeon.inc      mcsetkey.inc         openbusmonitor.inc            reset.inc \
   groupcacheread.inc       mcprogmodestatus.inc  mcwrite.inc          openbusmonitortext.inc        sendapdu.inc \
   groupcachereadsync.inc   mcprogmodetoggle.inc  mcwriteplain.inc     opengroupsocket.inc           sendgroup.inc \
-  groupcacheremove.inc     mcpropertydesc.inc    mgetmaskversion.inc  opentbroadcast.inc            sendtpdu.inc
+  groupcacheremove.inc     mcpropertydesc.inc    mgetmaskversion.inc  opentbroadcast.inc            sendtpdu.inc \
+  gettpdu.inc
 

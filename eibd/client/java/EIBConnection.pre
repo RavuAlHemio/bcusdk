@@ -16,6 +16,7 @@ class EIBConnection
 #include "java/io.inc"
 #include "java/complete.inc"
 #include "java/errno.inc"
+#include "java/result.inc"
 
 #include "def/all.lst"
 }
