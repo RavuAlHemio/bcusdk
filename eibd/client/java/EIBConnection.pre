@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Vector;
 
-class EIBConnection
+public class EIBConnection
 {
 #include "java/io.inc"
 #include "java/complete.inc"

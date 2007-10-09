@@ -26,16 +26,16 @@
 */
 package tuwien.auto.eibclient;
 
-class Buffer
+public class Buffer
 {
   public byte[] data;
 
-    Buffer ()
+  public Buffer ()
   {
     data = null;
   }
 
-  Buffer (byte[]val)
+  public Buffer (byte[]val)
   {
     data = val;
   }
