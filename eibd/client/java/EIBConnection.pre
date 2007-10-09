@@ -1,0 +1,21 @@
+#include "java/def.def"
+#include "eibtypes.h"
+#include "java/arg.def"
+#include "def/karg.def"
+
+package tuwien.auto.eibclient;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Vector;
+
+class EIBConnection
+{
+#include "java/io.inc"
+#include "java/complete.inc"
+#include "java/errno.inc"
+
+#include "def/all.lst"
+}
