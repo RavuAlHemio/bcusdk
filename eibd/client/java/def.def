@@ -127,9 +127,10 @@
 #define EIBC_SEND_BUF_LEN(name, Length) \
 	if (name.length < Length) \
 	  throw new ArrayIndexOutOfBoundsException ("data to short"); \
-	ibuf = new byte[head.length + data.length]; \
+	ibuf = new byte[head.length + name.length]; \
+	sendlen = name.length; \
 	System.arraycopy (head, 0, ibuf, 0, head.length); \
-	System.arraycopy (name, 0, ibuf, head.length, data.length);
+	System.arraycopy (name, 0, ibuf, head.length, name.length);
 
 #define EIBC_SEND_LEN(name) (name.length)
 

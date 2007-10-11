@@ -32,7 +32,7 @@
   private Int16 ptr4;
   private EIBAddr ptr5;
   private EIBAddr ptr6;
-  private short sendlen;
+  private int sendlen;
 
   private interface _complete
   {
