@@ -194,7 +194,7 @@ T_TPDU::Get_L_Data (L_Data_PDU * l)
 void
 T_TPDU::Send (const TpduComm & c)
 {
-  TRACEPRINTF (this->t, 4, this, "Send TPDU %s", c.data ());
+  t->TracePacket (4, this, "Send TPDU", c.data);
   L_Data_PDU *l = new L_Data_PDU;
   l->source = src;
   l->dest = c.addr;
