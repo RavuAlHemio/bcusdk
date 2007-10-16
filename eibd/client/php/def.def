@@ -65,8 +65,8 @@
 	  }
 
 #define EIBC_RETURN_BUF(offset) \
-	$this->buf->data = substr ($data, offset); \
-	return strlen ($this->buf->data);
+	$this->buf->buffer = substr ($this->data, offset); \
+	return strlen ($this->buf->buffer);
 
 #define EIBC_RETURN_OK \
 	return 0;
