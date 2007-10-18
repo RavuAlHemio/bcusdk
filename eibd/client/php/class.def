@@ -25,7 +25,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-class Buffer {
+class EIBBuffer {
 	public $buffer;
 	function _construct($buf="")
 	  {
@@ -43,7 +43,7 @@ class EIBAddr {
 
 }
 
-class Int8 {
+class EIBInt8 {
 	public $data;
 	function _construct($val=0)
 	  {
@@ -51,7 +51,7 @@ class Int8 {
 	  }
 }
 
-class Int16 {
+class EIBInt16 {
 	public $data;
 	function _construct($val=0)
 	  {

@@ -1,4 +1,3 @@
-#include "php/help.inc"
 #include "php/class.def"
 #include "php/def.def"
 #include "php/arg.def"
@@ -14,4 +13,5 @@ class EIBConnection {
 
 #include "def/all.lst"
 
+#include "php/help.inc"
 }

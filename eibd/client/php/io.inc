@@ -91,7 +91,7 @@
        }
      if ($this->readlen < 2)
        return 0;
-     $this->datalen = upack (implode ("", $this->head), "n");
+     $this->datalen = EIBConnection::upack (implode ("", $this->head), "n");
      if (feof ($this->socket))
        {
 	 $this->errno = self::ECONNRESET;

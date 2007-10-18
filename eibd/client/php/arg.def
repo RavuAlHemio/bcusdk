@@ -30,8 +30,8 @@ EIBC_LICENSE(
 #define AGARG_NONE 
 #define AGARG_BOOL(name, args) PAR(name)  KAG ## args
 #define AGARG_INBUF(name, args) PAR(name) KAG ## args
-#define AGARG_OUTBUF(name, args) Buffer PAR(name) KAG ## args
-#define AGARG_OUTBUF_LEN(name, args) PAR(name ## _len), Buffer PAR(name) KAG ## args
+#define AGARG_OUTBUF(name, args) EIBBuffer PAR(name) KAG ## args
+#define AGARG_OUTBUF_LEN(name, args) PAR(name ## _len), EIBBuffer PAR(name) KAG ## args
 #define AGARG_OUTADDR(name, args) EIBAddr PAR(name) KAG ## args
 #define AGARG_OUTADDRa(name, args) EIBAddr PAR(name) KAG ## args
 #define AGARG_ADDR(name, args) PAR(name) KAG ## args
@@ -40,10 +40,10 @@ EIBC_LICENSE(
 #define AGARG_UINT8a(name, args) PAR(name) KAG ## args
 #define AGARG_UINT8b(name, args) PAR(name) KAG ## args
 #define AGARG_UINT16(name, args) PAR(name) KAG ## args
-#define AGARG_OUTUINT8(name, args) Int8 PAR(name) KAG ## args
-#define AGARG_OUTUINT8a(name, args) Int8 PAR(name) KAG ## args
-#define AGARG_OUTUINT16(name, args) Int16 PAR(name) KAG ## args
-#define AGARG_OUTINT16(name, args) Int16 PAR(name) KAG ## args
+#define AGARG_OUTUINT8(name, args) EIBInt8 PAR(name) KAG ## args
+#define AGARG_OUTUINT8a(name, args) EIBInt8 PAR(name) KAG ## args
+#define AGARG_OUTUINT16(name, args) EIBInt16 PAR(name) KAG ## args
+#define AGARG_OUTINT16(name, args) EIBInt16 PAR(name) KAG ## args
 
 #define ALARG_NONE 
 #define ALARG_BOOL(name, args) PAR(name)  KAL ## args

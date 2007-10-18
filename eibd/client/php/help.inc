@@ -25,13 +25,13 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-function upack($data, $type)
+protected static function upack($data, $type)
 {
   $res=unpack($type."val", $data);
   return $res["val"];
 }
 
-function packb($data)
+protected static function packb($data)
 {
   return pack("C", $data);
 }
