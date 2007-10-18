@@ -1,6 +1,6 @@
 AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/common
 
-LDADD=common.o ../client/libeibclient.a
+LDADD=common.o ../client/c/libeibclient.a
 bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progmodetoggle progmodestatus maskver \
 	writeaddress vbusmonitor1 vbusmonitor2 mprogmodeon mprogmodeoff mprogmodetoggle mprogmodestatus mmaskver \
 	mpeitype madcread mread mwrite mpropread mpropwrite mpropdesc mpropscan groupread groupswrite groupwrite \

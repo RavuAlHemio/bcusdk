@@ -242,7 +242,7 @@ int EIBOpenT_TPDU_async (EIBConnection * con, eibaddr_t src);
  * \param data buffer with APDU
  * \return tranmited length or -1 if error
  */
-int EIBSendAPDU (EIBConnection * con, int len, uint8_t * data);
+int EIBSendAPDU (EIBConnection * con, int len, const uint8_t * data);
 
 /** Receive an APDU (blocking).
  * \param con eibd connection
@@ -270,7 +270,7 @@ int EIBGetAPDU_Src (EIBConnection * con, int maxlen, uint8_t * buf,
  * \return tranmited length or -1 if error
  */
 int EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len,
-		 uint8_t * data);
+		 const uint8_t * data);
 
 /** Receive a TPDU with source address.
  * \param con eibd connection
@@ -279,7 +279,8 @@ int EIBSendTPDU (EIBConnection * con, eibaddr_t dest, int len,
  * \param src pointer to where the source address should be stored
  * \return received length or -1 if error
  */
-#define EIBGetTPDU EIBGetAPDU_Src
+int EIBGetTPDU (EIBConnection * con, int maxlen, uint8_t * buf,
+		eibaddr_t * src);
 
 /** Opens a Group communication interface.
  * \param con eibd connection
@@ -303,7 +304,7 @@ int EIBOpen_GroupSocket_async (EIBConnection * con, int write_only);
  * \return tranmited length or -1 if error
  */
 int EIBSendGroup (EIBConnection * con, eibaddr_t dest, int len,
-		  uint8_t * data);
+		  const uint8_t * data);
 
 /** Receive a group APDU with source address (blocking).
  * \param con eibd connection
@@ -736,17 +737,17 @@ int EIB_MC_Write_Plain_async (EIBConnection * con, uint16_t addr, int len,
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
- * \return result
+ * \return result (for values see IMG_* constants), -1 if communication error with eibd
  */
-BCU_LOAD_RESULT EIB_LoadImage (EIBConnection * con, const uint8_t * image,
-			       int len);
+int EIB_LoadImage (EIBConnection * con, int len, const uint8_t * image);
+
 /** Loads a BCU SDK program image (over a management connection) - asynchronous.
  * \param con eibd connection
  * \param image pointer to image
  * \param len legth of the image
  * \return 0 if started, -1 if error
  */
-int EIB_LoadImage_async (EIBConnection * con, const uint8_t * image, int len);
+int EIB_LoadImage_async (EIBConnection * con, int len, const uint8_t * image);
 
 
 /** Enable Group Cache

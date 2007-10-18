@@ -1,0 +1,17 @@
+#include "php/class.def"
+#include "php/def.def"
+#include "php/arg.def"
+#include "def/karg.def"
+#include "eibtypes.h"
+
+class EIBConnection {
+
+#include "php/result.inc"
+#include "php/errno.inc"
+#include "php/complete.inc"
+#include "php/io.inc"
+
+#include "def/all.lst"
+
+#include "php/help.inc"
+}
