@@ -80,6 +80,7 @@
 
      if ($this->readlen < 2)
        {
+	 stream_set_blocking ($this->socket, $block ? 1 : 0);
 	 $read = fread ($this->socket, 2 - $this->readlen);
 	 if ($read === FALSE)
 	   {
@@ -99,6 +100,7 @@
        }
      if ($this->readlen < $this->datalen + 2)
        {
+	 stream_set_blocking ($this->socket, $block ? 1 : 0);
 	 $read = fread ($this->socket, $this->datalen + 2 - $this->readlen);
 	 if ($read === FALSE)
 	   {
