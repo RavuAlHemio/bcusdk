@@ -114,6 +114,8 @@ GroupCache::Get_L_Data (L_Data_PDU * l)
 		  c->data = t1->data;
 		  c->src = l->source;
 		  c->dst = l->dest;
+		  c->recvtime = time (0);
+		  pth_cond_notify (&cond, 1);
 		}
 	      else
 		{
@@ -121,6 +123,7 @@ GroupCache::Get_L_Data (L_Data_PDU * l)
 		  c->data = t1->data;
 		  c->src = l->source;
 		  c->dst = l->dest;
+		  c->recvtime = time (0);
 		  add (c);
 		  pth_cond_notify (&cond, 1);
 		}
@@ -163,10 +166,12 @@ GroupCache::Stop ()
 }
 
 GroupCacheEntry
-GroupCache::Read (eibaddr_t addr, unsigned Timeout)
+  GroupCache::Read (eibaddr_t addr, unsigned Timeout, uint16_t age)
 {
-  TRACEPRINTF (t, 4, this, "GroupCacheRead %d/%d/%d %d", (addr >> 11) & 0x1f,
-	       (addr >> 8) & 0x07, (addr) & 0xff, Timeout);
+  TRACEPRINTF (t, 4, this, "GroupCacheRead %d/%d/%d %d %d",
+	       (addr >> 11) & 0x1f, (addr >> 8) & 0x07, (addr) & 0xff,
+	       Timeout, age);
+  bool rm = false;
   GroupCacheEntry *c;
   if (!enable)
     {
@@ -178,7 +183,10 @@ GroupCache::Read (eibaddr_t addr, unsigned Timeout)
     }
 
   c = find (addr);
-  if (c)
+  if (c && age && c->recvtime + age < time (0))
+    rm = true;
+
+  if (c && !rm)
     {
       TRACEPRINTF (t, 4, this, "GroupCache found: %d.%d.%d",
 		   (c->src >> 12) & 0xf, (c->src >> 8) & 0xf,
@@ -211,7 +219,10 @@ GroupCache::Read (eibaddr_t addr, unsigned Timeout)
   do
     {
       c = find (addr);
-      if (c)
+      rm = false;
+      if (c && age && c->recvtime + age < time (0))
+	rm = true;
+      if (c && !rm)
 	{
 	  TRACEPRINTF (t, 4, this, "GroupCache found: %d.%d.%d",
 		       (c->src >> 12) & 0xf, (c->src >> 8) & 0xf,
@@ -221,11 +232,21 @@ GroupCache::Read (eibaddr_t addr, unsigned Timeout)
 
       pth_mutex_acquire (&mutex, 0, 0);
       pth_cond_await (&cond, &mutex, timeout);
+      if (pth_event_status (timeout) == PTH_STATUS_OCCURRED && c)
+	{
+	  GroupCacheEntry gc;
+	  gc.src = 0;
+	  gc.dst = addr;
+	  TRACEPRINTF (t, 4, this, "GroupCache reread timeout");
+	  return gc;
+	}
+
       if (pth_event_status (timeout) == PTH_STATUS_OCCURRED)
 	{
 	  c = new GroupCacheEntry;
 	  c->src = 0;
 	  c->dst = addr;
+	  c->recvtime = time(0);
 	  add (c);
 	  TRACEPRINTF (t, 4, this, "GroupCache timeout");
 	  return *c;

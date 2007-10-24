@@ -781,10 +781,11 @@ int EIB_Cache_Remove (EIBConnection * con, eibaddr_t dest);
  * \param src source address of the last APDU
  * \param max_len buffer size
  * \param buf buffer for last APDU
+ * \param age if non-zero, send a A_GroupValue_Read, if the cached telegram is older than age seconds.
  * \return -1 if error (ENODEV=group cache not enabled, ENOENT=A_GroupValue_Read request was not answered), else length of APDU
  */
 int EIB_Cache_Read_Sync (EIBConnection * con, eibaddr_t dest, eibaddr_t * src,
-			 int max_len, uint8_t * buf);
+			 int max_len, uint8_t * buf, uint16_t age);
 
 /** Query the last value sent to a group address
  * \param con eibd connection
@@ -828,10 +829,12 @@ int EIB_Cache_Remove_async (EIBConnection * con, eibaddr_t dest);
  * \param src source address of the last APDU
  * \param max_len buffer size
  * \param buf buffer for last APDU
+ * \param age if non-zero, send a A_GroupValue_Read, if the cached telegram is older than age seconds.
  * \return 0 if started, -1 if error
  */
 int EIB_Cache_Read_Sync_async (EIBConnection * con, eibaddr_t dest,
-			       eibaddr_t * src, int max_len, uint8_t * buf);
+			       eibaddr_t * src, int max_len, uint8_t * buf,
+			       uint16_t age);
 
 /** Query the last value sent to a group address - asynchronous.
  * \param con eibd connection

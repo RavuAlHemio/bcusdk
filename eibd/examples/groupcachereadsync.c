@@ -22,19 +22,22 @@ int
 main (int ac, char *ag[])
 {
   int len;
+  uint16_t age = 0;
   EIBConnection *con;
   eibaddr_t dest;
   eibaddr_t src;
   uchar buf[200];
 
-  if (ac != 3)
-    die ("usage: %s url eibaddr", ag[0]);
+  if (ac != 3 && ac != 4)
+    die ("usage: %s url eibaddr [age]", ag[0]);
   con = EIBSocketURL (ag[1]);
   if (!con)
     die ("Open failed");
   dest = readgaddr (ag[2]);
+  if (ac == 4)
+    age = atoi (ag[3]);
 
-  len = EIB_Cache_Read_Sync (con, dest, &src, sizeof(buf), buf);
+  len = EIB_Cache_Read_Sync (con, dest, &src, sizeof (buf), buf, age);
   if (len == -1)
     die ("Read failed");
 

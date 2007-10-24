@@ -20,6 +20,8 @@
 #ifndef GROUPCACHE_H
 #define GROUPCACHE_H
 
+#include <time.h>
+
 #include "layer3.h"
 
 typedef struct
@@ -30,6 +32,8 @@ typedef struct
   eibaddr_t src;
   /** destination address */
   eibaddr_t dst;
+  /** receive time */
+  time_t recvtime;
 } GroupCacheEntry;
 
 class GroupCache:public L_Data_CallBack
@@ -57,7 +61,7 @@ public:
   void Clear ();
   void Stop ();
 
-  GroupCacheEntry Read (eibaddr_t addr, unsigned timeout);
+  GroupCacheEntry Read (eibaddr_t addr, unsigned timeout, uint16_t age);
   void remove (eibaddr_t addr);
 };
 

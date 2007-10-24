@@ -46,6 +46,7 @@ GroupCacheRequest (Layer3 * l3, Trace * t, ClientConnection * c,
   GroupCacheEntry gc;
   CArray erg;
   eibaddr_t dst;
+  uint16_t age = 0;
 
   if (!cache)
     {
@@ -87,8 +88,18 @@ GroupCacheRequest (Layer3 * l3, Trace * t, ClientConnection * c,
 	  return;
 	}
       dst = (c->buf[2] << 8) | (c->buf[3]);
+      if (EIBTYPE (c->buf) == EIB_CACHE_READ)
+	{
+	  if (c->size < 6)
+	    {
+	      c->sendreject (stop);
+	      return;
+	    }
+	  age = (c->buf[4] << 8) | (c->buf[5]);
+	}
       gc =
-	cache->Read (dst, EIBTYPE (c->buf) == EIB_CACHE_READ_NOWAIT ? 0 : 1);
+	cache->Read (dst, EIBTYPE (c->buf) == EIB_CACHE_READ_NOWAIT ? 0 : 1,
+		     age);
       erg.resize (6 + gc.data ());
       EIBSETTYPE (erg, EIBTYPE (c->buf));
       erg[2] = (gc.src >> 8) & 0xff;
