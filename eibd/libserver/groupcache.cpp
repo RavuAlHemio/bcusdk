@@ -42,8 +42,8 @@ GroupCache::~GroupCache ()
 GroupCacheEntry *
 GroupCache::find (eibaddr_t dst)
 {
-  int l = 0, r = cache ();
-  while (l < r)
+  int l = 0, r = cache () - 1;
+  while (l <= r)
     {
       int p = (l + r) / 2;
       if (cache[p]->dst == dst)
@@ -62,8 +62,8 @@ GroupCache::remove (eibaddr_t addr)
   TRACEPRINTF (t, 4, this, "GroupCacheRemove %d/%d/%d", (addr >> 11) & 0x1f,
 	       (addr >> 8) & 0x07, (addr) & 0xff);
 
-  int l = 0, r = cache ();
-  while (l < r)
+  int l = 0, r = cache () - 1;
+  while (l <= r)
     {
       int p = (l + r) / 2;
       if (cache[p]->dst == addr)
@@ -222,22 +222,23 @@ GroupCacheEntry
       rm = false;
       if (c && age && c->recvtime + age < time (0))
 	rm = true;
+
       if (c && !rm)
 	{
 	  TRACEPRINTF (t, 4, this, "GroupCache found: %d.%d.%d",
 		       (c->src >> 12) & 0xf, (c->src >> 8) & 0xf,
 		       (c->src) & 0xff);
+	  pth_event_free (timeout, PTH_FREE_THIS);
 	  return *c;
 	}
 
-      pth_mutex_acquire (&mutex, 0, 0);
-      pth_cond_await (&cond, &mutex, timeout);
       if (pth_event_status (timeout) == PTH_STATUS_OCCURRED && c)
 	{
 	  GroupCacheEntry gc;
 	  gc.src = 0;
 	  gc.dst = addr;
 	  TRACEPRINTF (t, 4, this, "GroupCache reread timeout");
+	  pth_event_free (timeout, PTH_FREE_THIS);
 	  return gc;
 	}
 
@@ -246,11 +247,15 @@ GroupCacheEntry
 	  c = new GroupCacheEntry;
 	  c->src = 0;
 	  c->dst = addr;
-	  c->recvtime = time(0);
+	  c->recvtime = time (0);
 	  add (c);
 	  TRACEPRINTF (t, 4, this, "GroupCache timeout");
+	  pth_event_free (timeout, PTH_FREE_THIS);
 	  return *c;
 	}
+
+      pth_mutex_acquire (&mutex, 0, 0);
+      pth_cond_await (&cond, &mutex, timeout);
       pth_mutex_release (&mutex);
     }
   while (1);
