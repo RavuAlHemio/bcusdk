@@ -1,1 +1,1 @@
-EXTRA_DIST=swig
+EXTRA_DIST=swig gentoo
