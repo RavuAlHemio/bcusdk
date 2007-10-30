@@ -17,3 +17,8 @@ swig_clean:
 	-rm -f _eibclient.so eibclient.pyc \
 		eibclient.py eibclient_wrap.c \
 		eibclient_wrap.o eibclient/eibclient.py
+
+install:
+	strip _eibclient.so
+	cp _eibclient.so /usr/lib/python$(PYTHON_VERSION)/site-packages/
+	python ./setup.py install
