@@ -1,10 +1,12 @@
 #SWIG extensions
 PYTHON_VERSION=$(shell echo -e "import sys\nprint sys.version[:3]" |python -)
+PYTHON_LIB=/usr/lib/python$(PYTHON_VERSION)
+PYTHON_INCLUDE=/usr/include/python$(PYTHON_VERSION)
 
 swig: _eibclient.so 
 
 eibclient_wrap.o: eibclient_wrap.c 
-	$(CC) -fPIC -I/usr/include/python$(PYTHON_VERSION) -I../../eibd/include $< -c -o $@	
+	$(CC) -fPIC -I$(PYTHON_INCLUDE) -I../../eibd/include $< -c -o $@
 
 eibclient_wrap.c: eibclient.i
 	swig -python $(AM_CPPFLAGS) -I../../eibd/include eibclient.i
@@ -20,5 +22,5 @@ swig_clean:
 
 install:
 	strip _eibclient.so
-	cp _eibclient.so /usr/lib/python$(PYTHON_VERSION)/site-packages/
+	cp _eibclient.so $(PYTHON_LIB)/site-packages/
 	python ./setup.py install
