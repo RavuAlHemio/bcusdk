@@ -39,6 +39,8 @@ protected:
     /** server socket */
   int fd;
 
+  virtual void setupConnection (int cfd);
+
     Server (Layer3 * l3, Trace * tr);
 public:
     virtual ~ Server ();

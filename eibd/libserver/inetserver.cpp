@@ -19,6 +19,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <unistd.h>
 #include <string.h>
 #include "inetserver.h"
@@ -48,4 +49,11 @@ Server (la3, tr)
 
   TRACEPRINTF (tr, 8, this, "InetSocket opened");
   Start ();
+}
+
+void
+InetServer::setupConnection (int cfd)
+{
+  int val = 1;
+  setsockopt (cfd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof (val));
 }

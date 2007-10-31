@@ -64,10 +64,16 @@ Server::Run (pth_sem_t * stop1)
       if (cfd != -1)
 	{
 	  TRACEPRINTF (t, 8, this, "New Connection");
+	  setupConnection (cfd);
 	  ClientConnection *c = new ClientConnection (this, l3, t, cfd);
 	  connections.setpart (&c, connections (), 1);
 	  c->Start ();
 	}
     }
   pth_event_free (stop, PTH_FREE_THIS);
+}
+
+void
+Server::setupConnection (int cfd)
+{
 }
