@@ -175,9 +175,9 @@ L_Busmonitor_PDU::Decode ()
 
   for (i = 0; i < pdu (); i++)
     addHex (s, pdu[i]);
-  s+=":";
-  LPDU* l=LPDU::fromPacket(pdu);
-  s+=l->Decode();
+  s += ":";
+  LPDU *l = LPDU::fromPacket (pdu);
+  s += l->Decode ();
   delete l;
   return s;
 }
@@ -189,6 +189,7 @@ L_Data_PDU::L_Data_PDU ()
   prio = PRIO_LOW;
   repeated = 0;
   valid_checksum = 1;
+  valid_length = 1;
   AddrType = IndividualAddress;
   source = 0;
   dest = 0;
@@ -204,6 +205,7 @@ L_Data_PDU::L_Data_PDU (const CArray & c)
   if ((c[0] & 0x53) != 0x10)
     throw Exception (PDU_WRONG_FORMAT);
   repeated = (c[0] & 0x20) ? 0 : 1;
+  valid_length = 1;
   switch ((c[0] >> 2) & 0x3)
     {
     case 0:
@@ -249,8 +251,18 @@ L_Data_PDU::L_Data_PDU (const CArray & c)
       dest = (c[4] << 8) | (c[5]);
       len = c[6] + 1;
       if (len + 8 != c ())
-	throw Exception (PDU_INCONSISTENT_SIZE);
-      data.set (c.array () + 7, len);
+	{
+	  if (c () == 23)
+	    {
+	      valid_length = 0;
+	      data.set (c.array () + 7, 8);
+	    }
+	  else
+	    throw Exception (PDU_INCONSISTENT_SIZE);
+	}
+      else
+	data.set (c.array () + 7, len);
+
       c1 = 0;
       for (i = 0; i < c () - 1; i++)
 	c1 ^= c[i];
@@ -329,6 +341,8 @@ String L_Data_PDU::Decode ()
 
   String
   s ("L_Data");
+  if (!valid_length)
+    s += " (incomplete)";
   if (repeated)
     s += " (repeated)";
   switch (prio)

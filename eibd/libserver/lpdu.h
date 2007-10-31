@@ -30,6 +30,8 @@ typedef enum
   /** L_Data */
   L_Data,
   L_Data_Ind,
+  /** L_Data incomplete */
+  L_Data_Part,
   /** ACK */
   L_ACK,
   /** NACK */
@@ -89,6 +91,8 @@ public:
   bool repeated;
   /** checksum ok */
   bool valid_checksum;
+  /** length ok */
+  bool valid_length;
   /** to group/individual address*/
   EIB_AddrType AddrType;
   eibaddr_t source, dest;
@@ -103,7 +107,7 @@ public:
   String Decode ();
   LPDU_Type getType () const
   {
-    return L_Data;
+    return (valid_length ? L_Data : L_Data_Part);
   }
 };
 
