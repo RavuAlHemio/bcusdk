@@ -55,6 +55,7 @@ struct _EIBConnection
   unsigned size;
   struct
   {
+    int sendlen;
     int len;
     uint8_t *buf;
     int16_t *ptr1;
@@ -125,7 +126,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	return 0;
 
 #define EIBC_RETURN_LEN \
-	return con->req.len;
+	return con->req.sendlen;
 
 #define EIBC_RETURN_UINT8(offset) \
 	return con->buf[offset];
@@ -188,7 +189,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	    errno = EINVAL; \
 	    return -1; \
 	  } \
-	con->req.len = name ## _len; \
+	con->req.sendlen = name ## _len; \
 	dyn = 1; \
 	ibuf = (uchar *) malloc (ilen + name ## _len); \
 	if (!ibuf) \
