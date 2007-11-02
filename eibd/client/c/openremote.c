@@ -27,6 +27,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netdb.h>
 
 #include "eibclient.h"
@@ -87,6 +88,7 @@ EIBSocketRemote (const char *host, int port)
 {
   EIBConnection *con = (EIBConnection *) malloc (sizeof (EIBConnection));
   struct sockaddr_in addr;
+  int val = 1;
   if (!con)
     {
       errno = ENOMEM;
@@ -116,6 +118,7 @@ EIBSocketRemote (const char *host, int port)
       errno = saveerr;
       return 0;
     }
+  setsockopt (con->fd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof (val));
   con->buflen = 0;
   con->buf = 0;
   con->readlen = 0;

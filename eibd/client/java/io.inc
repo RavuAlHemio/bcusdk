@@ -43,6 +43,7 @@
     con = new Socket (host, port);
     is = con.getInputStream ();
     os = con.getOutputStream ();
+    con.setTcpNoDelay (true);
   }
 
   protected int _EIB_SendRequest (byte[]data) throws IOException

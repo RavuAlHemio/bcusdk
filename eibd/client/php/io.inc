@@ -52,12 +52,7 @@
         return -1;
       }
     $len=pack("n", strlen($data));
-    if (fwrite($this->socket, $len) != 2)
-      {
-	 $this->errno = self::ECONNRESET;
-	 return -1;
-      }
-    if (fwrite($this->socket, $data) != strlen($data))
+    if (fwrite($this->socket, $len.$data) != strlen($data)+2)
       {
 	 $this->errno = self::ECONNRESET;
 	 return -1;
