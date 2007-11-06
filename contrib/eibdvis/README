@@ -1,16 +1,16 @@
 eibdvis - an example of an eibd based visualisation
 ---------------------------------------------------
 
-To use it, please copy all php and css files in an directory on a PHP
+To use it, please copy all php and css files into an directory on a PHP
 enabled webserver.
 
-Additionally you need to copy eibclient.php into the directory. It
-will be installed to /usr/share/bcusdk/php/eibclient.php [This file is
+Additionally you need to copy eibclient.php into the directory. eibclient.php
+will be installed to /usr/share/bcusdk/eibclient.php [This file is
 part of the package libeibclient-dev or libeibclient-devel].
 
 Then you need to adapt config.php to your needs:
 
-In the first name, insert the title of your project and the
+In the first line, insert the title of your project and the
 IP address/hostname of the server, on which eibd is running. 
 
 The shipped configuration file is for the "Gemma Trainings Koffer 2".
@@ -46,10 +46,10 @@ The parameters are:
 The parameters are:
  * name of the device
  * group address to send on/off telegrams to
- * group address to send dimm up/down telegrams to
+ * group address to send dim up/down telegrams to
  * group address to send the current dimming value to
  * group address to request the on/off status from
- * group address to request the dimming status from
+ * group address to request the dimming value status from
  * maximum age of the on/off status
  * maximum age of the dimming value status
 
@@ -82,18 +82,17 @@ The general rules for the parameters are:
    it. If you do that, some functions will not be available.
  * the age should be normaly zero. The device should be configured
    to send a telegram, if the status changes. If this does not work,
-   you can specify an age (in seconds) to force a reead of the value.
+   you can specify an age (in seconds) to force a reread of the value.
 
 Some more notes:
  * to get a correct display, you should configure your actuators so, that
    the status group objects are readable and send a telegram, if the status
    changes.
 
- * The goal of these files is not to create a comple visulalisation
-  solution. They are a demonstration, who to used eibd with
-  PHP. Additionally they should be a starting point for creating its own
-  solution.
-  Patches are welcome.
+ * The goal of these files is not to create a complete visualisation
+  solution. They are a demonstration, how to used eibd with
+  PHP. Additionally they should be a starting point for creating your own
+  solution (Patches are welcome).
 
 Martin Koegler
 mkoegler@auto.tuwien.ac.at
