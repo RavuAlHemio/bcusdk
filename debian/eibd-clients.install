@@ -40,4 +40,6 @@ usr/bin/groupcacheclear
 usr/bin/groupcacheremove
 usr/bin/groupcachereadsync
 usr/bin/groupcacheread
+usr/bin/mrestart
+usr/bin/mwriteplain
 

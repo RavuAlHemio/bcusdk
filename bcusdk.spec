@@ -156,11 +156,15 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/groupcacheremove
 /usr/bin/groupcachereadsync
 /usr/bin/groupcacheread
+/usr/bin/mrestart
+/usr/bin/mwriteplain
 
 %files -n libeibclient-devel
 %defattr(-,root,root,-)
 /usr/include
 /usr/lib/libeibclient.a
+/usr/share/bcusdk/eibclient.php
+/usr/share/java/eibclient.jar
 
 %files -n eibd-client-sources
 %defattr(-,root,root,-)
