@@ -9,8 +9,7 @@ URL:            http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcusdk
 Source0:        bcusdk-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  libxml2-devel, gcc-c++, make, flex, bison 
-#, pthsem-devel, m68hc05-gcc
+BuildRequires:  libxml2-devel, gcc-c++, make, flex, bison, pthsem-devel, m68hc05-gcc, gcc-java, fastjar, indent
 Requires:       eibd-server, eibd-clients, eibd-client-sources, libeibclient-devel, bcusdk-build
 
 %description
@@ -66,7 +65,7 @@ contains all files and programs to build BCU images
 
 %build
 %configure --enable-ft12 --enable-pei16 --enable-tpuart --enable-pei16s --enable-tpuarts \
-   --enable-eibnetip --enable-eibnetipserver --enable-eibnetiptunnel --enable-usb --enable-groupcache
+   --enable-eibnetip --enable-eibnetipserver --enable-eibnetiptunnel --enable-usb --enable-groupcache --enable-java
 make %{?_smp_mflags}
 
 
