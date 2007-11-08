@@ -196,11 +196,11 @@ AC_ARG_ENABLE(java,
 if test x$enablejava = xtrue ; then
  AC_DEFINE(BUILD_JAVA, 1 , [building java client library])
 
- if test x$JAVAC = xno ; then
+ if test x"$JAVAC" = xno ; then
   AC_MSG_ERROR(no java compiler found)
  fi
 
- if test x$JAR = xno ; then
+ if test x"$JAR" = xno ; then
   AC_MSG_ERROR(jar not found)
  fi
 
