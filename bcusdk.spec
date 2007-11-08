@@ -90,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/bcusdk/include
 /usr/share/bcusdk/ldscripts
 /usr/share/bcusdk/xml
-/usr/lib/bcusdk/lib
+%{_libdir}/bcusdk/lib
 /usr/bin/build.ai
 /usr/bin/build.img
 /usr/bin/build.dev
@@ -164,7 +164,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libeibclient-devel
 %defattr(-,root,root,-)
 /usr/include
-/usr/lib/libeibclient.a
+%{_libdir}/libeibclient.a
 /usr/share/bcusdk/eibclient.php
 /usr/share/java/eibclient.jar
 
