@@ -9,6 +9,9 @@ an idea of how many people are using this software. To contribute,
 please send a short mail to bcusdk@auto.tuwien.ac.at whether you 
 find this software useful.
 
+Please note, that this is not requirement to use/modify/distribute the
+software.
+
 First a legal WARNING:
 ----------------------
 
@@ -81,13 +84,36 @@ See the webpage about it.
 
 ----------------------------------------------------------
 
-In order to justify continuing development, it is helpful to have
-an idea of how many people are using this software. To contribute,
-please send a short mail to bcusdk@auto.tuwien.ac.at whether you
-find this software useful.
+!! YOU SHOULD NOT RUN EIBD AS ROOT !!
 
-Please note, that this is not requirement to use/modify/distribute the
-software.
+The only privileges, which eibd needs, are access to the bus
+interface.  For the BCU 1, you only need to grant read and write
+access on the device node (/dev/eibX) to the user running eibd. For
+all other eibd backends based on the serial driver, you need to grant
+only read and write access to /dev/ttySx.  The EIBnet/IP backends
+require no privilege. The USB backend requires read and write access
+to the file representing the device in usbfs (normaly mounted at
+/proc/bus/usb).
+
+KNXLive! (http://www.auto.tuwien.ac.at/knx/knxlive.html) contains
+since version 0.2 a EIBD setup wizard.
+
+The shell script is also part of knxconfig_0.0.2.tar.gz (available at
+http://www.auto.tuwien.ac.at/~mkoegler/index.php/knxlive), filename
+knxconfig-0.2/setup/setup-eibd.sh.
+
+It can be used as reference, how to start eibd for the various
+supported interfaces.
+
+The shell script was written for the KNXLive! CD. If you intend to run
+it on a normal linux system, please take care of the folloing things:
+* The BCU SDK installation directory must be in the path
+* dialog or Xdialog must be installed
+* If you are using a BCU 1, you must load the BCU 1 driver module before.
+* The script expects, that it can executed commands as root via sudo without any password prompt.
+* The scripts grants access on /dev/ttyS0-ttyS3, /dev/eib0-eib3 and all KNX USB Interfaces to every user on the computer.
+* Status files are put under easy guessable names in /tmp
+* If you notice a problem, you should start the script in a terminal to catch all error messages
 
 Martin Koegler
 mkoegler@auto.tuwien.ac.at
