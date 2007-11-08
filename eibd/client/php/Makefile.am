@@ -6,7 +6,7 @@ result.inc : $(top_srcdir)/common/eibloadresult.h
 	cat $<  |grep IMG_ |sed -e 's/#define \(IMG_[A-Z_0-9]\+\)  \+\([0-9]\+\)/ const \1 = \2;/g' > $@
 
 CLEANFILES = result.inc EIBConnection.post EIBConnection.php eibclient.php
-
+EXTRA_DIST = lic.inc end.inc arg.def  class.def  def.def complete.inc errno.inc  help.inc  io.inc EIBConnection.pre
 EIBConnection.post : EIBConnection.pre result.inc
 
 @AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/EIBConnection.Po@am__quote@
