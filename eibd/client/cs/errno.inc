@@ -25,16 +25,16 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-const int EINVAL = 1;
-const int ECONNRESET = 2;
-const int EBUSY = 3;
-const int EADDRINUSE = 4;
-const int ETIMEDOUT = 5;
-const int EADDRNOTAVAIL = 6;
-const int EIO = 7;
-const int EPERM = 8;
-const int ENOENT = 9;
-const int ENODEV = 10;
+public const int EINVAL = 1;
+public const int ECONNRESET = 2;
+public const int EBUSY = 3;
+public const int EADDRINUSE = 4;
+public const int ETIMEDOUT = 5;
+public const int EADDRNOTAVAIL = 6;
+public const int EIO = 7;
+public const int EPERM = 8;
+public const int ENOENT = 9;
+public const int ENODEV = 10;
 
 private int errno = 0;
 
