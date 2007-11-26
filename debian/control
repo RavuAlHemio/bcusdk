@@ -4,6 +4,8 @@ Priority: extra
 Maintainer: Martin Koegler <mkoegler@auto.tuwien.ac.at>
 Build-Depends: debhelper (>= 4.1.0), cdbs, bzip2, bison, flex, m68hc05-gcc, libxml2-dev (>= 2.6.16), pthsem-dev (>=2.0.4), gcj, fastjar, indent
 Standards-Version: 3.6.1
+Homepage: http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcusdk
+Vcs-Git: http://www.auto.tuwien.ac.at/~mkoegler/git/bcusdk.git
 
 Package: eibd-server
 Architecture: any
