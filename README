@@ -90,7 +90,7 @@ The only privileges, which eibd needs, are access to the bus
 interface.  For the BCU 1, you only need to grant read and write
 access on the device node (/dev/eibX) to the user running eibd. For
 all other eibd backends based on the serial driver, you need to grant
-only read and write access to /dev/ttySx.  The EIBnet/IP backends
+only read and write access on /dev/ttySx. The EIBnet/IP backends
 require no privilege. The USB backend requires read and write access
 to the file representing the device in usbfs (normaly mounted at
 /proc/bus/usb).
@@ -103,7 +103,7 @@ http://www.auto.tuwien.ac.at/~mkoegler/index.php/knxlive), filename
 knxconfig-0.2/setup/setup-eibd.sh.
 
 It can be used as reference, how to start eibd for the various
-supported interfaces.
+supported interfaces and how to run eibd as normal user.
 
 The shell script was written for the KNXLive! CD. If you intend to run
 it on a normal linux system, please take care of the folloing things:
