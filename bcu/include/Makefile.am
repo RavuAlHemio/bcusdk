@@ -13,4 +13,5 @@ dist_inc_HEADERS=$(COMMON_H) $(COMMON_INC) $(BCU1_H) $(BCU1_INC) $(BCU2_H) $(BCU
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(incdir)
-	for a in $(addsuffix .h,$(BCU_LIST)) $(addsuffix .inc,$(BCU_LIST)) ; do ../addmissing.sh $(DESTDIR)$(incdir) $$a; done
+	cd $(top_srcdir)/bcu/include ; \
+	for a in $(addsuffix .h,$(BCU_LIST)) $(addsuffix .inc,$(BCU_LIST)) ; do $(top_srcdir)/bcu/addmissing.sh $(DESTDIR)$(incdir) $$a; done

@@ -8,4 +8,5 @@ dist_ld_DATA=genload.link $(BCU1) $(BCU2)
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(lddir)
-	for a in $(addsuffix .link,$(BCU_LIST)) ; do ../addmissing.sh $(DESTDIR)$(lddir) $$a; done
+	cd $(top_srcdir)/bcu/ldscripts ; \
+	for a in $(addsuffix .link,$(BCU_LIST)) ; do $(top_srcdir)/bcu/addmissing.sh $(DESTDIR)$(lddir) $$a; done

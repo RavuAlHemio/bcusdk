@@ -35,4 +35,4 @@ $(BCU1_EE) : Makefile
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(tlibdir)
-	for a in $(addprefix lib,$(addsuffix .a,$(BCU_LIST))) ; do ../addmissing.sh $(DESTDIR)$(tlibdir) $$a; done
+	for a in $(addprefix lib,$(addsuffix .a,$(BCU_LIST))) ; do $(top_srcdir)/bcu/addmissing.sh $(DESTDIR)$(tlibdir) $$a; done
