@@ -27,51 +27,53 @@ fi
 F=$2
 
 if [ ! -f $F ]; then
+    
+    prefix="`echo $F|sed -e 's/\([A-Za-z0-9]*_\).*/\1/g'`"
+    last="`echo $F|sed -e 's/[A-Za-z0-9]*_\(.*\)/\1/g'`"
 
-prefix=`echo $F|sed -e 's/\([A-Za-z0-9]*_\).*/\1/g'`
-last=`echo $F|sed -e 's/[A-Za-z0-9]*_\(.*\)/\1/g'`
-
-base=`echo $last | sed -e 's/\([0-9A-Fa-f]\{4\}\)[^.]*\([.].*\)/\1\2/g'`
-if [ -f $prefix$base ]; then
-echo using $prefix$base for $F
-
-cp $prefix$base $1/$2 || exit 1
-
-else
-
-ext=`echo $base | sed -e 's/[0-9A-Fa-f]\{4\}\([.].*\)/\1/g'`
-mask=`echo $base | sed -e 's/\([0-9A-Fa-f]\{4\}\)[.].*/\1/g'`
-var=`echo $last | sed -e 's/[0-9A-Fa-f]\{4\}\([^.]*\)[.].*/\1/g'`
-
-case "$mask" in
-    0021) mask="0020" ;;
-    *) echo unknown mask version $mask
-    exit 1;;
-esac
-
-for a in $mask; do
-
-if [ -f $prefix$a$var$ext ]; then
-echo using $prefix$a$var$ext for $F
-
-cp $prefix$a$var$ext $1/$2 || exit 1
-
-exit 0;
+    base="`echo "$last" | sed -e 's/\([0-9A-Fa-f]\{4\}\)[^.]*\([.].*\)/\1\2/g'`"
+    
+    if [ -f "$prefix$base" ]; then
+	echo "using $prefix$base for $F"
+	
+	cp "$prefix$base" "$1/$2" || exit 1
+	
+    else
+	
+	ext="`echo $base | sed -e 's/[0-9A-Fa-f]\{4\}\([.].*\)/\1/g'`"
+	mask="`echo $base | sed -e 's/\([0-9A-Fa-f]\{4\}\)[.].*/\1/g'`"
+	var="`echo $last | sed -e 's/[0-9A-Fa-f]\{4\}\([^.]*\)[.].*/\1/g'`"
+	
+	case "$mask" in
+	    0021) mask="0020"  ;;
+	    *) echo "unknown mask version $mask"
+	       exit 1 ;;
+	esac
+    
+	for a in "$mask"; do
+	    
+	    if [ -f "$prefix$a$var$ext" ]; then
+		echo using "$prefix$a$var$ext for $F"
+		
+		cp "$prefix$a$var$ext" "$1/$2" || exit 1
+		
+		exit 0;
+	    fi
+	    
+	    if [ -f "$prefix$a$ext" ]; then
+		echo "using $prefix$a$ext for $F"
+		
+		cp "$prefix$a$ext" "$1/$2" || exit 1
+		
+		exit 0;
+	    fi
+	    
+	done
+	
+	echo "no file found for $F"
+	exit 1
+	
+    fi
 fi
 
-if [ -f $prefix$a$ext ]; then
-echo using $prefix$a$ext for $F
-
-cp $prefix$a$ext $1/$2 || exit 1
-
-exit 0;
-fi
-
-done
-
-echo no file found for $F
-exit 1
-
-fi
-fi
 exit 0
