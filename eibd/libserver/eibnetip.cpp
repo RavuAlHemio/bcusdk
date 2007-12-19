@@ -21,10 +21,10 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <asm/types.h>
 #include "eibnetip.h"
 #include "config.h"
 #ifdef HAVE_LINUX_NETLINK
+#include <asm/types.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #endif
