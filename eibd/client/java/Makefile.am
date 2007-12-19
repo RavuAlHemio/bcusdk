@@ -1,6 +1,6 @@
 JAVAC = @JAVAC@
 JAR = @JAR@
-AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client -I$(top_builddir)/eibd/client
 
 java_SRC = tuwien/auto/eibclient/Buffer.java \
  tuwien/auto/eibclient/Int8.java \

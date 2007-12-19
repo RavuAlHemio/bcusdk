@@ -1,6 +1,6 @@
 pkgdata_DATA = eibclient.php
 
-AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client -I$(top_builddir)/eibd/client
 
 result.inc : $(top_srcdir)/common/eibloadresult.h
 	cat $<  |grep IMG_ |sed -e 's/#define \(IMG_[A-Z_0-9]\+\)  \+\([0-9]\+\)/ const \1 = \2;/g' > $@
