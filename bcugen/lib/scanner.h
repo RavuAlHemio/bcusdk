@@ -20,7 +20,7 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include "strings.h"
+#include "my_strings.h"
 #include "classes.h"
 String *unescapeString (const char *str);
 

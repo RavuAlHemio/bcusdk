@@ -21,7 +21,7 @@
 #define TYPES_H
 
 #include <stdint.h>
-#include "strings.h"
+#include "my_strings.h"
 #include "array.h"
 
 /** unsigned char */

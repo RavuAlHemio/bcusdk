@@ -23,7 +23,7 @@
 #define _(A) (A)
 
 #include "array.h"
-#include "strings.h"
+#include "my_strings.h"
 
 typedef unsigned long utype;
 typedef long itype;
