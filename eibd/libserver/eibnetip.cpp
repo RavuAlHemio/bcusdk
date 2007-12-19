@@ -260,7 +260,8 @@ EIBNetIPSocket::~EIBNetIPSocket ()
   if (fd != -1)
     {
       if (multicast)
-	setsockopt (fd, SOL_IP, IP_DROP_MEMBERSHIP, &maddr, sizeof (maddr));
+	setsockopt (fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, &maddr,
+		    sizeof (maddr));
       close (fd);
     }
 }
@@ -271,8 +272,8 @@ EIBNetIPSocket::SetMulticast (struct ip_mreq multicastaddr)
   if (multicast)
     throw Exception (DEV_OPEN_FAIL);
   maddr = multicastaddr;
-  if (setsockopt (fd, SOL_IP, IP_ADD_MEMBERSHIP, &maddr, sizeof (maddr)) ==
-      -1)
+  if (setsockopt (fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &maddr, sizeof (maddr))
+      == -1)
     throw Exception (DEV_OPEN_FAIL);
   multicast = 1;
 }
