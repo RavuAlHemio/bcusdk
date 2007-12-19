@@ -1,4 +1,6 @@
-AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client
+pkgdata_DATA = EIBConnection.cs
+
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client  -I$(top_builddir)/eibd/client
 
 CLEANFILES = result.inc EIBConnection.post EIBConnection.cs
 BUILT_SOURCES = EIBConnection.cs
