@@ -51,6 +51,9 @@ GetHostIP (struct sockaddr_in *sock, const char *Name)
   if (!Name)
     return 0;
   memset (sock, 0, sizeof (*sock));
+#ifdef HAVE_SOCKADDR_IN_LEN
+  sock->sin_len = sizeof (*sock);
+#endif
 #ifdef HAVE_GETHOSTBYNAME_R
   do
     {

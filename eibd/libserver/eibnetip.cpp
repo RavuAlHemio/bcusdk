@@ -45,6 +45,9 @@ GetHostIP (struct sockaddr_in *sock, const char *Name)
   h = gethostbyname (Name);
   if (!h)
     return 0;
+#ifdef HAVE_SOCKADDR_IN_LEN
+  sock->sin_len = sizeof (*sock);
+#endif
   sock->sin_family = h->h_addrtype;
   sock->sin_addr.s_addr = (*((unsigned long *) h->h_addr_list[0]));
   return 1;
@@ -208,6 +211,9 @@ EIBnettoIP (const CArray & buf, struct sockaddr_in *a)
     return 1;
   ip = (buf[2] << 24) | (buf[3] << 16) | (buf[4] << 8) | (buf[5]);
   port = (buf[6] << 8) | (buf[7]);
+#ifdef HAVE_SOCKADDR_IN_LEN
+  a->sin_len = sizeof (*a);
+#endif
   a->sin_family = AF_INET;
   a->sin_port = htons (port);
   a->sin_addr.s_addr = htonl (ip);

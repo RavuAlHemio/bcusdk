@@ -208,6 +208,13 @@ fi
 
 AM_CONDITIONAL(BUILD_JAVA, test x$enablejava = xtrue )
 
+AC_CHECK_MEMBER([struct sockaddr_in.sin_len],[AC_DEFINE(HAVE_SOCKADDR_IN_LEN,1,[Do we have sockaddr_in.sin_len?])],[],
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+])
+
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT(Makefile 
 common/Makefile
