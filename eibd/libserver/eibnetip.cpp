@@ -34,6 +34,10 @@
 #include <iphlpapi.h>
 #undef Array
 #endif
+#if HAVE_BSD_SOURCEINFO
+#include <net/if.h>
+#include <net/route.h>
+#endif
 
 int
 GetHostIP (struct sockaddr_in *sock, const char *Name)
@@ -143,6 +147,55 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
 	return 1;
       }
   free (tab);
+  return 0;
+}
+#endif
+
+#if HAVE_BSD_SOURCEINFO
+typedef struct
+{
+  struct rt_msghdr hdr;
+  char data[1000];
+} r_req;
+
+int
+GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
+{
+  int s;
+  r_req req;
+  char *cp = req.data;
+  memset (&req, 0, sizeof (req));
+  memset (src, 0, sizeof (*src));
+  s = socket (PF_ROUTE, SOCK_RAW, 0);
+  if (s == -1)
+    return 0;
+  req.hdr.rtm_msglen = sizeof (req) + sizeof (*dest);
+  req.hdr.rtm_version = RTM_VERSION;
+  req.hdr.rtm_flags = RTF_UP;
+  req.hdr.rtm_type = RTM_GET;
+  req.hdr.rtm_addrs = RTA_DST | RTA_IFP;
+  memcpy (cp, dest, sizeof (*dest));
+  if (write (s, (char *) &req, req.hdr.rtm_msglen) < 0)
+    return 0;
+  if (read (s, (char *) &req, sizeof (req)) < 0)
+    return 0;
+  close (s);
+  int i;
+  cp = (char *) (&req.hdr + 1);
+  for (i = 1; i; i <<= 1)
+    if (i & req.hdr.rtm_addrs)
+      {
+	struct sockaddr *sa = (struct sockaddr *) cp;
+	if (i == RTA_IFA)
+	  {
+	    src->sin_len = sizeof (*src);
+	    src->sin_family = AF_INET;
+	    src->sin_addr.s_addr =
+	      ((struct sockaddr_in *) sa)->sin_addr.s_addr;
+	    return 1;
+	  }
+	cp += SA_SIZE (sa);
+      }
   return 0;
 }
 #endif
