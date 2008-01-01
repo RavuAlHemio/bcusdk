@@ -34,7 +34,7 @@ progname="`basename \"$0\"`"
 usage()
 {
 cat >&2 <<END
-$progname $version Copyright 2005-2007 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+$progname $version Copyright (C) 2005-2007 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 creates a bcu image
 
 Usage: $progname [options] config_desc
