@@ -54,6 +54,12 @@
     $2 = temp;
 }
 
+%typemap(in, numinputs=0) (int max_len, uint8_t *buf) (unsigned char temp[1024])
+{
+    $1 = sizeof(temp);
+    $2 = temp;
+}
+
 %typemap(in, numinputs=1) (int len, uint8_t * data)
 {
     $1 = PyString_Size($input);
@@ -61,6 +67,30 @@
 }
 
 %typemap(argout) (int maxlen, uint8_t *buf)
+{
+    if (result < 0) {      /* Check for I/O error */
+	PyErr_SetFromErrno(PyExc_IOError);
+	return NULL;
+    }
+    PyObject *o;
+    o = PyString_FromStringAndSize((char *)$2,result);
+    if ((!$result) || ($result == Py_None)) {
+            $result = o;
+        } 
+    else {
+        if (!PyList_Check($result)) {
+            PyObject *o2 = $result;
+	    $result = PyList_New(0);
+	    PyList_Append($result,o2);
+	    Py_XDECREF(o2);
+        }
+    PyList_Append($result,o);
+    Py_XDECREF(o);
+    }
+}
+
+
+%typemap(argout) (int max_len, uint8_t *buf)
 {
     if (result < 0) {      /* Check for I/O error */
 	PyErr_SetFromErrno(PyExc_IOError);
@@ -107,6 +137,10 @@
 }
 
 %typemap(in) (eibaddr_t INPUT) {
+    $1 = ($type) PyInt_AsLong($input);
+}
+
+%typemap(in) (uint16_t age) {
     $1 = ($type) PyInt_AsLong($input);
 }
 
