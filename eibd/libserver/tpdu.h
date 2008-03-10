@@ -50,6 +50,7 @@ public:
   {
   }
 
+  virtual bool init (const CArray & c) = 0;
   /** convert to character array */
   virtual CArray ToPacket () = 0;
   /** decode content as string */
@@ -66,7 +67,7 @@ public:
   CArray pdu;
 
   T_UNKNOWN_PDU ();
-  T_UNKNOWN_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const
@@ -80,7 +81,7 @@ public:
   CArray data;
 
   T_DATA_XXX_REQ_PDU ();
-  T_DATA_XXX_REQ_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const
@@ -95,7 +96,7 @@ public:
   CArray data;
 
     T_DATA_CONNECTED_REQ_PDU ();
-    T_DATA_CONNECTED_REQ_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const
@@ -108,7 +109,7 @@ class T_CONNECT_REQ_PDU:public TPDU
 public:
 
   T_CONNECT_REQ_PDU ();
-  T_CONNECT_REQ_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const
@@ -121,7 +122,7 @@ class T_DISCONNECT_REQ_PDU:public TPDU
 public:
 
   T_DISCONNECT_REQ_PDU ();
-  T_DISCONNECT_REQ_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const
@@ -135,7 +136,7 @@ public:
   uchar serno;
 
   T_ACK_PDU ();
-  T_ACK_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const
@@ -149,7 +150,7 @@ public:
   uchar serno;
 
   T_NACK_PDU ();
-  T_NACK_PDU (const CArray & c);
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   TPDU_Type getType () const

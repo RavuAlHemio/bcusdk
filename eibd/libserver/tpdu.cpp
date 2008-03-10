@@ -23,29 +23,30 @@
 TPDU *
 TPDU::fromPacket (const CArray & c)
 {
-  try
-  {
-    if (c () >= 1)
-      {
-	if ((c[0] & 0xfc) == 0)
-	  return new T_DATA_XXX_REQ_PDU (c);
-	if (c[0] == 0x80)
-	  return new T_CONNECT_REQ_PDU (c);
-	if (c[0] == 0x81)
-	  return new T_DISCONNECT_REQ_PDU (c);
-	if ((c[0] & 0xC3) == 0xC2)
-	  return new T_ACK_PDU (c);
-	if ((c[0] & 0xC3) == 0xC3)
-	  return new T_NACK_PDU (c);
-	if ((c[0] & 0xC0) == 0x40)
-	  return new T_DATA_CONNECTED_REQ_PDU (c);
-      }
-  }
-  catch (Exception e)
-  {
-    return new T_UNKNOWN_PDU (c);
-  }
-  return new T_UNKNOWN_PDU (c);
+  TPDU *t = 0;
+  if (c () >= 1)
+    {
+      if ((c[0] & 0xfc) == 0)
+	t = new T_DATA_XXX_REQ_PDU ();
+      if (c[0] == 0x80)
+	t = new T_CONNECT_REQ_PDU ();
+      if (c[0] == 0x81)
+	t = new T_DISCONNECT_REQ_PDU ();
+      if ((c[0] & 0xC3) == 0xC2)
+	t = new T_ACK_PDU ();
+      if ((c[0] & 0xC3) == 0xC3)
+	t = new T_NACK_PDU ();
+      if ((c[0] & 0xC0) == 0x40)
+	t = new T_DATA_CONNECTED_REQ_PDU ();
+    }
+  if (t && t->init (c))
+    return t;
+  if (t)
+    delete t;
+
+  t = new T_UNKNOWN_PDU ();
+  t->init (c);
+  return t;
 }
 
 
@@ -55,8 +56,11 @@ T_UNKNOWN_PDU::T_UNKNOWN_PDU ()
 {
 }
 
-T_UNKNOWN_PDU::T_UNKNOWN_PDU (const CArray & c):pdu (c)
+bool
+T_UNKNOWN_PDU::init (const CArray & c)
 {
+  pdu = c;
+  return true;
 }
 
 CArray T_UNKNOWN_PDU::ToPacket ()
@@ -86,11 +90,13 @@ T_DATA_XXX_REQ_PDU::T_DATA_XXX_REQ_PDU ()
 {
 }
 
-T_DATA_XXX_REQ_PDU::T_DATA_XXX_REQ_PDU (const CArray & c):data (c)
+bool
+T_DATA_XXX_REQ_PDU::init (const CArray & c)
 {
   if (c () < 1)
-    throw
-    Exception (PDU_WRONG_FORMAT);
+    return false;
+  data = c;
+  return true;
 }
 
 CArray T_DATA_XXX_REQ_PDU::ToPacket ()
@@ -121,12 +127,14 @@ T_DATA_CONNECTED_REQ_PDU::T_DATA_CONNECTED_REQ_PDU ()
   serno = 0;
 }
 
-T_DATA_CONNECTED_REQ_PDU::T_DATA_CONNECTED_REQ_PDU (const CArray & c):data (c)
+bool
+T_DATA_CONNECTED_REQ_PDU::init (const CArray & c)
 {
   if (c () < 1)
-    throw
-    Exception (PDU_WRONG_FORMAT);
+    return false;
+  data = c;
   serno = (c[0] >> 2) & 0x0f;
+  return true;
 }
 
 CArray T_DATA_CONNECTED_REQ_PDU::ToPacket ()
@@ -159,10 +167,12 @@ T_CONNECT_REQ_PDU::T_CONNECT_REQ_PDU ()
 {
 }
 
-T_CONNECT_REQ_PDU::T_CONNECT_REQ_PDU (const CArray & c)
+bool
+T_CONNECT_REQ_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray T_CONNECT_REQ_PDU::ToPacket ()
@@ -183,10 +193,12 @@ T_DISCONNECT_REQ_PDU::T_DISCONNECT_REQ_PDU ()
 {
 }
 
-T_DISCONNECT_REQ_PDU::T_DISCONNECT_REQ_PDU (const CArray & c)
+bool
+T_DISCONNECT_REQ_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray T_DISCONNECT_REQ_PDU::ToPacket ()
@@ -208,11 +220,13 @@ T_ACK_PDU::T_ACK_PDU ()
   serno = 0;
 }
 
-T_ACK_PDU::T_ACK_PDU (const CArray & c)
+bool
+T_ACK_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   serno = (c[0] >> 2) & 0x0f;
+  return true;
 }
 
 CArray T_ACK_PDU::ToPacket ()
@@ -239,11 +253,12 @@ T_NACK_PDU::T_NACK_PDU ()
   serno = 0;
 }
 
-T_NACK_PDU::T_NACK_PDU (const CArray & c)
+bool T_NACK_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   serno = (c[0] >> 2) & 0x0f;
+  return true;
 }
 
 CArray T_NACK_PDU::ToPacket ()
