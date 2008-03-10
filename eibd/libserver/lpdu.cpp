@@ -24,25 +24,25 @@
 LPDU *
 LPDU::fromPacket (const CArray & c)
 {
-  try
-  {
-    if (c () >= 1)
-      {
-	if (c[0] == 0xCC)
-	  return new L_ACK_PDU (c);
-	if (c[0] == 0xC0)
-	  return new L_BUSY_PDU (c);
-	if (c[0] == 0x0C)
-	  return new L_NACK_PDU (c);
-	if ((c[0] & 0x53) == 0x10)
-	  return new L_Data_PDU (c);
-      }
-  }
-  catch (Exception e)
-  {
-    return new L_Unknown_PDU (c);
-  }
-  return new L_Unknown_PDU (c);
+  LPDU *l = 0;
+  if (c () >= 1)
+    {
+      if (c[0] == 0xCC)
+	l = new L_ACK_PDU ();
+      if (c[0] == 0xC0)
+	l = new L_BUSY_PDU ();
+      if (c[0] == 0x0C)
+	l = new L_NACK_PDU ();
+      if ((c[0] & 0x53) == 0x10)
+	l = new L_Data_PDU ();
+    }
+  if (l && l->init (c))
+    return l;
+  if (l)
+    delete l;
+  l = new L_Unknown_PDU ();
+  l->init (c);
+  return l;
 }
 
 /* L_NACK */
@@ -51,10 +51,12 @@ L_NACK_PDU::L_NACK_PDU ()
 {
 }
 
-L_NACK_PDU::L_NACK_PDU (const CArray & c)
+bool
+L_NACK_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray L_NACK_PDU::ToPacket ()
@@ -75,10 +77,12 @@ L_ACK_PDU::L_ACK_PDU ()
 {
 }
 
-L_ACK_PDU::L_ACK_PDU (const CArray & c)
+bool
+L_ACK_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray L_ACK_PDU::ToPacket ()
@@ -99,10 +103,12 @@ L_BUSY_PDU::L_BUSY_PDU ()
 {
 }
 
-L_BUSY_PDU::L_BUSY_PDU (const CArray & c)
+bool
+L_BUSY_PDU::init (const CArray & c)
 {
   if (c () != 1)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray L_BUSY_PDU::ToPacket ()
@@ -123,8 +129,11 @@ L_Unknown_PDU::L_Unknown_PDU ()
 {
 }
 
-L_Unknown_PDU::L_Unknown_PDU (const CArray & c):pdu (c)
+bool
+L_Unknown_PDU::init (const CArray & c)
 {
+  pdu = c;
+  return true;
 }
 
 CArray
@@ -154,8 +163,11 @@ L_Busmonitor_PDU::L_Busmonitor_PDU ()
 {
 }
 
-L_Busmonitor_PDU::L_Busmonitor_PDU (const CArray & c):pdu (c)
+bool
+L_Busmonitor_PDU::init (const CArray & c)
 {
+  pdu = c;
+  return true;
 }
 
 CArray
@@ -196,14 +208,15 @@ L_Data_PDU::L_Data_PDU ()
   hopcount = 0x07;
 }
 
-L_Data_PDU::L_Data_PDU (const CArray & c)
+bool
+L_Data_PDU::init (const CArray & c)
 {
   unsigned len, i;
   uchar c1;
   if (c () < 6)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   if ((c[0] & 0x53) != 0x10)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   repeated = (c[0] & 0x20) ? 0 : 1;
   valid_length = 1;
   switch ((c[0] >> 2) & 0x3)
@@ -230,7 +243,7 @@ L_Data_PDU::L_Data_PDU (const CArray & c)
       hopcount = (c[5] >> 4) & 0x07;
       AddrType = (c[5] & 0x80) ? GroupAddress : IndividualAddress;
       if (len + 7 != c ())
-	throw Exception (PDU_INCONSISTENT_SIZE);
+	return false;
       data.set (c.array () + 6, len);
       c1 = 0;
       for (i = 0; i < c () - 1; i++)
@@ -242,9 +255,9 @@ L_Data_PDU::L_Data_PDU (const CArray & c)
     {
       /*extended frame */
       if ((c[1] & 0x0f) != 0)
-	throw Exception (PDU_WRONG_FORMAT);
+	return false;
       if (c () < 7)
-	throw Exception (PDU_WRONG_FORMAT);
+	return false;
       hopcount = (c[1] >> 4) & 0x07;
       AddrType = (c[1] & 0x80) ? GroupAddress : IndividualAddress;
       source = (c[2] << 8) | (c[3]);
@@ -258,7 +271,7 @@ L_Data_PDU::L_Data_PDU (const CArray & c)
 	      data.set (c.array () + 7, 8);
 	    }
 	  else
-	    throw Exception (PDU_INCONSISTENT_SIZE);
+	    return false;
 	}
       else
 	data.set (c.array () + 7, len);
@@ -269,6 +282,7 @@ L_Data_PDU::L_Data_PDU (const CArray & c)
       c1 = ~c1;
       valid_checksum = (c[c () - 1] == c1 ? 1 : 0);
     }
+  return true;
 }
 
 CArray L_Data_PDU::ToPacket ()

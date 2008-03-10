@@ -51,6 +51,7 @@ public:
   {
   }
 
+  virtual bool init (const CArray & c) = 0;
   /** convert to a character array */
   virtual CArray ToPacket () = 0;
   /** decode content as string */
@@ -70,8 +71,8 @@ public:
   CArray pdu;
 
   L_Unknown_PDU ();
-  L_Unknown_PDU (const CArray & c);
 
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   LPDU_Type getType () const
@@ -101,8 +102,8 @@ public:
   CArray data;
 
     L_Data_PDU ();
-    L_Data_PDU (const CArray & c);
 
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   LPDU_Type getType () const
@@ -120,8 +121,8 @@ public:
   CArray pdu;
 
   L_Busmonitor_PDU ();
-  L_Busmonitor_PDU (const CArray & c);
 
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   LPDU_Type getType () const
@@ -153,8 +154,8 @@ class L_ACK_PDU:public LPDU
 public:
 
   L_ACK_PDU ();
-  L_ACK_PDU (const CArray & c);
 
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   LPDU_Type getType () const
@@ -168,8 +169,8 @@ class L_NACK_PDU:public LPDU
 public:
 
   L_NACK_PDU ();
-  L_NACK_PDU (const CArray & c);
 
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   LPDU_Type getType () const
@@ -183,8 +184,8 @@ class L_BUSY_PDU:public LPDU
 public:
 
   L_BUSY_PDU ();
-  L_BUSY_PDU (const CArray & c);
 
+  bool init (const CArray & c);
   CArray ToPacket ();
   String Decode ();
   LPDU_Type getType () const
