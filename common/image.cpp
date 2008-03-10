@@ -50,49 +50,64 @@ STR_Stream::fromArray (const CArray & c)
 {
   assert (c () >= 4);
   assert (((c[0] << 8) | c[1]) + 2 == c ());
-  try
-  {
-    switch (c[2] << 8 | c[3])
-      {
-      case L_STRING_PAR:
-	return new STR_StringParameter (c);
-      case L_INT_PAR:
-	return new STR_IntParameter (c);
-      case L_FLOAT_PAR:
-	return new STR_FloatParameter (c);
-      case L_LIST_PAR:
-	return new STR_ListParameter (c);
-      case L_GROUP_OBJECT:
-	return new STR_GroupObject (c);
-      case L_BCU_TYPE:
-	return new STR_BCUType (c);
-      case L_BCU2_INIT:
-	return new STR_BCU2Start (c);
-      case L_CODE:
-	return new STR_Code (c);
-      case L_BCU1_SIZE:
-	return new STR_BCU1Size (c);
-      case L_BCU2_SIZE:
-	return new STR_BCU2Size (c);
-      case L_BCU2_KEY:
-	return new STR_BCU2Key (c);
-      default:
-	return new STR_Unknown (c);
-      }
-  }
-  catch (...)
-  {
-    return new STR_Invalid (c);
-  }
+  STR_Stream *i;
+
+  switch (c[2] << 8 | c[3])
+    {
+    case L_STRING_PAR:
+      i = new STR_StringParameter ();
+      break;
+    case L_INT_PAR:
+      i = new STR_IntParameter ();
+      break;
+    case L_FLOAT_PAR:
+      i = new STR_FloatParameter ();
+      break;
+    case L_LIST_PAR:
+      i = new STR_ListParameter ();
+      break;
+    case L_GROUP_OBJECT:
+      i = new STR_GroupObject ();
+      break;
+    case L_BCU_TYPE:
+      i = new STR_BCUType ();
+      break;
+    case L_BCU2_INIT:
+      i = new STR_BCU2Start ();
+      break;
+    case L_CODE:
+      i = new STR_Code ();
+      break;
+    case L_BCU1_SIZE:
+      i = new STR_BCU1Size ();
+      break;
+    case L_BCU2_SIZE:
+      i = new STR_BCU2Size ();
+      break;
+    case L_BCU2_KEY:
+      i = new STR_BCU2Key ();
+      break;
+    default:
+      i = new STR_Unknown ();
+      break;
+    }
+  if (i->init (c))
+    return i;
+  delete i;
+  i = new STR_Invalid ();
+  i->init (c);
+  return i;
 }
 
 STR_Invalid::STR_Invalid ()
 {
 }
 
-STR_Invalid::STR_Invalid (const CArray & c)
+bool
+STR_Invalid::init (const CArray & c)
 {
   data = c;
+  return true;
 }
 
 CArray
@@ -117,10 +132,12 @@ STR_Unknown::STR_Unknown ()
   type = 0;
 }
 
-STR_Unknown::STR_Unknown (const CArray & c)
+bool
+STR_Unknown::init (const CArray & c)
 {
   data.set (c.array () + 4, c () - 4);
   type = c[2] << 8 | c[3];
+  return true;
 }
 
 CArray
@@ -152,11 +169,13 @@ STR_BCUType::STR_BCUType ()
   bcutype = 0;
 }
 
-STR_BCUType::STR_BCUType (const CArray & c)
+bool
+STR_BCUType::init (const CArray & c)
 {
   if (c () != 6)
-    throw 1;
+    return false;
   bcutype = c[4] << 8 | c[5];
+  return true;
 }
 
 CArray
@@ -186,9 +205,11 @@ STR_Code::STR_Code ()
 {
 }
 
-STR_Code::STR_Code (const CArray & c)
+bool
+STR_Code::init (const CArray & c)
 {
   code.set (c.array () + 4, c () - 4);
+  return true;
 }
 
 CArray
@@ -222,21 +243,23 @@ STR_StringParameter::STR_StringParameter ()
   length = 0;
 }
 
-STR_StringParameter::STR_StringParameter (const CArray & c)
+bool
+STR_StringParameter::init (const CArray & c)
 {
   const uchar *d;
   if (c () < 9)
-    throw 1;
+    return false;
   addr = c[4] << 8 | c[5];
   length = c[6] << 8 | c[7];
   if (c[c () - 1])
-    throw 1;
+    return false;
   d = &c[8];
   while (*d)
     d++;
   if (d != &c[c () - 1])
-    throw 1;
+    return false;
   name = (const char *) c.array () + 8;
+  return true;
 }
 
 CArray
@@ -272,21 +295,23 @@ STR_IntParameter::STR_IntParameter ()
   type = 0;
 }
 
-STR_IntParameter::STR_IntParameter (const CArray & c)
+bool
+STR_IntParameter::init (const CArray & c)
 {
   const uchar *d;
   if (c () < 8)
-    throw 1;
+    return false;
   addr = c[4] << 8 | c[5];
   type = (int8_t) c[6];
   if (c[c () - 1])
-    throw 1;
+    return false;
   d = &c[7];
   while (*d)
     d++;
   if (d != &c[c () - 1])
-    throw 1;
+    return false;
   name = (const char *) c.array () + 7;
+  return true;
 }
 
 CArray
@@ -320,20 +345,22 @@ STR_FloatParameter::STR_FloatParameter ()
   addr = 0;
 }
 
-STR_FloatParameter::STR_FloatParameter (const CArray & c)
+bool
+STR_FloatParameter::init (const CArray & c)
 {
   const uchar *d;
   if (c () < 7)
-    throw 1;
+    return false;
   addr = c[4] << 8 | c[5];
   if (c[c () - 1])
-    throw 1;
+    return false;
   d = &c[6];
   while (*d)
     d++;
   if (d != &c[c () - 1])
-    throw 1;
+    return false;
   name = (const char *) c.array () + 6;
+  return true;
 }
 
 CArray
@@ -365,40 +392,42 @@ STR_ListParameter::STR_ListParameter ()
   addr = 0;
 }
 
-STR_ListParameter::STR_ListParameter (const CArray & c)
+bool
+STR_ListParameter::init (const CArray & c)
 {
   uint16_t el, i;
   const uchar *d, *d1;
   if (c () < 9)
-    throw 1;
+    return false;
   addr = c[4] << 8 | c[5];
   el = c[6] << 8 | c[7];
   if (c[c () - 1])
-    throw 1;
+    return false;
   d = &c[8];
   d1 = d;
   while (*d)
     d++;
   if (d > &c[c () - 1])
-    throw 1;
+    return false;
   name = (const char *) d1;
   d1 = ++d;
   if (d > &c[c () - 1])
-    throw 1;
+    return false;
   elements.resize (el);
   for (i = 0; i < el; i++)
     {
       while (*d)
 	d++;
       if (d > &c[c () - 1])
-	throw 1;
+	return false;
       elements[i] = (const char *) d1;
       d1 = ++d;
       if (d > &c[c ()])
-	throw 1;
+	return false;
     }
   if (d != &c[c ()])
-    throw 1;
+    return false;
+  return true;
 }
 
 CArray
@@ -447,20 +476,22 @@ STR_GroupObject::STR_GroupObject ()
   no = 0;
 }
 
-STR_GroupObject::STR_GroupObject (const CArray & c)
+bool
+STR_GroupObject::init (const CArray & c)
 {
   const uchar *d;
   if (c () < 6)
-    throw 1;
+    return false;
   no = c[4];
   if (c[c () - 1])
-    throw 1;
+    return false;
   d = &c[5];
   while (*d)
     d++;
   if (d != &c[c () - 1])
-    throw 1;
+    return false;
   name = (const char *) c.array () + 5;
+  return true;
 }
 
 String
@@ -494,14 +525,16 @@ STR_BCU1Size::STR_BCU1Size ()
   bsssize = 0;
 }
 
-STR_BCU1Size::STR_BCU1Size (const CArray & c)
+bool
+STR_BCU1Size::init (const CArray & c)
 {
   if (c () != 12)
-    throw 1;
+    return false;
   textsize = c[4] << 8 | c[5];
   stacksize = c[6] << 8 | c[7];
   datasize = c[8] << 8 | c[9];
   bsssize = c[10] << 8 | c[11];
+  return true;
 }
 
 CArray
@@ -544,16 +577,18 @@ STR_BCU2Size::STR_BCU2Size ()
   hi_bsssize = 0;
 }
 
-STR_BCU2Size::STR_BCU2Size (const CArray & c)
+bool
+STR_BCU2Size::init (const CArray & c)
 {
   if (c () != 16)
-    throw 1;
+    return false;
   textsize = c[4] << 8 | c[5];
   stacksize = c[6] << 8 | c[7];
   lo_datasize = c[8] << 8 | c[9];
   lo_bsssize = c[10] << 8 | c[11];
   hi_datasize = c[12] << 8 | c[13];
   hi_bsssize = c[14] << 8 | c[15];
+  return true;
 }
 
 CArray
@@ -619,10 +654,11 @@ STR_BCU2Start::STR_BCU2Start ()
   poll_slot = 0;
 }
 
-STR_BCU2Start::STR_BCU2Start (const CArray & c)
+bool
+STR_BCU2Start::init (const CArray & c)
 {
   if (c () != 47)
-    throw 1;
+    return false;
   addrtab_start = c[4] << 8 | c[5];
   addrtab_size = c[6] << 8 | c[7];
   assoctab_start = c[8] << 8 | c[9];
@@ -645,6 +681,7 @@ STR_BCU2Start::STR_BCU2Start (const CArray & c)
   eeprom_end = c[42] << 8 | c[43];
   poll_addr = c[44] << 8 | c[45];
   poll_slot = c[46];
+  return true;
 }
 
 CArray
@@ -724,16 +761,18 @@ STR_BCU2Key::STR_BCU2Key ()
   installkey = 0xFFFFFFFF;
 }
 
-STR_BCU2Key::STR_BCU2Key (const CArray & c)
+bool
+STR_BCU2Key::init (const CArray & c)
 {
   unsigned i;
   if (c () % 4)
-    throw 1;
+    return false;
   if (c () < 8)
-    throw 1;
+    return false;
   installkey = (c[4] << 24) | (c[5] << 16) | (c[6] << 8) | (c[7]);
   for (i = 8; i < c (); i += 4)
     keys.add ((c[i] << 24) | (c[i + 1] << 16) | (c[i + 2] << 8) | (c[i + 3]));
+  return true;
 }
 
 CArray

@@ -48,6 +48,7 @@ public:
   {
   }
   static STR_Stream *fromArray (const CArray & c);
+  virtual bool init (const CArray & str) = 0;
   virtual CArray toArray () = 0;
   virtual STR_Type getType () = 0;
   virtual String decode () = 0;
@@ -59,7 +60,7 @@ public:
   CArray data;
 
   STR_Invalid ();
-  STR_Invalid (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -75,7 +76,7 @@ public:
   CArray data;
 
     STR_Unknown ();
-    STR_Unknown (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -90,7 +91,7 @@ public:
   uint16_t bcutype;
 
   STR_BCUType ();
-  STR_BCUType (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -104,7 +105,7 @@ public:
   CArray code;
 
   STR_Code ();
-  STR_Code (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -120,7 +121,7 @@ public:
   String name;
 
     STR_StringParameter ();
-    STR_StringParameter (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -136,7 +137,7 @@ public:
     Array < String > elements;
 
     STR_ListParameter ();
-    STR_ListParameter (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -152,7 +153,7 @@ public:
   String name;
 
     STR_IntParameter ();
-    STR_IntParameter (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -167,7 +168,7 @@ public:
   String name;
 
     STR_FloatParameter ();
-    STR_FloatParameter (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -182,7 +183,7 @@ public:
   String name;
 
     STR_GroupObject ();
-    STR_GroupObject (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -199,7 +200,7 @@ public:
   uint16_t bsssize;
 
     STR_BCU1Size ();
-    STR_BCU1Size (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -218,7 +219,7 @@ public:
   uint16_t hi_bsssize;
 
     STR_BCU2Size ();
-    STR_BCU2Size (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -254,7 +255,7 @@ public:
   uint8_t poll_slot;
 
     STR_BCU2Start ();
-    STR_BCU2Start (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
@@ -270,7 +271,7 @@ public:
   Array < eibkey_type > keys;
 
   STR_BCU2Key ();
-  STR_BCU2Key (const CArray & str);
+  bool init (const CArray & str);
   CArray toArray ();
   STR_Type getType ()
   {
