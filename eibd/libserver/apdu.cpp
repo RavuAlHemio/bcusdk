@@ -24,125 +24,162 @@
 APDU *
 APDU::fromPacket (const CArray & c)
 {
-  try
-  {
-    if (c () >= 2)
-      {
-	switch (c[0] & 0x03)
-	  {
-	  case 0:
-	    switch (c[1] & 0xC0)
-	      {
-	      case 0x00:
-		return new A_GroupValue_Read_PDU (c);
-	      case 0x40:
-		return new A_GroupValue_Response_PDU (c);
-	      case 0x80:
-		return new A_GroupValue_Write_PDU (c);
-	      case 0xC0:
-		return new A_IndividualAddress_Write_PDU (c);
-	      }
-	    break;
-	  case 1:
-	    switch (c[1] & 0xC0)
-	      {
-	      case 0x00:
-		return new A_IndividualAddress_Read_PDU (c);
-	      case 0x40:
-		return new A_IndividualAddress_Response_PDU (c);
-	      case 0x80:
-		return new A_ADC_Read_PDU (c);
-	      case 0xC0:
-		return new A_ADC_Response_PDU (c);
-	      }
-	    break;
-	  case 2:
-	    switch (c[1] & 0xC0)
-	      {
-	      case 0x00:
-		return new A_Memory_Read_PDU (c);
-	      case 0x40:
-		return new A_Memory_Response_PDU (c);
-	      case 0x80:
-		return new A_Memory_Write_PDU (c);
-	      case 0xC0:
-		switch (c[1])
-		  {
-		  case 0xC0:
-		    return new A_UserMemory_Read_PDU (c);
-		  case 0xC1:
-		    return new A_UserMemory_Response_PDU (c);
-		  case 0xC2:
-		    return new A_UserMemory_Write_PDU (c);
-		  case 0xC4:
-		    return new A_UserMemoryBit_Write_PDU (c);
-		  case 0xC5:
-		    return new A_UserManufacturerInfo_Read_PDU (c);
-		  case 0xC6:
-		    return new A_UserManufacturerInfo_Response_PDU (c);
-		  }
-	      }
-	    break;
-	  case 3:
-	    switch (c[1] & 0xC0)
-	      {
-	      case 0x00:
-		return new A_DeviceDescriptor_Read_PDU (c);
-	      case 0x40:
-		return new A_DeviceDescriptor_Response_PDU (c);
-	      case 0x80:
-		return new A_Restart_PDU (c);
-	      case 0xC0:
-		switch (c[1])
-		  {
-		  case 0xD0:
-		    return new A_MemoryBit_Write_PDU (c);
-		  case 0xD1:
-		    return new A_Authorize_Request_PDU (c);
-		  case 0xD2:
-		    return new A_Authorize_Response_PDU (c);
-		  case 0xD3:
-		    return new A_Key_Write_PDU (c);
-		  case 0xD4:
-		    return new A_Key_Response_PDU (c);
-		  case 0xD5:
-		    return new A_PropertyValue_Read_PDU (c);
-		  case 0xD6:
-		    return new A_PropertyValue_Response_PDU (c);
-		  case 0xD7:
-		    return new A_PropertyValue_Write_PDU (c);
-		  case 0xD8:
-		    return new A_PropertyDescription_Read_PDU (c);
-		  case 0xD9:
-		    return new A_PropertyDescription_Response_PDU (c);
-		  case 0xDC:
-		    return new A_IndividualAddressSerialNumber_Read_PDU (c);
-		  case 0xDD:
-		    return new
-		      A_IndividualAddressSerialNumber_Response_PDU (c);
-		  case 0xDE:
-		    return new A_IndividualAddressSerialNumber_Write_PDU (c);
-		  case 0xDF:
-		    return new A_ServiceInformation_Indication_Write_PDU (c);
-		  case 0xE0:
-		    return new A_DomainAddress_Write_PDU (c);
-		  case 0xE1:
-		    return new A_DomainAddress_Read_PDU (c);
-		  case 0xE2:
-		    return new A_DomainAddress_Response_PDU (c);
-		  case 0xE3:
-		    return new A_DomainAddressSelective_Read_PDU (c);
-		  }
-	      }
-	    break;
-	  }
-      }
-  }
-  catch (Exception e)
-  {
-    return new A_Unknown_PDU (c);
-  }
-  return new A_Unknown_PDU (c);
+  APDU *a = 0;
+  if (c () >= 2)
+    {
+      switch (c[0] & 0x03)
+	{
+	case 0:
+	  switch (c[1] & 0xC0)
+	    {
+	    case 0x00:
+	      a = new A_GroupValue_Read_PDU ();
+	      break;
+	    case 0x40:
+	      a = new A_GroupValue_Response_PDU ();
+	      break;
+	    case 0x80:
+	      a = new A_GroupValue_Write_PDU ();
+	      break;
+	    case 0xC0:
+	      a = new A_IndividualAddress_Write_PDU ();
+	      break;
+	    }
+	  break;
+	case 1:
+	  switch (c[1] & 0xC0)
+	    {
+	    case 0x00:
+	      a = new A_IndividualAddress_Read_PDU ();
+	      break;
+	    case 0x40:
+	      a = new A_IndividualAddress_Response_PDU ();
+	      break;
+	    case 0x80:
+	      a = new A_ADC_Read_PDU ();
+	      break;
+	    case 0xC0:
+	      a = new A_ADC_Response_PDU ();
+	      break;
+	    }
+	  break;
+	case 2:
+	  switch (c[1] & 0xC0)
+	    {
+	    case 0x00:
+	      a = new A_Memory_Read_PDU ();
+	      break;
+	    case 0x40:
+	      a = new A_Memory_Response_PDU ();
+	      break;
+	    case 0x80:
+	      a = new A_Memory_Write_PDU ();
+	      break;
+	    case 0xC0:
+	      switch (c[1])
+		{
+		case 0xC0:
+		  a = new A_UserMemory_Read_PDU ();
+		  break;
+		case 0xC1:
+		  a = new A_UserMemory_Response_PDU ();
+		  break;
+		case 0xC2:
+		  a = new A_UserMemory_Write_PDU ();
+		  break;
+		case 0xC4:
+		  a = new A_UserMemoryBit_Write_PDU ();
+		  break;
+		case 0xC5:
+		  a = new A_UserManufacturerInfo_Read_PDU ();
+		  break;
+		case 0xC6:
+		  a = new A_UserManufacturerInfo_Response_PDU ();
+		  break;
+		}
+	    }
+	  break;
+	case 3:
+	  switch (c[1] & 0xC0)
+	    {
+	    case 0x00:
+	      a = new A_DeviceDescriptor_Read_PDU ();
+	      break;
+	    case 0x40:
+	      a = new A_DeviceDescriptor_Response_PDU ();
+	      break;
+	    case 0x80:
+	      a = new A_Restart_PDU ();
+	      break;
+	    case 0xC0:
+	      switch (c[1])
+		{
+		case 0xD0:
+		  a = new A_MemoryBit_Write_PDU ();
+		  break;
+		case 0xD1:
+		  a = new A_Authorize_Request_PDU ();
+		  break;
+		case 0xD2:
+		  a = new A_Authorize_Response_PDU ();
+		  break;
+		case 0xD3:
+		  a = new A_Key_Write_PDU ();
+		  break;
+		case 0xD4:
+		  a = new A_Key_Response_PDU ();
+		  break;
+		case 0xD5:
+		  a = new A_PropertyValue_Read_PDU ();
+		  break;
+		case 0xD6:
+		  a = new A_PropertyValue_Response_PDU ();
+		  break;
+		case 0xD7:
+		  a = new A_PropertyValue_Write_PDU ();
+		  break;
+		case 0xD8:
+		  a = new A_PropertyDescription_Read_PDU ();
+		  break;
+		case 0xD9:
+		  a = new A_PropertyDescription_Response_PDU ();
+		  break;
+		case 0xDC:
+		  a = new A_IndividualAddressSerialNumber_Read_PDU ();
+		  break;
+		case 0xDD:
+		  a = new A_IndividualAddressSerialNumber_Response_PDU ();
+		  break;
+		case 0xDE:
+		  a = new A_IndividualAddressSerialNumber_Write_PDU ();
+		  break;
+		case 0xDF:
+		  a = new A_ServiceInformation_Indication_Write_PDU ();
+		  break;
+		case 0xE0:
+		  a = new A_DomainAddress_Write_PDU ();
+		  break;
+		case 0xE1:
+		  a = new A_DomainAddress_Read_PDU ();
+		  break;
+		case 0xE2:
+		  a = new A_DomainAddress_Response_PDU ();
+		  break;
+		case 0xE3:
+		  a = new A_DomainAddressSelective_Read_PDU ();
+		  break;
+		}
+	    }
+	  break;
+	}
+    }
+  if (a && a->init (c))
+    return a;
+  if (a)
+    delete a;
+  a = new A_Unknown_PDU;
+  a->init (c);
+  return a;
 }
 
 /* A_Unknown_PDU */
@@ -151,8 +188,11 @@ A_Unknown_PDU::A_Unknown_PDU ()
 {
 }
 
-A_Unknown_PDU::A_Unknown_PDU (const CArray & c):pdu (c)
+bool
+A_Unknown_PDU::init (const CArray & c)
 {
+  pdu = c;
+  return true;
 }
 
 CArray A_Unknown_PDU::ToPacket ()
@@ -188,10 +228,12 @@ A_GroupValue_Read_PDU::A_GroupValue_Read_PDU ()
 {
 }
 
-A_GroupValue_Read_PDU::A_GroupValue_Read_PDU (const CArray & c)
+bool
+A_GroupValue_Read_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray A_GroupValue_Read_PDU::ToPacket ()
@@ -220,10 +262,11 @@ A_GroupValue_Response_PDU::A_GroupValue_Response_PDU ()
   issmall = 0;
 }
 
-A_GroupValue_Response_PDU::A_GroupValue_Response_PDU (const CArray & c)
+bool
+A_GroupValue_Response_PDU::init (const CArray & c)
 {
   if (c () < 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   if (c () == 2)
     {
       uchar c1 = c[1] & 0x3f;
@@ -235,6 +278,7 @@ A_GroupValue_Response_PDU::A_GroupValue_Response_PDU (const CArray & c)
       data.set (c.array () + 2, c () - 2);
       issmall = 0;
     }
+  return true;
 }
 
 CArray A_GroupValue_Response_PDU::ToPacket ()
@@ -284,10 +328,11 @@ A_GroupValue_Write_PDU::A_GroupValue_Write_PDU ()
   issmall = 0;
 }
 
-A_GroupValue_Write_PDU::A_GroupValue_Write_PDU (const CArray & c)
+bool
+A_GroupValue_Write_PDU::init (const CArray & c)
 {
   if (c () < 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   if (c () == 2)
     {
       uchar c1 = c[1] & 0x3f;
@@ -299,6 +344,7 @@ A_GroupValue_Write_PDU::A_GroupValue_Write_PDU (const CArray & c)
       data.set (c.array () + 2, c () - 2);
       issmall = 0;
     }
+  return true;
 }
 
 CArray A_GroupValue_Write_PDU::ToPacket ()
@@ -348,12 +394,13 @@ A_IndividualAddress_Write_PDU::A_IndividualAddress_Write_PDU ()
   addr = 0;
 }
 
-A_IndividualAddress_Write_PDU::
-A_IndividualAddress_Write_PDU (const CArray & c)
+bool
+A_IndividualAddress_Write_PDU::init (const CArray & c)
 {
   if (c () != 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   addr = (c[2] << 8) | (c[3]);
+  return true;
 }
 
 CArray A_IndividualAddress_Write_PDU::ToPacket ()
@@ -386,10 +433,12 @@ A_IndividualAddress_Read_PDU::A_IndividualAddress_Read_PDU ()
 {
 }
 
-A_IndividualAddress_Read_PDU::A_IndividualAddress_Read_PDU (const CArray & c)
+bool
+A_IndividualAddress_Read_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray A_IndividualAddress_Read_PDU::ToPacket ()
@@ -417,11 +466,11 @@ A_IndividualAddress_Response_PDU::A_IndividualAddress_Response_PDU ()
 {
 }
 
-A_IndividualAddress_Response_PDU::
-A_IndividualAddress_Response_PDU (const CArray & c)
+bool A_IndividualAddress_Response_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray A_IndividualAddress_Response_PDU::ToPacket ()
@@ -451,12 +500,13 @@ A_IndividualAddressSerialNumber_Read_PDU ()
   memset (serno, 0, sizeof (serno));
 }
 
-A_IndividualAddressSerialNumber_Read_PDU::
-A_IndividualAddressSerialNumber_Read_PDU (const CArray & c)
+bool
+A_IndividualAddressSerialNumber_Read_PDU::init (const CArray & c)
 {
   if (c () != 8)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   memcpy (serno, c.array () + 2, 6);
+  return true;
 }
 
 CArray A_IndividualAddressSerialNumber_Read_PDU::ToPacket ()
@@ -499,13 +549,14 @@ A_IndividualAddressSerialNumber_Response_PDU ()
   addr = 0;
 }
 
-A_IndividualAddressSerialNumber_Response_PDU::
-A_IndividualAddressSerialNumber_Response_PDU (const CArray & c)
+bool
+A_IndividualAddressSerialNumber_Response_PDU::init (const CArray & c)
 {
   if (c () != 12)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   memcpy (serno, c.array () + 2, 6);
   addr = (c[8] << 8) | (c[9]);
+  return true;
 }
 
 CArray A_IndividualAddressSerialNumber_Response_PDU::ToPacket ()
@@ -539,8 +590,8 @@ String A_IndividualAddressSerialNumber_Response_PDU::Decode ()
 }
 
 bool
-  A_IndividualAddressSerialNumber_Response_PDU::isResponse (const APDU * req)
-  CONST
+  A_IndividualAddressSerialNumber_Response_PDU::isResponse (const APDU *
+							    req) CONST
 {
   if (req->getType () != A_IndividualAddressSerialNumber_Read)
     return 0;
@@ -560,13 +611,13 @@ A_IndividualAddressSerialNumber_Write_PDU ()
   addr = 0;
 }
 
-A_IndividualAddressSerialNumber_Write_PDU::
-A_IndividualAddressSerialNumber_Write_PDU (const CArray & c)
+bool A_IndividualAddressSerialNumber_Write_PDU::init (const CArray & c)
 {
   if (c () != 14)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   memcpy (serno, c.array () + 2, 6);
   addr = (c[8] << 8) | (c[9]);
+  return true;
 }
 
 CArray A_IndividualAddressSerialNumber_Write_PDU::ToPacket ()
@@ -618,14 +669,15 @@ A_ServiceInformation_Indication_Write_PDU ()
   appl_stopped = 0;
 }
 
-A_ServiceInformation_Indication_Write_PDU::
-A_ServiceInformation_Indication_Write_PDU (const CArray & c)
+bool
+A_ServiceInformation_Indication_Write_PDU::init (const CArray & c)
 {
   if (c () != 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   verify_mode = (c[2] & 0x04) ? 1 : 0;
   duplicate_address = (c[3] & 0x02) ? 1 : 0;
   appl_stopped = (c[2] & 0x01) ? 1 : 0;
+  return true;
 }
 
 CArray
@@ -671,11 +723,13 @@ A_DomainAddress_Write_PDU::A_DomainAddress_Write_PDU ()
   addr = 0;
 }
 
-A_DomainAddress_Write_PDU::A_DomainAddress_Write_PDU (const CArray & c)
+bool
+A_DomainAddress_Write_PDU::init (const CArray & c)
 {
   if (c () != 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   addr = (c[2] << 8) | (c[3]);
+  return true;
 }
 
 CArray A_DomainAddress_Write_PDU::ToPacket ()
@@ -709,10 +763,12 @@ A_DomainAddress_Read_PDU::A_DomainAddress_Read_PDU ()
 {
 }
 
-A_DomainAddress_Read_PDU::A_DomainAddress_Read_PDU (const CArray & c)
+bool
+A_DomainAddress_Read_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray A_DomainAddress_Read_PDU::ToPacket ()
@@ -741,11 +797,13 @@ A_DomainAddress_Response_PDU::A_DomainAddress_Response_PDU ()
   addr = 0;
 }
 
-A_DomainAddress_Response_PDU::A_DomainAddress_Response_PDU (const CArray & c)
+bool
+A_DomainAddress_Response_PDU::init (const CArray & c)
 {
   if (c () != 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   addr = (c[2] << 8) | c[3];
+  return true;
 }
 
 CArray A_DomainAddress_Response_PDU::ToPacket ()
@@ -782,14 +840,15 @@ A_DomainAddressSelective_Read_PDU::A_DomainAddressSelective_Read_PDU ()
   range = 0;
 }
 
-A_DomainAddressSelective_Read_PDU::
-A_DomainAddressSelective_Read_PDU (const CArray & c)
+bool
+A_DomainAddressSelective_Read_PDU::init (const CArray & c)
 {
   if (c () != 7)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   domainaddr = (c[2] << 8) | c[3];
   addr = (c[4] << 8) | c[5];
   range = c[6];
+  return true;
 }
 
 CArray A_DomainAddressSelective_Read_PDU::ToPacket ()
@@ -834,14 +893,16 @@ A_PropertyValue_Read_PDU::A_PropertyValue_Read_PDU ()
   start = 0;
 }
 
-A_PropertyValue_Read_PDU::A_PropertyValue_Read_PDU (const CArray & c)
+bool
+A_PropertyValue_Read_PDU::init (const CArray & c)
 {
   if (c () != 6)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   obj = c[2];
   prop = c[3];
   count = (c[4] >> 4) & 0x0f;
   start = (c[4] & 0x0f) << 8 | c[5];
+  return true;
 }
 
 CArray
@@ -891,15 +952,17 @@ A_PropertyValue_Response_PDU::A_PropertyValue_Response_PDU ()
   start = 0;
 }
 
-A_PropertyValue_Response_PDU::A_PropertyValue_Response_PDU (const CArray & c)
+bool
+A_PropertyValue_Response_PDU::init (const CArray & c)
 {
   if (c () < 6)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   obj = c[2];
   prop = c[3];
   count = (c[4] >> 4) & 0x0f;
   start = (c[4] & 0x0f) << 8 | c[5];
   data.set (c.array () + 6, c () - 6);
+  return true;
 }
 
 CArray
@@ -974,15 +1037,17 @@ A_PropertyValue_Write_PDU::A_PropertyValue_Write_PDU ()
   start = 0;
 }
 
-A_PropertyValue_Write_PDU::A_PropertyValue_Write_PDU (const CArray & c)
+bool
+A_PropertyValue_Write_PDU::init (const CArray & c)
 {
   if (c () < 6)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   obj = c[2];
   prop = c[3];
   count = (c[4] >> 4) & 0x0f;
   start = (c[4] & 0x0f) << 8 | c[5];
   data.set (c.array () + 6, c () - 6);
+  return true;
 }
 
 CArray
@@ -1035,14 +1100,15 @@ A_PropertyDescription_Read_PDU::A_PropertyDescription_Read_PDU ()
   property_index = 0;
 }
 
-A_PropertyDescription_Read_PDU::
-A_PropertyDescription_Read_PDU (const CArray & c)
+bool
+A_PropertyDescription_Read_PDU::init (const CArray & c)
 {
   if (c () != 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   obj = c[2];
   prop = c[3];
   property_index = c[4];
+  return true;
 }
 
 CArray
@@ -1087,17 +1153,18 @@ A_PropertyDescription_Response_PDU::A_PropertyDescription_Response_PDU ()
   access = 0;
 }
 
-A_PropertyDescription_Response_PDU::
-A_PropertyDescription_Response_PDU (const CArray & c)
+bool
+A_PropertyDescription_Response_PDU::init (const CArray & c)
 {
   if (c () != 9)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   obj = c[2];
   prop = c[3];
   property_index = c[4];
   type = c[5];
   count = (c[6] << 8) | c[7];
   access = c[8];
+  return true;
 }
 
 CArray
@@ -1153,11 +1220,13 @@ A_DeviceDescriptor_Read_PDU::A_DeviceDescriptor_Read_PDU ()
   type = 0;
 }
 
-A_DeviceDescriptor_Read_PDU::A_DeviceDescriptor_Read_PDU (const CArray & c)
+bool
+A_DeviceDescriptor_Read_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   type = c[1] & 0x3F;
+  return true;
 }
 
 CArray
@@ -1193,13 +1262,13 @@ A_DeviceDescriptor_Response_PDU::A_DeviceDescriptor_Response_PDU ()
   descriptor = 0;
 }
 
-A_DeviceDescriptor_Response_PDU::
-A_DeviceDescriptor_Response_PDU (const CArray & c)
+bool A_DeviceDescriptor_Response_PDU::init (const CArray & c)
 {
   if (c () != 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   type = c[1] & 0x3F;
   descriptor = (c[2] << 8) | c[3];
+  return true;
 }
 
 CArray
@@ -1245,12 +1314,14 @@ A_ADC_Read_PDU::A_ADC_Read_PDU ()
   count = 0;
 }
 
-A_ADC_Read_PDU::A_ADC_Read_PDU (const CArray & c)
+bool
+A_ADC_Read_PDU::init (const CArray & c)
 {
   if (c () != 3)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   channel = c[1] & 0x3F;
   count = c[2];
+  return true;
 }
 
 CArray
@@ -1290,13 +1361,15 @@ A_ADC_Response_PDU::A_ADC_Response_PDU ()
   val = 0;
 }
 
-A_ADC_Response_PDU::A_ADC_Response_PDU (const CArray & c)
+bool
+A_ADC_Response_PDU::init (const CArray & c)
 {
   if (c () != 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   channel = c[1] & 0x3F;
   count = c[2];
   val = (c[3] << 8) | (c[4]);
+  return true;
 }
 
 CArray
@@ -1347,12 +1420,14 @@ A_Memory_Read_PDU::A_Memory_Read_PDU ()
   addr = 0;
 }
 
-A_Memory_Read_PDU::A_Memory_Read_PDU (const CArray & c)
+bool
+A_Memory_Read_PDU::init (const CArray & c)
 {
   if (c () != 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   count = c[1] & 0xf;
   addr = (c[2] << 8) | c[3];
+  return true;
 }
 
 CArray
@@ -1392,15 +1467,17 @@ A_Memory_Response_PDU::A_Memory_Response_PDU ()
   addr = 0;
 }
 
-A_Memory_Response_PDU::A_Memory_Response_PDU (const CArray & c)
+bool
+A_Memory_Response_PDU::init (const CArray & c)
 {
   if (c () < 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   count = c[1] & 0xf;
   addr = (c[2] << 8) | c[3];
   data.set (c.array () + 4, c () - 4);
   if (data () != count)
-    throw Exception (PDU_INCONSISTENT_SIZE);
+    return false;
+  return true;
 }
 
 CArray
@@ -1454,15 +1531,17 @@ A_Memory_Write_PDU::A_Memory_Write_PDU ()
   addr = 0;
 }
 
-A_Memory_Write_PDU::A_Memory_Write_PDU (const CArray & c)
+bool
+A_Memory_Write_PDU::init (const CArray & c)
 {
   if (c () < 4)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   count = c[1] & 0xf;
   addr = (c[2] << 8) | c[3];
   data.set (c.array () + 4, c () - 4);
   if (data () != count)
-    throw Exception (PDU_INCONSISTENT_SIZE);
+    return false;
+  return true;
 }
 
 CArray
@@ -1508,16 +1587,18 @@ A_MemoryBit_Write_PDU::A_MemoryBit_Write_PDU ()
   addr = 0;
 }
 
-A_MemoryBit_Write_PDU::A_MemoryBit_Write_PDU (const CArray & c)
+bool
+A_MemoryBit_Write_PDU::init (const CArray & c)
 {
   if (c () < 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   count = c[2];
   addr = (c[3] << 8) | c[4];
   if (c () - 5 != count * 2)
-    throw Exception (PDU_INCONSISTENT_SIZE);
+    return false;
   andmask.set (c.array () + 5, count);
   xormask.set (c.array () + 5 + count, count);
+  return true;
 }
 
 CArray
@@ -1569,13 +1650,15 @@ A_UserMemory_Read_PDU::A_UserMemory_Read_PDU ()
   addr = 0;
 }
 
-A_UserMemory_Read_PDU::A_UserMemory_Read_PDU (const CArray & c)
+bool
+A_UserMemory_Read_PDU::init (const CArray & c)
 {
   if (c () != 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   addr_extension = (c[2] >> 4) & 0xf;
   count = c[2] & 0xf;
   addr = (c[3] << 8) | c[4];
+  return true;
 }
 
 CArray
@@ -1621,16 +1704,18 @@ A_UserMemory_Response_PDU::A_UserMemory_Response_PDU ()
   addr = 0;
 }
 
-A_UserMemory_Response_PDU::A_UserMemory_Response_PDU (const CArray & c)
+bool
+A_UserMemory_Response_PDU::init (const CArray & c)
 {
   if (c () < 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   addr_extension = (c[2] >> 4) & 0xf;
   count = c[2] & 0xf;
   addr = (c[3] << 8) | c[4];
   data.set (c.array () + 5, c () - 5);
   if (data () != count)
-    throw Exception (PDU_INCONSISTENT_SIZE);
+    return false;
+  return true;
 }
 
 CArray
@@ -1692,16 +1777,18 @@ A_UserMemory_Write_PDU::A_UserMemory_Write_PDU ()
   addr = 0;
 }
 
-A_UserMemory_Write_PDU::A_UserMemory_Write_PDU (const CArray & c)
+bool
+A_UserMemory_Write_PDU::init (const CArray & c)
 {
   if (c () < 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   addr_extension = (c[2] >> 4) & 0xf;
   count = c[2] & 0xf;
   addr = (c[3] << 8) | c[4];
   data.set (c.array () + 5, c () - 5);
   if (data () != count)
-    throw Exception (PDU_INCONSISTENT_SIZE);
+    return false;
+  return true;
 }
 
 CArray
@@ -1753,16 +1840,18 @@ A_UserMemoryBit_Write_PDU::A_UserMemoryBit_Write_PDU ()
   addr = 0;
 }
 
-A_UserMemoryBit_Write_PDU::A_UserMemoryBit_Write_PDU (const CArray & c)
+bool
+A_UserMemoryBit_Write_PDU::init (const CArray & c)
 {
   if (c () < 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   count = c[2];
   addr = (c[3] << 8) | c[4];
   if (c () - 5 != count * 2)
-    throw Exception (PDU_INCONSISTENT_SIZE);
+    return false;
   andmask.set (c.array () + 5, count);
   xormask.set (c.array () + 5 + count, count);
+  return true;
 }
 
 CArray
@@ -1811,11 +1900,11 @@ A_UserManufacturerInfo_Read_PDU::A_UserManufacturerInfo_Read_PDU ()
 {
 }
 
-A_UserManufacturerInfo_Read_PDU::
-A_UserManufacturerInfo_Read_PDU (const CArray & c)
+bool A_UserManufacturerInfo_Read_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray
@@ -1848,13 +1937,14 @@ A_UserManufacturerInfo_Response_PDU::A_UserManufacturerInfo_Response_PDU ()
   data = 0;
 }
 
-A_UserManufacturerInfo_Response_PDU::
-A_UserManufacturerInfo_Response_PDU (const CArray & c)
+bool
+A_UserManufacturerInfo_Response_PDU::init (const CArray & c)
 {
   if (c () != 5)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   manufacturerid = c[2];
   data = (c[3] << 8) | c[4];
+  return true;
 }
 
 CArray
@@ -1891,10 +1981,12 @@ A_Restart_PDU::A_Restart_PDU ()
 {
 }
 
-A_Restart_PDU::A_Restart_PDU (const CArray & c)
+bool
+A_Restart_PDU::init (const CArray & c)
 {
   if (c () != 2)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
+  return true;
 }
 
 CArray
@@ -1926,11 +2018,13 @@ A_Authorize_Request_PDU::A_Authorize_Request_PDU ()
   key = 0;
 }
 
-A_Authorize_Request_PDU::A_Authorize_Request_PDU (const CArray & c)
+bool
+A_Authorize_Request_PDU::init (const CArray & c)
 {
   if (c () != 7)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   key = (c[3] << 24) | (c[4] << 16) | (c[5] << 8) | (c[6]);
+  return true;
 }
 
 CArray
@@ -1967,11 +2061,13 @@ A_Authorize_Response_PDU::A_Authorize_Response_PDU ()
   level = 0;
 }
 
-A_Authorize_Response_PDU::A_Authorize_Response_PDU (const CArray & c)
+bool
+A_Authorize_Response_PDU::init (const CArray & c)
 {
   if (c () != 3)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   level = c[2];
+  return true;
 }
 
 CArray
@@ -2006,12 +2102,14 @@ A_Key_Write_PDU::A_Key_Write_PDU ()
   level = 0;
 }
 
-A_Key_Write_PDU::A_Key_Write_PDU (const CArray & c)
+bool
+A_Key_Write_PDU::init (const CArray & c)
 {
   if (c () != 7)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   level = c[2];
   key = (c[3] << 24) | (c[4] << 16) | (c[5] << 8) | (c[6]);
+  return true;
 }
 
 CArray
@@ -2050,11 +2148,13 @@ A_Key_Response_PDU::A_Key_Response_PDU ()
   level = 0;
 }
 
-A_Key_Response_PDU::A_Key_Response_PDU (const CArray & c)
+bool
+A_Key_Response_PDU::init (const CArray & c)
 {
   if (c () != 3)
-    throw Exception (PDU_WRONG_FORMAT);
+    return false;
   level = c[2];
+  return true;
 }
 
 CArray
