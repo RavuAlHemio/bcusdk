@@ -38,18 +38,32 @@ Server (la3, tr)
 
   fd = socket (AF_INET, SOCK_STREAM, 0);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
 
   setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
 
   if (bind (fd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   if (listen (fd, 10) == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   TRACEPRINTF (tr, 8, this, "InetSocket opened");
   Start ();
+}
+
+bool
+InetServer::init ()
+{
+  return fd != -1;
 }
 
 void

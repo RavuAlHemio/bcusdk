@@ -27,6 +27,7 @@ class LocalServer:public Server
 {
 public:
   LocalServer (Layer3 * l3, Trace * tr, const char *port);
+  bool init ();
 };
 
 #endif

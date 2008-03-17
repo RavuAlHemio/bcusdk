@@ -256,6 +256,7 @@ main (int ac, char *ag[])
 {
   int index;
   Queue < Server * >server;
+  Server *s;
   Layer2Interface *l2;
   Layer3 *l3;
 #ifdef HAVE_EIBNETIPSERVER
@@ -312,9 +313,19 @@ main (int ac, char *ag[])
     l2 = Create (ag[index], &t);
     l3 = new Layer3 (l2, &t);
     if (arg.port)
-      server.put (new InetServer (l3, &t, arg.port));
+      {
+	s = new InetServer (l3, &t, arg.port);
+	if (!s->init ())
+	  throw Exception (DEV_OPEN_FAIL);
+	server.put (s);
+      }
     if (arg.name)
-      server.put (new LocalServer (l3, &t, arg.name));
+      {
+	s = new LocalServer (l3, &t, arg.name);
+	if (!s->init ())
+	  throw Exception (DEV_OPEN_FAIL);
+	server.put (s);
+      }
 #ifdef HAVE_EIBNETIPSERVER
     serv = startServer (l3, &t);
 #endif

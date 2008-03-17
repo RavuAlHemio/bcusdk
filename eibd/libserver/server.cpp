@@ -31,7 +31,8 @@ Server::~Server ()
   while (connections () != 0)
     pth_yield (0);
 
-  close (fd);
+  if (fd != -1)
+    close (fd);
   TRACEPRINTF (t, 8, this, "Server ended");
 }
 
@@ -51,6 +52,7 @@ Server::Server (Layer3 * layer3, Trace * tr)
 {
   t = tr;
   l3 = layer3;
+  fd = -1;
 }
 
 void

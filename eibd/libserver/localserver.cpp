@@ -32,15 +32,29 @@ Server (la3, tr)
 
   fd = socket (AF_LOCAL, SOCK_STREAM, 0);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
 
   unlink (path);
   if (bind (fd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   if (listen (fd, 10) == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   TRACEPRINTF (tr, 8, this, "LocalSocket opened");
   Start ();
+}
+
+bool
+LocalServer::init ()
+{
+  return fd != -1;
 }

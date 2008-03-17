@@ -44,6 +44,8 @@ protected:
     Server (Layer3 * l3, Trace * tr);
 public:
     virtual ~ Server ();
+
+  virtual bool init () = 0;
     /** deregister client connection */
   bool deregister (ClientConnection * con);
 };
