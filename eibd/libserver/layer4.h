@@ -71,10 +71,12 @@ class T_Broadcast:public L_Data_CallBack
     Queue < BroadcastComm > outqueue;
     /** semaphore for output queue */
   pth_sem_t sem;
+  bool init_ok;
 
 public:
     T_Broadcast (Layer3 * l3, Trace * t, int write_only);
     virtual ~ T_Broadcast ();
+  bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
@@ -95,10 +97,12 @@ class GroupSocket:public L_Data_CallBack
     Queue < GroupAPDU > outqueue;
     /** semaphore for output queue */
   pth_sem_t sem;
+  bool init_ok;
 
 public:
     GroupSocket (Layer3 * l3, Trace * t, int write_only);
     virtual ~ GroupSocket ();
+  bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
@@ -121,10 +125,12 @@ class T_Group:public L_Data_CallBack
   pth_sem_t sem;
   /** group address */
   eibaddr_t groupaddr;
+  bool init_ok;
 
 public:
     T_Group (Layer3 * l3, Trace * t, eibaddr_t dest, int write_only);
     virtual ~ T_Group ();
+  bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
@@ -147,10 +153,12 @@ class T_TPDU:public L_Data_CallBack
   pth_sem_t sem;
   /** source address to use */
   eibaddr_t src;
+  bool init_ok;
 
 public:
     T_TPDU (Layer3 * l3, Trace * t, eibaddr_t src);
     virtual ~ T_TPDU ();
+  bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
@@ -173,10 +181,12 @@ class T_Individual:public L_Data_CallBack
   pth_sem_t sem;
   /** destination address */
   eibaddr_t dest;
+  bool init_ok;
 
 public:
     T_Individual (Layer3 * l3, Trace * t, eibaddr_t dest, int write_only);
     virtual ~ T_Individual ();
+  bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
@@ -214,6 +224,7 @@ class T_Connection:public L_Data_CallBack, private Thread
   pth_sem_t bufsem;
     /** semaphore for output queue */
   pth_sem_t outsem;
+  bool init_ok;
 
   /** sends T_Connect */
   void SendConnect ();
@@ -227,6 +238,7 @@ class T_Connection:public L_Data_CallBack, private Thread
 public:
     T_Connection (Layer3 * l3, Trace * t, eibaddr_t dest);
    ~T_Connection ();
+  bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 

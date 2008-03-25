@@ -26,15 +26,22 @@ T_Broadcast::T_Broadcast (Layer3 * l3, Trace * tr, int write_only)
   layer3 = l3;
   t = tr;
   pth_sem_init (&sem);
+  init_ok = false;
   if (!write_only)
     if (!layer3->registerBroadcastCallBack (this))
-      throw Exception (L4_INIT_FAIL);
+      return;
+  init_ok = true;
 }
 
 T_Broadcast::~T_Broadcast ()
 {
   TRACEPRINTF (t, 4, this, "CloseBroadcast");
   layer3->deregisterBroadcastCallBack (this);
+}
+
+bool T_Broadcast::init ()
+{
+  return init_ok;
 }
 
 void
@@ -99,12 +106,19 @@ T_Group::T_Group (Layer3 * l3, Trace * tr, eibaddr_t group, int write_only)
   t = tr;
   groupaddr = group;
   pth_sem_init (&sem);
+  init_ok = false;
   if (group == 0)
-    throw Exception (L4_INIT_FAIL);
+    return;
 
   if (!write_only)
     if (!layer3->registerGroupCallBack (this, group))
-      throw Exception (L4_INIT_FAIL);
+      return;
+  init_ok = true;
+}
+
+bool T_Group::init ()
+{
+  return init_ok;
 }
 
 void
@@ -175,9 +189,16 @@ T_TPDU::T_TPDU (Layer3 * l3, Trace * tr, eibaddr_t d)
   t = tr;
   src = d;
   pth_sem_init (&sem);
+  init_ok = false;
   if (!layer3->
       registerIndividualCallBack (this, Individual_Lock_None, 0, src))
-    throw Exception (L4_INIT_FAIL);
+    return;
+  init_ok = true;
+}
+
+bool T_TPDU::init ()
+{
+  return init_ok;
 }
 
 void
@@ -240,10 +261,17 @@ T_Individual::T_Individual (Layer3 * l3, Trace * tr, eibaddr_t d,
   t = tr;
   dest = d;
   pth_sem_init (&sem);
+  init_ok = false;
   if (!write_only)
     if (!layer3->
 	registerIndividualCallBack (this, Individual_Lock_None, dest))
-      throw Exception (L4_INIT_FAIL);
+      return;
+  init_ok = true;
+}
+
+bool T_Individual::init ()
+{
+  return init_ok;
 }
 
 void
@@ -318,10 +346,12 @@ T_Connection::T_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
   recvno = 0;
   sendno = 0;
   mode = 0;
+  init_ok = false;
   if (!layer3->
       registerIndividualCallBack (this, Individual_Lock_Connection, dest))
-    throw Exception (L4_INIT_FAIL);
+    return;
   Start ();
+  init_ok = true;
 }
 
 T_Connection::~T_Connection ()
@@ -331,6 +361,11 @@ T_Connection::~T_Connection ()
   while (!buf.isempty ())
     delete buf.get ();
   layer3->deregisterIndividualCallBack (this, dest);
+}
+
+bool T_Connection::init ()
+{
+  return init_ok;
 }
 
 void
@@ -584,15 +619,22 @@ GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
   layer3 = l3;
   t = tr;
   pth_sem_init (&sem);
+  init_ok = false;
   if (!write_only)
     if (!layer3->registerGroupCallBack (this, 0))
-      throw Exception (L4_INIT_FAIL);
+      return;
+  init_ok = true;
 }
 
 GroupSocket::~GroupSocket ()
 {
   TRACEPRINTF (t, 4, this, "CloseGroupSocket");
   layer3->deregisterGroupCallBack (this, 0);
+}
+
+bool GroupSocket::init ()
+{
+  return init_ok;
 }
 
 void
