@@ -23,13 +23,14 @@
 
 static GroupCache *cache = 0;
 
-void
+bool
 CreateGroupCache (Layer3 * l3, Trace * t, bool enable)
 {
   cache = new GroupCache (l3, t);
   if (enable)
     if (!cache->Start ())
-      throw Exception (L4_INIT_FAIL);
+      return false;
+  return true;
 }
 
 void

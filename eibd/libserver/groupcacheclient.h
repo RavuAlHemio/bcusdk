@@ -24,7 +24,7 @@
 
 class ClientConnection;
 
-void CreateGroupCache (Layer3 * l3, Trace * t, bool enable);
+bool CreateGroupCache (Layer3 * l3, Trace * t, bool enable);
 void DeleteGroupCache ();
 
 void GroupCacheRequest (Layer3 * l3, Trace * t, ClientConnection * c,

@@ -330,7 +330,8 @@ main (int ac, char *ag[])
     serv = startServer (l3, &t);
 #endif
 #ifdef HAVE_GROUPCACHE
-    CreateGroupCache (l3, &t, arg.groupcache);
+    if (!CreateGroupCache (l3, &t, arg.groupcache))
+      throw Exception (L4_INIT_FAIL);
 #endif
   }
   catch (Exception e)
