@@ -29,14 +29,19 @@ Layer7_Broadcast::Layer7_Broadcast (Layer3 * l3, Trace * tr)
     {
       delete l4;
       l4 = 0;
-      throw Exception (L4_INIT_FAIL);
     }
 }
 
 Layer7_Broadcast::~Layer7_Broadcast ()
 {
   TRACEPRINTF (t, 5, this, "L7Broadcast Close");
-  delete l4;
+  if (l4)
+    delete l4;
+}
+
+bool Layer7_Broadcast::init ()
+{
+  return l4 != 0;
 }
 
 void
@@ -83,15 +88,19 @@ Layer7_Connection::Layer7_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
     {
       delete l4;
       l4 = 0;
-      throw Exception (L4_INIT_FAIL);
     }
 }
 
 Layer7_Connection::~Layer7_Connection ()
 {
-  delete l4;
+  if (l4)
+    delete l4;
 }
 
+bool Layer7_Connection::init ()
+{
+  return l4 != 0;
+}
 
 void
 Layer7_Connection::A_Restart ()

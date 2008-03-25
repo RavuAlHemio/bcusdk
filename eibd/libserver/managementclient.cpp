@@ -25,499 +25,500 @@ void
 ReadIndividualAddresses (Layer3 * l3, Trace * t, ClientConnection * c,
 			 pth_event_t stop)
 {
-  try
-  {
-    Layer7_Broadcast b (l3, t);
-    CArray erg;
-    Array < eibaddr_t > e = b.A_IndividualAddress_Read ();
-    erg.resize (2 + 2 * e ());
-    EIBSETTYPE (erg, EIB_M_INDIVIDUAL_ADDRESS_READ);
-    for (unsigned i = 0; i < e (); i++)
-      {
-	erg[2 + i * 2] = (e[i] >> 8) & 0xff;
-	erg[2 + i * 2 + 1] = (e[i]) & 0xff;
-      }
-    c->sendmessage (erg (), erg.array (), stop);
-  }
-  catch (Exception e)
-  {
-    c->sendreject (stop, EIB_PROCESSING_ERROR);
-  }
+  Layer7_Broadcast b (l3, t);
+  if (!b.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  CArray erg;
+  Array < eibaddr_t > e = b.A_IndividualAddress_Read ();
+  erg.resize (2 + 2 * e ());
+  EIBSETTYPE (erg, EIB_M_INDIVIDUAL_ADDRESS_READ);
+  for (unsigned i = 0; i < e (); i++)
+    {
+      erg[2 + i * 2] = (e[i] >> 8) & 0xff;
+      erg[2 + i * 2 + 1] = (e[i]) & 0xff;
+    }
+  c->sendmessage (erg (), erg.array (), stop);
 }
 
 void
 ChangeProgMode (Layer3 * l3, Trace * t, ClientConnection * c,
 		pth_event_t stop)
 {
-  try
-  {
-    eibaddr_t dest;
-    uchar res[3];
-    int i;
-    EIBSETTYPE (res, EIB_PROG_MODE);
-    res[2] = 0;
-    if (c->size < 5)
-      {
+  eibaddr_t dest;
+  uchar res[3];
+  int i;
+  EIBSETTYPE (res, EIB_PROG_MODE);
+  res[2] = 0;
+  if (c->size < 5)
+    {
+      c->sendreject (stop);
+      return;
+    }
+  dest = (c->buf[2] << 8) | (c->buf[3]);
+  Management_Connection m (l3, t, dest);
+  if (!m.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  switch (c->buf[4])
+    {
+    case 0:
+      if (m.X_Progmode_Off () == -1)
 	c->sendreject (stop);
-	return;
-      }
-    dest = (c->buf[2] << 8) | (c->buf[3]);
-    Management_Connection m (l3, t, dest);
-    switch (c->buf[4])
-      {
-      case 0:
-	if (m.X_Progmode_Off () == -1)
-	  c->sendreject (stop);
-	else
-	  c->sendmessage (3, res, stop);
-	break;
-      case 1:
-	if (m.X_Progmode_On () == -1)
-	  c->sendreject (stop);
-	else
-	  c->sendmessage (3, res, stop);
-	break;
-      case 2:
-	if (m.X_Progmode_Toggle () == -1)
-	  c->sendreject (stop);
-	else
-	  c->sendmessage (3, res, stop);
-	break;
-      case 3:
-	if ((i = m.X_Progmode_Status ()) == -1)
-	  c->sendreject (stop);
-	else
-	  {
-	    res[2] = i;
-	    c->sendmessage (3, res, stop);
-	  }
-	break;
-      default:
+      else
+	c->sendmessage (3, res, stop);
+      break;
+    case 1:
+      if (m.X_Progmode_On () == -1)
 	c->sendreject (stop);
-      }
-  }
-  catch (Exception e)
-  {
-    c->sendreject (stop, EIB_PROCESSING_ERROR);
-  }
+      else
+	c->sendmessage (3, res, stop);
+      break;
+    case 2:
+      if (m.X_Progmode_Toggle () == -1)
+	c->sendreject (stop);
+      else
+	c->sendmessage (3, res, stop);
+      break;
+    case 3:
+      if ((i = m.X_Progmode_Status ()) == -1)
+	c->sendreject (stop);
+      else
+	{
+	  res[2] = i;
+	  c->sendmessage (3, res, stop);
+	}
+      break;
+    default:
+      c->sendreject (stop);
+    }
 }
 
 void
 GetMaskVersion (Layer3 * l3, Trace * t, ClientConnection * c,
 		pth_event_t stop)
 {
-  try
-  {
-    eibaddr_t dest;
-    uchar res[4];
-    uint16_t maskver;
-    EIBSETTYPE (res, EIB_MASK_VERSION);
-    res[2] = 0;
-    if (c->size < 4)
-      {
-	c->sendreject (stop);
-	return;
-      }
-
-    dest = (c->buf[2] << 8) | (c->buf[3]);
-    Management_Connection m (l3, t, dest);
-    if (m.A_Device_Descriptor_Read (maskver) == -1)
+  eibaddr_t dest;
+  uchar res[4];
+  uint16_t maskver;
+  EIBSETTYPE (res, EIB_MASK_VERSION);
+  res[2] = 0;
+  if (c->size < 4)
+    {
       c->sendreject (stop);
-    else
-      {
-	res[2] = (maskver >> 8) & 0xff;
-	res[3] = (maskver) & 0xff;
-	c->sendmessage (4, res, stop);
-      }
-  }
-  catch (Exception e)
-  {
-    c->sendreject (stop, EIB_PROCESSING_ERROR);
-  }
+      return;
+    }
+
+  dest = (c->buf[2] << 8) | (c->buf[3]);
+  Management_Connection m (l3, t, dest);
+  if (!m.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  if (m.A_Device_Descriptor_Read (maskver) == -1)
+    c->sendreject (stop);
+  else
+    {
+      res[2] = (maskver >> 8) & 0xff;
+      res[3] = (maskver) & 0xff;
+      c->sendmessage (4, res, stop);
+    }
 }
 
 void
 WriteIndividualAddress (Layer3 * l3, Trace * t, ClientConnection * c,
 			pth_event_t stop)
 {
-  try
-  {
-    eibaddr_t dest;
-    uint16_t maskver;
-    if (c->size < 4)
-      {
-	c->sendreject (stop);
-	return;
-      }
-
-    dest = (c->buf[2] << 8) | (c->buf[3]);
-    Layer7_Broadcast b (l3, t);
+  eibaddr_t dest;
+  uint16_t maskver;
+  if (c->size < 4)
     {
-      Management_Connection m (l3, t, dest);
-      if (m.A_Device_Descriptor_Read (maskver) != -1)
-	{
-	  c->sendreject (stop, EIB_ERROR_ADDR_EXISTS);
-	  return;
-	}
+      c->sendreject (stop);
+      return;
     }
-    Array < eibaddr_t > addr = b.A_IndividualAddress_Read ();
-    if (addr () > 1)
-      {
-	c->sendreject (stop, EIB_ERROR_MORE_DEVICE);
-	return;
-      }
-    if (addr () == 0)
-      {
-	c->sendreject (stop, EIB_ERROR_TIMEOUT);
-	return;
-      }
-    b.A_IndividualAddress_Write (dest);
-    // wait 100ms
-    pth_usleep (100000);
 
-    Management_Connection m1 (l3, t, dest);
-    if (m1.A_Device_Descriptor_Read (maskver) == -1)
-      {
-	c->sendreject (stop, EIB_PROCESSING_ERROR);
-	return;
-      }
-    if (m1.X_Progmode_Off () == -1)
-      {
-	c->sendreject (stop, EIB_PROCESSING_ERROR);
-	return;
-      }
-    c->sendreject (stop, EIB_M_INDIVIDUAL_ADDRESS_WRITE);
-  }
-  catch (Exception e)
+  dest = (c->buf[2] << 8) | (c->buf[3]);
+  Layer7_Broadcast b (l3, t);
+  if (!b.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
   {
-    c->sendreject (stop, EIB_PROCESSING_ERROR);
+    Management_Connection m (l3, t, dest);
+    if (!m.init ())
+      {
+	c->sendreject (stop, EIB_PROCESSING_ERROR);
+	return;
+      }
+    if (m.A_Device_Descriptor_Read (maskver) != -1)
+      {
+	c->sendreject (stop, EIB_ERROR_ADDR_EXISTS);
+	return;
+      }
   }
+  Array < eibaddr_t > addr = b.A_IndividualAddress_Read ();
+  if (addr () > 1)
+    {
+      c->sendreject (stop, EIB_ERROR_MORE_DEVICE);
+      return;
+    }
+  if (addr () == 0)
+    {
+      c->sendreject (stop, EIB_ERROR_TIMEOUT);
+      return;
+    }
+  b.A_IndividualAddress_Write (dest);
+  // wait 100ms
+  pth_usleep (100000);
+
+  Management_Connection m1 (l3, t, dest);
+  if (!m1.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  if (m1.A_Device_Descriptor_Read (maskver) == -1)
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  if (m1.X_Progmode_Off () == -1)
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  c->sendreject (stop, EIB_M_INDIVIDUAL_ADDRESS_WRITE);
 }
+
 void
 ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		      pth_event_t stop)
 {
-  try
-  {
-    eibaddr_t dest;
-    uint16_t maskver;
-    int16_t val;
-    uchar buf[10];
-    int i;
-    eibkey_type key;
+  eibaddr_t dest;
+  uint16_t maskver;
+  int16_t val;
+  uchar buf[10];
+  int i;
+  eibkey_type key;
 
-    if (c->size < 4)
-      {
-	c->sendreject (stop);
-	return;
-      }
+  if (c->size < 4)
+    {
+      c->sendreject (stop);
+      return;
+    }
 
-    dest = (c->buf[2] << 8) | (c->buf[3]);
-    Management_Connection m (l3, t, dest);
-    if (m.A_Device_Descriptor_Read (maskver) == -1)
-      {
-	c->sendreject (stop);
-	return;
-      }
-    c->sendreject (stop, EIB_MC_CONNECTION);
-    do
-      {
-	i = c->readmessage (stop);
-	if (i != -1)
-	  switch (EIBTYPE (c->buf))
-	    {
-	    case EIB_MC_PROG_MODE:
-	      if (c->size < 3)
-		{
+  dest = (c->buf[2] << 8) | (c->buf[3]);
+  Management_Connection m (l3, t, dest);
+  if (!m.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  if (m.A_Device_Descriptor_Read (maskver) == -1)
+    {
+      c->sendreject (stop);
+      return;
+    }
+  c->sendreject (stop, EIB_MC_CONNECTION);
+  do
+    {
+      i = c->readmessage (stop);
+      if (i != -1)
+	switch (EIBTYPE (c->buf))
+	  {
+	  case EIB_MC_PROG_MODE:
+	    if (c->size < 3)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    EIBSETTYPE (buf, EIB_MC_PROG_MODE);
+	    buf[2] = 0;
+	    switch (c->buf[2])
+	      {
+	      case 0:
+		if (m.X_Progmode_Off () == -1)
 		  c->sendreject (stop);
-		  break;
-		}
-	      EIBSETTYPE (buf, EIB_MC_PROG_MODE);
-	      buf[2] = 0;
-	      switch (c->buf[2])
-		{
-		case 0:
-		  if (m.X_Progmode_Off () == -1)
-		    c->sendreject (stop);
-		  else
+		else
+		  c->sendmessage (3, buf, stop);
+		break;
+	      case 1:
+		if (m.X_Progmode_On () == -1)
+		  c->sendreject (stop);
+		else
+		  c->sendmessage (3, buf, stop);
+		break;
+	      case 2:
+		if (m.X_Progmode_Toggle () == -1)
+		  c->sendreject (stop);
+		else
+		  c->sendmessage (3, buf, stop);
+		break;
+	      case 3:
+		if ((i = m.X_Progmode_Status ()) == -1)
+		  c->sendreject (stop);
+		else
+		  {
+		    buf[2] = i;
 		    c->sendmessage (3, buf, stop);
-		  break;
-		case 1:
-		  if (m.X_Progmode_On () == -1)
-		    c->sendreject (stop);
-		  else
-		    c->sendmessage (3, buf, stop);
-		  break;
-		case 2:
-		  if (m.X_Progmode_Toggle () == -1)
-		    c->sendreject (stop);
-		  else
-		    c->sendmessage (3, buf, stop);
-		  break;
-		case 3:
-		  if ((i = m.X_Progmode_Status ()) == -1)
-		    c->sendreject (stop);
-		  else
-		    {
-		      buf[2] = i;
-		      c->sendmessage (3, buf, stop);
-		    }
-		  break;
-		default:
-		  c->sendreject (stop);
-		}
-	      break;
-	    case EIB_MC_MASK_VERSION:
-	      if (m.A_Device_Descriptor_Read (maskver) == -1)
-		c->sendreject (stop);
-	      else
-		{
-		  EIBSETTYPE (buf, EIB_MC_MASK_VERSION);
-		  buf[2] = (maskver >> 8) & 0xff;
-		  buf[3] = (maskver) & 0xff;
-		  c->sendmessage (4, buf, stop);
-		}
-	      break;
-	    case EIB_MC_PEI_TYPE:
-	      if (m.X_Get_PEIType (val) == -1)
-		c->sendreject (stop);
-	      else
-		{
-		  EIBSETTYPE (buf, EIB_MC_PEI_TYPE);
-		  buf[2] = (val >> 8) & 0xff;
-		  buf[3] = (val) & 0xff;
-		  c->sendmessage (4, buf, stop);
-		}
-	      break;
-	    case EIB_MC_ADC_READ:
-	      if (c->size < 4)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      if (m.A_ADC_Read (c->buf[2], c->buf[3], val) == -1)
-		c->sendreject (stop);
-	      else
-		{
-		  EIBSETTYPE (buf, EIB_MC_ADC_READ);
-		  buf[2] = (val >> 8) & 0xff;
-		  buf[3] = (val) & 0xff;
-		  c->sendmessage (4, buf, stop);
-		}
-	      break;
-
-	    case EIB_MC_READ:
-	      if (c->size < 6)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      {
-		memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
-		unsigned len = (c->buf[4] << 8) | (c->buf[5]);
-		CArray data, erg;
-		if (m.X_Memory_Read_Block (addr, len, data) == -1)
-		  c->sendreject (stop);
-		else
-		  {
-		    erg.resize (6);
-		    EIBSETTYPE (erg, EIB_MC_READ);
-		    erg.setpart (data, 2);
-		    c->sendmessage (erg (), erg.array (), stop);
 		  }
-	      }
-	      break;
-
-	    case EIB_MC_WRITE:
-	      if (c->size < 6)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      {
-		memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
-		unsigned len = (c->buf[4] << 8) | (c->buf[5]);
-		if (c->size < len + 6)
-		  {
-		    c->sendreject (stop);
-		    break;
-		  }
-		i = m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len));
-		if (i == -2)
-		  c->sendreject (stop, EIB_ERROR_VERIFY);
-		else if (i != 0)
-		  c->sendreject (stop, EIB_PROCESSING_ERROR);
-		else
-		  c->sendreject (stop, EIB_MC_WRITE);
-	      }
-	      break;
-
-	    case EIB_MC_PROP_READ:
-	      if (c->size < 7)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      {
-		CArray data, erg;
-		if (m.
-		    A_Property_Read (c->buf[2], c->buf[3],
-				     (c->buf[4] << 8) | c->buf[5], c->buf[6],
-				     data) == -1)
-		  c->sendreject (stop);
-		else
-		  {
-		    erg.resize (2);
-		    EIBSETTYPE (erg, EIB_MC_PROP_READ);
-		    erg.setpart (data, 2);
-		    c->sendmessage (erg (), erg.array (), stop);
-		  }
-	      }
-	      break;
-
-	    case EIB_MC_PROP_WRITE:
-	      if (c->size < 7)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      {
-		CArray data, erg;
-		if (m.
-		    A_Property_Write (c->buf[2], c->buf[3],
-				      (c->buf[4] << 8) | c->buf[5], c->buf[6],
-				      CArray (c->buf + 7, c->size - 7),
-				      erg) == -1)
-		  c->sendreject (stop);
-		else
-		  {
-		    erg.resize (2);
-		    EIBSETTYPE (erg, EIB_MC_PROP_WRITE);
-		    erg.setpart (data, 2);
-		    c->sendmessage (erg (), erg.array (), stop);
-		  }
-	      }
-	      break;
-
-	    case EIB_MC_AUTHORIZE:
-	      if (c->size < 6)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      EIBSETTYPE (buf, EIB_MC_AUTHORIZE);
-	      key =
-		(c->buf[2] << 24) | (c->buf[3] << 16) | (c->
-							 buf[4] << 8) | (c->
-									 buf
-									 [5]);
-	      if (m.A_Authorize (key, buf[2]) == -1)
+		break;
+	      default:
 		c->sendreject (stop);
-	      else
-		c->sendmessage (3, buf, stop);
-	      break;
-
-	    case EIB_MC_KEY_WRITE:
-	      if (c->size < 7)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      key =
-		(c->buf[2] << 24) | (c->buf[3] << 16) | (c->
-							 buf[4] << 8) | (c->
-									 buf
-									 [5]);
-	      if (m.A_KeyWrite (key, *(c->buf + 6)) == -1)
-		c->sendreject (stop);
-	      else
-		c->sendreject (stop, EIB_MC_KEY_WRITE);
-	      break;
-
-	    case EIB_MC_PROP_DESC:
-	      if (c->size < 4)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      if (m.
-		  A_Property_Desc (c->buf[2], c->buf[3], 0, buf[2], maskver,
-				   buf[5]) == -1)
-		c->sendreject (stop);
-	      else
-		{
-		  EIBSETTYPE (buf, EIB_MC_PROP_DESC);
-		  buf[3] = (maskver >> 8) & 0xff;
-		  buf[4] = (maskver) & 0xff;
-		  c->sendmessage (6, buf, stop);
-		}
-	      break;
-
-	    case EIB_MC_PROP_SCAN:
-	      {
-		Array < PropertyInfo > p;
-		if (m.X_PropertyScan (p) == -1)
-		  c->sendreject (stop);
-		else
-		  {
-		    CArray erg;
-		    erg.resize (2 + p () * 6);
-		    EIBSETTYPE (erg, EIB_MC_PROP_SCAN);
-		    for (unsigned i = 0; i < p (); i++)
-		      {
-			erg[i * 6 + 2] = p[i].obj;
-			erg[i * 6 + 3] = p[i].property;
-			erg[i * 6 + 4] = p[i].type;
-			erg[i * 6 + 5] = (p[i].count >> 8) & 0xff;
-			erg[i * 6 + 6] = (p[i].count) & 0xff;
-			erg[i * 6 + 7] = p[i].access;
-		      }
-		    c->sendmessage (erg (), erg.array (), stop);
-		  }
 	      }
-	      break;
-
-	    case EIB_RESET_CONNECTION:
-	      i = -1;
-	      break;
-
-	    case EIB_MC_RESTART:
-	      m.A_Restart ();
-	      c->sendreject (stop, EIB_MC_RESTART);
-	      break;
-
-	    case EIB_MC_WRITE_NOVERIFY:
-	      if (c->size < 6)
-		{
-		  c->sendreject (stop);
-		  break;
-		}
-	      {
-		memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
-		unsigned len = (c->buf[4] << 8) | (c->buf[5]);
-		if (c->size < len + 6)
-		  {
-		    c->sendreject (stop);
-		    break;
-		  }
-		i = m.A_Memory_Write_Block (addr, CArray (c->buf + 6, len));
-		if (i != 0)
-		  c->sendreject (stop, EIB_PROCESSING_ERROR);
-		else
-		  c->sendreject (stop, EIB_MC_WRITE_NOVERIFY);
-	      }
-	      break;
-
-	    default:
+	    break;
+	  case EIB_MC_MASK_VERSION:
+	    if (m.A_Device_Descriptor_Read (maskver) == -1)
 	      c->sendreject (stop);
+	    else
+	      {
+		EIBSETTYPE (buf, EIB_MC_MASK_VERSION);
+		buf[2] = (maskver >> 8) & 0xff;
+		buf[3] = (maskver) & 0xff;
+		c->sendmessage (4, buf, stop);
+	      }
+	    break;
+	  case EIB_MC_PEI_TYPE:
+	    if (m.X_Get_PEIType (val) == -1)
+	      c->sendreject (stop);
+	    else
+	      {
+		EIBSETTYPE (buf, EIB_MC_PEI_TYPE);
+		buf[2] = (val >> 8) & 0xff;
+		buf[3] = (val) & 0xff;
+		c->sendmessage (4, buf, stop);
+	      }
+	    break;
+	  case EIB_MC_ADC_READ:
+	    if (c->size < 4)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    if (m.A_ADC_Read (c->buf[2], c->buf[3], val) == -1)
+	      c->sendreject (stop);
+	    else
+	      {
+		EIBSETTYPE (buf, EIB_MC_ADC_READ);
+		buf[2] = (val >> 8) & 0xff;
+		buf[3] = (val) & 0xff;
+		c->sendmessage (4, buf, stop);
+	      }
+	    break;
+
+	  case EIB_MC_READ:
+	    if (c->size < 6)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
+	      unsigned len = (c->buf[4] << 8) | (c->buf[5]);
+	      CArray data, erg;
+	      if (m.X_Memory_Read_Block (addr, len, data) == -1)
+		c->sendreject (stop);
+	      else
+		{
+		  erg.resize (6);
+		  EIBSETTYPE (erg, EIB_MC_READ);
+		  erg.setpart (data, 2);
+		  c->sendmessage (erg (), erg.array (), stop);
+		}
 	    }
-      }
-    while (i != -1);
-  }
-  catch (Exception e)
-  {
-    c->sendreject (stop);
-  }
+	    break;
+
+	  case EIB_MC_WRITE:
+	    if (c->size < 6)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
+	      unsigned len = (c->buf[4] << 8) | (c->buf[5]);
+	      if (c->size < len + 6)
+		{
+		  c->sendreject (stop);
+		  break;
+		}
+	      i = m.X_Memory_Write_Block (addr, CArray (c->buf + 6, len));
+	      if (i == -2)
+		c->sendreject (stop, EIB_ERROR_VERIFY);
+	      else if (i != 0)
+		c->sendreject (stop, EIB_PROCESSING_ERROR);
+	      else
+		c->sendreject (stop, EIB_MC_WRITE);
+	    }
+	    break;
+
+	  case EIB_MC_PROP_READ:
+	    if (c->size < 7)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      CArray data, erg;
+	      if (m.
+		  A_Property_Read (c->buf[2], c->buf[3],
+				   (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				   data) == -1)
+		c->sendreject (stop);
+	      else
+		{
+		  erg.resize (2);
+		  EIBSETTYPE (erg, EIB_MC_PROP_READ);
+		  erg.setpart (data, 2);
+		  c->sendmessage (erg (), erg.array (), stop);
+		}
+	    }
+	    break;
+
+	  case EIB_MC_PROP_WRITE:
+	    if (c->size < 7)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      CArray data, erg;
+	      if (m.
+		  A_Property_Write (c->buf[2], c->buf[3],
+				    (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				    CArray (c->buf + 7, c->size - 7),
+				    erg) == -1)
+		c->sendreject (stop);
+	      else
+		{
+		  erg.resize (2);
+		  EIBSETTYPE (erg, EIB_MC_PROP_WRITE);
+		  erg.setpart (data, 2);
+		  c->sendmessage (erg (), erg.array (), stop);
+		}
+	    }
+	    break;
+
+	  case EIB_MC_AUTHORIZE:
+	    if (c->size < 6)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    EIBSETTYPE (buf, EIB_MC_AUTHORIZE);
+	    key =
+	      (c->buf[2] << 24) | (c->buf[3] << 16) | (c->
+						       buf[4] << 8) | (c->
+								       buf
+								       [5]);
+	    if (m.A_Authorize (key, buf[2]) == -1)
+	      c->sendreject (stop);
+	    else
+	      c->sendmessage (3, buf, stop);
+	    break;
+
+	  case EIB_MC_KEY_WRITE:
+	    if (c->size < 7)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    key =
+	      (c->buf[2] << 24) | (c->buf[3] << 16) | (c->
+						       buf[4] << 8) | (c->
+								       buf
+								       [5]);
+	    if (m.A_KeyWrite (key, *(c->buf + 6)) == -1)
+	      c->sendreject (stop);
+	    else
+	      c->sendreject (stop, EIB_MC_KEY_WRITE);
+	    break;
+
+	  case EIB_MC_PROP_DESC:
+	    if (c->size < 4)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    if (m.
+		A_Property_Desc (c->buf[2], c->buf[3], 0, buf[2], maskver,
+				 buf[5]) == -1)
+	      c->sendreject (stop);
+	    else
+	      {
+		EIBSETTYPE (buf, EIB_MC_PROP_DESC);
+		buf[3] = (maskver >> 8) & 0xff;
+		buf[4] = (maskver) & 0xff;
+		c->sendmessage (6, buf, stop);
+	      }
+	    break;
+
+	  case EIB_MC_PROP_SCAN:
+	    {
+	      Array < PropertyInfo > p;
+	      if (m.X_PropertyScan (p) == -1)
+		c->sendreject (stop);
+	      else
+		{
+		  CArray erg;
+		  erg.resize (2 + p () * 6);
+		  EIBSETTYPE (erg, EIB_MC_PROP_SCAN);
+		  for (unsigned i = 0; i < p (); i++)
+		    {
+		      erg[i * 6 + 2] = p[i].obj;
+		      erg[i * 6 + 3] = p[i].property;
+		      erg[i * 6 + 4] = p[i].type;
+		      erg[i * 6 + 5] = (p[i].count >> 8) & 0xff;
+		      erg[i * 6 + 6] = (p[i].count) & 0xff;
+		      erg[i * 6 + 7] = p[i].access;
+		    }
+		  c->sendmessage (erg (), erg.array (), stop);
+		}
+	    }
+	    break;
+
+	  case EIB_RESET_CONNECTION:
+	    i = -1;
+	    break;
+
+	  case EIB_MC_RESTART:
+	    m.A_Restart ();
+	    c->sendreject (stop, EIB_MC_RESTART);
+	    break;
+
+	  case EIB_MC_WRITE_NOVERIFY:
+	    if (c->size < 6)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      memaddr_t addr = (c->buf[2] << 8) | (c->buf[3]);
+	      unsigned len = (c->buf[4] << 8) | (c->buf[5]);
+	      if (c->size < len + 6)
+		{
+		  c->sendreject (stop);
+		  break;
+		}
+	      i = m.A_Memory_Write_Block (addr, CArray (c->buf + 6, len));
+	      if (i != 0)
+		c->sendreject (stop, EIB_PROCESSING_ERROR);
+	      else
+		c->sendreject (stop, EIB_MC_WRITE_NOVERIFY);
+	    }
+	    break;
+
+	  default:
+	    c->sendreject (stop);
+	  }
+    }
+  while (i != -1);
 }
 
 void
@@ -539,13 +540,13 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
       c->sendmessage (4, buf, stop);
       return;
     }
-
-  try
   {
     uint16_t maskver;
     uchar c;
     r = IMG_NO_DEVICE_CONNECTION;
     Management_Connection m (l3, t, i->addr);
+    if (!m.init ())
+      goto out;
     r = IMG_MASK_READ_FAILED;
     if (m.A_Device_Descriptor_Read (maskver) == -1)
       goto out;
@@ -675,9 +676,6 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	r = IMG_LOADED;
 	goto out;
       }
-  }
-  catch (Exception e)
-  {
   }
 out:
 

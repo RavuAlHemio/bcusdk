@@ -33,6 +33,7 @@ class Layer7_Broadcast
 public:
     Layer7_Broadcast (Layer3 * l3, Trace * tr);
     virtual ~ Layer7_Broadcast ();
+  bool init ();
 
     /** send IndividualAddress_Write */
   void A_IndividualAddress_Write (eibaddr_t addr);
@@ -53,6 +54,7 @@ class Layer7_Connection
 public:
     Layer7_Connection (Layer3 * l3, Trace * tr, eibaddr_t dest);
     virtual ~ Layer7_Connection ();
+  bool init ();
 
     /** send A_Restart */
   void A_Restart ();
