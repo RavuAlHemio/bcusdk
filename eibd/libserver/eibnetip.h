@@ -281,7 +281,7 @@ public:
     virtual ~ EIBNetIPSocket ();
 
     /** enables multicast */
-  void SetMulticast (struct ip_mreq multicastaddr);
+  bool SetMulticast (struct ip_mreq multicastaddr);
   /** sends a packet */
   void Send (EIBNetIPPacket p);
   /** waits for an packet; aborts if stop occurs */

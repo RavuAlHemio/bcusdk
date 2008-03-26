@@ -319,16 +319,17 @@ EIBNetIPSocket::~EIBNetIPSocket ()
     }
 }
 
-void
+bool
 EIBNetIPSocket::SetMulticast (struct ip_mreq multicastaddr)
 {
   if (multicast)
-    throw Exception (DEV_OPEN_FAIL);
+    return false;
   maddr = multicastaddr;
   if (setsockopt (fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &maddr, sizeof (maddr))
       == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return false;
   multicast = 1;
+  return true;
 }
 
 void

@@ -48,7 +48,8 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
   sock = new EIBNetIPSocket (baddr, 1, t);
   mcfg.imr_multiaddr = maddr.sin_addr;
   mcfg.imr_interface.s_addr = htonl (INADDR_ANY);
-  sock->SetMulticast (mcfg);
+  if (!sock->SetMulticast (mcfg))
+    throw Exception (DEV_OPEN_FAIL);
   sock->recvall = 2;
   if (!GetSourceAddress (&maddr, &sock->localaddr))
     throw Exception (DEV_OPEN_FAIL);

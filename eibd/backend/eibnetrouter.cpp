@@ -46,7 +46,8 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
 
   mcfg.imr_multiaddr = sock->sendaddr.sin_addr;
   mcfg.imr_interface.s_addr = htonl (INADDR_ANY);
-  sock->SetMulticast (mcfg);
+  if (!sock->SetMulticast (mcfg))
+    throw Exception (DEV_OPEN_FAIL);
   pth_sem_init (&out_signal);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
