@@ -244,6 +244,8 @@ startServer (Layer3 * l3, Trace * t)
   else
     port = 3671;
   c = new EIBnetServer (a, port, arg.tunnel, arg.route, arg.discover, l3, t);
+  if (!c->init ())
+    die ("initilization of the EIBnet/IP server failed");
   free (a);
   return c;
 }

@@ -56,6 +56,7 @@ public:
     EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 		  bool Route, bool Discover, Layer3 * layer3, Trace * tr);
     virtual ~ EIBnetServer ();
+  bool init ();
 
 };
 

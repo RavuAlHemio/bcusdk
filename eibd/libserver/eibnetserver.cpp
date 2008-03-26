@@ -42,7 +42,10 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
   baddr.sin_addr.s_addr = htonl (INADDR_ANY);
 
   if (GetHostIP (&maddr, multicastaddr) == 0)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      sock = 0;
+      return;
+    }
   maddr.sin_port = htons (port);
 
   sock = new EIBNetIPSocket (baddr, 1, t);
@@ -50,15 +53,23 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
     {
       delete sock;
       sock = 0;
-      throw Exception (DEV_OPEN_FAIL);
+      return;
     }
   mcfg.imr_multiaddr = maddr.sin_addr;
   mcfg.imr_interface.s_addr = htonl (INADDR_ANY);
   if (!sock->SetMulticast (mcfg))
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      delete sock;
+      sock = 0;
+      return;
+    }
   sock->recvall = 2;
   if (!GetSourceAddress (&maddr, &sock->localaddr))
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      delete sock;
+      sock = 0;
+      return;
+    }
   sock->localaddr.sin_port = htons (port);
   tunnel = Tunnel;
   route = Route;
@@ -67,11 +78,23 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
   if (route || tunnel)
     {
       if (!l3->registerBroadcastCallBack (this))
-	throw Exception (DEV_OPEN_FAIL);
+	{
+	  delete sock;
+	  sock = 0;
+	  return;
+	}
       if (!l3->registerGroupCallBack (this, 0))
-	throw Exception (DEV_OPEN_FAIL);
+	{
+	  delete sock;
+	  sock = 0;
+	  return;
+	}
       if (!l3->registerIndividualCallBack (this, Individual_Lock_None, 0, 0))
-	throw Exception (DEV_OPEN_FAIL);
+	{
+	  delete sock;
+	  sock = 0;
+	  return;
+	}
     }
   Start ();
   TRACEPRINTF (t, 8, this, "Opened");
@@ -90,6 +113,12 @@ EIBnetServer::~EIBnetServer ()
   Stop ();
   if (sock)
     delete sock;
+}
+
+bool
+EIBnetServer::init ()
+{
+  return sock != 0;
 }
 
 void
