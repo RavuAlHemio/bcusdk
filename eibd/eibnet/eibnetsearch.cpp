@@ -92,23 +92,19 @@ main (int ac, char *ag[])
     a = (char *) "224.0.23.12";
 
   printf ("Asking %s at port %d from port %d\n", a, dport, sport);
-  try
-  {
-    if (!GetHostIP (&caddr, a))
-      die ("Host not found");
-    caddr.sin_port = htons (dport);
-    if (!GetSourceAddress (&caddr, &saddr))
-      die ("No route found");
-    saddr.sin_port = htons (sport);
-    sock = new EIBNetIPSocket (saddr, 0, &t);
-    sock->sendaddr = caddr;
-    sock->recvaddr = caddr;
-    sock->recvall = 1;
-  }
-  catch (Exception e)
-  {
+
+  if (!GetHostIP (&caddr, a))
+    die ("Host not found");
+  caddr.sin_port = htons (dport);
+  if (!GetSourceAddress (&caddr, &saddr))
+    die ("No route found");
+  saddr.sin_port = htons (sport);
+  sock = new EIBNetIPSocket (saddr, 0, &t);
+  sock->sendaddr = caddr;
+  sock->recvaddr = caddr;
+  sock->recvall = 1;
+  if (!sock->init ())
     die ("IP initialisation failed");
-  }
 
   EIBnet_SearchRequest req;
   EIBnet_SearchResponse resp;

@@ -46,6 +46,12 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
   maddr.sin_port = htons (port);
 
   sock = new EIBNetIPSocket (baddr, 1, t);
+  if (!sock->init ())
+    {
+      delete sock;
+      sock = 0;
+      throw Exception (DEV_OPEN_FAIL);
+    }
   mcfg.imr_multiaddr = maddr.sin_addr;
   mcfg.imr_interface.s_addr = htonl (INADDR_ANY);
   if (!sock->SetMulticast (mcfg))
@@ -82,7 +88,8 @@ EIBnetServer::~EIBnetServer ()
       l3->deregisterIndividualCallBack (this, 0, 0);
     }
   Stop ();
-  delete sock;
+  if (sock)
+    delete sock;
 }
 
 void

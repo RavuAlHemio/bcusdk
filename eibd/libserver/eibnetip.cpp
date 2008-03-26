@@ -290,16 +290,24 @@ EIBNetIPSocket::EIBNetIPSocket (struct sockaddr_in bindaddr, bool reuseaddr,
 
   fd = socket (AF_INET, SOCK_DGRAM, 0);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
 
   if (reuseaddr)
     {
       i = 1;
       if (setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &i, sizeof (i)) == -1)
-	throw Exception (DEV_OPEN_FAIL);
+	{
+	  close (fd);
+	  fd = -1;
+	  return;
+	}
     }
   if (bind (fd, (struct sockaddr *) &bindaddr, sizeof (bindaddr)) == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   Start ();
   TRACEPRINTF (t, 0, this, "Openend");
@@ -317,6 +325,12 @@ EIBNetIPSocket::~EIBNetIPSocket ()
 		    sizeof (maddr));
       close (fd);
     }
+}
+
+bool
+EIBNetIPSocket::init ()
+{
+  return fd != -1;
 }
 
 bool

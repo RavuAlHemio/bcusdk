@@ -90,22 +90,19 @@ main (int ac, char *ag[])
   t.SetTraceLevel (tracelevel);
 
   printf ("Asking %s at port %d from port %d\n", a, dport, sport);
-  try
-  {
-    if (!GetHostIP (&caddr, a))
-      die ("Host not found");
-    caddr.sin_port = htons (dport);
-    if (!GetSourceAddress (&caddr, &saddr))
-      die ("No route found");
-    saddr.sin_port = htons (sport);
-    sock = new EIBNetIPSocket (saddr, 0, &t);
-    sock->sendaddr = caddr;
-    sock->recvaddr = caddr;
-  }
-  catch (Exception e)
-  {
+
+  if (!GetHostIP (&caddr, a))
+    die ("Host not found");
+  caddr.sin_port = htons (dport);
+  if (!GetSourceAddress (&caddr, &saddr))
+    die ("No route found");
+  saddr.sin_port = htons (sport);
+  sock = new EIBNetIPSocket (saddr, 0, &t);
+  sock->sendaddr = caddr;
+  sock->recvaddr = caddr;
+
+  if (!sock->init ())
     die ("IP initialisation failed");
-  }
 
   EIBnet_DescriptionRequest req;
   EIBnet_DescriptionResponse resp;

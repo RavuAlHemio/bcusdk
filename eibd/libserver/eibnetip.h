@@ -279,6 +279,7 @@ class EIBNetIPSocket:private Thread
 public:
     EIBNetIPSocket (struct sockaddr_in bindaddr, bool reuseaddr, Trace * tr);
     virtual ~ EIBNetIPSocket ();
+  bool init ();
 
     /** enables multicast */
   bool SetMulticast (struct ip_mreq multicastaddr);

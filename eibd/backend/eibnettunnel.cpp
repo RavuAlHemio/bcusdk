@@ -55,6 +55,9 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
 {
   t = tr;
   TRACEPRINTF (t, 2, this, "Open");
+  pth_sem_init (&insignal);
+  pth_sem_init (&outsignal);
+  getwait = pth_event (PTH_EVENT_SEM, &outsignal);
   if (!GetHostIP (&caddr, dest))
     throw Exception (DEV_OPEN_FAIL);
   caddr.sin_port = htons (port);
@@ -62,11 +65,14 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
     throw Exception (DEV_OPEN_FAIL);
   saddr.sin_port = htons (sport);
   sock = new EIBNetIPSocket (saddr, 0, t);
+  if (!sock->init ())
+    {
+      delete sock;
+      sock = 0;
+      throw Exception (DEV_OPEN_FAIL);
+    }
   sock->sendaddr = caddr;
   sock->recvaddr = caddr;
-  pth_sem_init (&insignal);
-  pth_sem_init (&outsignal);
-  getwait = pth_event (PTH_EVENT_SEM, &outsignal);
   mode = 0;
   vmode = 0;
   Start ();
@@ -80,7 +86,8 @@ EIBNetIPTunnel::~EIBNetIPTunnel ()
   while (!outqueue.isempty ())
     delete outqueue.get ();
   pth_event_free (getwait, PTH_FREE_THIS);
-  delete sock;
+  if (sock)
+    delete sock;
 }
 
 void

@@ -39,6 +39,12 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
   baddr.sin_port = htons (port);
   baddr.sin_addr.s_addr = htonl (INADDR_ANY);
   sock = new EIBNetIPSocket (baddr, 1, t);
+  if (!sock->init ())
+    {
+      delete sock;
+      sock = 0;
+      throw Exception (DEV_OPEN_FAIL);
+    }
   sock->recvall = 1;
   if (GetHostIP (&sock->sendaddr, multicastaddr) == 0)
     throw Exception (DEV_OPEN_FAIL);
@@ -61,7 +67,8 @@ EIBNetIPRouter::~EIBNetIPRouter ()
   pth_event_free (getwait, PTH_FREE_THIS);
   while (!outqueue.isempty ())
     delete outqueue.get ();
-  delete sock;
+  if (sock)
+    delete sock;
 }
 
 void
