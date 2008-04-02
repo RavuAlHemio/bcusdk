@@ -174,16 +174,9 @@ main (int ac, char *ag[])
   Trace t;
   t.SetTraceLevel (arg.tracelevel);
 
-  try
-  {
-    iface = Create (ag[index], &t);
-    if (!iface->init ())
-      throw Exception (DEV_OPEN_FAIL);
-  }
-  catch (Exception e)
-  {
+  iface = Create (ag[index], &t);
+  if (!iface->init ())
     die ("initialisation failed");
-  }
 
   if (arg.timeout > 0)
     pth_spawn (0, &timeout_abort, 0);

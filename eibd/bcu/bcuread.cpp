@@ -162,16 +162,9 @@ main (int ac, char *ag[])
   Trace t;
   t.SetTraceLevel (arg.tracelevel);
 
-  try
-  {
-    iface = Create (ag[index], &t);
-    if (!iface->init ())
-      throw Exception (DEV_OPEN_FAIL);
-  }
-  catch (Exception e)
-  {
+  iface = Create (ag[index], &t);
+  if (!iface->init ())
     die ("initialisation failed");
-  }
 
   addr = readHex (ag[index + 1]);
   len = atoi (ag[index + 2]);
