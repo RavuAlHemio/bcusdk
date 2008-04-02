@@ -203,31 +203,35 @@ USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
   unsigned char devnum;
 
   t = tr;
+  pth_sem_init (&in_signal);
+  pth_sem_init (&out_signal);
+  pth_sem_init (&send_empty);
+  pth_sem_set_value (&send_empty, 1);
+  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+
   TRACEPRINTF (t, 1, this, "Detect");
   USBEndpoint e = parseUSBEndpoint (Dev);
   d = detectUSBEndpoint (e);
+  state = 0;
   if (d.dev == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   libusb_get_devnum (d.dev, &devnum);
   libusb_get_bus_id (d.dev, &bus);
   TRACEPRINTF (t, 1, this, "Using %d (%d:%d:%d:%d) (%d:%d)", d.dev,
 	       libusb_get_busnum (bus),
 	       devnum, d.config, d.interface, d.sendep, d.recvep);
   if (libusb_open (d.dev, &dev) < 0)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
+  state = 1;
   TRACEPRINTF (t, 1, this, "Open");
   libusb_detach_kernel_driver_np (dev, d.interface);
   if (libusb_set_configuration (dev, d.config) < 0)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   if (libusb_claim_interface (dev, d.interface) < 0)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   TRACEPRINTF (t, 1, this, "Claimed");
+  state = 2;
 
-  pth_sem_init (&in_signal);
-  pth_sem_init (&out_signal);
-  pth_sem_init (&send_empty);
-  pth_sem_set_value (&send_empty, 1);
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
   TRACEPRINTF (t, 1, this, "Opened");
 }
@@ -239,12 +243,21 @@ USBLowLevelDriver::~USBLowLevelDriver ()
   pth_event_free (getwait, PTH_FREE_THIS);
 
   TRACEPRINTF (t, 1, this, "Release");
-  libusb_release_interface (dev, d.interface);
-  libusb_attach_kernel_driver_np (dev, d.interface);
+  if (state > 0)
+    {
+      libusb_release_interface (dev, d.interface);
+      libusb_attach_kernel_driver_np (dev, d.interface);
+    }
   TRACEPRINTF (t, 1, this, "Close");
-  libusb_close (dev);
+  if (state > 0)
+    libusb_close (dev);
 }
 
+bool
+USBLowLevelDriver::init ()
+{
+  return state == 2;
+}
 
 bool
 USBLowLevelDriver::Connection_Lost ()

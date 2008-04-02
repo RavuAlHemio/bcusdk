@@ -177,6 +177,8 @@ main (int ac, char *ag[])
   try
   {
     iface = Create (ag[index], &t);
+    if (!iface->init ())
+      throw Exception (DEV_OPEN_FAIL);
   }
   catch (Exception e)
   {

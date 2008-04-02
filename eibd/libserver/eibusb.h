@@ -33,6 +33,7 @@ public:
     USBConverterInterface (LowLevelDriverInterface * iface, Trace * tr,
 			   EMIVer ver);
     virtual ~ USBConverterInterface ();
+  bool init ();
 
   void Send_Packet (CArray l);
   bool Send_Queue_Empty ();

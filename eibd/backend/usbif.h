@@ -61,12 +61,14 @@ class USBLowLevelDriver:public LowLevelDriverInterface, private Thread
   pth_event_t getwait;
   /** semaphore to signal empty sendqueue */
   pth_sem_t send_empty;
+  int state;
 
   void Run (pth_sem_t * stop);
 
 public:
     USBLowLevelDriver (const char *device, Trace * tr);
    ~USBLowLevelDriver ();
+  bool init ();
 
   void Send_Packet (CArray l);
   bool Send_Queue_Empty ();

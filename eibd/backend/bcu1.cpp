@@ -26,16 +26,17 @@ BCU1DriverLowLevelDriver::BCU1DriverLowLevelDriver (const char *dev,
 						    Trace * tr)
 {
   t = tr;
-  TRACEPRINTF (t, 1, this, "Open");
-  fd = open (dev, O_RDWR);
-  if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
-
   pth_sem_init (&in_signal);
   pth_sem_init (&out_signal);
   pth_sem_init (&send_empty);
   pth_sem_set_value (&send_empty, 1);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+  send_done = 0;
+
+  TRACEPRINTF (t, 1, this, "Open");
+  fd = open (dev, O_RDWR);
+  if (fd == -1)
+    return;
 
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 1));
   send_done = pth_event (PTH_EVENT_FD | PTH_UNTIL_FD_EXCEPTION, fd);
@@ -68,6 +69,11 @@ BCU1DriverLowLevelDriver::~BCU1DriverLowLevelDriver ()
 
   if (fd != -1)
     close (fd);
+}
+
+bool BCU1DriverLowLevelDriver::init ()
+{
+  return fd != -1;
 }
 
 bool BCU1DriverLowLevelDriver::Connection_Lost ()

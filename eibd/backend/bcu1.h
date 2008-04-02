@@ -48,6 +48,7 @@ class BCU1DriverLowLevelDriver:public LowLevelDriverInterface, private Thread
 public:
     BCU1DriverLowLevelDriver (const char *device, Trace * tr);
    ~BCU1DriverLowLevelDriver ();
+  bool init ();
 
   void Send_Packet (CArray l);
   bool Send_Queue_Empty ();

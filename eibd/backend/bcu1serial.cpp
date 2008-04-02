@@ -85,19 +85,38 @@ BCU1SerialLowLevelDriver::BCU1SerialLowLevelDriver (const char *dev,
   struct termios ti;
 
   t = tr;
+  pth_sem_init (&in_signal);
+  pth_sem_init (&out_signal);
+  pth_sem_init (&send_empty);
+  pth_sem_set_value (&send_empty, 1);
+  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+
   TRACEPRINTF (t, 1, this, "Open");
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   set_low_latency (fd, &sold);
 
   close (fd);
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
 
-  tcgetattr (fd, &told);
+  if (tcgetattr (fd, &told))
+    {
+      restore_low_latency (fd, &sold);
+      close (fd);
+      fd = -1;
+      return;
+    }
 
+  if (tcgetattr (fd, &ti))
+    {
+      restore_low_latency (fd, &sold);
+      close (fd);
+      fd = -1;
+      return;
+    }
   ti.c_cflag = CS8 | CLOCAL | CREAD;
   ti.c_iflag = IGNBRK | INPCK | ISIG;
   ti.c_oflag = 0;
@@ -107,16 +126,17 @@ BCU1SerialLowLevelDriver::BCU1SerialLowLevelDriver (const char *dev,
   cfsetospeed (&ti, B9600);
   cfsetispeed (&ti, 0);
 
-  tcsetattr (fd, TCSAFLUSH, &ti);
+  if (tcsetattr (fd, TCSAFLUSH, &ti))
+    {
+      restore_low_latency (fd, &sold);
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   setstat (getstat () & ~(TIOCM_RTS | TIOCM_CTS));
   while ((getstat () & TIOCM_CTS));
 
-  pth_sem_init (&in_signal);
-  pth_sem_init (&out_signal);
-  pth_sem_init (&send_empty);
-  pth_sem_set_value (&send_empty, 1);
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
   TRACEPRINTF (t, 1, this, "Opened");
 }
@@ -133,6 +153,12 @@ BCU1SerialLowLevelDriver::~BCU1SerialLowLevelDriver ()
       tcsetattr (fd, TCSAFLUSH, &told);
       close (fd);
     }
+}
+
+bool
+BCU1SerialLowLevelDriver::init ()
+{
+  return fd != -1;
 }
 
 int

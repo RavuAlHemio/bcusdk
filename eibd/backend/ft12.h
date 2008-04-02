@@ -61,6 +61,7 @@ class FT12LowLevelDriver:public LowLevelDriverInterface, private Thread
 public:
     FT12LowLevelDriver (const char *device, Trace * tr);
    ~FT12LowLevelDriver ();
+  bool init ();
 
   void Send_Packet (CArray l);
   bool Send_Queue_Empty ();

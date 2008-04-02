@@ -27,14 +27,29 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
 {
   struct termios t1;
   t = tr;
+  pth_sem_init (&in_signal);
+  pth_sem_init (&out_signal);
+  pth_sem_init (&send_empty);
+  pth_sem_set_value (&send_empty, 1);
+  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
   TRACEPRINTF (t, 1, this, "Open");
   fd = open (dev, O_RDWR | O_NOCTTY);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
-  tcgetattr (fd, &old);
+    return;
+  if (tcgetattr (fd, &old))
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
 
-  tcgetattr (fd, &t1);
+  if (tcgetattr (fd, &t1))
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
   t1.c_cflag = CS8 | PARENB | CLOCAL | CREAD;
   t1.c_iflag = IGNBRK | INPCK | ISIG;
   t1.c_oflag = 0;
@@ -44,16 +59,16 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
   cfsetospeed (&t1, B19200);
   cfsetispeed (&t1, 0);
 
-  tcsetattr (fd, TCSAFLUSH, &t1);
+  if (tcsetattr (fd, TCSAFLUSH, &t1))
+    {
+      close (fd);
+      fd = -1;
+      return;
+    }
   sendflag = 0;
   recvflag = 0;
   repeatcount = 0;
   mode = 0;
-  pth_sem_init (&in_signal);
-  pth_sem_init (&out_signal);
-  pth_sem_init (&send_empty);
-  pth_sem_set_value (&send_empty, 1);
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   Start ();
   TRACEPRINTF (t, 1, this, "Opened");
 }
@@ -72,6 +87,11 @@ FT12LowLevelDriver::~FT12LowLevelDriver ()
       tcsetattr (fd, TCSAFLUSH, &old);
       close (fd);
     }
+}
+
+bool FT12LowLevelDriver::init ()
+{
+  return fd != -1;
 }
 
 void

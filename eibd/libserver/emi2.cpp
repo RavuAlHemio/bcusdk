@@ -80,6 +80,8 @@ EMI2Layer2Interface::EMI2Layer2Interface (LowLevelDriverInterface * i,
   vmode = 0;
   pth_sem_init (&out_signal);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+  if (!iface->init ())
+    throw Exception (DEV_OPEN_FAIL);
   Start ();
   TRACEPRINTF (tr, 2, this, "Opened");
 }

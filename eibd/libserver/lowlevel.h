@@ -32,6 +32,7 @@ public:
     virtual ~ LowLevelDriverInterface ()
   {
   }
+  virtual bool init () = 0;
 
   /** sends a EMI frame asynchronous */
   virtual void Send_Packet (CArray l) = 0;
