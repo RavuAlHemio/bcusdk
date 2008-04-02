@@ -61,6 +61,7 @@ class TPUARTSerialLayer2Driver:public Layer2Interface, private Thread
 public:
     TPUARTSerialLayer2Driver (const char *dev, eibaddr_t addr, Trace * tr);
    ~TPUARTSerialLayer2Driver ();
+  bool init ();
 
   void Send_L_Data (LPDU * l);
   LPDU *Get_L_Data (pth_event_t stop);

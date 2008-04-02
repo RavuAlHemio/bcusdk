@@ -38,24 +38,32 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
   baddr.sin_family = AF_INET;
   baddr.sin_port = htons (port);
   baddr.sin_addr.s_addr = htonl (INADDR_ANY);
+  pth_sem_init (&out_signal);
+  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   sock = new EIBNetIPSocket (baddr, 1, t);
   if (!sock->init ())
     {
       delete sock;
       sock = 0;
-      throw Exception (DEV_OPEN_FAIL);
+      return;
     }
   sock->recvall = 1;
   if (GetHostIP (&sock->sendaddr, multicastaddr) == 0)
-    throw Exception (DEV_OPEN_FAIL);
+    {
+      delete sock;
+      sock = 0;
+      return;
+    }
   sock->sendaddr.sin_port = htons (port);
 
   mcfg.imr_multiaddr = sock->sendaddr.sin_addr;
   mcfg.imr_interface.s_addr = htonl (INADDR_ANY);
   if (!sock->SetMulticast (mcfg))
-    throw Exception (DEV_OPEN_FAIL);
-  pth_sem_init (&out_signal);
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+    {
+      delete sock;
+      sock = 0;
+      return;
+    }
   Start ();
   TRACEPRINTF (t, 2, this, "Opened");
 }
@@ -69,6 +77,12 @@ EIBNetIPRouter::~EIBNetIPRouter ()
     delete outqueue.get ();
   if (sock)
     delete sock;
+}
+
+bool
+EIBNetIPRouter::init ()
+{
+  return sock != 0;
 }
 
 void

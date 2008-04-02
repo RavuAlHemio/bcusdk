@@ -272,7 +272,7 @@ USBLayer2Interface::USBLayer2Interface (LowLevelDriverInterface * i,
   emi = 0;
   LowLevelDriverInterface *iface = initUSBDriver (i, tr);
   if (!iface)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
 
   switch (iface->getEMIVer ())
     {
@@ -285,7 +285,7 @@ USBLayer2Interface::USBLayer2Interface (LowLevelDriverInterface * i,
     default:
       TRACEPRINTF (tr, 2, this, "Unsupported EMI");
       delete iface;
-      throw Exception (DEV_OPEN_FAIL);
+      return;
     }
 }
 
@@ -293,6 +293,11 @@ USBLayer2Interface::~USBLayer2Interface ()
 {
   if (emi)
     delete emi;
+}
+
+bool USBLayer2Interface::init ()
+{
+  return emi != 0;
 }
 
 bool USBLayer2Interface::addAddress (eibaddr_t addr)

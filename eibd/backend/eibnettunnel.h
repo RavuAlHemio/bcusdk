@@ -43,6 +43,7 @@ class EIBNetIPTunnel:public Layer2Interface, private Thread
 public:
     EIBNetIPTunnel (const char *dest, int port, int sport, Trace * tr);
     virtual ~ EIBNetIPTunnel ();
+  bool init ();
 
   void Send_L_Data (LPDU * l);
   LPDU *Get_L_Data (pth_event_t stop);

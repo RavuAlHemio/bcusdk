@@ -29,6 +29,7 @@ public:
   virtual ~ Layer2Interface ()
   {
   }
+  virtual bool init () = 0;
 
   /** sends a Layer 2 frame asynchronouse */
   virtual void Send_L_Data (LPDU * l) = 0;

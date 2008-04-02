@@ -48,6 +48,7 @@ public:
     EIBNetIPRouter (const char *multicastaddr, int port, eibaddr_t a,
 		    Trace * tr);
     virtual ~ EIBNetIPRouter ();
+  bool init ();
 
   void Send_L_Data (LPDU * l);
   LPDU *Get_L_Data (pth_event_t stop);

@@ -313,6 +313,8 @@ main (int ac, char *ag[])
   try
   {
     l2 = Create (ag[index], &t);
+    if (!l2->init ())
+      throw Exception (DEV_OPEN_FAIL);
     l3 = new Layer3 (l2, &t);
     if (arg.port)
       {

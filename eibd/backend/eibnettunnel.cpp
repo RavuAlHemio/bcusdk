@@ -58,18 +58,19 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
   pth_sem_init (&insignal);
   pth_sem_init (&outsignal);
   getwait = pth_event (PTH_EVENT_SEM, &outsignal);
+  sock = 0;
   if (!GetHostIP (&caddr, dest))
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   caddr.sin_port = htons (port);
   if (!GetSourceAddress (&caddr, &saddr))
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   saddr.sin_port = htons (sport);
   sock = new EIBNetIPSocket (saddr, 0, t);
   if (!sock->init ())
     {
       delete sock;
       sock = 0;
-      throw Exception (DEV_OPEN_FAIL);
+      return;
     }
   sock->sendaddr = caddr;
   sock->recvaddr = caddr;
@@ -88,6 +89,11 @@ EIBNetIPTunnel::~EIBNetIPTunnel ()
   pth_event_free (getwait, PTH_FREE_THIS);
   if (sock)
     delete sock;
+}
+
+bool EIBNetIPTunnel::init ()
+{
+  return sock != 0;
 }
 
 void

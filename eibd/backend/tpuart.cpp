@@ -47,18 +47,18 @@ TPUARTLayer2Driver::TPUARTLayer2Driver (int version, const char *device,
   addr = a;
   ver = version;
 
-  fd = open (device, O_RDWR);
-  if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
-
-  addAddress (a);
   pth_sem_init (&in_signal);
   pth_sem_init (&out_signal);
+  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
+  fd = open (device, O_RDWR);
+  if (fd == -1)
+    return;
+
+  addAddress (a);
   Start ();
   mode = 0;
   vmode = 0;
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   TRACEPRINTF (t, 2, this, "Opened");
 }
 
@@ -77,6 +77,12 @@ TPUARTLayer2Driver::~TPUARTLayer2Driver ()
       removeAddress (addr);
       close (fd);
     }
+}
+
+bool
+TPUARTLayer2Driver::init ()
+{
+  return fd != -1;
 }
 
 bool

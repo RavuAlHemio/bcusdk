@@ -46,17 +46,37 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
   t = tr;
   TRACEPRINTF (t, 2, this, "Open");
 
+  pth_sem_init (&in_signal);
+  pth_sem_init (&out_signal);
+
+  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
+
   fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
+    return;
   set_low_latency (fd, &sold);
 
   close (fd);
 
   fd = open (dev, O_RDWR | O_NOCTTY | O_SYNC);
   if (fd == -1)
-    throw Exception (DEV_OPEN_FAIL);
-  tcgetattr (fd, &old);
+    return;
+
+  if (tcgetattr (fd, &old))
+    {
+      restore_low_latency (fd, &sold);
+      close (fd);
+      fd = -1;
+      return;
+    }
+
+  if (tcgetattr (fd, &t1))
+    {
+      restore_low_latency (fd, &sold);
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   t1.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
   t1.c_iflag = IGNBRK | INPCK | ISIG;
@@ -67,7 +87,13 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
   cfsetospeed (&t1, B19200);
   cfsetispeed (&t1, 0);
 
-  tcsetattr (fd, TCSAFLUSH, &t1);
+  if (tcsetattr (fd, TCSAFLUSH, &t1))
+    {
+      restore_low_latency (fd, &sold);
+      close (fd);
+      fd = -1;
+      return;
+    }
 
   setstat (fd, (getstat (fd) & ~TIOCM_RTS) | TIOCM_DTR);
 
@@ -76,11 +102,6 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
   addr = a;
   indaddr.resize (1);
   indaddr[0] = a;
-
-  pth_sem_init (&in_signal);
-  pth_sem_init (&out_signal);
-
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
   Start ();
   TRACEPRINTF (t, 2, this, "Openend");
@@ -105,6 +126,11 @@ TPUARTSerialLayer2Driver::~TPUARTSerialLayer2Driver ()
       close (fd);
     }
 
+}
+
+bool TPUARTSerialLayer2Driver::init ()
+{
+  return fd != -1;
 }
 
 bool
