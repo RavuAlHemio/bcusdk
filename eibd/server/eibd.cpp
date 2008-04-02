@@ -310,38 +310,31 @@ main (int ac, char *ag[])
 	fclose (pidf);
       }
 
-  try
-  {
-    l2 = Create (ag[index], &t);
-    if (!l2->init ())
-      throw Exception (DEV_OPEN_FAIL);
-    l3 = new Layer3 (l2, &t);
-    if (arg.port)
-      {
-	s = new InetServer (l3, &t, arg.port);
-	if (!s->init ())
-	  throw Exception (DEV_OPEN_FAIL);
-	server.put (s);
-      }
-    if (arg.name)
-      {
-	s = new LocalServer (l3, &t, arg.name);
-	if (!s->init ())
-	  throw Exception (DEV_OPEN_FAIL);
-	server.put (s);
-      }
+  l2 = Create (ag[index], &t);
+  if (!l2->init ())
+    die ("initialisation of the backend failed");
+  l3 = new Layer3 (l2, &t);
+  if (arg.port)
+    {
+      s = new InetServer (l3, &t, arg.port);
+      if (!s->init ())
+	die ("initialisation of the eibd inet protocol");
+      server.put (s);
+    }
+  if (arg.name)
+    {
+      s = new LocalServer (l3, &t, arg.name);
+      if (!s->init ())
+	die ("initialisation of the eibd unix protocol");
+      server.put (s);
+    }
 #ifdef HAVE_EIBNETIPSERVER
-    serv = startServer (l3, &t);
+  serv = startServer (l3, &t);
 #endif
 #ifdef HAVE_GROUPCACHE
-    if (!CreateGroupCache (l3, &t, arg.groupcache))
-      throw Exception (L4_INIT_FAIL);
+  if (!CreateGroupCache (l3, &t, arg.groupcache))
+    die ("initialisation of the group cache");
 #endif
-  }
-  catch (Exception e)
-  {
-    die ("initialisation failed");
-  }
 
   sigset_t t1;
   sigemptyset (&t1);
