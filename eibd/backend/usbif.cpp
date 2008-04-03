@@ -68,8 +68,8 @@ parseUSBEndpoint (const char *addr)
   return e;
 }
 
-void
-check_device (libusb_device_id_t cdev, USBEndpoint e)
+bool
+check_device (libusb_device_id_t cdev, USBEndpoint e, USBDevice & e2)
 {
   struct usb_device_desc desc;
   struct usb_config_desc cfg;
@@ -82,15 +82,15 @@ check_device (libusb_device_id_t cdev, USBEndpoint e)
   int j, k, l;
 
   if (!cdev)
-    return;
+    return false;
 
   libusb_get_devnum (cdev, &devnum);
   libusb_get_bus_id (cdev, &bus);
 
   if (libusb_get_busnum (bus) != e.bus && e.bus != -1)
-    return;
+    return false;
   if (devnum != e.device && e.device != -1)
-    return;
+    return false;
 
   libusb_get_device_desc (cdev, &desc);
   for (j = 0; j < desc.bNumConfigurations; j++)
@@ -148,28 +148,33 @@ check_device (libusb_device_id_t cdev, USBEndpoint e)
 	      e1.sendep = out;
 	      e1.recvep = in;
 	      libusb_close (h);
-	      throw e1;
+	      e2 = e1;
+	      return true;
 	    }
 	}
     }
+  return false;
 }
 
 
-void
-check_devlist (libusb_device_id_t dev, USBEndpoint e)
+bool
+check_devlist (libusb_device_id_t dev, USBEndpoint e, USBDevice & e2)
 {
   libusb_device_id_t cdev;
   unsigned char count;
   int i;
 
-  check_device (dev, e);
+  if (check_device (dev, e, e2))
+    return true;
   libusb_get_child_count (dev, &count);
   for (i = 0; i < count; i++)
     {
       if (libusb_get_child_device_id (dev, i + 1, &cdev) < 0)
 	continue;
-      check_devlist (cdev, e);
+      if (check_devlist (cdev, e, e2))
+	return true;
     }
+  return false;
 }
 
 USBDevice
@@ -178,22 +183,16 @@ detectUSBEndpoint (USBEndpoint e)
   libusb_bus_id_t bus;
   libusb_device_id_t dev;
   USBDevice e2;
-  try
-  {
-    for (libusb_get_first_bus_id (&bus); bus;)
-      {
-	libusb_get_first_device_id (bus, &dev);
-	check_devlist (dev, e);
-
-	if (libusb_get_next_bus_id (&bus) < 0)
-	  break;
-      }
-  }
-  catch (USBDevice e1)
-  {
-    return e1;
-  }
   e2.dev = -1;
+  for (libusb_get_first_bus_id (&bus); bus;)
+    {
+      libusb_get_first_device_id (bus, &dev);
+      if (check_devlist (dev, e, e2))
+	break;
+
+      if (libusb_get_next_bus_id (&bus) < 0)
+	break;
+    }
   return e2;
 }
 
