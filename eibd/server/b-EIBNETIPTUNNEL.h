@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include "eibnettunnel.h"
 
-#define EIBNETIPTUNNEL_URL "ipt:router-ip[:dest-port[:src-port]]]\n"
+#define EIBNETIPTUNNEL_URL "ipt:router-ip[:dest-port[:src-port[:nat-ip[:data-port]]]]]\n"
 #define EIBNETIPTUNNEL_DOC "ipt connects with the EIBnet/IP Tunneling protocol over an EIBnet/IP gateway. The gateway must be so configured, that it routes the necessary addresses\n\n"
 
 #define EIBNETIPTUNNEL_PREFIX "ipt"
@@ -35,7 +35,10 @@ eibnetiptunnel_Create (const char *dev, Trace * t)
   char *a = strdup (dev);
   char *b;
   char *c;
+  char *d = 0;
+  char *e;
   int dport;
+  int dataport = -1;
   int sport;
   Layer2Interface *iface;
   if (!a)
@@ -53,6 +56,22 @@ eibnetiptunnel_Create (const char *dev, Trace * t)
       if (*c == ':')
 	{
 	  *c = 0;
+	  for (d = c + 1; *d; d++)
+	    if (*d == ':')
+	      break;
+	  if (*d == ':')
+	    {
+	      for (e = d + 1; *e; e++)
+		if (*e == ':')
+		  break;
+	      if (*e == ':')
+		dataport = atoi (e + 1);
+	      *e = 0;
+	      d++;
+	    }
+	  else
+	    d = 0;
+
 	  sport = atoi (c + 1);
 	}
       dport = atoi (b + 1);
@@ -60,7 +79,7 @@ eibnetiptunnel_Create (const char *dev, Trace * t)
   else
     dport = 3671;
 
-  iface = new EIBNetIPTunnel (a, dport, sport, t);
+  iface = new EIBNetIPTunnel (a, dport, sport, d, dataport, t);
   free (a);
   return iface;
 }

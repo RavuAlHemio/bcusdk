@@ -51,7 +51,7 @@ EIBNetIPTunnel::getDefaultAddr ()
 }
 
 EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
-				Trace * tr)
+				const char *srcip, int Dataport, Trace * tr)
 {
   t = tr;
   TRACEPRINTF (t, 2, this, "Open");
@@ -62,9 +62,11 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
   if (!GetHostIP (&caddr, dest))
     return;
   caddr.sin_port = htons (port);
-  if (!GetSourceAddress (&caddr, &saddr))
+  if (!GetSourceAddress (&caddr, &raddr))
     return;
-  saddr.sin_port = htons (sport);
+  raddr.sin_port = htons (sport);
+  NAT = false;
+  dataport = Dataport;
   sock = new EIBNetIPSocket (saddr, 0, t);
   if (!sock->init ())
     {
@@ -72,6 +74,19 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
       sock = 0;
       return;
     }
+  if (srcip)
+    {
+      if (!GetHostIP (&saddr, srcip))
+	{
+	  delete sock;
+	  sock = 0;
+	  return;
+	}
+      saddr.sin_port = htons (sport);
+      NAT = true;
+    }
+  else
+    saddr = raddr;
   sock->sendaddr = caddr;
   sock->recvaddr = caddr;
   mode = 0;
@@ -269,6 +284,10 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		}
 	      myaddr = (cresp.CRD[1] << 8) | cresp.CRD[2];
 	      daddr = cresp.daddr;
+	      if (NAT)
+		daddr.sin_addr = caddr.sin_addr;
+	      if (dataport != -1)
+		daddr.sin_port = htons (dataport);
 	      channel = cresp.channel;
 	      mod = 1;
 	      sno = 0;

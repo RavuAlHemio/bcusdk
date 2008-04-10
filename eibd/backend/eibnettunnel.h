@@ -31,6 +31,7 @@ class EIBNetIPTunnel:public Layer2Interface, private Thread
   struct sockaddr_in caddr;
   struct sockaddr_in daddr;
   struct sockaddr_in saddr;
+  struct sockaddr_in raddr;
   pth_sem_t insignal;
   pth_sem_t outsignal;
   pth_event_t getwait;
@@ -38,10 +39,13 @@ class EIBNetIPTunnel:public Layer2Interface, private Thread
     Queue < LPDU * >outqueue;
   int mode;
   int vmode;
+  int dataport;
+  bool NAT;
 
   void Run (pth_sem_t * stop);
 public:
-    EIBNetIPTunnel (const char *dest, int port, int sport, Trace * tr);
+    EIBNetIPTunnel (const char *dest, int port, int sport, const char *srcip,
+		    int dataport, Trace * tr);
     virtual ~ EIBNetIPTunnel ();
   bool init ();
 
