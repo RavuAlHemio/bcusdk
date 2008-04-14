@@ -186,7 +186,7 @@ bitcount (unsigned char x)
   return j;
 }
 
-void
+bool
 BCU1SerialLowLevelDriver::startsync ()
 {
   int to = 0;
@@ -196,12 +196,13 @@ BCU1SerialLowLevelDriver::startsync ()
     {
       to++;
       if (to > 0x10000)
-	throw (int) 1;
+	return false;
     }
   TRACEPRINTF (t, 0, this, "Startsync");
+  return true;
 }
 
-void
+bool
 BCU1SerialLowLevelDriver::endsync ()
 {
   int to = 0;
@@ -212,13 +213,15 @@ BCU1SerialLowLevelDriver::endsync ()
     {
       to++;
       if (to > 0x10000)
-	throw (int) 2;
+	return false;
     }
   TRACEPRINTF (t, 0, this, "Endsync");
+  return true;
 }
 
-uchar
-BCU1SerialLowLevelDriver::exchange (uchar c, pth_event_t stop)
+bool
+  BCU1SerialLowLevelDriver::exchange (uchar c, uchar & result,
+				      pth_event_t stop)
 {
   uchar s;
   int i;
@@ -229,10 +232,11 @@ BCU1SerialLowLevelDriver::exchange (uchar c, pth_event_t stop)
     {
       to++;
       if (to > 0x10000)
-	throw (int) 3;
+	return false;
     }
   TRACEPRINTF (t, 0, this, "exchange %02X <->%02X", c, s);
-  return s;
+  result = s;
+  return true;
 }
 
 void
@@ -243,6 +247,7 @@ BCU1SerialLowLevelDriver::Run (pth_sem_t * stop1)
   pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 10));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
+      int error;
       timeout =
 	pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
 		   pth_timeout (0, 150));
@@ -257,74 +262,113 @@ BCU1SerialLowLevelDriver::Run (pth_sem_t * stop1)
 
       struct timeval v1, v2;
       gettimeofday (&v1, 0);
-      try
-      {
-	CArray e;
-	CArray r;
-	uchar s;
-	if (!inqueue.isempty ())
-	  {
-	    const CArray & c = inqueue.top ();
-	    e.resize (c () + 1);
-	    s = c () & 0x1f;
-	    s |= 0x20;
-	    s |= 0x80 * bitcount (s);
-	    e[0] = s;
-	    e.setpart (c, 1);
-	  }
-	else
-	  {
-	    e.resize (1);
-	    e[0] = 0xff;
-	  }
-	startsync ();
-	s = exchange (e[0], stop);
-	endsync ();
-	if (s == 0xff && e[0] != 0xff)
-	  {
-	    for (unsigned i = 1; i < e (); i++)
-	      {
-		startsync ();
-		s = exchange (e[i], stop);
-		endsync ();
-	      }
-	    if (s != 0x00)
-	      throw 10;
-	    inqueue.get ();
-	    TRACEPRINTF (t, 0, this, "Sent");
-	    pth_sem_dec (&in_signal);
-	    if (inqueue.isempty ())
-	      pth_sem_set_value (&send_empty, 1);
-	  }
-	else if (s != 0xff)
-	  {
-	    r.resize ((s & 0x1f));
-	    for (unsigned i = 0; i < (s & 0x1f); i++)
-	      {
-		startsync ();
-		r[i] = exchange (0, stop);
-		endsync ();
-	      }
-	    TRACEPRINTF (t, 0, this, "Recv");
-	    outqueue.put (new CArray (r));
-	    pth_sem_inc (&out_signal, 1);
-	  }
-	gettimeofday (&v2, 0);
-	TRACEPRINTF (t, 1, this, "Recvtime: %d",
-		     v2.tv_sec * 1000000L + v2.tv_usec -
-		     (v1.tv_sec * 1000000L + v1.tv_usec));
-      }
-      catch (int x)
-      {
-	gettimeofday (&v2, 0);
-	TRACEPRINTF (t, 1, this, "ERecvtime: %d",
-		     v2.tv_sec * 1000000L + v2.tv_usec -
-		     (v1.tv_sec * 1000000L + v1.tv_usec));
-	setstat (getstat () & ~(TIOCM_RTS | TIOCM_CTS));
-	pth_usleep (2000);
-	while ((getstat () & TIOCM_CTS));
-	TRACEPRINTF (t, 0, this, "Restart %d", x);
-      }
+
+      CArray e;
+      CArray r;
+      uchar s;
+      if (!inqueue.isempty ())
+	{
+	  const CArray & c = inqueue.top ();
+	  e.resize (c () + 1);
+	  s = c () & 0x1f;
+	  s |= 0x20;
+	  s |= 0x80 * bitcount (s);
+	  e[0] = s;
+	  e.setpart (c, 1);
+	}
+      else
+	{
+	  e.resize (1);
+	  e[0] = 0xff;
+	}
+      if (!startsync ())
+	{
+	  error = 1;
+	  goto err;
+	}
+      if (!exchange (e[0], s, stop))
+	{
+	  error = 3;
+	  goto err;
+	}
+      if (!endsync ())
+	{
+	  error = 2;
+	  goto err;
+	}
+      if (s == 0xff && e[0] != 0xff)
+	{
+	  for (unsigned i = 1; i < e (); i++)
+	    {
+	      if (!startsync ())
+		{
+		  error = 1;
+		  goto err;
+		}
+	      if (!exchange (e[i], s, stop))
+		{
+		  error = 3;
+		  goto err;
+		}
+	      if (endsync ())
+		{
+		  error = 2;
+		  goto err;
+		}
+	    }
+	  if (s != 0x00)
+	    {
+	      error = 10;
+	      goto err;
+	    }
+	  inqueue.get ();
+	  TRACEPRINTF (t, 0, this, "Sent");
+	  pth_sem_dec (&in_signal);
+	  if (inqueue.isempty ())
+	    pth_sem_set_value (&send_empty, 1);
+	}
+      else if (s != 0xff)
+	{
+	  r.resize ((s & 0x1f));
+	  for (unsigned i = 0; i < (s & 0x1f); i++)
+	    {
+	      if (!startsync ())
+		{
+		  error = 1;
+		  goto err;
+		}
+	      if (!exchange (0, r[i], stop))
+		{
+		  error = 3;
+		  goto err;
+		}
+	      if (!endsync ())
+		{
+		  error = 2;
+		  goto err;
+		}
+	    }
+	  TRACEPRINTF (t, 0, this, "Recv");
+	  outqueue.put (new CArray (r));
+	  pth_sem_inc (&out_signal, 1);
+	}
+      gettimeofday (&v2, 0);
+      TRACEPRINTF (t, 1, this, "Recvtime: %d",
+		   v2.tv_sec * 1000000L + v2.tv_usec -
+		   (v1.tv_sec * 1000000L + v1.tv_usec));
+
+      if (0)
+	{
+	err:
+	  gettimeofday (&v2, 0);
+	  TRACEPRINTF (t, 1, this, "ERecvtime: %d",
+		       v2.tv_sec * 1000000L + v2.tv_usec -
+		       (v1.tv_sec * 1000000L + v1.tv_usec));
+	  setstat (getstat () & ~(TIOCM_RTS | TIOCM_CTS));
+	  pth_usleep (2000);
+	  while ((getstat () & TIOCM_CTS));
+	  TRACEPRINTF (t, 0, this, "Restart %d", error);
+	}
 
       pth_event_isolate (timeout);
     }

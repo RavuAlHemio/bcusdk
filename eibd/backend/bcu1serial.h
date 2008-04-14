@@ -53,11 +53,11 @@ class BCU1SerialLowLevelDriver:public LowLevelDriverInterface, private Thread
   /** sets the serial port line status */
   void setstat (int v);
   /** runs a start sync of a byte exchange */
-  void startsync ();
+  bool startsync ();
   /** finishes the byte exchange */
-  void endsync ();
+  bool endsync ();
   /** exchange two bytes*/
-  uchar exchange (uchar c, pth_event_t stop);
+  bool exchange (uchar c, uchar & result, pth_event_t stop);
   void Run (pth_sem_t * stop);
 public:
     BCU1SerialLowLevelDriver (const char *device, Trace * tr);
