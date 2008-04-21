@@ -18,8 +18,8 @@ tlib_LIBRARIES=libbcu_0012.a libbcu_0020.a
 COMMON=regs.s tmp.s fp.s tmpspace.s
 BCU1=initbcu1.s bcu1func.s
 BCU2=initbcu2.s bcu2func.s
-BCU1_EE=eewrite_QI.c eewrite_HI.c eewrite_AI.c eewrite_SI.c \
-	eewrite_FI.c eewrite_CI.c eewrite_EI.c eewrite_DI.c
+BCU1_EE=gen/eewrite_QI.c gen/eewrite_HI.c gen/eewrite_AI.c gen/eewrite_SI.c \
+	gen/eewrite_FI.c gen/eewrite_CI.c gen/eewrite_EI.c gen/eewrite_DI.c
 
 BUILT_SOURCES=$(BCU1_EE)
 CLEANFILES=$(BCU1_EE)
@@ -27,11 +27,10 @@ CLEANFILES=$(BCU1_EE)
 libbcu_0012_a_SOURCES=$(BCU1) $(COMMON) $(BCU1_EE)
 libbcu_0020_a_SOURCES=$(BCU2) $(COMMON) $(BCU1_EE)
 
-$(BCU1_EE) : Makefile
-	for b in QI HI AI SI EI CI FI DI ; do \
-	echo "#define MODE $$b" >eewrite_$$b.c ; \
-	echo "#include \"eewrite.c\"" >>eewrite_$$b.c ; \
-	done
+gen/eewrite_%.c : Makefile
+	mkdir -p gen
+	echo "#define MODE " `basename $@|sed -e s/eewrite_//g |sed -e s/.c//g` > $@ 
+	echo "#include \"eewrite.c\"" >> $@
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(tlibdir)
