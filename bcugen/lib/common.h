@@ -24,6 +24,7 @@
 
 #include "array.h"
 #include "my_strings.h"
+#include "types.h"
 
 typedef unsigned long utype;
 typedef long itype;
