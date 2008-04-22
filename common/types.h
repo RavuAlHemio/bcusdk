@@ -21,6 +21,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+#include "config.h"
 #include "my_strings.h"
 #include "array.h"
 
@@ -35,5 +36,9 @@ typedef uint16_t eibaddr_t;
 
 /** EIB key */
 typedef uint32_t eibkey_type;
+
+#ifdef USE_NOLIBSTDC
+#include "libstdc.h"
+#endif
 
 #endif
