@@ -46,7 +46,7 @@
 	 $this->errno = self::ECONNRESET;
 	 return -1;
        }
-    if (strlen($data) > 0xffff || strlen(data) < 2)
+    if (strlen($data) > 0xffff || strlen($data) < 2)
       {
         $this->errno = self::EINVAL;
         return -1;
