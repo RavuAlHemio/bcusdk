@@ -23,6 +23,8 @@ AC_CHECK_HEADER(iphlpapi.h,[AC_DEFINE(HAVE_WINDOWS_IPHELPER, 1,[Windows IPHelper
   LIBS="-liphlpapi $LIBS"; have_source_info=yes],[],[-])
 
 have_bsd_source_info=no
+AC_CHECK_DECL(__FREEBSD__,[have_bsd_source_info=yes],[],[])
+AC_CHECK_DECL(__APPLE__,[have_bsd_source_info=yes],[],[])
 if test x$have_bsd_source_info = xyes ; then
   AC_DEFINE(HAVE_BSD_SOURCEINFO, 1,[FreeBSD compatible sourceinfo])
   have_source_info=yes
