@@ -214,6 +214,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   creq.CRI[1] = 0x02;
   creq.CRI[2] = 0x00;
   p = creq.ToPacket ();
+  sock->sendaddr = caddr;
   sock->Send (p);
 
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
@@ -256,8 +257,9 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      daddr = cresp.daddr;
 	      channel = cresp.channel;
 	      mod = 1;
+	      sno = 0;
+	      rno = 0;
 	      sock->recvaddr = daddr;
-	      sock->sendaddr = daddr;
 	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
 			 pth_timeout (30, 0));
 	      heartbeat = 0;
@@ -292,6 +294,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      tresp.channel = channel;
 	      tresp.seqno = treq.seqno;
 	      p = tresp.ToPacket ();
+	      sock->sendaddr = daddr;
 	      sock->Send (p);
 	      //Confirmation
 	      if (treq.CEMI[0] == 0x2E)
@@ -391,6 +394,17 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		    TRACEPRINTF (t, 1, this,
 				 "Duplicate Connection State Response");
 		}
+	      else if (csresp.status == 0x21)
+		{
+		  TRACEPRINTF (t, 1, this,
+			       "Connection State Response not connected");
+		  dreq.caddr = saddr;
+		  dreq.channel = channel;
+		  p = dreq.ToPacket ();
+		  sock->sendaddr = caddr;
+		  sock->Send (p);
+		  mod = 0;
+		}
 	      else
 		TRACEPRINTF (t, 1, this,
 			     "Connection State Response Error %02x",
@@ -418,8 +432,26 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      t->TracePacket (1, this, "SendDis", p.data);
 	      sock->sendaddr = caddr;
 	      sock->Send (p);
-	      sock->sendaddr = daddr;
 	      mod = 0;
+	      break;
+	    case DISCONNECT_RESPONSE:
+	      if (mod == 0)
+		{
+		  TRACEPRINTF (t, 1, this, "Not connected");
+		  break;
+		}
+	      if (parseEIBnet_DisconnectResponse (*p1, dresp))
+		{
+		  TRACEPRINTF (t, 1, this, "Invalid request");
+		  break;
+		}
+	      if (dresp.channel != channel)
+		{
+		  TRACEPRINTF (t, 1, this, "Not for us");
+		  break;
+		}
+	      mod = 0;
+	      TRACEPRINTF (t, 1, this, "Disconnected");
 	      break;
 	    default:
 	    err:
@@ -449,10 +481,9 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      csreq.caddr = saddr;
 	      csreq.channel = channel;
 	      p = csreq.ToPacket ();
-	      sock->sendaddr = caddr;
 	      TRACEPRINTF (t, 1, this, "Heartbeat");
+	      sock->sendaddr = caddr;
 	      sock->Send (p);
-	      sock->sendaddr = daddr;
 	      heartbeat++;
 	    }
 	  else
@@ -461,6 +492,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      dreq.caddr = saddr;
 	      dreq.channel = channel;
 	      p = dreq.ToPacket ();
+	      sock->sendaddr = caddr;
 	      if (channel != -1)
 		sock->Send (p);
 	      mod = 0;
@@ -474,7 +506,6 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	  TRACEPRINTF (t, 1, this, "Connectretry");
 	  sock->sendaddr = caddr;
 	  sock->Send (p);
-	  sock->sendaddr = daddr;
 	}
 
       if (!inqueue.isempty () && mod == 1)
@@ -484,6 +515,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	  treq.CEMI = inqueue.top ();
 	  p = treq.ToPacket ();
 	  t->TracePacket (1, this, "SendTunnel", p.data);
+	  sock->sendaddr = daddr;
 	  sock->Send (p);
 	  mod = 2;
 	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
@@ -494,6 +526,7 @@ out:
   dreq.caddr = saddr;
   dreq.channel = channel;
   p = dreq.ToPacket ();
+  sock->sendaddr = caddr;
   if (channel != -1)
     sock->Send (p);
 
