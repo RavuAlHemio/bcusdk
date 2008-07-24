@@ -190,6 +190,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   int sno = 0;
   int retry = 0;
   int heartbeat = 0;
+  int drop = 0;
   eibaddr_t myaddr;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &insignal);
@@ -281,10 +282,31 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  TRACEPRINTF (t, 1, this, "Not for us");
 		  break;
 		}
+	      if (((treq.seqno + 1) & 0xff) == rno)
+		{
+		  tresp.status = 0;
+		  tresp.channel = channel;
+		  tresp.seqno = treq.seqno;
+		  p = tresp.ToPacket ();
+		  sock->sendaddr = daddr;
+		  sock->Send (p);
+		  break;
+		}
 	      if (treq.seqno != rno)
 		{
 		  TRACEPRINTF (t, 1, this, "Wrong sequence %d<->%d",
 			       treq.seqno, rno);
+		  if (treq.seqno < rno)
+		    treq.seqno += 0x100;
+		  if (treq.seqno >= rno + 5)
+		    {
+		      dreq.caddr = saddr;
+		      dreq.channel = channel;
+		      p = dreq.ToPacket ();
+		      sock->sendaddr = caddr;
+		      sock->Send (p);
+		      mod = 0;
+		    }
 		  break;
 		}
 	      rno++;
@@ -371,6 +393,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  inqueue.get ();
 		  mod = 1;
 		  retry = 0;
+		  drop = 0;
 		}
 	      else
 		TRACEPRINTF (t, 1, this, "Unexpected ACK");
@@ -470,6 +493,16 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      pth_sem_dec (&insignal);
 	      inqueue.get ();
 	      retry = 0;
+	      drop++;
+	      if (drop >= 3)
+		{
+		  dreq.caddr = saddr;
+		  dreq.channel = channel;
+		  p = dreq.ToPacket ();
+		  sock->sendaddr = caddr;
+		  sock->Send (p);
+		  mod = 0;
+		}
 	    }
 	}
       if (mod != 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
