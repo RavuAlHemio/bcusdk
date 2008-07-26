@@ -38,8 +38,9 @@ main (int ac, char *ag[])
       len = EIBGetBusmonitorPacket (con, sizeof (buf), buf);
       if (len == -1)
 	die ("Read failed");
-      buf [len] = 0;
+      buf[len] = 0;
       printf ("%s\n", buf);
+      fflush (stdout);
     }
 
   EIBClose (con);

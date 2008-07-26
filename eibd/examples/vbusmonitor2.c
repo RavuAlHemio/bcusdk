@@ -40,6 +40,7 @@ main (int ac, char *ag[])
 	die ("Read failed");
       printHex (len, buf);
       printf ("\n");
+      fflush (stdout);
     }
 
   EIBClose (con);

@@ -80,6 +80,7 @@ main (int ac, char *ag[])
 		printHex (len - 2, buf + 2);
 	    }
 	  printf ("\n");
+	  fflush (stdout);
 	}
     }
 

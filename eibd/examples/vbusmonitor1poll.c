@@ -54,6 +54,7 @@ main (int ac, char *ag[])
       if (len == -1)
 	die ("Read failed");
       printf ("%s\n", buf);
+      fflush (stdout);
     }
 
   EIBClose (con);
