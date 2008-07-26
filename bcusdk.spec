@@ -151,6 +151,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/msetkey
 /usr/bin/groupsocketlisten
 /usr/bin/groupsocketread
+/usr/bin/groupsocketwrite
+/usr/bin/groupsocketswrite
 /usr/bin/groupreadresponse
 /usr/bin/groupcacheenable
 /usr/bin/groupcachedisable
