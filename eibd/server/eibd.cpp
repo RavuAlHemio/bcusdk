@@ -248,6 +248,8 @@ startServer (Layer3 * l3, Trace * t)
 }
 #endif
 
+#define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
+
 int
 main (int ac, char *ag[])
 {
@@ -279,7 +281,7 @@ main (int ac, char *ag[])
 
   if (arg.daemon)
     {
-      int fd = open (arg.daemon, O_WRONLY | O_APPEND | O_CREAT);
+      int fd = open (arg.daemon, O_WRONLY | O_APPEND | O_CREAT, FILE_MODE);
       if (fd == -1)
 	die ("Can not open file %s", arg.daemon);
       int i = fork ();
