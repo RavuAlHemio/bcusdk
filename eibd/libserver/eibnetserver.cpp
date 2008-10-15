@@ -299,6 +299,14 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  goto reqf;
 	      goto out;
 	    reqf:
+	      if (state[i].rno == (r1.seqno + 1) & 0xff)
+		{
+		  r2.channel = r1.channel;
+		  r2.seqno = r1.seqno;
+		  sock->sendaddr = state[i].daddr;
+		  sock->Send (r2.ToPacket ());
+		  goto out;
+		}
 	      if (state[i].rno != r1.seqno)
 		{
 		  TRACEPRINTF (t, 8, this, "Wrong sequence %d<->%d",
