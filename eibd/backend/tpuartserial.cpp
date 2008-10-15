@@ -498,13 +498,17 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	      pth_sem_dec (&in_signal);
 	    }
 	}
-      if (watch == 1 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED)
+      if (watch == 1 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED
+	  && mode == 0)
 	{
 	  uchar c = 0x01;
 	  t->TracePacket (2, this, "Watchdog Reset", 1, &c);
 	  write (fd, &c, 1);
 	  watch = 0;
 	}
+      if (watch == 1 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED
+	  && mode)
+	watch = 0;
       if (watch == 2 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED)
 	watch = 0;
       if (in () == 0 && !inqueue.isempty () && !waitconfirm)
