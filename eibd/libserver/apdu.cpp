@@ -164,7 +164,7 @@ String A_Unknown_PDU::Decode ()
 {
   String
   s ("Unknown APDU: ");
-  unsigned 
+  unsigned
     i;
 
   if (pdu () == 0)
@@ -177,7 +177,7 @@ String A_Unknown_PDU::Decode ()
   return s;
 }
 
-bool A_Unknown_PDU::isResponse(const APDU* req) const
+bool A_Unknown_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -208,7 +208,7 @@ String A_GroupValue_Read_PDU::Decode ()
   return "A_GroupValue_Read";
 }
 
-bool A_GroupValue_Read_PDU::isResponse(const APDU* req) const
+bool A_GroupValue_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -272,9 +272,9 @@ String A_GroupValue_Response_PDU::Decode ()
   return s;
 }
 
-bool A_GroupValue_Response_PDU::isResponse(const APDU* req) const
+bool A_GroupValue_Response_PDU::isResponse (const APDU * req) CONST
 {
-  return req->getType()==A_GroupValue_Read;
+  return req->getType () == A_GroupValue_Read;
 }
 
 /* A_GroupValue_Write */
@@ -336,7 +336,7 @@ String A_GroupValue_Write_PDU::Decode ()
   return s;
 }
 
-bool A_GroupValue_Write_PDU::isResponse(const APDU* req) const
+bool A_GroupValue_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -375,7 +375,7 @@ String A_IndividualAddress_Write_PDU::Decode ()
   return s + FormatEIBAddr (addr);
 }
 
-bool A_IndividualAddress_Write_PDU::isResponse(const APDU* req) const
+bool A_IndividualAddress_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -406,7 +406,7 @@ String A_IndividualAddress_Read_PDU::Decode ()
   return "A_IndividualAddress_Read";
 }
 
-bool A_IndividualAddress_Read_PDU::isResponse(const APDU* req) const
+bool A_IndividualAddress_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -438,9 +438,9 @@ String A_IndividualAddress_Response_PDU::Decode ()
   return "A_IndividualAddress_Response";
 }
 
-bool A_IndividualAddress_Response_PDU::isResponse(const APDU* req) const
+bool A_IndividualAddress_Response_PDU::isResponse (const APDU * req) CONST
 {
-  return req->getType()==A_IndividualAddress_Read;
+  return req->getType () == A_IndividualAddress_Read;
 }
 
 /* A_IndividualAddressSerialNumber_Read */
@@ -483,7 +483,9 @@ String A_IndividualAddressSerialNumber_Read_PDU::Decode ()
   return s;
 }
 
-bool A_IndividualAddressSerialNumber_Read_PDU::isResponse(const APDU* req) const
+bool
+  A_IndividualAddressSerialNumber_Read_PDU::isResponse (const APDU * req)
+  CONST
 {
   return 0;
 }
@@ -536,13 +538,15 @@ String A_IndividualAddressSerialNumber_Response_PDU::Decode ()
   return s;
 }
 
-bool A_IndividualAddressSerialNumber_Response_PDU::isResponse(const APDU* req) const
+bool
+  A_IndividualAddressSerialNumber_Response_PDU::isResponse (const APDU * req)
+  CONST
 {
-  if(req->getType()!=A_IndividualAddressSerialNumber_Read)
+  if (req->getType () != A_IndividualAddressSerialNumber_Read)
     return 0;
-  const A_IndividualAddressSerialNumber_Read_PDU* a=
-    (const A_IndividualAddressSerialNumber_Read_PDU*)req;
-  if(memcmp(a->serno,serno,sizeof(serno)))
+  const A_IndividualAddressSerialNumber_Read_PDU *a =
+    (const A_IndividualAddressSerialNumber_Read_PDU *) req;
+  if (memcmp (a->serno, serno, sizeof (serno)))
     return 0;
   return 1;
 }
@@ -597,7 +601,9 @@ String A_IndividualAddressSerialNumber_Write_PDU::Decode ()
   return s;
 }
 
-bool A_IndividualAddressSerialNumber_Write_PDU::isResponse(const APDU* req) const
+bool
+  A_IndividualAddressSerialNumber_Write_PDU::isResponse (const APDU * req)
+  CONST
 {
   return 0;
 }
@@ -651,7 +657,9 @@ A_ServiceInformation_Indication_Write_PDU::Decode ()
   return s;
 }
 
-bool A_ServiceInformation_Indication_Write_PDU::isResponse(const APDU* req) const
+bool
+  A_ServiceInformation_Indication_Write_PDU::isResponse (const APDU * req)
+  CONST
 {
   return 0;
 }
@@ -690,7 +698,7 @@ String A_DomainAddress_Write_PDU::Decode ()
 }
 
 
-bool A_DomainAddress_Write_PDU::isResponse(const APDU* req) const
+bool A_DomainAddress_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -721,7 +729,7 @@ String A_DomainAddress_Read_PDU::Decode ()
   return "A_DomainAddress_Read";
 }
 
-bool A_DomainAddress_Read_PDU::isResponse(const APDU* req) const
+bool A_DomainAddress_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -760,9 +768,9 @@ String A_DomainAddress_Response_PDU::Decode ()
   return s;
 }
 
-bool A_DomainAddress_Response_PDU::isResponse(const APDU* req) const
+bool A_DomainAddress_Response_PDU::isResponse (const APDU * req) CONST
 {
-  return req->getType()==A_DomainAddress_Read;
+  return req->getType () == A_DomainAddress_Read;
 }
 
 /* A_DomainAddressSelective_Read */
@@ -811,7 +819,7 @@ A_DomainAddressSelective_Read_PDU::Decode ()
   return s;
 }
 
-bool A_DomainAddressSelective_Read_PDU::isResponse(const APDU* req) const
+bool A_DomainAddressSelective_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -868,7 +876,7 @@ A_PropertyValue_Read_PDU::Decode ()
   return s;
 }
 
-bool A_PropertyValue_Read_PDU::isResponse(const APDU* req) const
+bool A_PropertyValue_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -930,25 +938,28 @@ A_PropertyValue_Response_PDU::Decode ()
   return s;
 }
 
-bool A_PropertyValue_Response_PDU::isResponse(const APDU* req) const
+bool A_PropertyValue_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()==A_PropertyValue_Write)
+  if (req->getType () == A_PropertyValue_Write)
     {
-      const A_PropertyValue_Write_PDU* a=(const A_PropertyValue_Write_PDU*)req;
-      if(a->obj==obj&&a->prop==prop&&a->start==start&&a->count==count)
+      const A_PropertyValue_Write_PDU *
+	a = (const A_PropertyValue_Write_PDU *) req;
+      if (a->obj == obj && a->prop == prop && a->start == start
+	  && a->count == count)
 	return 1;
     }
 
-  if(req->getType()!=A_PropertyValue_Read)
-   return 0;
-  const A_PropertyValue_Read_PDU* a=(const A_PropertyValue_Read_PDU*)req;
-  if(a->obj!=obj)
+  if (req->getType () != A_PropertyValue_Read)
     return 0;
-  if(a->prop!=prop)
+  const A_PropertyValue_Read_PDU *
+    a = (const A_PropertyValue_Read_PDU *) req;
+  if (a->obj != obj)
     return 0;
-  if(a->start!=start)
+  if (a->prop != prop)
     return 0;
-  if(a->count!=count)
+  if (a->start != start)
+    return 0;
+  if (a->count != count)
     return 0;
   return 1;
 }
@@ -1010,7 +1021,7 @@ A_PropertyValue_Write_PDU::Decode ()
   return s;
 }
 
-bool A_PropertyValue_Write_PDU::isResponse(const APDU* req) const
+bool A_PropertyValue_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1059,7 +1070,7 @@ A_PropertyDescription_Read_PDU::Decode ()
   return s;
 }
 
-bool A_PropertyDescription_Read_PDU::isResponse(const APDU* req) const
+bool A_PropertyDescription_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1124,12 +1135,13 @@ A_PropertyDescription_Response_PDU::Decode ()
   return s;
 }
 
-bool A_PropertyDescription_Response_PDU::isResponse(const APDU* req) const
+bool A_PropertyDescription_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()!=A_PropertyDescription_Read)
-   return 0;
-  const A_PropertyDescription_Read_PDU* a=(const A_PropertyDescription_Read_PDU*)req;
-  if(a->obj!=obj)
+  if (req->getType () != A_PropertyDescription_Read)
+    return 0;
+  const A_PropertyDescription_Read_PDU *
+    a = (const A_PropertyDescription_Read_PDU *) req;
+  if (a->obj != obj)
     return 0;
   return 1;
 }
@@ -1168,7 +1180,7 @@ A_DeviceDescriptor_Read_PDU::Decode ()
   return s;
 }
 
-bool A_DeviceDescriptor_Read_PDU::isResponse(const APDU* req) const
+bool A_DeviceDescriptor_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1214,12 +1226,13 @@ A_DeviceDescriptor_Response_PDU::Decode ()
   return s;
 }
 
-bool A_DeviceDescriptor_Response_PDU::isResponse(const APDU* req) const
+bool A_DeviceDescriptor_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()!=A_DeviceDescriptor_Read)
-   return 0;
-  const A_DeviceDescriptor_Read_PDU* a=(const A_DeviceDescriptor_Read_PDU*)req;
-  if(a->type!=type)
+  if (req->getType () != A_DeviceDescriptor_Read)
+    return 0;
+  const A_DeviceDescriptor_Read_PDU *
+    a = (const A_DeviceDescriptor_Read_PDU *) req;
+  if (a->type != type)
     return 0;
   return 1;
 }
@@ -1263,7 +1276,7 @@ A_ADC_Read_PDU::Decode ()
   return s;
 }
 
-bool A_ADC_Read_PDU::isResponse(const APDU* req) const
+bool A_ADC_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1313,14 +1326,15 @@ A_ADC_Response_PDU::Decode ()
   return s;
 }
 
-bool A_ADC_Response_PDU::isResponse(const APDU* req) const
+bool A_ADC_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()!=A_ADC_Read)
+  if (req->getType () != A_ADC_Read)
     return 0;
-  const A_ADC_Read_PDU* a=(const A_ADC_Read_PDU*)req;
-  if(a->count!=count)
+  const A_ADC_Read_PDU *
+    a = (const A_ADC_Read_PDU *) req;
+  if (a->count != count)
     return 0;
-  if(a->channel!=channel)
+  if (a->channel != channel)
     return 0;
   return 1;
 }
@@ -1365,7 +1379,7 @@ A_Memory_Read_PDU::Decode ()
   return s;
 }
 
-bool A_Memory_Read_PDU::isResponse(const APDU* req) const
+bool A_Memory_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1419,14 +1433,15 @@ A_Memory_Response_PDU::Decode ()
   return s;
 }
 
-bool A_Memory_Response_PDU::isResponse(const APDU* req) const
+bool A_Memory_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()!=A_Memory_Read)
+  if (req->getType () != A_Memory_Read)
     return 0;
-  const A_Memory_Read_PDU* a=(const A_Memory_Read_PDU*)req;
-  if(a->count!=count)
+  const A_Memory_Read_PDU *
+    a = (const A_Memory_Read_PDU *) req;
+  if (a->count != count)
     return 0;
-  if(a->addr!=addr)
+  if (a->addr != addr)
     return 0;
   return 1;
 }
@@ -1480,7 +1495,7 @@ A_Memory_Write_PDU::Decode ()
   return s;
 }
 
-bool A_Memory_Write_PDU::isResponse(const APDU* req) const
+bool A_Memory_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1540,7 +1555,7 @@ A_MemoryBit_Write_PDU::Decode ()
   return s;
 }
 
-bool A_MemoryBit_Write_PDU::isResponse(const APDU* req) const
+bool A_MemoryBit_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1592,7 +1607,7 @@ A_UserMemory_Read_PDU::Decode ()
   return s;
 }
 
-bool A_UserMemory_Read_PDU::isResponse(const APDU* req) const
+bool A_UserMemory_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1653,16 +1668,17 @@ A_UserMemory_Response_PDU::Decode ()
   return s;
 }
 
-bool A_UserMemory_Response_PDU::isResponse(const APDU* req) const
+bool A_UserMemory_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()!=A_UserMemory_Read)
+  if (req->getType () != A_UserMemory_Read)
     return 0;
-  const A_UserMemory_Read_PDU* a=(const A_UserMemory_Read_PDU*)req;
-  if(a->count!=count)
+  const A_UserMemory_Read_PDU *
+    a = (const A_UserMemory_Read_PDU *) req;
+  if (a->count != count)
     return 0;
-  if(a->addr!=addr)
+  if (a->addr != addr)
     return 0;
-  if(a->addr_extension!=addr_extension)
+  if (a->addr_extension != addr_extension)
     return 0;
   return 1;
 }
@@ -1723,7 +1739,7 @@ A_UserMemory_Write_PDU::Decode ()
   return s;
 }
 
-bool A_UserMemory_Write_PDU::isResponse(const APDU* req) const
+bool A_UserMemory_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1784,7 +1800,7 @@ A_UserMemoryBit_Write_PDU::Decode ()
   return s;
 }
 
-bool A_UserMemoryBit_Write_PDU::isResponse(const APDU* req) const
+bool A_UserMemoryBit_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1819,7 +1835,7 @@ A_UserManufacturerInfo_Read_PDU::Decode ()
   return s;
 }
 
-bool A_UserManufacturerInfo_Read_PDU::isResponse(const APDU* req) const
+bool A_UserManufacturerInfo_Read_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1864,9 +1880,9 @@ A_UserManufacturerInfo_Response_PDU::Decode ()
   return s;
 }
 
-bool A_UserManufacturerInfo_Response_PDU::isResponse(const APDU* req) const
+bool A_UserManufacturerInfo_Response_PDU::isResponse (const APDU * req) CONST
 {
-  return req->getType()==A_UserManufacturerInfo_Read;
+  return req->getType () == A_UserManufacturerInfo_Read;
 }
 
 /* A_Restart */
@@ -1898,7 +1914,7 @@ A_Restart_PDU::Decode ()
   return s;
 }
 
-bool A_Restart_PDU::isResponse(const APDU* req) const
+bool A_Restart_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1914,7 +1930,7 @@ A_Authorize_Request_PDU::A_Authorize_Request_PDU (const CArray & c)
 {
   if (c () != 7)
     throw Exception (PDU_WRONG_FORMAT);
-  key = (c[3]<<24) | (c[4]<<16) | (c[5]<<8) | (c[6]);
+  key = (c[3] << 24) | (c[4] << 16) | (c[5] << 8) | (c[6]);
 }
 
 CArray
@@ -1939,7 +1955,7 @@ A_Authorize_Request_PDU::Decode ()
   return s + FormatEIBKey (key);
 }
 
-bool A_Authorize_Request_PDU::isResponse(const APDU* req) const
+bool A_Authorize_Request_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -1977,9 +1993,9 @@ A_Authorize_Response_PDU::Decode ()
   return s;
 }
 
-bool A_Authorize_Response_PDU::isResponse(const APDU* req) const
+bool A_Authorize_Response_PDU::isResponse (const APDU * req) CONST
 {
-  return req->getType()==A_Authorize_Request;
+  return req->getType () == A_Authorize_Request;
 }
 
 /* A_Key_Write */
@@ -1995,7 +2011,7 @@ A_Key_Write_PDU::A_Key_Write_PDU (const CArray & c)
   if (c () != 7)
     throw Exception (PDU_WRONG_FORMAT);
   level = c[2];
-  key = (c[3]<<24) | (c[4]<<16) | (c[5]<<8) | (c[6]);
+  key = (c[3] << 24) | (c[4] << 16) | (c[5] << 8) | (c[6]);
 }
 
 CArray
@@ -2022,7 +2038,7 @@ A_Key_Write_PDU::Decode ()
   return s + FormatEIBKey (key);
 }
 
-bool A_Key_Write_PDU::isResponse(const APDU* req) const
+bool A_Key_Write_PDU::isResponse (const APDU * req) CONST
 {
   return 0;
 }
@@ -2060,10 +2076,11 @@ A_Key_Response_PDU::Decode ()
   return s;
 }
 
-bool A_Key_Response_PDU::isResponse(const APDU* req) const
+bool A_Key_Response_PDU::isResponse (const APDU * req) CONST
 {
-  if(req->getType()!=A_Key_Write)
+  if (req->getType () != A_Key_Write)
     return 0;
-  const A_Key_Write_PDU* a=(const A_Key_Write_PDU*)req;
-  return a->level==level;
+  const A_Key_Write_PDU *
+    a = (const A_Key_Write_PDU *) req;
+  return a->level == level;
 }
