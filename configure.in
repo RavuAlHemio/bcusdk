@@ -22,6 +22,14 @@ AC_CHECK_HEADER(linux/usbdevice_fs.h,[AC_DEFINE(LINUX_API, 1, [Linux usb availab
 AC_CHECK_HEADER(iphlpapi.h,[AC_DEFINE(HAVE_WINDOWS_IPHELPER, 1,[Windows IPHelper available]) 
   LIBS="-liphlpapi $LIBS"; have_source_info=yes],[],[-])
 
+have_bsd_source_info=no
+AC_CHECK_DECL(__FREEBSD__,[have_bsd_source_info=yes],[],[])
+AC_CHECK_DECL(__APPLE__,[have_bsd_source_info=yes],[],[])
+if test x$have_bsd_source_info = xyes ; then
+  AC_DEFINE(HAVE_BSD_SOURCEINFO, 1,[FreeBSD compatible sourceinfo])
+  have_source_info=yes
+fi
+
 AC_CHECK_FUNCS(gethostbyname_r,,[AC_MSG_WARN([eibd client library not thread safe])])
 
 AM_CONDITIONAL(LINUX_API, test x$have_linux_api = xyes)
@@ -207,6 +215,13 @@ if test x$enablejava = xtrue ; then
 fi
 
 AM_CONDITIONAL(BUILD_JAVA, test x$enablejava = xtrue )
+
+AC_CHECK_MEMBER([struct sockaddr_in.sin_len],[AC_DEFINE(HAVE_SOCKADDR_IN_LEN,1,[Do we have sockaddr_in.sin_len?])],[],
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+])
 
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT(Makefile 

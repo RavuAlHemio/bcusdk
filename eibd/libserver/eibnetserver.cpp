@@ -19,6 +19,7 @@
 
 #include "eibnetserver.h"
 #include "emi.h"
+#include "config.h"
 
 #define NAME "eibd"
 
@@ -32,6 +33,10 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
   l3 = layer3;
 
   TRACEPRINTF (t, 8, this, "Open");
+  memset (&baddr, 0, sizeof (baddr));
+#ifdef HAVE_SOCKADDR_IN_LEN
+  baddr.sin_len = sizeof (baddr);
+#endif
   baddr.sin_family = AF_INET;
   baddr.sin_port = htons (port);
   baddr.sin_addr.s_addr = htonl (INADDR_ANY);

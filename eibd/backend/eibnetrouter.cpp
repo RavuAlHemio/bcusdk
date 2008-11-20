@@ -19,6 +19,7 @@
 
 #include "eibnetrouter.h"
 #include "emi.h"
+#include "config.h"
 
 EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
 				eibaddr_t a, Trace * tr)
@@ -31,6 +32,9 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
   mode = 0;
   vmode = 0;
   memset (&baddr, 0, sizeof (baddr));
+#ifdef HAVE_SOCKADDR_IN_LEN
+  baddr.sin_len = sizeof (baddr);
+#endif
   baddr.sin_family = AF_INET;
   baddr.sin_port = htons (port);
   baddr.sin_addr.s_addr = htonl (INADDR_ANY);

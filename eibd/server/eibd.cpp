@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include "layer3.h"
 #include "localserver.h"
 #include "inetserver.h"
