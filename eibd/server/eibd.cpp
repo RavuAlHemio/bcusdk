@@ -318,14 +318,14 @@ main (int ac, char *ag[])
     {
       s = new InetServer (l3, &t, arg.port);
       if (!s->init ())
-	die ("initialisation of the eibd inet protocol");
+	die ("initialisation of the eibd inet protocol failed");
       server.put (s);
     }
   if (arg.name)
     {
       s = new LocalServer (l3, &t, arg.name);
       if (!s->init ())
-	die ("initialisation of the eibd unix protocol");
+	die ("initialisation of the eibd unix protocol failed");
       server.put (s);
     }
 #ifdef HAVE_EIBNETIPSERVER
@@ -333,7 +333,7 @@ main (int ac, char *ag[])
 #endif
 #ifdef HAVE_GROUPCACHE
   if (!CreateGroupCache (l3, &t, arg.groupcache))
-    die ("initialisation of the group cache");
+    die ("initialisation of the group cache failed");
 #endif
 
   sigset_t t1;
