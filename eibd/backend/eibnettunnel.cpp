@@ -67,7 +67,7 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
   raddr.sin_port = htons (sport);
   NAT = false;
   dataport = Dataport;
-  sock = new EIBNetIPSocket (saddr, 0, t);
+  sock = new EIBNetIPSocket (raddr, 0, t);
   if (!sock->init ())
     {
       delete sock;
