@@ -1665,7 +1665,7 @@ CArray
 A_UserMemory_Read_PDU::ToPacket ()
 {
   assert ((count & 0xf0) == 0);
-  assert (addr_extension & 0xf0 == 0);
+  assert ((addr_extension & 0xf0) == 0);
   CArray pdu;
   pdu.resize (5);
   pdu[0] = 0x02;
@@ -1680,7 +1680,7 @@ String
 A_UserMemory_Read_PDU::Decode ()
 {
   assert ((count & 0xf0) == 0);
-  assert (addr_extension & 0xf0 == 0);
+  assert ((addr_extension & 0xf0) == 0);
   String s ("A_UserMemory_Read Addr_ext:");
   addHex (s, addr_extension);
   s += " Len: ";
