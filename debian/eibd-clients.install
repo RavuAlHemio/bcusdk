@@ -44,4 +44,5 @@ usr/bin/groupcachereadsync
 usr/bin/groupcacheread
 usr/bin/mrestart
 usr/bin/mwriteplain
+usr/bin/knxtool
 

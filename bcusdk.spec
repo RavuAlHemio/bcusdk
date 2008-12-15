@@ -162,6 +162,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/groupcacheread
 /usr/bin/mrestart
 /usr/bin/mwriteplain
+/usr/bin/knxtool
 
 %files -n libeibclient-devel
 %defattr(-,root,root,-)
