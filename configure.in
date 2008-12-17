@@ -25,7 +25,7 @@ dnl ##    SUCH DAMAGE.
 
 AC_PREREQ(2.59)
 
-AC_INIT(bcusdk, 0.0.3)
+AC_INIT(bcusdk, 0.0.4)
 AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
