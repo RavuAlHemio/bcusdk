@@ -1,6 +1,6 @@
 #!/bin/bash
 #    BCU SDK bcu development enviroment
-#    Copyright (C) 2005-2008 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+#    Copyright (C) 2005-2009 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ progname="`basename \"$0\"`"
 usage()
 {
 cat >&2 <<END
-$progname $version Copyright (C) 2005-2008 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+$progname $version Copyright (C) 2005-2009 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 creates a bcu image using the configuration in the config file
 
 Usage: $progname [options] config_file

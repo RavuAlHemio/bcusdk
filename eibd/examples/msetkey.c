@@ -1,6 +1,6 @@
 /*
     EIB Demo program - set a key in a BCU
-    Copyright (C) 2005-2008 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2009 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
