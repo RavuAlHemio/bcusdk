@@ -34,11 +34,20 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
   TRACEPRINTF (t, 1, this, "Open");
+
+  fd = open (dev, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
+  if (fd == -1)
+    return;
+  set_low_latency (fd, &sold);
+
+  close (fd);
+
   fd = open (dev, O_RDWR | O_NOCTTY);
   if (fd == -1)
     return;
   if (tcgetattr (fd, &old))
     {
+      restore_low_latency (fd, &sold);
       close (fd);
       fd = -1;
       return;
@@ -46,6 +55,7 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
 
   if (tcgetattr (fd, &t1))
     {
+      restore_low_latency (fd, &sold);
       close (fd);
       fd = -1;
       return;
@@ -61,6 +71,7 @@ FT12LowLevelDriver::FT12LowLevelDriver (const char *dev, Trace * tr)
 
   if (tcsetattr (fd, TCSAFLUSH, &t1))
     {
+      restore_low_latency (fd, &sold);
       close (fd);
       fd = -1;
       return;
@@ -85,6 +96,7 @@ FT12LowLevelDriver::~FT12LowLevelDriver ()
   if (fd != -1)
     {
       tcsetattr (fd, TCSAFLUSH, &old);
+      restore_low_latency (fd, &sold);
       close (fd);
     }
 }

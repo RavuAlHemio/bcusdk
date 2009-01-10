@@ -1,5 +1,5 @@
 if HAVE_FT12
-FT12 = ft12.h ft12.cpp
+FT12 = ft12.h ft12.cpp lowlatency.h lowlatency.cpp
 else
 FT12 =
 endif

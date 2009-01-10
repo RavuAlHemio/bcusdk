@@ -24,10 +24,13 @@
 
 #include "threads.h"
 #include "lowlevel.h"
+#include "lowlatency.h"
 
 /** FT1.2 lowlevel driver*/
 class FT12LowLevelDriver:public LowLevelDriverInterface, private Thread
 {
+  /** old serial config */
+  low_latency_save sold;
   /** file descriptor */
   int fd;
   /** saved termios */
