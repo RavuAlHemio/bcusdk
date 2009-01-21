@@ -115,8 +115,7 @@ EIBnetServer::~EIBnetServer ()
     delete sock;
 }
 
-bool
-EIBnetServer::init ()
+bool EIBnetServer::init ()
 {
   return sock != 0;
 }
@@ -124,6 +123,13 @@ EIBnetServer::init ()
 void
 EIBnetServer::Get_L_Data (L_Data_PDU * l)
 {
+  if (!l->hopcount)
+    {
+      TRACEPRINTF (t, 8, this, "SendDrop");
+      delete l;
+      return;
+    }
+  l->hopcount--;
   if (route)
     {
       TRACEPRINTF (t, 8, this, "Send_Route %s", l->Decode ()());
@@ -235,7 +241,16 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      if (c)
 		{
 		  TRACEPRINTF (t, 8, this, "Recv_Route %s", c->Decode ()());
-		  l3->send_L_Data (c);
+		  if (c->hopcount)
+		    {
+		      c->hopcount--;
+		      l3->send_L_Data (c);
+		    }
+		  else
+		    {
+		      TRACEPRINTF (t, 8, this, "RecvDrop");
+		      delete c;
+		    }
 		}
 	    }
 	  if (p1->service == CONNECTIONSTATE_REQUEST && tunnel)
@@ -361,15 +376,24 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      if (c)
 		{
 		  r2.status = 0;
-		  if (r1.CEMI[0] == 0x11)
+		  if (c->hopcount)
 		    {
-		      state[i].out.put (L_Data_ToCEMI (0x2E, *c));
-		      pth_sem_inc (state[i].outsignal, 0);
+		      c->hopcount--;
+		      if (r1.CEMI[0] == 0x11)
+			{
+			  state[i].out.put (L_Data_ToCEMI (0x2E, *c));
+			  pth_sem_inc (state[i].outsignal, 0);
+			}
+		      if (r1.CEMI[0] == 0x11 || r1.CEMI[0] == 0x29)
+			l3->send_L_Data (c);
+		      else
+			delete c;
 		    }
-		  if (r1.CEMI[0] == 0x11 || r1.CEMI[0] == 0x29)
-		    l3->send_L_Data (c);
 		  else
-		    delete c;
+		    {
+		      TRACEPRINTF (t, 8, this, "RecvDrop");
+		      delete c;
+		    }
 
 		}
 	      else
