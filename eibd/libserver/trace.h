@@ -32,15 +32,25 @@
 #define TRACE_LEVEL_6 0x40
 #define TRACE_LEVEL_7 0x80
 
+#define LEVEL_FATAL 0
+#define LEVEL_CRITICAL 1
+#define LEVEL_ERROR 2
+#define LEVEL_WARNING 3
+#define LEVEL_NOTICE 4
+#define LEVEL_INFO 5
+
 /** implements debug output with different levels */
 class Trace
 {
   /** message levels to print */
   int layers;
+  /** error levels to print */
+  int level;
 public:
     Trace ()
   {
     layers = 0;
+    level = 0;
   }
   virtual ~ Trace ()
   {
@@ -50,6 +60,12 @@ public:
   virtual void SetTraceLevel (int l)
   {
     layers = l;
+  }
+
+  /** sets error level */
+  virtual void SetErrorLevel (int l)
+  {
+    level = l;
   }
 
   /** prints a message with a hex dump unconditional
@@ -93,6 +109,12 @@ public:
    */
   virtual void TracePrintf (int layer, void *inst, const char *msg, ...);
 
+  /** like printf for errors
+   * @param msgid message id
+   * @param msg Message
+   */
+  virtual void ErrorPrintfUncond (unsigned int msgid, const char *msg, ...);
+
   /** should trace message be written
    * @parm layer level of the message
    * @return bool
@@ -104,8 +126,24 @@ public:
     else
       return 0;
   }
+
+  /** should error message be written
+   * @parm msgid level of the message
+   * @return bool
+   */
+  bool ShowError (unsigned int msgid)
+  {
+    if (((msgid >> 28) & 0x0f) <= level)
+      return 1;
+    else
+      return 0;
+  }
 };
 
-#define TRACEPRINTF(trace, layer, msg, args...) do { if ((trace)->ShowPrint(layer)) (trace)->TracePrintf(layer, msg, ##args); } while (0)
+#define TRACEPRINTF(trace, layer, inst, msg, args...) do { if ((trace)->ShowPrint(layer)) (trace)->TracePrintf(layer, inst, msg, ##args); } while (0)
+#define ERRORPRINTF(trace, msgid, inst, msg, args...) do { \
+      if ((trace)->ShowPrint(((msgid)>>24)&0x0f)) (trace)->TracePrintf(((msgid)>>24)&0x0f, inst, msg, ##args); \
+      if ((trace)->ShowError(msgid)) (trace)->ErrorPrintfUncond(msgid, msg, ##args); \
+   } while (0)
 
 #endif

@@ -46,3 +46,39 @@ Trace::TracePrintf (int layer, void *inst, const char *msg, ...)
   printf ("\n");
   va_end (ap);
 }
+
+void
+Trace::ErrorPrintfUncond (unsigned int msgid, const char *msg, ...)
+{
+  va_list ap;
+  int t = time (0);
+  char c;
+  switch ((msgid >> 28) & 0x0f)
+    {
+    case LEVEL_FATAL:
+      c = 'F';
+      break;
+    case LEVEL_CRITICAL:
+      c = 'C';
+      break;
+    case LEVEL_ERROR:
+      c = 'E';
+      break;
+    case LEVEL_WARNING:
+      c = 'W';
+      break;
+    case LEVEL_NOTICE:
+      c = 'N';
+      break;
+    case LEVEL_INFO:
+      c = 'I';
+      break;
+    default:
+      c = '?';
+    }
+  fprintf (stderr, "%c%08d: ", c, (msgid & 0xffffff));
+  va_start (ap, msg);
+  vfprintf (stderr, msg, ap);
+  fprintf (stderr, "\n");
+  va_end (ap);
+}
