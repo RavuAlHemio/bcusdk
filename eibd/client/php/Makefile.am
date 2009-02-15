@@ -14,8 +14,8 @@ EIBConnection.post : EIBConnection.pre result.inc
 EIBConnection.php : EIBConnection.post 
 	sed -e 's/PAR \?(\([A-Za-z][A-Za-z0-9_]*\))/$$\1/g' $< |sed -e 's/PAR \?(\([0-9]*\))/\1/g' > $@
 	$(INDENT) $@ || /bin/true
-	sed -ri 's/== =/===/g' $@
-	sed -ri 's/= &/=\& /g' $@
+	sed -i -e 's/== =/===/g' $@
+	sed -i -e 's/= &/=\& /g' $@
 
 eibclient.php : lic.inc EIBConnection.php end.inc
 	cat $^ > $@
