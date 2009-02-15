@@ -20,4 +20,4 @@ findknxusb_SOURCES= findknxusb.cpp
 findknxusb_LDADD= libusb.a
 
 noinst_LIBRARIES=libusb.a
-libusb_a_SOURCES=$(LIBUSB)
+libusb_a_SOURCES=$(LIBUSB) dummy.cpp
