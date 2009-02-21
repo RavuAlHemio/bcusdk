@@ -158,6 +158,20 @@ typedef struct
   char data[1000];
 } r_req;
 
+#ifndef HAVE_SA_SIZE
+static int
+SA_SIZE (struct sockaddr *sa)
+{
+  int align = sizeof (long);
+  int len = (sa->sa_len ? sa->sa_len : align);
+  if (len & (align - 1))
+    {
+      len += align - (len & (align - 1));
+    }
+  return len;
+}
+#endif
+
 int
 GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
 {
