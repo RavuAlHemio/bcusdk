@@ -22,18 +22,19 @@
 
 #include "eibusb.h"
 #include "usbif.h"
+#include "usb.h"
 
 #define USB_URL "usb:[bus[:device[:config[:interface]]]]\n"
 #define USB_DOC "usb connects over a KNX USB interface\n\n"
 #define USB_PREFIX "usb"
 #define USB_CREATE Usb_Create
-#define USB_CLEANUP NULL
+#define USB_CLEANUP USBEnd
 
 inline Layer2Interface *
 Usb_Create (const char *dev, Trace * t)
 {
-  libusb_set_debug (0);
-  libusb_init ();
+  if (!USBInit (t))
+    return 0;
   return new USBLayer2Interface (new USBLowLevelDriver (dev, t), t);
 }
 

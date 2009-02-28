@@ -27,6 +27,7 @@
 #include <linux/hiddev.h>
 #include <sys/ioctl.h>
 #include "usbif.h"
+#include "usb.h"
 
 USBEndpoint
 parseUSBEndpoint (const char *addr)
@@ -35,6 +36,7 @@ parseUSBEndpoint (const char *addr)
   e.bus = -1;
   e.device = -1;
   e.config = -1;
+  e.altsetting = -1;
   e.interface = -1;
   if (!*addr)
     return e;
@@ -64,115 +66,102 @@ parseUSBEndpoint (const char *addr)
   addr++;
   if (!isdigit (*addr))
     return e;
+  e.altsetting = atoi (addr);
+  if (*addr != ':')
+    return e;
+  addr++;
+  if (!isdigit (*addr))
+    return e;
   e.interface = atoi (addr);
   return e;
 }
 
 bool
-check_device (libusb_device_id_t cdev, USBEndpoint e, USBDevice & e2)
+check_device (libusb_device * dev, USBEndpoint e, USBDevice & e2)
 {
-  struct usb_device_desc desc;
-  struct usb_config_desc cfg;
-  struct usb_interface_desc intf;
-  struct usb_endpoint_desc ep;
-  int in, out, outint;
-  libusb_bus_id_t bus;
-  unsigned char devnum;
-  libusb_dev_handle_t h;
-  int j, k, l;
+  struct libusb_device_descriptor desc;
+  struct libusb_config_descriptor *cfg;
+  const struct libusb_interface *intf;
+  const struct libusb_interface_descriptor *alts;
+  const struct libusb_endpoint_descriptor *ep;
+  libusb_device_handle *h;
+  int j, k, l, m;
+  int in, out;
 
-  if (!cdev)
+  if (!dev)
     return false;
 
-  libusb_get_devnum (cdev, &devnum);
-  libusb_get_bus_id (cdev, &bus);
-
-  if (libusb_get_busnum (bus) != e.bus && e.bus != -1)
+  if (libusb_get_bus_number (dev) != e.bus && e.bus != -1)
     return false;
-  if (devnum != e.device && e.device != -1)
+  if (libusb_get_device_address (dev) != e.device && e.device != -1)
     return false;
 
-  libusb_get_device_desc (cdev, &desc);
+  if (libusb_get_device_descriptor (dev, &desc))
+    return false;
+
   for (j = 0; j < desc.bNumConfigurations; j++)
     {
-      libusb_get_config_desc (cdev, j, &cfg);
-      if (cfg.bConfigurationValue != e.config && e.config != -1)
+      if (libusb_get_config_descriptor (dev, j, &cfg))
 	continue;
-      for (k = 0; k < cfg.bNumInterfaces; k++)
+      if (cfg->bConfigurationValue != e.config && e.config != -1)
+	continue;
+
+      for (k = 0; k < cfg->bNumInterfaces; k++)
 	{
-	  libusb_get_interface_desc (cdev, j, k, &intf);
-	  if (intf.bInterfaceNumber != e.interface && e.interface != -1)
-	    continue;
-	  if (intf.bInterfaceClass != USB_CLASS_HID)
-	    continue;
-
-	  in = 0;
-	  out = 0;
-	  outint = 0;
-
-	  for (l = 0; l < intf.bNumEndpoints; l++)
+	  intf = &cfg->interface[k];
+	  for (l = 0; l < intf->num_altsetting; l++)
 	    {
-	      libusb_get_endpoint_desc (cdev, j, k, l, &ep);
-	      if (ep.wMaxPacketSize == 64)
-		{
-		  if (ep.bEndpointAddress & 0x80)
-		    {
-		      if ((ep.bmAttributes & USB_ENDPOINT_TYPE_MASK) ==
-			  USB_ENDPOINT_TYPE_INTERRUPT)
-			in = ep.bEndpointAddress;
-		    }
-		  else
-		    {
-		      if (((ep.bmAttributes & USB_ENDPOINT_TYPE_MASK) ==
-			   USB_ENDPOINT_TYPE_CONTROL && !outint && 0)
-			  || (ep.bmAttributes & USB_ENDPOINT_TYPE_MASK) ==
-			  USB_ENDPOINT_TYPE_INTERRUPT)
-			{
-			  out = ep.bEndpointAddress;
-			  outint =
-			    (ep.bmAttributes & USB_ENDPOINT_TYPE_MASK) ==
-			    USB_ENDPOINT_TYPE_INTERRUPT;
-			}
+	      alts = &intf->altsetting[l];
+	      if (alts->bInterfaceClass != LIBUSB_CLASS_HID)
+		continue;
+	      if (alts->bAlternateSetting != e.altsetting
+		  && e.altsetting != -1)
+		continue;
+	      if (alts->bInterfaceNumber != e.interface && e.interface != -1)
+		continue;
 
+	      in = 0;
+	      out = 0;
+	      for (m = 0; m < alts->bNumEndpoints; m++)
+		{
+		  ep = &alts->endpoint[m];
+		  if (ep->wMaxPacketSize == 64)
+		    {
+		      if (ep->bEndpointAddress & LIBUSB_ENDPOINT_IN)
+			{
+			  if ((ep->
+			       bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) ==
+			      LIBUSB_TRANSFER_TYPE_INTERRUPT)
+			    in = ep->bEndpointAddress;
+			}
+		      else
+			{
+			  if ((ep->
+			       bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) ==
+			      LIBUSB_TRANSFER_TYPE_INTERRUPT)
+			    out = ep->bEndpointAddress;
+			}
 		    }
 		}
-	    }
-	  if (!in || !out)
-	    continue;
-	  if (libusb_open (cdev, &h) >= 0)
-	    {
-	      USBDevice e1;
-	      e1.dev = cdev;
-	      e1.config = cfg.bConfigurationValue;
-	      e1.interface = intf.bInterfaceNumber;
-	      e1.sendep = out;
-	      e1.recvep = in;
-	      libusb_close (h);
-	      e2 = e1;
-	      return true;
+
+	      if (!in || !out)
+		continue;
+	      if (!libusb_open (dev, &h))
+		{
+		  USBDevice e1;
+		  e1.dev = dev;
+		  libusb_ref_device (dev);
+		  e1.config = cfg->bConfigurationValue;
+		  e1.interface = alts->bInterfaceNumber;
+		  e1.altsetting = alts->bAlternateSetting;
+		  e1.sendep = out;
+		  e1.recvep = in;
+		  libusb_close (h);
+		  e2 = e1;
+		  return true;
+		}
 	    }
 	}
-    }
-  return false;
-}
-
-
-bool
-check_devlist (libusb_device_id_t dev, USBEndpoint e, USBDevice & e2)
-{
-  libusb_device_id_t cdev;
-  unsigned char count;
-  int i;
-
-  if (check_device (dev, e, e2))
-    return true;
-  libusb_get_child_count (dev, &count);
-  for (i = 0; i < count; i++)
-    {
-      if (libusb_get_child_device_id (dev, i + 1, &cdev) < 0)
-	continue;
-      if (check_devlist (cdev, e, e2))
-	return true;
     }
   return false;
 }
@@ -180,28 +169,23 @@ check_devlist (libusb_device_id_t dev, USBEndpoint e, USBDevice & e2)
 USBDevice
 detectUSBEndpoint (USBEndpoint e)
 {
-  libusb_bus_id_t bus;
-  libusb_device_id_t dev;
+  libusb_device **devs;
+  int i, count;
   USBDevice e2;
-  e2.dev = -1;
-  for (libusb_get_first_bus_id (&bus); bus;)
-    {
-      libusb_get_first_device_id (bus, &dev);
-      if (check_devlist (dev, e, e2))
-	break;
+  e2.dev = NULL;
+  count = libusb_get_device_list (NULL, &devs);
 
-      if (libusb_get_next_bus_id (&bus) < 0)
-	break;
-    }
+  for (i = 0; i < count; i++)
+    if (check_device (devs[i], e, e2))
+      break;
+
+  libusb_free_device_list (devs, 1);
+
   return e2;
 }
 
-
 USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
 {
-  libusb_bus_id_t bus;
-  unsigned char devnum;
-
   t = tr;
   pth_sem_init (&in_signal);
   pth_sem_init (&out_signal);
@@ -213,21 +197,23 @@ USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
   USBEndpoint e = parseUSBEndpoint (Dev);
   d = detectUSBEndpoint (e);
   state = 0;
-  if (d.dev == -1)
+  if (d.dev == 0)
     return;
-  libusb_get_devnum (d.dev, &devnum);
-  libusb_get_bus_id (d.dev, &bus);
-  TRACEPRINTF (t, 1, this, "Using %d (%d:%d:%d:%d) (%d:%d)", d.dev,
-	       libusb_get_busnum (bus),
-	       devnum, d.config, d.interface, d.sendep, d.recvep);
+  TRACEPRINTF (t, 1, this, "Using %d:%d:%d:%d:%d (%d:%d)",
+	       libusb_get_bus_number (d.dev),
+	       libusb_get_device_address (d.dev), d.config, d.altsetting,
+	       d.interface, d.sendep, d.recvep);
   if (libusb_open (d.dev, &dev) < 0)
     return;
+  libusb_unref_device (d.dev);
   state = 1;
   TRACEPRINTF (t, 1, this, "Open");
-  libusb_detach_kernel_driver_np (dev, d.interface);
+  libusb_detach_kernel_driver (dev, d.interface);
   if (libusb_set_configuration (dev, d.config) < 0)
     return;
   if (libusb_claim_interface (dev, d.interface) < 0)
+    return;
+  if (libusb_set_interface_alt_setting (dev, d.interface, d.altsetting) < 0)
     return;
   TRACEPRINTF (t, 1, this, "Claimed");
   state = 2;
@@ -246,7 +232,7 @@ USBLowLevelDriver::~USBLowLevelDriver ()
   if (state > 0)
     {
       libusb_release_interface (dev, d.interface);
-      libusb_attach_kernel_driver_np (dev, d.interface);
+      libusb_attach_kernel_driver (dev, d.interface);
     }
   TRACEPRINTF (t, 1, this, "Close");
   if (state > 0)
@@ -320,73 +306,91 @@ LowLevelDriverInterface::EMIVer USBLowLevelDriver::getEMIVer ()
   return vRaw;
 }
 
+struct usb_complete
+{
+  pth_sem_t
+    signal;
+};
+
+void
+usb_complete (struct libusb_transfer *transfer)
+{
+  struct usb_complete *
+    complete = (struct usb_complete *) transfer->user_data;
+  pth_sem_inc (&complete->signal, 0);
+}
 
 void
 USBLowLevelDriver::Run (pth_sem_t * stop1)
 {
-  int i, j;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
   uchar recvbuf[64];
   uchar sendbuf[64];
-  libusb_io_handle_t *sendh = 0;
-  libusb_io_handle_t *recvh = 0;
-  pth_event_t sende = pth_event (PTH_EVENT_SEM, &in_signal);;
-  pth_event_t recve = pth_event (PTH_EVENT_SEM, &in_signal);;
+  struct libusb_transfer *sendh = 0;
+  struct libusb_transfer *recvh = 0;
+  struct usb_complete sendc, recvc;
+  pth_event_t sende = pth_event (PTH_EVENT_SEM, &in_signal);
+  pth_event_t recve = pth_event (PTH_EVENT_SEM, &in_signal);
+
+  pth_sem_init (&sendc.signal);
+  pth_sem_init (&recvc.signal);
 
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       if (!recvh)
 	{
-	  recvh =
-	    libusb_submit_interrupt_read (dev, d.recvep, recvbuf,
-					  sizeof (recvbuf), 1000, 0);
+	  recvh = libusb_alloc_transfer (0);
 	  if (!recvh)
+	    {
+	      TRACEPRINTF (t, 0, this, "Error AllocRecv");
+	      break;
+	    }
+	  libusb_fill_interrupt_transfer (recvh, dev, d.recvep, recvbuf,
+					  sizeof (recvbuf), usb_complete,
+					  &recvc, 30000);
+	  if (libusb_submit_transfer (recvh))
 	    {
 	      TRACEPRINTF (t, 0, this, "Error StartRecv");
 	      break;
 	    }
-	  TRACEPRINTF (t, 0, this, "StartRecv");
-	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
-		     PTH_UNTIL_FD_WRITEABLE, recve,
-		     libusb_io_wait_handle (recvh));
-	}
 
-      if (recvh && libusb_is_io_completed (recvh))
+	  TRACEPRINTF (t, 0, this, "StartRecv");
+	  pth_event (PTH_EVENT_SEM | PTH_MODE_REUSE | PTH_UNTIL_DECREMENT,
+		     recve, &recvc.signal);
+	}
+      if (recvh && pth_event_status (recve) == PTH_STATUS_OCCURRED)
 	{
-	  if (libusb_io_comp_status (recvh) < 0)
-	    TRACEPRINTF (t, 0, this, "RecvError %d",
-			 libusb_io_comp_status (recvh));
+	  if (recvh->status != LIBUSB_TRANSFER_COMPLETED)
+	    TRACEPRINTF (t, 0, this, "RecvError %d", recvh->status);
 	  else
 	    {
 	      TRACEPRINTF (t, 0, this, "RecvComplete %d",
-			   libusb_io_xfer_size (recvh));
+			   recvh->actual_length);
 	      CArray res;
 	      res.set (recvbuf, sizeof (recvbuf));
 	      t->TracePacket (0, this, "RecvUSB", res);
 	      outqueue.put (new CArray (res));
 	      pth_sem_inc (&out_signal, 1);
 	    }
-	  libusb_io_free (recvh);
+	  libusb_free_transfer (recvh);
 	  recvh = 0;
 	  continue;
 	}
-
-      if (sendh && libusb_is_io_completed (sendh))
+      if (sendh && pth_event_status (sende) == PTH_STATUS_OCCURRED)
 	{
-	  if (libusb_io_comp_status (sendh) < 0)
-	    TRACEPRINTF (t, 0, this, "SendError %d",
-			 libusb_io_comp_status (sendh));
+	  if (sendh->status != LIBUSB_TRANSFER_COMPLETED)
+	    TRACEPRINTF (t, 0, this, "SendError %d", sendh->status);
 	  else
 	    {
 	      TRACEPRINTF (t, 0, this, "SendComplete %d",
-			   libusb_io_xfer_size (sendh));
+			   sendh->actual_length);
 	      pth_sem_dec (&in_signal);
 	      inqueue.get ();
 	      if (inqueue.isempty ())
 		pth_sem_set_value (&send_empty, 1);
 	    }
-	  libusb_io_free (sendh);
+	  libusb_free_transfer (sendh);
 	  sendh = 0;
 	  continue;
 	}
@@ -397,19 +401,23 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	  memset (sendbuf, 0, sizeof (sendbuf));
 	  memcpy (sendbuf, c.array (),
 		  (c () > sizeof (sendbuf) ? sizeof (sendbuf) : c ()));
-
-	  sendh =
-	    libusb_submit_interrupt_write (dev, d.sendep, sendbuf,
-					   sizeof (sendbuf), 1000, 0);
+	  sendh = libusb_alloc_transfer (0);
 	  if (!sendh)
+	    {
+	      TRACEPRINTF (t, 0, this, "Error AllocSend");
+	      break;
+	    }
+	  libusb_fill_interrupt_transfer (sendh, dev, d.sendep, sendbuf,
+					  sizeof (sendbuf), usb_complete,
+					  &sendc, 1000);
+	  if (libusb_submit_transfer (sendh))
 	    {
 	      TRACEPRINTF (t, 0, this, "Error StartSend");
 	      break;
 	    }
 	  TRACEPRINTF (t, 0, this, "StartSend");
-	  pth_event (PTH_EVENT_FD | PTH_MODE_REUSE | PTH_UNTIL_FD_READABLE |
-		     PTH_UNTIL_FD_WRITEABLE, sende,
-		     libusb_io_wait_handle (sendh));
+	  pth_event (PTH_EVENT_SEM | PTH_MODE_REUSE | PTH_UNTIL_DECREMENT,
+		     sende, &sendc.signal);
 	  continue;
 	}
 
@@ -425,17 +433,17 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
       pth_event_isolate (sende);
       pth_event_isolate (recve);
       pth_event_isolate (input);
-
     }
+
   if (sendh)
     {
-      libusb_io_cancel (sendh);
-      libusb_io_free (sendh);
+      libusb_cancel_transfer (sendh);
+      libusb_free_transfer (sendh);
     }
   if (recvh)
     {
-      libusb_io_cancel (recvh);
-      libusb_io_free (recvh);
+      libusb_cancel_transfer (recvh);
+      libusb_free_transfer (recvh);
     }
   pth_event_free (stop, PTH_FREE_THIS);
   pth_event_free (input, PTH_FREE_THIS);

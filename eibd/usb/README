@@ -4,8 +4,7 @@ http://libusb.sourceforge.net/. The licence for this libary can be
 found in COPYING.
 
 Upstream Authors:
-Johannes Erdfelt, <johannes@erdfelt.com>
-Thomas Sailer, <sailer@ife.ee.ethz.ch>
+Daniel Drake <dsd@gentoo.org>
 
 Please do not bother the upstream authors with bugs introduced by me.
 

@@ -17,25 +17,26 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef C_USB_H
-#define C_USB_H
+#ifndef USB_H
+#define USB_H
 
-#include "eibusb.h"
-#include "usbif.h"
-#include "usb.h"
+#include "trace.h"
+#include "threads.h"
+#include "libusb.h"
 
-#define USB_URL "usb:[bus[:device[:config[:interface]]]]\n"
-#define USB_DOC "usb connects over a KNX USB interface\n\n"
-#define USB_PREFIX "usb"
-#define USB_CREATE usb_ll_Create
-#define USB_CLEANUP USBEnd
+bool USBInit (Trace * tr);
+void USBEnd ();
 
-inline LowLevelDriverInterface *
-usb_ll_Create (const char *dev, Trace * t)
+class USBLoop:public Thread
 {
-  if (!USBInit (t))
-    return 0;
-  return initUSBDriver (new USBLowLevelDriver (dev, t), t);
-}
+  Trace *t;
+  libusb_context *context;
+
+  void Run (pth_sem_t * stop);
+
+public:
+    USBLoop (libusb_context * context, Trace * tr);
+
+};
 
 #endif

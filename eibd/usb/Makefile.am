@@ -1,13 +1,15 @@
 EXTRA_DIST=README COPYING
 
+EIBD_USB = usb.cpp usb.h
+
 if LINUX_API
-TARGET = linux.c linux.h
+TARGET = linux_usbfs.c linux_usbfs.h
 else
 TARGET =
 endif
 
 if HAVE_USB
-LIBUSB = async.c devices.c descriptors.c list.c list.h libusb.h usb.c usbi.h $(TARGET)
+LIBUSB = $(EIBD_USB) libusb.h libusbi.h core.c descriptor.c io.c sync.c $(TARGET)
 PROG = findknxusb
 else
 LIBUSB =
@@ -21,3 +23,4 @@ findknxusb_LDADD= libusb.a
 
 noinst_LIBRARIES=libusb.a
 libusb_a_SOURCES=$(LIBUSB) dummy.cpp
+AM_CPPFLAGS=-I$(top_srcdir)/eibd/libserver -I$(top_srcdir)/common $(PTH_CPPFLAGS)

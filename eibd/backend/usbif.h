@@ -28,13 +28,15 @@ typedef struct
   int bus;
   int device;
   int config;
+  int altsetting;
   int interface;
 } USBEndpoint;
 
 typedef struct
 {
-  libusb_device_id_t dev;
+  libusb_device *dev;
   int config;
+  int altsetting;
   int interface;
   int sendep;
   int recvep;
@@ -45,7 +47,7 @@ USBDevice detectUSBEndpoint (USBEndpoint e);
 
 class USBLowLevelDriver:public LowLevelDriverInterface, private Thread
 {
-  libusb_dev_handle_t dev;
+  libusb_device_handle *dev;
   USBDevice d;
   /** debug output */
   Trace *t;
