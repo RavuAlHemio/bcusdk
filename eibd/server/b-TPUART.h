@@ -34,6 +34,9 @@
 #define TPUART24_CREATE tpuart24_Create
 #define TPUART26_CREATE tpuart26_Create
 
+#define TPUART24_CLEANUP NULL
+#define TPUART26_CLEANUP NULL
+
 inline Layer2Interface *
 tpuart24_Create (const char *dev, Trace * t)
 {

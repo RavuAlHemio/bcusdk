@@ -28,6 +28,7 @@
 
 #define EIBNETIP_PREFIX "ip"
 #define EIBNETIP_CREATE eibnetip_Create
+#define EIBNETIP_CLEANUP NULL
 
 inline Layer2Interface *
 eibnetip_Create (const char *dev, Trace * t)

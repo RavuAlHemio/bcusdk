@@ -30,6 +30,8 @@
 
 #define TPUARTs_CREATE tpuarts_Create
 
+#define TPUARTs_CLEANUP NULL
+
 inline Layer2Interface *
 tpuarts_Create (const char *dev, Trace * t)
 {

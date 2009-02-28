@@ -28,6 +28,7 @@
 
 #define EIBNETIPTUNNEL_PREFIX "ipt"
 #define EIBNETIPTUNNEL_CREATE eibnetiptunnel_Create
+#define EIBNETIPTUNNEL_CLEANUP NULL
 
 inline Layer2Interface *
 eibnetiptunnel_Create (const char *dev, Trace * t)

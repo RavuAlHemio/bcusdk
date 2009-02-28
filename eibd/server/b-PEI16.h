@@ -28,6 +28,7 @@
 
 #define PEI16_PREFIX "bcu1"
 #define PEI16_CREATE PEI16_Create
+#define PEI16_CLEANUP NULL
 
 inline Layer2Interface *
 PEI16_Create (const char *dev, Trace * t)

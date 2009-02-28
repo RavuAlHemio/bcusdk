@@ -84,15 +84,19 @@ struct urldef
   const char *prefix;
   /** factory function */
   Layer2_Create_Func Create;
+  /** cleanup function */
+  void (*Cleanup) ();
 };
 
 /** list of URLs */
 struct urldef URLs[] = {
 #undef L2_NAME
-#define L2_NAME(a) { a##_PREFIX, a##_CREATE },
+#define L2_NAME(a) { a##_PREFIX, a##_CREATE, a##_CLEANUP },
 #include "layer2create.h"
-  {0, 0}
+  {0, 0, 0}
 };
+
+void (*Cleanup) ();
 
 /** determines the right backend for the url and creates it */
 Layer2Interface *
@@ -108,6 +112,7 @@ Create (const char *url, Trace * t)
     {
       if (strlen (u->prefix) == p && !memcmp (u->prefix, url, p))
 	{
+	  Cleanup = u->Cleanup;
 	  return u->Create (url + p + 1, t);
 	}
       u++;
@@ -368,6 +373,8 @@ main (int ac, char *ag[])
 #endif
 
   delete l3;
+  if (Cleanup)
+    Cleanup ();
 
   if (arg.pidfile)
     unlink (arg.pidfile);
