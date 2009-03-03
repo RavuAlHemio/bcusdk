@@ -23,9 +23,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <asm/types.h>
-#include <linux/hiddev.h>
-#include <sys/ioctl.h>
 #include "usbif.h"
 #include "usb.h"
 
