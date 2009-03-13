@@ -108,6 +108,7 @@ check_device (libusb_device * dev)
 		}
 	    }
 	}
+      libusb_free_config_descriptor (cfg);
     }
 }
 

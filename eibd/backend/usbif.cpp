@@ -101,7 +101,10 @@ check_device (libusb_device * dev, USBEndpoint e, USBDevice & e2)
       if (libusb_get_config_descriptor (dev, j, &cfg))
 	continue;
       if (cfg->bConfigurationValue != e.config && e.config != -1)
-	continue;
+	{
+	  libusb_free_config_descriptor (cfg);
+	  continue;
+	}
 
       for (k = 0; k < cfg->bNumInterfaces; k++)
 	{
@@ -155,10 +158,12 @@ check_device (libusb_device * dev, USBEndpoint e, USBDevice & e2)
 		  e1.recvep = in;
 		  libusb_close (h);
 		  e2 = e1;
+		  libusb_free_config_descriptor (cfg);
 		  return true;
 		}
 	    }
 	}
+      libusb_free_config_descriptor (cfg);
     }
   return false;
 }
