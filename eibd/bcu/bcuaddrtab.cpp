@@ -180,6 +180,8 @@ main (int ac, char *ag[])
   t.SetTraceLevel (arg.tracelevel);
 
   iface = Create (ag[index], &t);
+  if (!iface)
+    die ("initialisation failed");
   if (!iface->init ())
     die ("initialisation failed");
 
