@@ -217,10 +217,11 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
 EIBNetIPPacket::EIBNetIPPacket ()
 {
   service = 0;
+  memset (&src, 0, sizeof (src));
 }
 
 EIBNetIPPacket *
-EIBNetIPPacket::fromPacket (const CArray & c)
+EIBNetIPPacket::fromPacket (const CArray & c, const struct sockaddr_in src)
 {
   EIBNetIPPacket *p;
   unsigned len;
@@ -234,6 +235,7 @@ EIBNetIPPacket::fromPacket (const CArray & c)
   p = new EIBNetIPPacket;
   p->service = (c[2] << 8) | c[3];
   p->data.set (c.array () + 6, len - 6);
+  p->src = src;
   return p;
 }
 
@@ -417,7 +419,7 @@ EIBNetIPSocket::Run (pth_sem_t * stop1)
 	    {
 	      t->TracePacket (0, this, "Recv", i, buf);
 	      EIBNetIPPacket *p =
-		EIBNetIPPacket::fromPacket (CArray (buf, i));
+		EIBNetIPPacket::fromPacket (CArray (buf, i), r);
 	      if (p)
 		{
 		  outqueue.put (*p);

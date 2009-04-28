@@ -63,10 +63,13 @@ public:
   int service;
   /** payload */
   CArray data;
+  /** source address */
+  struct sockaddr_in src;
 
     EIBNetIPPacket ();
     /** create from character array */
-  static EIBNetIPPacket *fromPacket (const CArray & c);
+  static EIBNetIPPacket *fromPacket (const CArray & c,
+				     const struct sockaddr_in src);
   /** convert to character array */
   CArray ToPacket () const;
     virtual ~ EIBNetIPPacket ()
