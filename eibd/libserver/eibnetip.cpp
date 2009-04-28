@@ -396,6 +396,7 @@ void
 EIBNetIPSocket::Run (pth_sem_t * stop1)
 {
   int i;
+  int error = 0;
   uchar buf[255];
   socklen_t rl;
   sockaddr_in r;
@@ -439,6 +440,16 @@ EIBNetIPSocket::Run (pth_sem_t * stop1)
 	    {
 	      pth_sem_dec (&insignal);
 	      inqueue.get ();
+	      error = 0;
+	    }
+	  else
+	    error++;
+	  if (error > 5)
+	    {
+	      t->TracePacket (0, this, "Drop EIBnetSocket", p);
+	      pth_sem_dec (&insignal);
+	      inqueue.get ();
+	      error = 0;
 	    }
 	}
     }
