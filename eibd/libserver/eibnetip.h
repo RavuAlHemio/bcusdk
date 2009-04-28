@@ -52,7 +52,8 @@ int GetSourceAddress (const struct sockaddr_in *dest,
 /** convert a to EIBnet/IP format */
 CArray IPtoEIBNetIP (const struct sockaddr_in *a);
 /** convert EIBnet/IP IP Address to a */
-int EIBnettoIP (const CArray & buf, struct sockaddr_in *a);
+int EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
+		const struct sockaddr_in *src);
 
 /** represents a EIBnet/IP packet */
 class EIBNetIPPacket

@@ -272,7 +272,8 @@ IPtoEIBNetIP (const struct sockaddr_in * a)
 }
 
 int
-EIBnettoIP (const CArray & buf, struct sockaddr_in *a)
+EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
+	    const struct sockaddr_in *src)
 {
   int ip, port;
   memset (a, 0, sizeof (*a));
@@ -284,8 +285,16 @@ EIBnettoIP (const CArray & buf, struct sockaddr_in *a)
   a->sin_len = sizeof (*a);
 #endif
   a->sin_family = AF_INET;
-  a->sin_port = htons (port);
-  a->sin_addr.s_addr = htonl (ip);
+  if (port == 0 && ip == 0)
+    {
+      a->sin_port = src->sin_port;
+      a->sin_addr.s_addr = src->sin_addr.s_addr;
+    }
+  else
+    {
+      a->sin_port = htons (port);
+      a->sin_addr.s_addr = htonl (ip);
+    }
   return 0;
 }
 
@@ -491,9 +500,9 @@ parseEIBnet_ConnectRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () < 18)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array (), 8), &r.caddr))
+  if (EIBnettoIP (CArray (p.data.array (), 8), &r.caddr, &p.src))
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 8, 8), &r.daddr))
+  if (EIBnettoIP (CArray (p.data.array () + 8, 8), &r.daddr, &p.src))
     return 1;
   if (p.data () - 16 != p.data[16])
     return 1;
@@ -532,7 +541,7 @@ parseEIBnet_ConnectResponse (const EIBNetIPPacket & p,
     return 1;
   if (p.data () < 12)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.daddr))
+  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.daddr, &p.src))
     return 1;
   if (p.data () - 10 != p.data[10])
     return 1;
@@ -570,7 +579,7 @@ parseEIBnet_ConnectionStateRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () != 10)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr))
+  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr, &p.src))
     return 1;
   r.channel = p.data[0];
   return 0;
@@ -634,7 +643,7 @@ parseEIBnet_DisconnectRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () != 10)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr))
+  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr, &p.src))
     return 1;
   r.channel = p.data[0];
   return 0;
@@ -764,7 +773,7 @@ parseEIBnet_DescriptionRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () != 8)
     return 1;
-  if (EIBnettoIP (p.data, &r.caddr))
+  if (EIBnettoIP (p.data, &r.caddr, &p.src))
     return 1;
   return 0;
 }
@@ -873,7 +882,7 @@ parseEIBnet_SearchRequest (const EIBNetIPPacket & p, EIBnet_SearchRequest & r)
     return 1;
   if (p.data () != 8)
     return 1;
-  if (EIBnettoIP (p.data, &r.caddr))
+  if (EIBnettoIP (p.data, &r.caddr, &p.src))
     return 1;
   return 0;
 }
@@ -931,7 +940,7 @@ parseEIBnet_SearchResponse (const EIBNetIPPacket & p,
     return 1;
   if (p.data () < 64)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 0, 8), &r.caddr))
+  if (EIBnettoIP (CArray (p.data.array () + 0, 8), &r.caddr, &p.src))
     return 1;
   if (p.data[8] != 54)
     return 1;
