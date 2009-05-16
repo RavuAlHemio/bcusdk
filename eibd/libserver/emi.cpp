@@ -46,7 +46,11 @@ L_Data_ToCEMI (uchar code, const L_Data_PDU & l1)
   pdu.resize (l1.data () + 9);
   pdu[0] = code;
   pdu[1] = 0x00;
-  pdu[2] = 0x30 | (c << 2) | (l1.data () - 1 <= 0x0f ? 0x80 : 0x00);
+  pdu[2] = 0x10 | (c << 2) | (l1.data () - 1 <= 0x0f ? 0x80 : 0x00);
+  if (code == 0x29)
+    pdu[2] |= (l1.repeated ? 0 : 0x20);
+  else
+    pdu[2] |= 0x20;
   pdu[3] =
     (l1.AddrType ==
      GroupAddress ? 0x80 : 0x00) | ((l1.hopcount & 0x7) << 4) | 0x0;
@@ -73,7 +77,10 @@ CEMI_to_L_Data (const CArray & data)
   c.source = (data[start + 2] << 8) | (data[start + 3]);
   c.dest = (data[start + 4] << 8) | (data[start + 5]);
   c.data.set (data.array () + start + 7, data[6 + start] + 1);
-  c.repeated = (data[start] & 0x20) ? 0 : 1;
+  if (data[0] == 0x29)
+    c.repeated = (data[start] & 0x20) ? 0 : 1;
+  else
+    c.repeated = 0;
   switch ((data[start] >> 2) & 0x3)
     {
     case 0:
