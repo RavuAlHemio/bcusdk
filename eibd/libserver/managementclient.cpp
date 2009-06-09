@@ -366,10 +366,9 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 	      }
 	    {
 	      CArray data, erg;
-	      if (m.
-		  A_Property_Read (c->buf[2], c->buf[3],
-				   (c->buf[4] << 8) | c->buf[5], c->buf[6],
-				   data) == -1)
+	      if (m.A_Property_Read (c->buf[2], c->buf[3],
+				     (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				     data) == -1)
 		c->sendreject (stop);
 	      else
 		{
@@ -389,11 +388,10 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 	      }
 	    {
 	      CArray data, erg;
-	      if (m.
-		  A_Property_Write (c->buf[2], c->buf[3],
-				    (c->buf[4] << 8) | c->buf[5], c->buf[6],
-				    CArray (c->buf + 7, c->size - 7),
-				    erg) == -1)
+	      if (m.A_Property_Write (c->buf[2], c->buf[3],
+				      (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				      CArray (c->buf + 7, c->size - 7),
+				      erg) == -1)
 		c->sendreject (stop);
 	      else
 		{
@@ -413,10 +411,8 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 	      }
 	    EIBSETTYPE (buf, EIB_MC_AUTHORIZE);
 	    key =
-	      (c->buf[2] << 24) | (c->buf[3] << 16) | (c->
-						       buf[4] << 8) | (c->
-								       buf
-								       [5]);
+	      (c->buf[2] << 24) | (c->buf[3] << 16) | (c->buf[4] << 8) |
+	      (c->buf[5]);
 	    if (m.A_Authorize (key, buf[2]) == -1)
 	      c->sendreject (stop);
 	    else
@@ -430,10 +426,8 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		break;
 	      }
 	    key =
-	      (c->buf[2] << 24) | (c->buf[3] << 16) | (c->
-						       buf[4] << 8) | (c->
-								       buf
-								       [5]);
+	      (c->buf[2] << 24) | (c->buf[3] << 16) | (c->buf[4] << 8) |
+	      (c->buf[5]);
 	    if (m.A_KeyWrite (key, *(c->buf + 6)) == -1)
 	      c->sendreject (stop);
 	    else
@@ -446,9 +440,8 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 		c->sendreject (stop);
 		break;
 	      }
-	    if (m.
-		A_Property_Desc (c->buf[2], c->buf[3], 0, buf[2], maskver,
-				 buf[5]) == -1)
+	    if (m.A_Property_Desc (c->buf[2], c->buf[3], 0, buf[2], maskver,
+				   buf[5]) == -1)
 	      c->sendreject (stop);
 	    else
 	      {
@@ -522,6 +515,93 @@ ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 }
 
 void
+ManagementIndividual (Layer3 * l3, Trace * t, ClientConnection * c,
+		      pth_event_t stop)
+{
+  eibaddr_t dest;
+  uint16_t maskver;
+  int16_t val;
+  uchar buf[10];
+  int i;
+  eibkey_type key;
+
+  if (c->size < 4)
+    {
+      c->sendreject (stop);
+      return;
+    }
+
+  dest = (c->buf[2] << 8) | (c->buf[3]);
+  Management_Individual m (l3, t, dest);
+  if (!m.init ())
+    {
+      c->sendreject (stop, EIB_PROCESSING_ERROR);
+      return;
+    }
+  c->sendreject (stop, EIB_MC_INDIVIDUAL);
+  do
+    {
+      i = c->readmessage (stop);
+      if (i != -1)
+	switch (EIBTYPE (c->buf))
+	  {
+	  case EIB_MC_PROP_READ:
+	    if (c->size < 7)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      CArray data, erg;
+	      if (m.A_Property_Read (c->buf[2], c->buf[3],
+				     (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				     data) == -1)
+		c->sendreject (stop);
+	      else
+		{
+		  erg.resize (2);
+		  EIBSETTYPE (erg, EIB_MC_PROP_READ);
+		  erg.setpart (data, 2);
+		  c->sendmessage (erg (), erg.array (), stop);
+		}
+	    }
+	    break;
+
+	  case EIB_MC_PROP_WRITE:
+	    if (c->size < 7)
+	      {
+		c->sendreject (stop);
+		break;
+	      }
+	    {
+	      CArray data, erg;
+	      if (m.A_Property_Write (c->buf[2], c->buf[3],
+				      (c->buf[4] << 8) | c->buf[5], c->buf[6],
+				      CArray (c->buf + 7, c->size - 7),
+				      erg) == -1)
+		c->sendreject (stop);
+	      else
+		{
+		  erg.resize (2);
+		  EIBSETTYPE (erg, EIB_MC_PROP_WRITE);
+		  erg.setpart (data, 2);
+		  c->sendmessage (erg (), erg.array (), stop);
+		}
+	    }
+	    break;
+
+	  case EIB_RESET_CONNECTION:
+	    i = -1;
+	    break;
+
+	  default:
+	    c->sendreject (stop);
+	  }
+    }
+  while (i != -1);
+}
+
+void
 LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 {
   uchar buf[200];
@@ -575,23 +655,21 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 	  goto out;
 
 	/*load the data from 0x103 to 0x10C */
-	if (m.
-	    X_Memory_Write_Block (0x0103,
-				  CArray (i->code.array () + 0x03, 10)) != 0)
+	if (m.X_Memory_Write_Block (0x0103,
+				    CArray (i->code.array () + 0x03,
+					    10)) != 0)
 	  goto out;
 
 	/*load the data from 0x10E to 0x115 */
-	if (m.
-	    X_Memory_Write_Block (0x010E,
-				  CArray (i->code.array () + 0x0E, 8)) != 0)
+	if (m.X_Memory_Write_Block (0x010E,
+				    CArray (i->code.array () + 0x0E, 8)) != 0)
 	  goto out;
 
 	/*load the data from 0x119H to eeprom end */
 	r = IMG_LOAD_MAIN;
-	if (m.
-	    X_Memory_Write_Block (0x119,
-				  CArray (i->code.array () + 0x19,
-					  i->code () - 0x19)) != 0)
+	if (m.X_Memory_Write_Block (0x119,
+				    CArray (i->code.array () + 0x19,
+					    i->code () - 0x19)) != 0)
 	  goto out;
 
 	if (m.X_Memory_Write_Block (0x0100, CArray (i->code.array (), 1)) !=
@@ -606,9 +684,8 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 
 	/* set the length of the address table */
 	r = IMG_FINALIZE_ADDR_TAB;
-	if (m.
-	    X_Memory_Write_Block (0x0116,
-				  CArray (i->code.array () + 0x16, 1)) != 0)
+	if (m.X_Memory_Write_Block (0x0116,
+				    CArray (i->code.array () + 0x16, 1)) != 0)
 	  goto out;
 
 	/* reset all error flags in the BCU (0x10D = 0xFF) */
@@ -662,11 +739,10 @@ LoadImage (Layer3 * l3, Trace * t, ClientConnection * c, pth_event_t stop)
 		  goto out;
 	      }
 	    if (i->load[j].memaddr != 0xffff)
-	      if (m.
-		  X_Memory_Write_Block (i->load[j].memaddr,
-					CArray (i->code.array () +
-						i->load[j].memaddr - 0x100,
-						i->load[j].len)) != 0)
+	      if (m.X_Memory_Write_Block (i->load[j].memaddr,
+					  CArray (i->code.array () +
+						  i->load[j].memaddr - 0x100,
+						  i->load[j].len)) != 0)
 		goto out;
 	  }
 

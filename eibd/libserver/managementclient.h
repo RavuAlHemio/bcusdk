@@ -75,4 +75,13 @@ void ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
 void LoadImage (Layer3 * l3, Trace * t, ClientConnection * c,
 		pth_event_t stop);
 
+/** opens and handles a individual connection
+ * @param l3 Layer 3 interface
+ * @param t debug output
+ * @param c client connection
+ * @param stop if occurs, function should abort
+ */
+void ManagementIndividual (Layer3 * l3, Trace * t, ClientConnection * c,
+			   pth_event_t stop);
+
 #endif

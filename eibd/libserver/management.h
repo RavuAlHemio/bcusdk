@@ -61,5 +61,15 @@ public:
   int X_PropertyScan (Array < PropertyInfo > &pi);
 };
 
+class Management_Individual:public Layer7_Individual
+{
+  Trace *t;
+public:
+    Management_Individual (Layer3 * l3, Trace * tr,
+			   eibaddr_t dest):Layer7_Individual (l3, tr, dest)
+  {
+    t = tr;
+  }
+};
 
 #endif
