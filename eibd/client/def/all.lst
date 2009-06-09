@@ -41,6 +41,7 @@ EIBC_LICENSE(
 #include "loadimage.inc"
 #include "mcauthorize.inc"
 #include "mcconnect.inc"
+#include "mcindividual.inc"
 #include "mcgetmaskversion.inc"
 #include "mcgetpeitype.inc"
 #include "mcprogmodeoff.inc"

@@ -433,6 +433,20 @@ int EIB_MC_Connect (EIBConnection * con, eibaddr_t dest);
  */
 int EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest);
 
+/** Opens a connectionless management connection.
+ * \param con eibd connection
+ * \param dest destionation address
+ * \return 0 if successful, -1 if error
+ */
+int EIB_MC_Individual_Open (EIBConnection * con, eibaddr_t dest);
+
+/** Opens a connectionless management connection - asynchronous.
+ * \param con eibd connection
+ * \param dest destionation address
+ * \return 0 if started, -1 if error
+ */
+int EIB_MC_Individual_Open_async (EIBConnection * con, eibaddr_t dest);
+
 /** Read BAU memory (over a management connection).
  * \param con eibd connection
  * \param addr memory address
