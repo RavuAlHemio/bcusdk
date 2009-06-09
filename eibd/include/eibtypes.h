@@ -58,6 +58,7 @@
 #define EIB_ERROR_TIMEOUT               0x0043
 #define EIB_ERROR_VERIFY                0x0044
 
+#define EIB_MC_INDIVIDUAL               0x0049
 #define EIB_MC_CONNECTION               0x0050
 #define EIB_MC_READ                     0x0051
 #define EIB_MC_WRITE                    0x0052
