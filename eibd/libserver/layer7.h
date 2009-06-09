@@ -95,5 +95,27 @@ public:
   int A_Memory_Write_Block (memaddr_t addr, const CArray & data);
 };
 
+/** Layer 7 Individual  */
+class Layer7_Individual
+{
+  Trace *t;
+  T_Individual *l4;
+  /** destination address */
+  eibaddr_t dest;
+
+  /** sends APDU and waits for respone; return NULL, if it fails */
+  APDU *Request_Response (APDU * r);
+public:
+    Layer7_Individual (Layer3 * l3, Trace * tr, eibaddr_t dest);
+    virtual ~ Layer7_Individual ();
+  bool init ();
+
+  /** read a property */
+  int A_Property_Read (uchar obj, uchar propertyid, uint16_t start,
+		       uchar count, CArray & erg);
+  /** write a property */
+  int A_Property_Write (uchar obj, uchar propertyid, uint16_t start,
+			uchar count, const CArray & data, CArray & result);
+};
 
 #endif

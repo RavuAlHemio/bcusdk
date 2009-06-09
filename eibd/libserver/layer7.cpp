@@ -386,3 +386,98 @@ Layer7_Connection::A_Memory_Write_Block (memaddr_t addr, const CArray & data)
 
   return res;
 }
+
+Layer7_Individual::Layer7_Individual (Layer3 * l3, Trace * tr, eibaddr_t d)
+{
+  t = tr;
+  dest = d;
+  l4 = new T_Individual (l3, tr, d, false);
+  if (!l4->init ())
+    {
+      delete l4;
+      l4 = 0;
+    }
+}
+
+Layer7_Individual::~Layer7_Individual ()
+{
+  if (l4)
+    delete l4;
+}
+
+bool Layer7_Individual::init ()
+{
+  return l4 != 0;
+}
+
+APDU *
+Layer7_Individual::Request_Response (APDU * r)
+{
+  APDU *a;
+  CArray *c;
+  l4->Send (r->ToPacket ());
+  pth_event_t t = pth_event (PTH_EVENT_TIME, pth_timeout (6, 100));
+  while (pth_event_status (t) != PTH_STATUS_OCCURRED)
+    {
+      c = l4->Get (t);
+      if (c)
+	{
+	  if (c->len () == 0)
+	    {
+	      delete c;
+	      pth_event_free (t, PTH_FREE_THIS);
+	      return 0;
+	    }
+	  a = APDU::fromPacket (*c);
+	  delete c;
+	  if (a->isResponse (r))
+	    {
+	      pth_event_free (t, PTH_FREE_THIS);
+	      return a;
+	    }
+	  delete a;
+	  pth_event_free (t, PTH_FREE_THIS);
+	  return 0;
+	}
+    }
+  pth_event_free (t, PTH_FREE_THIS);
+  return 0;
+}
+
+int
+Layer7_Individual::A_Property_Read (uchar obj, uchar propertyid,
+				    uint16_t start, uchar count, CArray & erg)
+{
+  A_PropertyValue_Read_PDU r;
+  r.obj = obj;
+  r.prop = propertyid;
+  r.start = start & 0x0fff;
+  r.count = count & 0x0f;
+  APDU *a = Request_Response (&r);
+  if (!a)
+    return -1;
+  A_PropertyValue_Response_PDU *a1 = (A_PropertyValue_Response_PDU *) a;
+  erg = a1->data;
+  delete a;
+  return 0;
+}
+
+int
+Layer7_Individual::A_Property_Write (uchar obj, uchar propertyid,
+				     uint16_t start, uchar count,
+				     const CArray & data, CArray & result)
+{
+  A_PropertyValue_Write_PDU r;
+  r.obj = obj;
+  r.prop = propertyid;
+  r.start = start & 0x0fff;
+  r.count = count & 0x0f;
+  r.data = data;
+  APDU *a = Request_Response (&r);
+  if (!a)
+    return -1;
+  A_PropertyValue_Response_PDU *a1 = (A_PropertyValue_Response_PDU *) a;
+  result = a1->data;
+  delete a;
+  return 0;
+}
