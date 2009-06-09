@@ -149,6 +149,10 @@ ClientConnection::Run (pth_sem_t * stop1)
 	  ManagementConnection (l3, t, this, stop);
 	  break;
 
+	case EIB_MC_INDIVIDUAL:
+	  ManagementIndividual (l3, t, this, stop);
+	  break;
+
 	case EIB_LOAD_IMAGE:
 	  LoadImage (l3, t, this, stop);
 	  break;
