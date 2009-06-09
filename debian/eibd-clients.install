@@ -45,4 +45,6 @@ usr/bin/groupcacheread
 usr/bin/mrestart
 usr/bin/mwriteplain
 usr/bin/knxtool
+usr/bin/xpropread
+usr/bin/xpropwrite
 

@@ -163,6 +163,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/mrestart
 /usr/bin/mwriteplain
 /usr/bin/knxtool
+/usr/bin/xpropread
+/usr/bin/xpropwrite
 
 %files -n libeibclient-devel
 %defattr(-,root,root,-)
