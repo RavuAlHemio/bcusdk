@@ -524,12 +524,18 @@ EIBNetIPPacket EIBnet_ConnectResponse::ToPacket ()CONST
   CArray
     da = IPtoEIBNetIP (&daddr);
   p.service = CONNECTION_RESPONSE;
-  p.data.resize (da () + CRD () + 3);
+  if (status != 0)
+    p.data.resize (2);
+  else
+    p.data.resize (da () + CRD () + 3);
   p.data[0] = channel;
   p.data[1] = status;
-  p.data.setpart (da, 2);
-  p.data[da () + 2] = CRD () + 1;
-  p.data.setpart (CRD, da () + 3);
+  if (status == 0)
+    {
+      p.data.setpart (da, 2);
+      p.data[da () + 2] = CRD () + 1;
+      p.data.setpart (CRD, da () + 3);
+    }
   return p;
 }
 
@@ -539,6 +545,16 @@ parseEIBnet_ConnectResponse (const EIBNetIPPacket & p,
 {
   if (p.service != CONNECTION_RESPONSE)
     return 1;
+  if (p.data () < 2)
+    return 1;
+  if (p.data[1] != 0)
+    {
+      if (p.data () != 2)
+	return 1;
+      r.channel = p.data[0];
+      r.status = p.data[1];
+      return 0;
+    }
   if (p.data () < 12)
     return 1;
   if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.daddr, &p.src))
