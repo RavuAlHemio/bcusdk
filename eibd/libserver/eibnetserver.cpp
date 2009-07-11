@@ -263,9 +263,14 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      for (i = 0; i < state (); i++)
 		if (state[i].channel == r1.channel)
 		  {
-		    res = 0;
-		    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE,
-			       state[i].timeout, pth_timeout (120, 0));
+		    if (compareIPAddress (p1->src, state[i].caddr))
+		      {
+			res = 0;
+			pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE,
+				   state[i].timeout, pth_timeout (120, 0));
+		      }
+		    else
+		      TRACEPRINTF (t, 8, this, "Invalid control address");
 		  }
 	      r2.channel = r1.channel;
 	      r2.status = res;
@@ -282,13 +287,18 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      for (i = 0; i < state (); i++)
 		if (state[i].channel == r1.channel)
 		  {
-		    res = 0;
-		    pth_event_free (state[i].timeout, PTH_FREE_THIS);
-		    pth_event_free (state[i].sendtimeout, PTH_FREE_THIS);
-		    pth_event_free (state[i].outwait, PTH_FREE_THIS);
-		    delete state[i].outsignal;
-		    state.deletepart (i, 1);
-		    break;
+		    if (compareIPAddress (p1->src, state[i].caddr))
+		      {
+			res = 0;
+			pth_event_free (state[i].timeout, PTH_FREE_THIS);
+			pth_event_free (state[i].sendtimeout, PTH_FREE_THIS);
+			pth_event_free (state[i].outwait, PTH_FREE_THIS);
+			delete state[i].outsignal;
+			state.deletepart (i, 1);
+			break;
+		      }
+		    else
+		      TRACEPRINTF (t, 8, this, "Invalid control address");
 		  }
 	      r2.channel = r1.channel;
 	      r2.status = res;
@@ -356,6 +366,11 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  goto reqf;
 	      goto out;
 	    reqf:
+	      if (!compareIPAddress (p1->src, state[i].daddr))
+		{
+		  TRACEPRINTF (t, 8, this, "Invalid data endpoint");
+		  goto out;
+		}
 	      if (state[i].rno == (r1.seqno + 1) & 0xff)
 		{
 		  r2.channel = r1.channel;
@@ -415,6 +430,11 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  goto reqf1;
 	      goto out;
 	    reqf1:
+	      if (!compareIPAddress (p1->src, state[i].daddr))
+		{
+		  TRACEPRINTF (t, 8, this, "Invalid data endpoint");
+		  goto out;
+		}
 	      if (state[i].sno != r1.seqno)
 		{
 		  TRACEPRINTF (t, 8, this, "Wrong sequence %d<->%d",

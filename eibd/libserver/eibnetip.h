@@ -54,6 +54,8 @@ CArray IPtoEIBNetIP (const struct sockaddr_in *a);
 /** convert EIBnet/IP IP Address to a */
 int EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
 		const struct sockaddr_in *src);
+bool compareIPAddress (const struct sockaddr_in &a,
+		       const struct sockaddr_in &b);
 
 /** represents a EIBnet/IP packet */
 class EIBNetIPPacket

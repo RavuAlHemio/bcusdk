@@ -214,6 +214,20 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
 }
 #endif
 
+bool
+compareIPAddress (const struct sockaddr_in & a, const struct sockaddr_in & b)
+{
+  if (a.sin_family != AF_INET)
+    return false;
+  if (b.sin_family != AF_INET)
+    return false;
+  if (a.sin_port != b.sin_port)
+    return false;
+  if (a.sin_addr.s_addr != b.sin_addr.s_addr)
+    return false;
+  return true;
+}
+
 EIBNetIPPacket::EIBNetIPPacket ()
 {
   service = 0;
