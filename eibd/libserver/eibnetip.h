@@ -297,6 +297,8 @@ public:
   /** addres to accept packets from */
   struct sockaddr_in recvaddr;
   /** addres to accept packets from */
+  struct sockaddr_in recvaddr2;
+  /** addres to accept packets from */
   struct sockaddr_in localaddr;
   /** accept all packets*/
   uchar recvall;

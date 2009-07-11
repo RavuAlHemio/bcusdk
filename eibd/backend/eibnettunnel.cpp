@@ -89,6 +89,7 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
     saddr = raddr;
   sock->sendaddr = caddr;
   sock->recvaddr = caddr;
+  sock->recvall = 0;
   mode = 0;
   vmode = 0;
   Start ();
@@ -292,7 +293,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      mod = 1;
 	      sno = 0;
 	      rno = 0;
-	      sock->recvaddr = daddr;
+	      sock->recvaddr2 = daddr;
+	      sock->recvall = 3;
 	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
 			 pth_timeout (30, 0));
 	      heartbeat = 0;
@@ -322,6 +324,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  p = tresp.ToPacket ();
 		  sock->sendaddr = daddr;
 		  sock->Send (p);
+		  sock->recvall = 0;
 		  break;
 		}
 	      if (treq.seqno != rno)
@@ -337,6 +340,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		      p = dreq.ToPacket ();
 		      sock->sendaddr = caddr;
 		      sock->Send (p);
+		      sock->recvall = 0;
 		      mod = 0;
 		    }
 		  break;
@@ -458,6 +462,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  p = dreq.ToPacket ();
 		  sock->sendaddr = caddr;
 		  sock->Send (p);
+		  sock->recvall = 0;
 		  mod = 0;
 		}
 	      else
@@ -487,6 +492,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      t->TracePacket (1, this, "SendDis", p.data);
 	      sock->sendaddr = caddr;
 	      sock->Send (p);
+	      sock->recvall = 0;
 	      mod = 0;
 	      break;
 	    case DISCONNECT_RESPONSE:
@@ -506,6 +512,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  break;
 		}
 	      mod = 0;
+	      sock->recvall = 0;
 	      TRACEPRINTF (t, 1, this, "Disconnected");
 	      break;
 	    default:
@@ -533,6 +540,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		  p = dreq.ToPacket ();
 		  sock->sendaddr = caddr;
 		  sock->Send (p);
+		  sock->recvall = 0;
 		  mod = 0;
 		}
 	    }
@@ -560,6 +568,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      sock->sendaddr = caddr;
 	      if (channel != -1)
 		sock->Send (p);
+	      sock->recvall = 0;
 	      mod = 0;
 	    }
 	}

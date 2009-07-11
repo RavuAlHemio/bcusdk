@@ -311,6 +311,7 @@ EIBNetIPSocket::EIBNetIPSocket (struct sockaddr_in bindaddr, bool reuseaddr,
   memset (&maddr, 0, sizeof (maddr));
   memset (&sendaddr, 0, sizeof (sendaddr));
   memset (&recvaddr, 0, sizeof (recvaddr));
+  memset (&recvaddr2, 0, sizeof (recvaddr2));
   recvall = 0;
 
   fd = socket (AF_INET, SOCK_DGRAM, 0);
@@ -424,7 +425,8 @@ EIBNetIPSocket::Run (pth_sem_t * stop1)
       if (i > 0 && rl == sizeof (r))
 	{
 	  if (recvall == 1 || !memcmp (&r, &recvaddr, sizeof (r)) ||
-	      (recvall == 2 && memcmp (&r, &localaddr, sizeof (r))))
+	      (recvall == 2 && memcmp (&r, &localaddr, sizeof (r))) ||
+	      (recvall == 3 && !memcmp (&r, &recvaddr2, sizeof (r))))
 	    {
 	      t->TracePacket (0, this, "Recv", i, buf);
 	      EIBNetIPPacket *p =
