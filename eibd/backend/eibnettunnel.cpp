@@ -483,7 +483,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		}
 	      dresp.channel = channel;
 	      dresp.status = 0;
-	      p = treq.ToPacket ();
+	      p = dresp.ToPacket ();
 	      t->TracePacket (1, this, "SendDis", p.data);
 	      sock->sendaddr = caddr;
 	      sock->Send (p);
