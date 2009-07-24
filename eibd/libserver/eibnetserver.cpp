@@ -261,7 +261,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      if (parseEIBnet_ConnectionStateRequest (*p1, r1))
 		goto out;
 	      for (i = 0; i < state (); i++)
-		if (state[i].channel = r1.channel)
+		if (state[i].channel == r1.channel)
 		  {
 		    res = 0;
 		    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE,
@@ -280,7 +280,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      if (parseEIBnet_DisconnectRequest (*p1, r1))
 		goto out;
 	      for (i = 0; i < state (); i++)
-		if (state[i].channel = r1.channel)
+		if (state[i].channel == r1.channel)
 		  {
 		    res = 0;
 		    pth_event_free (state[i].timeout, PTH_FREE_THIS);
