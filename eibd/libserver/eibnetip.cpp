@@ -78,7 +78,8 @@ GetSourceAddress (const struct sockaddr_in *dest, struct sockaddr_in *src)
   if (s == -1)
     return 0;
   req.n.nlmsg_len =
-    NLMSG_SPACE (sizeof (req.r)) + RTA_LENGTH (sizeof (*dest));
+    NLMSG_SPACE (sizeof (req.r)) +
+    RTA_LENGTH (sizeof (dest->sin_addr.s_addr));
   req.n.nlmsg_flags = NLM_F_REQUEST;
   req.n.nlmsg_type = RTM_GETROUTE;
   req.r.rtm_family = AF_INET;
