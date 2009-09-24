@@ -261,6 +261,18 @@ EMI1Layer2Interface::Run (pth_sem_t * stop1)
       CArray *c = iface->Get_Packet (stop);
       if (!c)
 	continue;
+      if (c->len () == 1 && (*c)[0] == 0xA0 && mode == 2)
+	{
+	  TRACEPRINTF (t, 2, this, "Reopen");
+	  mode = 0;
+	  Open ();
+	}
+      if (c->len () == 1 && (*c)[0] == 0xA0 && mode == 1)
+	{
+	  TRACEPRINTF (t, 2, this, "Reopen Busmonitor");
+	  mode = 0;
+	  enterBusmonitor ();
+	}
       if (c->len () && (*c)[0] == 0x49 && mode == 2)
 	{
 	  L_Data_PDU *p = EMI_to_L_Data (*c);
