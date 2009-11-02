@@ -248,6 +248,14 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 		      //right sequence number
 		      recvflag = !recvflag;
 		    }
+		  if ((akt[1] & 0x0f) == 0)
+		    {
+		      const uchar reset[1] = { 0xA0 };
+		      CArray *c = new CArray (reset, sizeof (reset));
+		      t->TracePacket (0, this, "RecvReset", *c);
+		      outqueue.put (c);
+		      pth_sem_inc (&out_signal, TRUE);
+		    }
 		}
 	      akt.deletepart (0, 4);
 	    }
