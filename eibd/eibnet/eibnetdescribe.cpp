@@ -57,7 +57,7 @@ main (int ac, char *ag[])
   struct sockaddr_in saddr;
   struct sockaddr_in caddr;
   EIBNetIPSocket *sock;
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (10, 0));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (10, 0));
 
   pth_init ();
   tracelevel = 0;

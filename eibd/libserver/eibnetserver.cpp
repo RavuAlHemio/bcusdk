@@ -266,8 +266,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		    if (compareIPAddress (p1->src, state[i].caddr))
 		      {
 			res = 0;
-			pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE,
-				   state[i].timeout, pth_timeout (120, 0));
+			pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE,
+				   state[i].timeout, pth_time (120, 0));
 		      }
 		    else
 		      TRACEPRINTF (t, 8, this, "Invalid control address");
@@ -331,13 +331,13 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		      int pos = state ();
 		      state.resize (state () + 1);
 		      state[pos].timeout =
-			pth_event (PTH_EVENT_TIME, pth_timeout (120, 0));
+			pth_event (PTH_EVENT_RTIME, pth_time (120, 0));
 		      state[pos].outsignal = new pth_sem_t;
 		      pth_sem_init (state[pos].outsignal);
 		      state[pos].outwait =
 			pth_event (PTH_EVENT_SEM, state[pos].outsignal);
 		      state[pos].sendtimeout =
-			pth_event (PTH_EVENT_TIME, pth_timeout (1, 0));
+			pth_event (PTH_EVENT_RTIME, pth_time (1, 0));
 		      state[pos].channel = id;
 		      state[pos].daddr = r1.daddr;
 		      state[pos].caddr = r1.caddr;
@@ -491,8 +491,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      r.channel = state[i].channel;
 	      r.seqno = state[i].sno;
 	      r.CEMI = state[i].out.top ();
-	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE,
-			 state[i].sendtimeout, pth_timeout (1, 0));
+	      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE,
+			 state[i].sendtimeout, pth_time (1, 0));
 	      sock->sendaddr = state[i].daddr;
 	      sock->Send (r.ToPacket ());
 	    }

@@ -38,7 +38,7 @@ BCU1DriverLowLevelDriver::BCU1DriverLowLevelDriver (const char *dev,
   if (fd == -1)
     return;
 
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 1));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 1));
   send_done = pth_event (PTH_EVENT_FD | PTH_UNTIL_FD_EXCEPTION, fd);
   pth_event_concat (send_done, timeout, NULL);
 

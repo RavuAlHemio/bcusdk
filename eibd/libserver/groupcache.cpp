@@ -206,7 +206,7 @@ GroupCacheEntry
   A_GroupValue_Read_PDU apdu;
   T_DATA_XXX_REQ_PDU tpdu;
   L_Data_PDU *l;
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (Timeout, 0));;
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (Timeout, 0));;
 
   tpdu.data = apdu.ToPacket ();
   l = new L_Data_PDU;

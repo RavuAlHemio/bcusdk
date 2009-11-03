@@ -318,9 +318,9 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
   int watch = 0;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
-  pth_event_t watchdog = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
-  pth_event_t sendtimeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 0));
+  pth_event_t watchdog = pth_event (PTH_EVENT_RTIME, pth_time (0, 0));
+  pth_event_t sendtimeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 0));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       if (in () == 0 && !waitconfirm)
@@ -385,8 +385,8 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	    {
 	      TRACEPRINTF (t, 0, this, "RecvWatchdog: %02X", in[0]);
 	      watch = 2;
-	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, watchdog,
-			 pth_timeout (10, 0));
+	      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, watchdog,
+			 pth_time (10, 0));
 	      in.deletepart (0, 1);
 	    }
 	  else if (in[0] == 0xCC || in[0] == 0xC0 || in[0] == 0x0C)
@@ -401,8 +401,8 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  if (!to)
 		    {
 		      to = 1;
-		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (0, 300000));
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (0, 300000));
 		    }
 		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
 		    break;
@@ -436,8 +436,8 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  if (!to)
 		    {
 		      to = 1;
-		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (0, 300000));
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (0, 300000));
 		    }
 		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
 		    break;
@@ -456,8 +456,8 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  if (!to)
 		    {
 		      to = 1;
-		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (0, 300000));
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (0, 300000));
 		    }
 		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
 		    break;
@@ -491,8 +491,8 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  if (!to)
 		    {
 		      to = 1;
-		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (0, 300000));
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (0, 300000));
 		    }
 		  if (pth_event_status (timeout) != PTH_STATUS_OCCURRED)
 		    break;
@@ -554,13 +554,13 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 	  t->TracePacket (0, this, "Write", w);
 	  j = pth_write_ev (fd, w.array (), w (), stop);
 	  waitconfirm = 1;
-	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, sendtimeout,
-		     pth_timeout (0, 600000));
+	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, sendtimeout,
+		     pth_time (0, 600000));
 	}
       else if (in () == 0 && !waitconfirm && !watch && mode == 0 && !to)
 	{
-	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, watchdog,
-		     pth_timeout (10, 0));
+	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, watchdog,
+		     pth_time (10, 0));
 	  watch = 1;
 	  uchar c = 0x02;
 	  t->TracePacket (2, this, "Watchdog Status", 1, &c);

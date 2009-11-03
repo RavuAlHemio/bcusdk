@@ -204,7 +204,7 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 100000));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 100000));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       pth_event_isolate (input);
@@ -332,8 +332,8 @@ FT12LowLevelDriver::Run (pth_sem_t * stop1)
 	    {
 	      mode = 1;
 	      timeout =
-		pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-			   pth_timeout (0, 100000));
+		pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+			   pth_time (0, 100000));
 	    }
 	}
     }
