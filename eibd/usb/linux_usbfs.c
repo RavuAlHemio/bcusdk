@@ -18,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define _GNU_SOURCE
-
+#include <pthsem.h>
 #include <config.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -46,9 +45,7 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex)
 
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
-	struct timeval tv;
-	gettimeofday (&tv, 0);
-	TIMEVAL_TO_TIMESPEC (&tv, tp);
+	pth_int_time (tp);
 	return 0;
 }
 
