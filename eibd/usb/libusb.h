@@ -25,6 +25,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,7 +96,7 @@ enum libusb_class_code {
 	LIBUSB_CLASS_DATA = 10,
 
 	/** Class is vendor-specific */
-	LIBUSB_CLASS_VENDOR_SPEC = 0xff,
+	LIBUSB_CLASS_VENDOR_SPEC = 0xff
 };
 
 /** \ingroup desc
@@ -126,7 +127,7 @@ enum libusb_descriptor_type {
 	LIBUSB_DT_PHYSICAL = 0x23,
 
 	/** Hub descriptor */
-	LIBUSB_DT_HUB = 0x29,
+	LIBUSB_DT_HUB = 0x29
 };
 
 /* Descriptor sizes per descriptor type */
@@ -149,7 +150,7 @@ enum libusb_endpoint_direction {
 	LIBUSB_ENDPOINT_IN = 0x80,
 
 	/** Out: host-to-device */
-	LIBUSB_ENDPOINT_OUT = 0x00,
+	LIBUSB_ENDPOINT_OUT = 0x00
 };
 
 #define LIBUSB_TRANSFER_TYPE_MASK			0x03    /* in bmAttributes */
@@ -169,7 +170,7 @@ enum libusb_transfer_type {
 	LIBUSB_TRANSFER_TYPE_BULK = 2,
 
 	/** Interrupt endpoint */
-	LIBUSB_TRANSFER_TYPE_INTERRUPT = 3,
+	LIBUSB_TRANSFER_TYPE_INTERRUPT = 3
 };
 
 /** \ingroup misc
@@ -210,7 +211,7 @@ enum libusb_standard_request {
 	LIBUSB_REQUEST_SET_INTERFACE = 0x0B,
 
 	/** Set then report an endpoint's synchronization frame */
-	LIBUSB_REQUEST_SYNCH_FRAME = 0x0C,
+	LIBUSB_REQUEST_SYNCH_FRAME = 0x0C
 };
 
 /** \ingroup misc
@@ -228,7 +229,7 @@ enum libusb_request_type {
 	LIBUSB_REQUEST_TYPE_VENDOR = (0x02 << 5),
 
 	/** Reserved */
-	LIBUSB_REQUEST_TYPE_RESERVED = (0x03 << 5),
+	LIBUSB_REQUEST_TYPE_RESERVED = (0x03 << 5)
 };
 
 /** \ingroup misc
@@ -246,7 +247,7 @@ enum libusb_request_recipient {
 	LIBUSB_RECIPIENT_ENDPOINT = 0x02,
 
 	/** Other */
-	LIBUSB_RECIPIENT_OTHER = 0x03,
+	LIBUSB_RECIPIENT_OTHER = 0x03
 };
 
 #define LIBUSB_ISO_SYNC_TYPE_MASK		0x0C
@@ -267,7 +268,7 @@ enum libusb_iso_sync_type {
 	LIBUSB_ISO_SYNC_TYPE_ADAPTIVE = 2,
 
 	/** Synchronous */
-	LIBUSB_ISO_SYNC_TYPE_SYNC = 3,
+	LIBUSB_ISO_SYNC_TYPE_SYNC = 3
 };
 
 #define LIBUSB_ISO_USAGE_TYPE_MASK 0x30
@@ -285,7 +286,7 @@ enum libusb_iso_usage_type {
 	LIBUSB_ISO_USAGE_TYPE_FEEDBACK = 1,
 
 	/** Implicit feedback Data endpoint */
-	LIBUSB_ISO_USAGE_TYPE_IMPLICIT = 2,
+	LIBUSB_ISO_USAGE_TYPE_IMPLICIT = 2
 };
 
 /** \ingroup desc
@@ -628,7 +629,7 @@ enum libusb_error {
 	LIBUSB_ERROR_NOT_SUPPORTED = -12,
 
 	/** Other error */
-	LIBUSB_ERROR_OTHER = -99,
+	LIBUSB_ERROR_OTHER = -99
 };
 
 /** \ingroup asyncio
@@ -655,7 +656,7 @@ enum libusb_transfer_status {
 	LIBUSB_TRANSFER_NO_DEVICE,
 
 	/** Device sent more data than requested */
-	LIBUSB_TRANSFER_OVERFLOW,
+	LIBUSB_TRANSFER_OVERFLOW
 };
 
 /** \ingroup asyncio
@@ -671,7 +672,7 @@ enum libusb_transfer_flags {
 	 * If this flag is set, it is illegal to call libusb_free_transfer()
 	 * from your transfer callback, as this will result in a double-free
 	 * when this flag is acted upon. */
-	LIBUSB_TRANSFER_FREE_TRANSFER = 1<<2,
+	LIBUSB_TRANSFER_FREE_TRANSFER = 1<<2
 };
 
 /** \ingroup asyncio
@@ -1053,11 +1054,19 @@ static inline unsigned char *libusb_get_iso_packet_buffer(
 {
 	int i;
 	size_t offset = 0;
+	int _packet;
 
-	if (packet >= transfer->num_iso_packets)
+	/* oops..slight bug in the API. packet is an unsigned int, but we use
+	 * signed integers almost everywhere else. range-check and convert to
+	 * signed to avoid compiler warnings. FIXME for libusb-2. */
+	if (packet > INT_MAX)
+		return NULL;
+	_packet = packet;
+
+	if (_packet >= transfer->num_iso_packets)
 		return NULL;
 
-	for (i = 0; i < packet; i++)
+	for (i = 0; i < _packet; i++)
 		offset += transfer->iso_packet_desc[i].length;
 
 	return transfer->buffer + offset;
@@ -1085,10 +1094,19 @@ static inline unsigned char *libusb_get_iso_packet_buffer(
 static inline unsigned char *libusb_get_iso_packet_buffer_simple(
 	struct libusb_transfer *transfer, unsigned int packet)
 {
-	if (packet >= transfer->num_iso_packets)
+	int _packet;
+
+	/* oops..slight bug in the API. packet is an unsigned int, but we use
+	 * signed integers almost everywhere else. range-check and convert to
+	 * signed to avoid compiler warnings. FIXME for libusb-2. */
+	if (packet > INT_MAX)
+		return NULL;
+	_packet = packet;
+
+	if (_packet >= transfer->num_iso_packets)
 		return NULL;
 
-	return transfer->buffer + (transfer->iso_packet_desc[0].length * packet);
+	return transfer->buffer + (transfer->iso_packet_desc[0].length * _packet);
 }
 
 /* sync I/O */

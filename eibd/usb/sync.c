@@ -60,8 +60,8 @@ static void ctrl_transfer_cb(struct libusb_transfer *transfer)
  * \param wLength the length field for the setup packet. The data buffer should
  * be at least this size.
  * \param timeout timeout (in millseconds) that this function should wait
- * before giving up due to no response being received. For no timeout, use
- * value 0.
+ * before giving up due to no response being received. For an unlimited
+ * timeout, use value 0.
  * \returns on success, the number of bytes actually transferred
  * \returns LIBUSB_ERROR_TIMEOUT if the transfer timed out
  * \returns LIBUSB_ERROR_PIPE if the control request was not supported by the
@@ -104,6 +104,8 @@ API_EXPORTED int libusb_control_transfer(libusb_device_handle *dev_handle,
 	while (!completed) {
 		r = libusb_handle_events(HANDLE_CTX(dev_handle));
 		if (r < 0) {
+			if (r == LIBUSB_ERROR_INTERRUPTED)
+				continue;
 			libusb_cancel_transfer(transfer);
 			while (!completed)
 				if (libusb_handle_events(HANDLE_CTX(dev_handle)) < 0)
@@ -172,6 +174,8 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
 	while (!completed) {
 		r = libusb_handle_events(HANDLE_CTX(dev_handle));
 		if (r < 0) {
+			if (r == LIBUSB_ERROR_INTERRUPTED)
+				continue;
 			libusb_cancel_transfer(transfer);
 			while (!completed)
 				if (libusb_handle_events(HANDLE_CTX(dev_handle)) < 0)
@@ -236,8 +240,8 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
  * \param transferred output location for the number of bytes actually
  * transferred.
  * \param timeout timeout (in millseconds) that this function should wait
- * before giving up due to no response being received. For no timeout, use
- * value 0.
+ * before giving up due to no response being received. For an unlimited
+ * timeout, use value 0.
  *
  * \returns 0 on success (and populates <tt>transferred</tt>)
  * \returns LIBUSB_ERROR_TIMEOUT if the transfer timed out (and populates
@@ -286,8 +290,8 @@ API_EXPORTED int libusb_bulk_transfer(struct libusb_device_handle *dev_handle,
  * \param transferred output location for the number of bytes actually
  * transferred.
  * \param timeout timeout (in millseconds) that this function should wait
- * before giving up due to no response being received. For no timeout, use
- * value 0.
+ * before giving up due to no response being received. For an unlimited
+ * timeout, use value 0.
  *
  * \returns 0 on success (and populates <tt>transferred</tt>)
  * \returns LIBUSB_ERROR_TIMEOUT if the transfer timed out
