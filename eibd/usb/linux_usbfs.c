@@ -1,6 +1,6 @@
 /*
  * Linux usbfs backend for libusb
- * Copyright (C) 2007-2008 Daniel Drake <dsd@gentoo.org>
+ * Copyright (C) 2007-2009 Daniel Drake <dsd@gentoo.org>
  * Copyright (c) 2001 Johannes Erdfelt <johannes@erdfelt.com>
  *
  * This library is free software; you can redistribute it and/or
@@ -77,7 +77,18 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
  * included as of Linux 2.6.26.
  */
 
+/* endianness for multi-byte fields:
+ *
+ * Descriptors exposed by usbfs have the multi-byte fields in the device
+ * descriptor as host endian. Multi-byte fields in the other descriptors are
+ * bus-endian. The kernel documentation says otherwise, but it is wrong.
+ */
+
 static const char *usbfs_path = NULL;
+
+/* clock ID for monotonic clock, as not all clock sources are available on all
+ * systems. appropriate choice made at initialization time. */
+static clockid_t monotonic_clkid = -1;
 
 /* do we have a busnum to relate devices? this also implies that we can read
  * the active configuration through bConfigurationValue */
@@ -180,6 +191,38 @@ static const char *find_usbfs_path(void)
 	return ret;
 }
 
+static clockid_t find_monotonic_clock(void)
+{
+	struct timespec ts;
+	int i;
+	const clockid_t clktypes[] = {
+		/* the most monotonic clock I know about, but only available since
+		 * Linux 2.6.28, and not even available in glibc-2.10 */
+#ifndef CLOCK_MONOTONIC_RAW
+#define CLOCK_MONOTONIC_RAW 4
+#endif
+		CLOCK_MONOTONIC_RAW,
+
+		/* a monotonic clock, but it's not available on all architectures,
+		 * and is susceptible to ntp adjustments */
+		CLOCK_MONOTONIC,
+
+		/* the fallback option */
+		CLOCK_REALTIME,
+	};
+
+	for (i = 0; i < (sizeof(clktypes) / sizeof(*clktypes)); i++) {
+		int r = clock_gettime(clktypes[i], &ts);
+		if (r == 0) {
+			usbi_dbg("clock %d selected", clktypes[i]);
+			return r;
+		}
+		usbi_dbg("clock %d doesn't work", clktypes[i]);
+	}
+
+	return -1;
+}
+
 static int op_init(struct libusb_context *ctx)
 {
 	struct stat statbuf;
@@ -189,6 +232,14 @@ static int op_init(struct libusb_context *ctx)
 	if (!usbfs_path) {
 		usbi_err(ctx, "could not find usbfs");
 		return LIBUSB_ERROR_OTHER;
+	}
+
+	if (monotonic_clkid == -1) {
+		monotonic_clkid = find_monotonic_clock();
+		if (monotonic_clkid == -1) {
+			usbi_err(ctx, "could not find working monotonic clock");
+			return LIBUSB_ERROR_OTHER;
+		}
 	}
 
 	r = stat(SYSFS_DEVICE_PATH, &statbuf);
@@ -454,7 +505,6 @@ static int op_get_active_config_descriptor(struct libusb_device *dev,
 	if (sysfs_has_descriptors) {
 		return sysfs_get_active_config_descriptor(dev, buffer, len);
 	} else {
-		*host_endian = 1;
 		return usbfs_get_active_config_descriptor(dev, buffer, len);
 	}
 }
@@ -519,7 +569,6 @@ static int op_get_config_descriptor(struct libusb_device *dev,
 
 	r = get_config_descriptor(DEVICE_CTX(dev), fd, config_index, buffer, len);
 	close(fd);
-	*host_endian = 1;
 	return r;
 }
 
@@ -1286,7 +1335,9 @@ static int submit_bulk_transfer(struct usbi_transfer *itransfer,
 	int num_urbs = transfer->length / MAX_BULK_BUFFER_LENGTH;
 	int last_urb_partial = 0;
 
-	if ((transfer->length % MAX_BULK_BUFFER_LENGTH) > 0) {
+	if (transfer->length == 0) {
+		num_urbs = 1;
+	} else if ((transfer->length % MAX_BULK_BUFFER_LENGTH) > 0) {
 		last_urb_partial = 1;
 		num_urbs++;
 	}
@@ -1310,6 +1361,8 @@ static int submit_bulk_transfer(struct usbi_transfer *itransfer,
 		urb->buffer = transfer->buffer + (i * MAX_BULK_BUFFER_LENGTH);
 		if (i == num_urbs - 1 && last_urb_partial)
 			urb->buffer_length = transfer->length % MAX_BULK_BUFFER_LENGTH;
+		else if (transfer->length == 0)
+			urb->buffer_length = 0;
 		else
 			urb->buffer_length = MAX_BULK_BUFFER_LENGTH;
 
@@ -1716,22 +1769,41 @@ static int handle_bulk_completion(struct usbi_transfer *itransfer,
 
 	tpriv->num_retired++;
 
-	if (urb->status == 0 ||
-			(urb->status == -EOVERFLOW && urb->actual_length > 0))
-		itransfer->transferred += urb->actual_length;
-
 	if (tpriv->reap_action != NORMAL) {
 		/* cancelled, submit_fail, or completed early */
-		if (urb->status == 0 && tpriv->reap_action == COMPLETED_EARLY) {
-			/* FIXME we could solve this extreme corner case with a memmove
-			 * or something */
-			usbi_warn(ITRANSFER_CTX(itransfer), "SOME DATA LOST! "
-				"(completed early but remaining urb completed)");
+		usbi_dbg("abnormal reap: urb status %d", urb->status);
+
+		/* even though we're in the process of cancelling, it's possible that
+		 * we may receive some data in these URBs that we don't want to lose.
+		 * examples:
+		 * 1. while the kernel is cancelling all the packets that make up an
+		 *    URB, a few of them might complete. so we get back a successful
+		 *    cancellation *and* some data.
+		 * 2. we receive a short URB which marks the early completion condition,
+		 *    so we start cancelling the remaining URBs. however, we're too
+		 *    slow and another URB completes (or at least completes partially).
+		 *
+		 * When this happens, our objectives are not to lose any "surplus" data,
+		 * and also to stick it at the end of the previously-received data
+		 * (closing any holes), so that libusb reports the total amount of
+		 * transferred data and presents it in a contiguous chunk.
+		 */
+		if (urb->actual_length > 0) {
+			struct libusb_transfer *transfer =
+				__USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
+			unsigned char *target = transfer->buffer + itransfer->transferred;
+			usbi_dbg("received %d bytes of surplus data", urb->actual_length);
+			if (urb->buffer != target) {
+				usbi_dbg("moving surplus data from offset %d to offset %d",
+					(unsigned char *) urb->buffer - transfer->buffer,
+					target - transfer->buffer);
+				memmove(target, urb->buffer, urb->actual_length);
+			}
+			itransfer->transferred += urb->actual_length;
 		}
-		usbi_dbg("CANCEL: urb status %d", urb->status);
 
 		if (tpriv->num_retired == num_urbs) {
-			usbi_dbg("CANCEL: last URB handled, reporting");
+			usbi_dbg("abnormal reap: last URB handled, reporting");
 			if (tpriv->reap_action == CANCELLED) {
 				free(tpriv->urbs);
 				tpriv->urbs = NULL;
@@ -1744,6 +1816,11 @@ static int handle_bulk_completion(struct usbi_transfer *itransfer,
 		}
 		return 0;
 	}
+
+	if (urb->status == 0 ||
+			(urb->status == -EOVERFLOW && urb->actual_length > 0))
+		itransfer->transferred += urb->actual_length;
+
 
 	switch (urb->status) {
 	case 0:
@@ -2018,7 +2095,7 @@ static int op_clock_gettime(int clk_id, struct timespec *tp)
 {
 	switch (clk_id) {
 	case USBI_CLOCK_MONOTONIC:
-		return clock_gettime(CLOCK_MONOTONIC, tp);
+		return clock_gettime(monotonic_clkid, tp);
 	case USBI_CLOCK_REALTIME:
 		return clock_gettime(CLOCK_REALTIME, tp);
 	default:
