@@ -223,8 +223,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   eibaddr_t myaddr;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &insignal);
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 0));
-  pth_event_t timeout1 = pth_event (PTH_EVENT_TIME, pth_timeout (10, 0));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 0));
+  pth_event_t timeout1 = pth_event (PTH_EVENT_RTIME, pth_time (10, 0));
   L_Data_PDU *c;
 
   EIBNetIPPacket p;
@@ -295,8 +295,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      rno = 0;
 	      sock->recvaddr2 = daddr;
 	      sock->recvall = 3;
-	      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
-			 pth_timeout (30, 0));
+	      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,
+			 pth_time (30, 0));
 	      heartbeat = 0;
 	      break;
 
@@ -547,8 +547,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	}
       if (mod != 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
 	{
-	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
-		     pth_timeout (30, 0));
+	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,
+		     pth_time (30, 0));
 	  if (heartbeat < 5)
 	    {
 	      csreq.caddr = saddr;
@@ -574,8 +574,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	}
       if (mod == 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
 	{
-	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout1,
-		     pth_timeout (10, 0));
+	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,
+		     pth_time (10, 0));
 	  p = creq.ToPacket ();
 	  TRACEPRINTF (t, 1, this, "Connectretry");
 	  sock->sendaddr = caddr;
@@ -592,8 +592,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	  sock->sendaddr = daddr;
 	  sock->Send (p);
 	  mod = 2;
-	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-		     pth_timeout (1, 0));
+	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+		     pth_time (1, 0));
 	}
     }
 out:

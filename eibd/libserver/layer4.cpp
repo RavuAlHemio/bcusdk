@@ -190,8 +190,8 @@ T_TPDU::T_TPDU (Layer3 * l3, Trace * tr, eibaddr_t d)
   src = d;
   pth_sem_init (&sem);
   init_ok = false;
-  if (!layer3->
-      registerIndividualCallBack (this, Individual_Lock_None, 0, src))
+  if (!layer3->registerIndividualCallBack
+      (this, Individual_Lock_None, 0, src))
     return;
   init_ok = true;
 }
@@ -263,8 +263,8 @@ T_Individual::T_Individual (Layer3 * l3, Trace * tr, eibaddr_t d,
   pth_sem_init (&sem);
   init_ok = false;
   if (!write_only)
-    if (!layer3->
-	registerIndividualCallBack (this, Individual_Lock_None, dest))
+    if (!layer3->registerIndividualCallBack
+	(this, Individual_Lock_None, dest))
       return;
   init_ok = true;
 }
@@ -347,8 +347,8 @@ T_Connection::T_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
   sendno = 0;
   mode = 0;
   init_ok = false;
-  if (!layer3->
-      registerIndividualCallBack (this, Individual_Lock_Connection, dest))
+  if (!layer3->registerIndividualCallBack
+      (this, Individual_Lock_Connection, dest))
     return;
   Start ();
   init_ok = true;
@@ -488,7 +488,7 @@ T_Connection::Run (pth_sem_t * stop1)
   sendno = 0;
   recvno = 0;
   repcount = 0;
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (6, 0));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (6, 0));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED && mode != 0)
     {
       pth_event_concat (bufev, stop, timeout, NULL);
@@ -531,8 +531,8 @@ T_Connection::Run (pth_sem_t * stop1)
 
 		if (mode == 1)
 		  timeout =
-		    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-			       pth_timeout (6, 0));
+		    pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+			       pth_time (6, 0));
 	      }
 	      break;
 	    case T_NACK:
@@ -549,8 +549,8 @@ T_Connection::Run (pth_sem_t * stop1)
 		    repcount++;
 		    SendData (sendno, in.top ());
 		    timeout =
-		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (3, 0));
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (3, 0));
 		  }
 	      }
 	      break;
@@ -564,8 +564,8 @@ T_Connection::Run (pth_sem_t * stop1)
 		else
 		  {
 		    timeout =
-		      pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-				 pth_timeout (6, 0));
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (6, 0));
 		    mode = 1;
 		    in.get ();
 		    sendno = (sendno + 1) & 0x0f;
@@ -585,8 +585,8 @@ T_Connection::Run (pth_sem_t * stop1)
 	  SendData (sendno, in.top ());
 	  mode = 2;
 	  timeout =
-	    pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-		       pth_timeout (3, 0));
+	    pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+		       pth_time (3, 0));
 	}
       else if (pth_event_status (timeout) == PTH_STATUS_OCCURRED)
 	{
@@ -595,8 +595,8 @@ T_Connection::Run (pth_sem_t * stop1)
 	      repcount++;
 	      SendData (sendno, in.top ());
 	      timeout =
-		pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-			   pth_timeout (3, 0));
+		pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+			   pth_time (3, 0));
 	    }
 	  else
 	    mode = 0;

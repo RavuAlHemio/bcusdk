@@ -67,8 +67,8 @@ USBLoop::Run (pth_sem_t * stop1)
 	break;
       if (i > 0)
 	{
-	  pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE,
-		     timeout, pth_timeout (tv.tv_sec, tv.tv_usec));
+	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE,
+		     timeout, pth_time (tv.tv_sec, tv.tv_usec));
 	  pth_event_concat (stop, timeout, NULL);
 	}
       pth_event (PTH_EVENT_SELECT | PTH_MODE_REUSE, event, &rc, fds + 1, &r,

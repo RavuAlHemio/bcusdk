@@ -150,7 +150,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 void *
 timeout_abort (void *)
 {
-  pth_event_t e = pth_event (PTH_EVENT_TIME, pth_timeout (arg.timeout, 0));
+  pth_event_t e = pth_event (PTH_EVENT_RTIME, pth_time (arg.timeout, 0));
   pth_wait (e);
   die ("Request timed out");
 }

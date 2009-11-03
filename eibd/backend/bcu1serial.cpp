@@ -244,20 +244,20 @@ BCU1SerialLowLevelDriver::Run (pth_sem_t * stop1)
 {
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
-  pth_event_t timeout = pth_event (PTH_EVENT_TIME, pth_timeout (0, 10));
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 10));
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
       int error;
       timeout =
-	pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-		   pth_timeout (0, 150));
+	pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+		   pth_time (0, 150));
       pth_event_concat (stop, input, timeout, NULL);
       pth_wait (stop);
       pth_event_isolate (stop);
       pth_event_isolate (input);
       timeout =
-	pth_event (PTH_EVENT_TIME | PTH_MODE_REUSE, timeout,
-		   pth_timeout (0, 200));
+	pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+		   pth_time (0, 200));
       pth_event_concat (stop, timeout, NULL);
 
       struct timeval v1, v2;
