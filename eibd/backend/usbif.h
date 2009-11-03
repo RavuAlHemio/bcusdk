@@ -64,6 +64,7 @@ class USBLowLevelDriver:public LowLevelDriverInterface, private Thread
   /** semaphore to signal empty sendqueue */
   pth_sem_t send_empty;
   int state;
+  bool connection_state;
 
   void Run (pth_sem_t * stop);
 

@@ -219,6 +219,7 @@ USBLowLevelDriver::USBLowLevelDriver (const char *Dev, Trace * tr)
     return;
   TRACEPRINTF (t, 1, this, "Claimed");
   state = 2;
+  connection_state = true;
 
   Start ();
   TRACEPRINTF (t, 1, this, "Opened");
@@ -374,6 +375,24 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	      t->TracePacket (0, this, "RecvUSB", res);
 	      outqueue.put (new CArray (res));
 	      pth_sem_inc (&out_signal, 1);
+	      if (recvbuf [0] == 0x01 &&
+		  recvbuf [1] == 0x13 &&
+		  recvbuf [2] == 0x0A &&
+		  recvbuf [3] == 0x00 &&
+		  recvbuf [4] == 0x08 &&
+		  recvbuf [5] == 0x00 &&
+		  recvbuf [6] == 0x02 &&
+		  recvbuf [7] == 0x0F &&
+		  recvbuf [8] == 0x04 &&
+		  recvbuf [9] == 0x00 &&
+		  recvbuf [10] == 0x00 &&
+		  recvbuf [11] == 0x03)
+		{
+		  if (recvbuf [12] & 0x1)
+		    connection_state = true;
+		  else
+		    connection_state = false;
+		}
 	    }
 	  libusb_free_transfer (recvh);
 	  recvh = 0;
@@ -396,7 +415,7 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	  sendh = 0;
 	  continue;
 	}
-      if (!sendh && !inqueue.isempty ())
+      if (!sendh && !inqueue.isempty () && connection_state)
 	{
 	  const CArray & c = inqueue.top ();
 	  t->TracePacket (0, this, "Send", c);
