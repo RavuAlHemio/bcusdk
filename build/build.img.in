@@ -48,7 +48,7 @@ END
 exit 1
 }
 
-function error()
+error()
 {
 if [ $keep != 1 ]; then
 	rm -r $TMP
@@ -88,11 +88,11 @@ if [ ! -f "$IN" ]; then
 	exit 1 
 fi
 
-if [ "x$OUT" == "x" ]; then
+if [ "x$OUT" = "x" ]; then
 	OUT="$IN.load"
 fi
 
-if [ "x$TMP" == "x" ]; then
+if [ "x$TMP" = "x" ]; then
 	TMP=`mktemp -u bcusdk.XXXXXXXXXX`||exit 1
 	mkdir $TMP
 elif [ ! -e "$TMP" ]; then
@@ -110,7 +110,7 @@ if [ $keep != 1 ]; then
 	trap "rm -r $TMP; exit 1" 1 2 3 5 10 13 15
 fi
 
-if [ "x$CONF" == "x" ]; then
+if [ "x$CONF" = "x" ]; then
 	$EXTRACT "$IN" "$TMP/cf" || error
 
 else
@@ -120,7 +120,7 @@ fi
 pushd "$TMP" >/dev/null || error
 $TAR x cf bcusdk-version || error
 
-if [ "x`cat bcusdk-version`" == "x0.0.0" ]; then
+if [ "x`cat bcusdk-version`" = "x0.0.0" ]; then
 $TAR x cf config || error
 $TAR x cf c.inc || error
 else

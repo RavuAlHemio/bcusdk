@@ -50,7 +50,7 @@ END
 exit 1
 }
 
-function error()
+error()
 {
 if [ $keep != 1 ]; then
 	rm -r $TMP
@@ -94,11 +94,11 @@ if [ ! -f "$IN" ]; then
 	exit 1 
 fi
 
-if [ "x$OUT" == "x" ]; then
+if [ "x$OUT" = "x" ]; then
 	OUT="$IN.ai"
 fi
 
-if [ "x$TMP" == "x" ]; then
+if [ "x$TMP" = "x" ]; then
 	TMP=`mktemp -u bcusdk.XXXXXXXXXX`||exit 1
 	mkdir $TMP
 elif [ ! -e "$TMP" ]; then
