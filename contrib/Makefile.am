@@ -1,1 +1,1 @@
-EXTRA_DIST=swig gentoo eibdvis
+EXTRA_DIST=swig gentoo eibdvis linux

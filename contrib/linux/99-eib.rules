@@ -1,0 +1,15 @@
+# udev rule file
+# grants eib access to everybody
+#
+# copy to /etc/udev/rules.d
+
+# BCU 1 kernel driver
+KERNEL=="eib[0-9]",     GROUP="root",MODE="0666"
+# Serial Ports (FT1.2, TPUART)
+KERNEL=="ttyS[0-9]",     GROUP="root",MODE="0666"
+# Siemens AG:KNX/EIB-USB Interface (DIN rail)
+SUBSYSTEM=="usb",ENV{DEVTYPE}=="usb_device",ATTR{idVendor}=="0e77", ATTR{idProduct}=="0112",GROUP="root",MODE="0666"
+# Siemens AG:KNX/EIB-USB Interface (Flush mounted)
+SUBSYSTEM=="usb",ENV{DEVTYPE}=="usb_device",ATTR{idVendor}=="0e77", ATTR{idProduct}=="0111",GROUP="root",MODE="0666"
+# Weinzierl Engineering GmbH:KNX-USB Data Interface
+SUBSYSTEM=="usb",ENV{DEVTYPE}=="usb_device",ATTR{idVendor}=="0e77", ATTR{idProduct}=="0103",GROUP="root",MODE="0666"
