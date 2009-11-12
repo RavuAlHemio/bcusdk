@@ -53,7 +53,7 @@ main (int ac, char *ag[])
   int dport;
   char *a, *b, *c;
   if (ac != 2 && ac != 3)
-    die ("Usage: %s ip[:port] [tracelevel]", ag[0]);
+    die ("Usage: %s ip[:dst-port[:src-port]] [tracelevel]", ag[0]);
   struct sockaddr_in saddr;
   struct sockaddr_in caddr;
   EIBNetIPSocket *sock;
