@@ -173,6 +173,10 @@
 	$ibuf[offset] = EIBConnection::packb ((PAR(name)>>8)&0xff); \
 	$ibuf[offset+1] = EIBConnection::packb ((PAR(name))&0xff);
 
+#define EIBC_SETLEN(name, offset) \
+	$ibuf[offset] = EIBConnection::packb (((name)>>8)&0xff); \
+	$ibuf[offset+1] = EIBConnection::packb (((name))&0xff);
+
 #define EIBC_SETBOOL(value, offset) \
 	$ibuf[offset] = EIBConnection::packb((PAR(value)) ? 0xff : 0);
 

@@ -252,6 +252,10 @@ int _EIB_GetRequest (EIBConnection * con);
 	ibuf[offset] = ((value) >> 8) & 0xff; \
 	ibuf[offset + 1] = ((value)) & 0xff;
 
+#define EIBC_SETLEN(value, offset) \
+	ibuf[offset] = ((value) >> 8) & 0xff; \
+	ibuf[offset + 1] = ((value)) & 0xff;
+
 #define EIBC_SETBOOL(value, offset) \
 	ibuf[offset] = ((value) ? 0xff : 0);
 

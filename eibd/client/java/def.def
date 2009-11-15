@@ -174,6 +174,10 @@
 	ibuf[offset] = (byte)((name>>8)&0xff); \
 	ibuf[offset+1] = (byte)((name)&0xff);
 
+#define EIBC_SETLEN(name, offset) \
+	ibuf[offset] = (byte)((name>>8)&0xff); \
+	ibuf[offset+1] = (byte)((name)&0xff);
+
 #define EIBC_SETBOOL(value, offset) \
 	ibuf[offset] = (byte)((value) ? 0xff : 0);
 
