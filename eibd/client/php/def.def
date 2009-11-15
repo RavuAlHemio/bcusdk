@@ -114,10 +114,9 @@
 	return 0;
 
 #define EIBC_INIT_SEND(length) \
-	$head = array(); \
+	$ibuf = array(); \
 	for ($i = 0; $i<length; $i++) \
-	  $head[$i]=" "; \
-	$ibuf =& $head;
+	  $ibuf[$i]=" ";
 
 #define EIBC_SEND_BUF(name) EIBC_SEND_BUF_LEN (name, 0)
 

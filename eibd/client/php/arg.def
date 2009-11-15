@@ -49,7 +49,7 @@ EIBC_LICENSE(
 #define ALARG_BOOL(name, args) PAR(name)  KAL ## args
 #define ALARG_INBUF(name, args) PAR(name) KAL ## args
 #define ALARG_OUTBUF(name, args) PAR(name) KAL ## args
-#define ALARG_OUTBUF_LEN(name, args) PAR(name##_len), $name KAL ## args
+#define ALARG_OUTBUF_LEN(name, args) PAR(name##_len), PAR(name) KAL ## args
 #define ALARG_OUTADDR(name, args) PAR(name) KAL ## args
 #define ALARG_OUTADDRa(name, args) PAR(name) KAL ## args
 #define ALARG_ADDR(name, args) PAR(name) KAL ## args
