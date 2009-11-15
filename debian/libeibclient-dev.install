@@ -2,4 +2,5 @@ usr/include
 usr/lib/libeibclient.a
 usr/share/bcusdk/eibclient.php
 usr/share/bcusdk/EIBConnection.cs
+usr/share/bcusdk/EIBConnection.pm
 usr/share/java/eibclient.jar

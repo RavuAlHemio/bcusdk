@@ -172,6 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libeibclient.a
 /usr/share/bcusdk/eibclient.php
 /usr/share/bcusdk/EIBConnection.cs
+/usr/share/bcusdk/EIBConnection.pm
 /usr/share/java/eibclient.jar
 
 %files -n eibd-client-sources
