@@ -111,6 +111,7 @@
 
 #define EIBC_COMPLETE(name, body) \
         private int name ## _complete () { \
+	  complete = null; \
 	  body \
 	}
 

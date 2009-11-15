@@ -41,5 +41,10 @@ private complete_t complete = null;
 public int
 EIBComplete ()
 {
+  if (complete == null)
+    {
+      errno = EINVAL;
+      return -1;
+    }
   return complete ();
 }
