@@ -110,6 +110,7 @@
 #define EIBC_COMPLETE(name, body) \
 	private class name##_complete implements _complete { \
 	  public int complete () throws IOException { \
+	    complete  = null; \
 	    body \
 	  } \
 	}

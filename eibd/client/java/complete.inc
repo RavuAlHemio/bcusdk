@@ -43,6 +43,11 @@
 
   public int EIBComplete () throws IOException
   {
+    if (complete == null)
+      {
+	errno = EINVAL;
+	return -1;
+      }
     return complete.complete ();
   }
 
