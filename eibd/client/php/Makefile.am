@@ -12,7 +12,7 @@ EIBConnection.post : EIBConnection.pre result.inc
 @AMDEP_TRUE@-@am__include@ @am__quote@./$(DEPDIR)/EIBConnection.Po@am__quote@
 
 EIBConnection.php : EIBConnection.post 
-	sed -e 's/PAR \?(\([A-Za-z][A-Za-z0-9_]*\))/$$\1/g' $< |sed -e 's/PAR \?(\([0-9]*\))/\1/g' > $@
+	cat $< > $@
 	$(INDENT) $@ || /bin/true
 	sed -i -e 's/== =/===/g' $@
 	sed -i -e 's/= &/=\& /g' $@
