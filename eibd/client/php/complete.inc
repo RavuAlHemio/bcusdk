@@ -39,6 +39,12 @@
   public function EIBComplete () 
   {
     $name = $this->complete;
+    if ($name == "")
+    {
+      $this->errno = self::EINVAL;
+      return -1;
+    }
+    $this->complete = "";
     return $this->$name();
   }
 
