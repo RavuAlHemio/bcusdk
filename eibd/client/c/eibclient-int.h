@@ -248,6 +248,9 @@ int _EIB_GetRequest (EIBConnection * con);
 #define EIBC_SETUINT8(value, offset) \
 	ibuf[offset] = value;
 
+#define EIBC_UINT8(value, offset) \
+	ibuf[offset] = value;
+
 #define EIBC_SETUINT16(value, offset) \
 	ibuf[offset] = ((value) >> 8) & 0xff; \
 	ibuf[offset + 1] = ((value)) & 0xff;

@@ -36,7 +36,7 @@ EIBC_COMPLETE (EIB_M_Progmode_Status,
 EIBC_ASYNC (EIB_M_Progmode_Status, ARG_ADDR (dest, ARG_NONE),
   EIBC_INIT_SEND (5)
   EIBC_SETADDR (dest, 2)
-  EIBC_SETUINT8 (3, 4)
+  EIBC_UINT8 (3, 4)
   EIBC_SEND (EIB_PROG_MODE)
   EIBC_INIT_COMPLETE (EIB_M_Progmode_Status)
 )
