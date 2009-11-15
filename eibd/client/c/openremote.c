@@ -123,6 +123,7 @@ EIBSocketRemote (const char *host, int port)
       return 0;
     }
   setsockopt (con->fd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof (val));
+  con->complete = 0;
   con->buflen = 0;
   con->buf = 0;
   con->readlen = 0;

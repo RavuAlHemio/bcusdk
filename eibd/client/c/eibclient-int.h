@@ -162,6 +162,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	static int \
 	name ## _complete (EIBConnection * con) \
 	{ \
+          con->complete = 0; \
 	  body \
 	}
 

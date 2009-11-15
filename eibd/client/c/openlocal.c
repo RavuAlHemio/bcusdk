@@ -60,6 +60,7 @@ EIBSocketLocal (const char *path)
       errno = saveerr;
       return 0;
     }
+  con->complete = 0;
   con->buflen = 0;
   con->buf = 0;
   con->readlen = 0;

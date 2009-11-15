@@ -31,7 +31,7 @@
 int
 EIBComplete (EIBConnection * con)
 {
-  if (!con)
+  if (!con || !con->complete)
     {
       errno = EINVAL;
       return -1;
