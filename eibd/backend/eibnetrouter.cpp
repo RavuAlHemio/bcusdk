@@ -99,7 +99,15 @@ EIBNetIPRouter::Send_L_Data (LPDU * l)
   p.data = L_Data_ToCEMI (0x29, *l1);
   p.service = ROUTING_INDICATION;
   sock->Send (p);
-  delete l;
+  if (vmode)
+    {
+      L_Busmonitor_PDU *l2 = new L_Busmonitor_PDU;
+      l2->pdu.set (l->ToPacket ());
+      outqueue.put (l2);
+      pth_sem_inc (&out_signal, 1);
+    }
+  outqueue.put (l);
+  pth_sem_inc (&out_signal, 1);
 }
 
 LPDU *
