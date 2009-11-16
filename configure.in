@@ -36,6 +36,10 @@ AC_PROG_YACC
 AC_PROG_LEX
 AM_PROG_AS
 AC_PROG_RANLIB
+
+GMP_PROG_CPP_FOR_BUILD
+GMP_PROG_EXEEXT_FOR_BUILD
+
 AC_COMPILER_OPTION(nortti,[-fno-rtti],[-fno-rtti],CXXFLAGS="$CXXFLAGS -fno-rtti")
 AC_COMPILER_OPTION(noexceptions,[-fno-exceptions],[-fno-exceptions],CXXFLAGS="$CXXFLAGS -fno-exceptions")
 AC_CHECK_PTHSEM(2.0.8,yes,yes,no)
@@ -267,7 +271,7 @@ AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT(Makefile 
 common/Makefile
 eibd/Makefile eibd/include/Makefile  eibd/client/Makefile eibd/examples/Makefile eibd/libserver/Makefile eibd/server/Makefile eibd/backend/Makefile
-eibd/client/def/Makefile eibd/client/c/Makefile eibd/client/java/Makefile eibd/client/php/Makefile eibd/client/cs/Makefile eibd/client/perl/Makefile
+eibd/client/def/Makefile eibd/client/c/Makefile eibd/client/java/Makefile eibd/client/php/Makefile eibd/client/cs/Makefile eibd/client/perl/Makefile eibd/client/python/Makefile
 eibd/eibnet/Makefile eibd/bcu/Makefile eibd/usb/Makefile
 xml/Makefile xml/gui/Makefile xml/gui/examples/Makefile
 bcu/Makefile bcu/lib/Makefile bcu/include/Makefile bcu/ldscripts/Makefile
