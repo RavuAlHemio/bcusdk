@@ -103,6 +103,19 @@ CEMI_to_L_Data (const CArray & data)
   return new L_Data_PDU (c);
 }
 
+L_Busmonitor_PDU *
+CEMI_to_Busmonitor (const CArray & data)
+{
+  L_Busmonitor_PDU c;
+  if (data () < 2)
+    return 0;
+  unsigned start = data[1] + 2;
+  if (data () < 1 + start)
+    return 0;
+  c.pdu.set (data.array () + start, data () - start);
+  return new L_Busmonitor_PDU (c);
+}
+
 CArray
 L_Data_ToEMI (uchar code, const L_Data_PDU & l1)
 {
