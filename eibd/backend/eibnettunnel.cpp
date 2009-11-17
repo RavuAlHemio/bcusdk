@@ -92,6 +92,8 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
   sock->recvall = 0;
   mode = 0;
   vmode = 0;
+  support_busmonitor = 1;
+  connect_busmonitor = 0;
   Start ();
   TRACEPRINTF (t, 2, this, "Opened");
 }
@@ -182,6 +184,10 @@ bool
 EIBNetIPTunnel::enterBusmonitor ()
 {
   mode = 1;
+  if (support_busmonitor)
+    connect_busmonitor = 1;
+  inqueue.put (CArray ());
+  pth_sem_inc (&insignal, 1);
   return 1;
 }
 
@@ -189,6 +195,9 @@ bool
 EIBNetIPTunnel::leaveBusmonitor ()
 {
   mode = 0;
+  connect_busmonitor = 0;
+  inqueue.put (CArray ());
+  pth_sem_inc (&insignal, 1);
   return 1;
 }
 
@@ -276,6 +285,20 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		{
 		  TRACEPRINTF (t, 1, this, "Connect failed with error %02X",
 			       cresp.status);
+		  if (cresp.status == 0x23 && support_busmonitor == 1
+		      && connect_busmonitor == 1)
+		    {
+		      TRACEPRINTF (t, 1, this, "Disable busmonitor support");
+		      support_busmonitor = 0;
+		      connect_busmonitor = 0;
+		      creq.CRI[1] = 0x02;
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,
+				 pth_time (10, 0));
+		      p = creq.ToPacket ();
+		      TRACEPRINTF (t, 1, this, "Connectretry");
+		      sock->sendaddr = caddr;
+		      sock->Send (p);
+		    }
 		  break;
 		}
 	      if (cresp.CRD () != 3)
@@ -357,6 +380,13 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      //Confirmation
 	      if (treq.CEMI[0] == 0x2E)
 		break;
+	      if (treq.CEMI[0] == 0x2B)
+		{
+		  L_Busmonitor_PDU *l2 = CEMI_to_Busmonitor (treq.CEMI);
+		  outqueue.put (l2);
+		  pth_sem_inc (&outsignal, 1);
+		  break;
+		}
 	      if (treq.CEMI[0] != 0x29)
 		{
 		  TRACEPRINTF (t, 1, this, "Unexpected CEMI Type %02X",
@@ -514,6 +544,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      mod = 0;
 	      sock->recvall = 0;
 	      TRACEPRINTF (t, 1, this, "Disconnected");
+	      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,
+			 pth_time (0, 100));
 	      break;
 	    default:
 	    err:
@@ -576,10 +608,26 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	{
 	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,
 		     pth_time (10, 0));
+	  creq.CRI[1] =
+	    ((connect_busmonitor && support_busmonitor) ? 0x80 : 0x02);
 	  p = creq.ToPacket ();
 	  TRACEPRINTF (t, 1, this, "Connectretry");
 	  sock->sendaddr = caddr;
 	  sock->Send (p);
+	}
+
+      if (!inqueue.isempty () && inqueue.top ()() == 0)
+	{
+	  pth_sem_dec (&insignal);
+	  inqueue.get ();
+	  if (support_busmonitor)
+	    {
+	      dreq.caddr = saddr;
+	      dreq.channel = channel;
+	      p = dreq.ToPacket ();
+	      sock->sendaddr = caddr;
+	      sock->Send (p);
+	    }
 	}
 
       if (!inqueue.isempty () && mod == 1)

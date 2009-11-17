@@ -41,6 +41,8 @@ class EIBNetIPTunnel:public Layer2Interface, private Thread
   int vmode;
   int dataport;
   bool NAT;
+  int support_busmonitor;
+  int connect_busmonitor;
 
   void Run (pth_sem_t * stop);
 public:
