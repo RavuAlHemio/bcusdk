@@ -33,11 +33,11 @@ EIBC_COMPLETE (EIB_MC_PropertyRead,
   EIBC_RETURN_BUF (2)
 )
 
-EIBC_ASYNC (EIB_MC_PropertyRead, ARG_UINT8 (obj, ARG_UINT8a (property, ARG_UINT16 (start, ARG_UINT8b (nr_of_elem, ARG_OUTBUF (buf, ARG_NONE))))),
+EIBC_ASYNC (EIB_MC_PropertyRead, ARG_UINT8 (obj, ARG_UINT8a (propertyno, ARG_UINT16 (start, ARG_UINT8b (nr_of_elem, ARG_OUTBUF (buf, ARG_NONE))))),
   EIBC_INIT_SEND (7)
   EIBC_READ_BUF (buf)
   EIBC_SETUINT8 (obj, 2)
-  EIBC_SETUINT8 (property, 3)
+  EIBC_SETUINT8 (propertyno, 3)
   EIBC_SETUINT16 (start, 4)
   EIBC_SETUINT8 (nr_of_elem, 6)
   EIBC_SEND (EIB_MC_PROP_READ)

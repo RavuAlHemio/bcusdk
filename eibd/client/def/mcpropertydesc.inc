@@ -36,13 +36,13 @@ EIBC_COMPLETE (EIB_MC_PropertyDesc,
   EIBC_RETURN_OK
 )
 
-EIBC_ASYNC (EIB_MC_PropertyDesc, ARG_UINT8 (obj, ARG_UINT8a (property, ARG_OUTUINT8 (type, ARG_OUTUINT16 (max_nr_of_elem, ARG_OUTUINT8a (access, ARG_NONE))))),
+EIBC_ASYNC (EIB_MC_PropertyDesc, ARG_UINT8 (obj, ARG_UINT8a (propertyno, ARG_OUTUINT8 (proptype, ARG_OUTUINT16 (max_nr_of_elem, ARG_OUTUINT8a (access, ARG_NONE))))),
   EIBC_INIT_SEND (4)
-  EIBC_PTR2 (type)
+  EIBC_PTR2 (proptype)
   EIBC_PTR4 (max_nr_of_elem)
   EIBC_PTR3 (access)
   EIBC_SETUINT8 (obj, 2)
-  EIBC_SETUINT8 (property, 3)
+  EIBC_SETUINT8 (propertyno, 3)
   EIBC_SEND (EIB_MC_PROP_DESC)
   EIBC_INIT_COMPLETE (EIB_MC_PropertyDesc)
 )
