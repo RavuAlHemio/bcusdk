@@ -174,6 +174,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/bcusdk/EIBConnection.cs
 /usr/share/bcusdk/EIBConnection.pm
 /usr/share/bcusdk/EIBConnection.py
+/usr/share/bcusdk/EIBD.pas
 /usr/share/java/eibclient.jar
 
 %files -n eibd-client-sources
