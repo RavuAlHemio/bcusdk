@@ -96,6 +96,7 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 	  return;
 	}
     }
+  busmoncount = 0;
   Start ();
   TRACEPRINTF (t, 8, this, "Opened");
 }
@@ -110,6 +111,8 @@ EIBnetServer::~EIBnetServer ()
       l3->deregisterGroupCallBack (this, 0);
       l3->deregisterIndividualCallBack (this, 0, 0);
     }
+  if (busmoncount)
+    l3->deregisterVBusmonitor (this);
   Stop ();
   if (sock)
     delete sock;
@@ -119,6 +122,20 @@ bool EIBnetServer::init ()
 {
   return sock != 0;
 }
+
+void
+EIBnetServer::Get_L_Busmonitor (L_Busmonitor_PDU * l)
+{
+  for (int i = 0; i < state (); i++)
+    {
+      if (state[i].type == 1)
+	{
+	  state[i].out.put (Busmonitor_to_CEMI (0x2B, *l, state[i].no++));
+	  pth_sem_inc (state[i].outsignal, 0);
+	}
+    }
+}
+
 
 void
 EIBnetServer::Get_L_Data (L_Data_PDU * l)
@@ -141,10 +158,32 @@ EIBnetServer::Get_L_Data (L_Data_PDU * l)
     }
   for (int i = 0; i < state (); i++)
     {
-      state[i].out.put (L_Data_ToCEMI (0x29, *l));
-      pth_sem_inc (state[i].outsignal, 0);
+      if (state[i].type == 0)
+	{
+	  state[i].out.put (L_Data_ToCEMI (0x29, *l));
+	  pth_sem_inc (state[i].outsignal, 0);
+	}
     }
   delete l;
+}
+
+void
+EIBnetServer::addBusmonitor ()
+{
+  if (busmoncount == 0)
+    {
+      if (!l3->registerVBusmonitor (this))
+	TRACEPRINTF (t, 8, this, "Registervbusmonitor failed");
+      busmoncount++;
+    }
+}
+
+void
+EIBnetServer::delBusmonitor ()
+{
+  busmoncount--;
+  if (busmoncount == 0)
+    l3->deregisterVBusmonitor (this);
 }
 
 void
@@ -294,6 +333,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 			pth_event_free (state[i].sendtimeout, PTH_FREE_THIS);
 			pth_event_free (state[i].outwait, PTH_FREE_THIS);
 			delete state[i].outsignal;
+			if (state[i].type == 1)
+			  delBusmonitor ();
 			state.deletepart (i, 1);
 			break;
 		      }
@@ -316,7 +357,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      r2.CRD[1] = 0x00;
 	      r2.CRD[2] = 0x00;
 	      r2.status = 0x22;
-	      if (r1.CRI () == 3 && r1.CRI[0] == 4 && r1.CRI[1] == 2)
+	      if (r1.CRI () == 3 && r1.CRI[0] == 4
+		  && (r1.CRI[1] == 0x02 || r1.CRI[1] == 0x80))
 		{
 		  int id = 1;
 		rt:
@@ -344,6 +386,10 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		      state[pos].state = 0;
 		      state[pos].sno = 0;
 		      state[pos].rno = 0;
+		      state[pos].no = 1;
+		      state[pos].type = (r1.CRI[1] == 0x80) ? 1 : 0;
+		      if (state[pos].type == 1)
+			addBusmonitor ();
 		      r2.channel = id;
 		      r2.status = 0;
 		    }
@@ -387,29 +433,33 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		}
 	      r2.channel = r1.channel;
 	      r2.seqno = r1.seqno;
-	      L_Data_PDU *c = CEMI_to_L_Data (r1.CEMI);
-	      if (c)
+	      if (state[i].type == 0)
 		{
-		  r2.status = 0;
-		  if (c->hopcount)
+		  L_Data_PDU *c = CEMI_to_L_Data (r1.CEMI);
+		  if (c)
 		    {
-		      c->hopcount--;
-		      if (r1.CEMI[0] == 0x11)
+		      r2.status = 0;
+		      if (c->hopcount)
 			{
-			  state[i].out.put (L_Data_ToCEMI (0x2E, *c));
-			  pth_sem_inc (state[i].outsignal, 0);
+			  c->hopcount--;
+			  if (r1.CEMI[0] == 0x11)
+			    {
+			      state[i].out.put (L_Data_ToCEMI (0x2E, *c));
+			      pth_sem_inc (state[i].outsignal, 0);
+			    }
+			  if (r1.CEMI[0] == 0x11 || r1.CEMI[0] == 0x29)
+			    l3->send_L_Data (c);
+			  else
+			    delete c;
 			}
-		      if (r1.CEMI[0] == 0x11 || r1.CEMI[0] == 0x29)
-			l3->send_L_Data (c);
 		      else
-			delete c;
+			{
+			  TRACEPRINTF (t, 8, this, "RecvDrop");
+			  delete c;
+			}
 		    }
 		  else
-		    {
-		      TRACEPRINTF (t, 8, this, "RecvDrop");
-		      delete c;
-		    }
-
+		    r2.status = 0x29;
 		}
 	      else
 		r2.status = 0x29;
@@ -468,6 +518,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	    pth_event_free (state[i].sendtimeout, PTH_FREE_THIS);
 	    pth_event_free (state[i].outwait, PTH_FREE_THIS);
 	    delete state[i].outsignal;
+	    if (state[i].type == 1)
+	      delBusmonitor ();
 	    state.deletepart (i, 1);
 	    break;
 	  }
@@ -512,6 +564,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
       pth_event_free (state[i].sendtimeout, PTH_FREE_THIS);
       pth_event_free (state[i].outwait, PTH_FREE_THIS);
       delete state[i].outsignal;
+      if (state[i].type == 1)
+	delBusmonitor ();
     }
   pth_event_free (stop, PTH_FREE_THIS);
 }

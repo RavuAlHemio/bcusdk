@@ -28,6 +28,7 @@ CArray L_Data_ToCEMI (uchar code, const L_Data_PDU & p);
 L_Data_PDU *CEMI_to_L_Data (const CArray & data);
 
 L_Busmonitor_PDU *CEMI_to_Busmonitor (const CArray & data);
+CArray Busmonitor_to_CEMI (uchar code, const L_Busmonitor_PDU & p, int no);
 
 /** convert L_Data_PDU to EMI1/2 frame */
 CArray L_Data_ToEMI (uchar code, const L_Data_PDU & p);

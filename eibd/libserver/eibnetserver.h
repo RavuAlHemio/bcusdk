@@ -29,6 +29,8 @@ typedef struct
   uchar sno;
   uchar rno;
   int state;
+  int type;
+  int no;
   pth_event_t timeout;
     Queue < CArray > out;
   struct sockaddr_in daddr;
@@ -38,7 +40,8 @@ typedef struct
   pth_event_t sendtimeout;
 } ConnState;
 
-class EIBnetServer:public L_Data_CallBack, private Thread
+class EIBnetServer:public L_Data_CallBack, public L_Busmonitor_CallBack,
+  private Thread
 {
   Layer3 *l3;
   Trace *t;
@@ -47,11 +50,15 @@ class EIBnetServer:public L_Data_CallBack, private Thread
   bool tunnel;
   bool route;
   bool discover;
+  int busmoncount;
   struct sockaddr_in maddr;
     Array < ConnState > state;
 
   void Run (pth_sem_t * stop);
   void Get_L_Data (L_Data_PDU * l);
+  void Get_L_Busmonitor (L_Busmonitor_PDU * l);
+  void addBusmonitor ();
+  void delBusmonitor ();
 public:
     EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 		  bool Route, bool Discover, Layer3 * layer3, Trace * tr);
