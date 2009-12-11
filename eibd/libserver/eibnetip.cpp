@@ -782,6 +782,76 @@ parseEIBnet_TunnelACK (const EIBNetIPPacket & p, EIBnet_TunnelACK & r)
   return 0;
 }
 
+EIBnet_ConfigRequest::EIBnet_ConfigRequest ()
+{
+  channel = 0;
+  seqno = 0;
+}
+
+EIBNetIPPacket EIBnet_ConfigRequest::ToPacket ()CONST
+{
+  EIBNetIPPacket
+    p;
+  p.service = DEVICE_CONFIGURATION_REQUEST;
+  p.data.resize (CEMI () + 4);
+  p.data[0] = 4;
+  p.data[1] = channel;
+  p.data[2] = seqno;
+  p.data[3] = 0;
+  p.data.setpart (CEMI, 4);
+  return p;
+}
+
+int
+parseEIBnet_ConfigRequest (const EIBNetIPPacket & p, EIBnet_ConfigRequest & r)
+{
+  if (p.service != DEVICE_CONFIGURATION_REQUEST)
+    return 1;
+  if (p.data () < 6)
+    return 1;
+  if (p.data[0] != 4)
+    return 1;
+  r.channel = p.data[1];
+  r.seqno = p.data[2];
+  r.CEMI.set (p.data.array () + 4, p.data () - 4);
+  return 0;
+}
+
+EIBnet_ConfigACK::EIBnet_ConfigACK ()
+{
+  channel = 0;
+  seqno = 0;
+  status = 0;
+}
+
+EIBNetIPPacket EIBnet_ConfigACK::ToPacket ()CONST
+{
+  EIBNetIPPacket
+    p;
+  p.service = DEVICE_CONFIGURATION_ACK;
+  p.data.resize (4);
+  p.data[0] = 4;
+  p.data[1] = channel;
+  p.data[2] = seqno;
+  p.data[3] = status;
+  return p;
+}
+
+int
+parseEIBnet_ConfigACK (const EIBNetIPPacket & p, EIBnet_ConfigACK & r)
+{
+  if (p.service != DEVICE_CONFIGURATION_ACK)
+    return 1;
+  if (p.data () != 4)
+    return 1;
+  if (p.data[0] != 4)
+    return 1;
+  r.channel = p.data[1];
+  r.seqno = p.data[2];
+  r.status = p.data[3];
+  return 0;
+}
+
 EIBnet_DescriptionRequest::EIBnet_DescriptionRequest ()
 {
   memset (&caddr, 0, sizeof (caddr));

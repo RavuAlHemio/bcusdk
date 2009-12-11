@@ -118,7 +118,8 @@ EIBnetServer::~EIBnetServer ()
     delete sock;
 }
 
-bool EIBnetServer::init ()
+bool
+EIBnetServer::init ()
 {
   return sock != 0;
 }
@@ -184,6 +185,39 @@ EIBnetServer::delBusmonitor ()
   busmoncount--;
   if (busmoncount == 0)
     l3->deregisterVBusmonitor (this);
+}
+
+int
+EIBnetServer::addClient (int type, const EIBnet_ConnectRequest & r1)
+{
+  int i;
+  int id = 1;
+rt:
+  for (i = 0; i < state (); i++)
+    if (state[i].channel == id)
+      {
+	id++;
+	goto rt;
+      }
+  if (id <= 0xff)
+    {
+      int pos = state ();
+      state.resize (state () + 1);
+      state[pos].timeout = pth_event (PTH_EVENT_RTIME, pth_time (120, 0));
+      state[pos].outsignal = new pth_sem_t;
+      pth_sem_init (state[pos].outsignal);
+      state[pos].outwait = pth_event (PTH_EVENT_SEM, state[pos].outsignal);
+      state[pos].sendtimeout = pth_event (PTH_EVENT_RTIME, pth_time (1, 0));
+      state[pos].channel = id;
+      state[pos].daddr = r1.daddr;
+      state[pos].caddr = r1.caddr;
+      state[pos].state = 0;
+      state[pos].sno = 0;
+      state[pos].rno = 0;
+      state[pos].no = 1;
+      state[pos].type = type;
+    }
+  return id;
 }
 
 void
@@ -262,6 +296,8 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      d.family = 2;
 	      if (discover)
 		r2.services.add (d);
+	      d.family = 3;
+	      r2.services.add (d);
 	      d.family = 4;
 	      if (tunnel)
 		r2.services.add (d);
@@ -292,7 +328,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		    }
 		}
 	    }
-	  if (p1->service == CONNECTIONSTATE_REQUEST && tunnel)
+	  if (p1->service == CONNECTIONSTATE_REQUEST)
 	    {
 	      uchar res = 21;
 	      EIBnet_ConnectionStateRequest r1;
@@ -316,7 +352,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      sock->sendaddr = r1.caddr;
 	      sock->Send (r2.ToPacket ());
 	    }
-	  if (p1->service == DISCONNECT_REQUEST && tunnel)
+	  if (p1->service == DISCONNECT_REQUEST)
 	    {
 	      uchar res = 0x21;
 	      EIBnet_DisconnectRequest r1;
@@ -346,50 +382,38 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      sock->sendaddr = r1.caddr;
 	      sock->Send (r2.ToPacket ());
 	    }
-	  if (p1->service == CONNECTION_REQUEST && tunnel)
+	  if (p1->service == CONNECTION_REQUEST)
 	    {
 	      EIBnet_ConnectRequest r1;
 	      EIBnet_ConnectResponse r2;
 	      if (parseEIBnet_ConnectRequest (*p1, r1))
 		goto out;
-	      r2.CRD.resize (3);
-	      r2.CRD[0] = 0x04;
-	      r2.CRD[1] = 0x00;
-	      r2.CRD[2] = 0x00;
 	      r2.status = 0x22;
-	      if (r1.CRI () == 3 && r1.CRI[0] == 4
-		  && (r1.CRI[1] == 0x02 || r1.CRI[1] == 0x80))
+	      if (r1.CRI () == 3 && r1.CRI[0] == 4 && tunnel)
 		{
-		  int id = 1;
-		rt:
-		  for (i = 0; i < state (); i++)
-		    if (state[i].channel == id)
-		      {
-			id++;
-			goto rt;
-		      }
+		  r2.CRD.resize (3);
+		  r2.CRD[0] = 0x04;
+		  r2.CRD[1] = 0x00;
+		  r2.CRD[2] = 0x00;
+		  if (r1.CRI[1] == 0x02 || r1.CRI[1] == 0x80)
+		    {
+		      int id = addClient ((r1.CRI[1] == 0x80) ? 1 : 0, r1);
+		      if (id <= 0xff)
+			{
+			  if (r1.CRI[1] == 0x80)
+			    addBusmonitor ();
+			  r2.channel = id;
+			  r2.status = 0;
+			}
+		    }
+		}
+	      if (r1.CRI () == 1 && r1.CRI[0] == 3)
+		{
+		  r2.CRD.resize (1);
+		  r2.CRD[0] = 0x03;
+		  int id = addClient (2, r1);
 		  if (id <= 0xff)
 		    {
-		      int pos = state ();
-		      state.resize (state () + 1);
-		      state[pos].timeout =
-			pth_event (PTH_EVENT_RTIME, pth_time (120, 0));
-		      state[pos].outsignal = new pth_sem_t;
-		      pth_sem_init (state[pos].outsignal);
-		      state[pos].outwait =
-			pth_event (PTH_EVENT_SEM, state[pos].outsignal);
-		      state[pos].sendtimeout =
-			pth_event (PTH_EVENT_RTIME, pth_time (1, 0));
-		      state[pos].channel = id;
-		      state[pos].daddr = r1.daddr;
-		      state[pos].caddr = r1.caddr;
-		      state[pos].state = 0;
-		      state[pos].sno = 0;
-		      state[pos].rno = 0;
-		      state[pos].no = 1;
-		      state[pos].type = (r1.CRI[1] == 0x80) ? 1 : 0;
-		      if (state[pos].type == 1)
-			addBusmonitor ();
 		      r2.channel = id;
 		      r2.status = 0;
 		    }
@@ -501,6 +525,143 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  TRACEPRINTF (t, 8, this, "Unexpected ACK");
 		  goto out;
 		}
+	      if (state[i].type != 0 && state[i].type != 1)
+		{
+		  TRACEPRINTF (t, 8, this, "Unexpected Connection Type");
+		  goto out;
+		}
+	      state[i].sno++;
+	      if (state[i].sno > 0xff)
+		state[i].sno = 0;
+	      state[i].state = 0;
+	      state[i].out.get ();
+	      pth_sem_dec (state[i].outsignal);
+	    }
+	  if (p1->service == DEVICE_CONFIGURATION_REQUEST)
+	    {
+	      EIBnet_ConfigRequest r1;
+	      EIBnet_ConfigACK r2;
+	      if (parseEIBnet_ConfigRequest (*p1, r1))
+		goto out;
+	      TRACEPRINTF (t, 8, this, "CONFIG_REQ");
+	      for (i = 0; i < state (); i++)
+		if (state[i].channel == r1.channel)
+		  goto reqf3;
+	      goto out;
+	    reqf3:
+	      if (!compareIPAddress (p1->src, state[i].daddr))
+		{
+		  TRACEPRINTF (t, 8, this, "Invalid data endpoint");
+		  goto out;
+		}
+	      if (state[i].rno == (r1.seqno + 1) & 0xff)
+		{
+		  r2.channel = r1.channel;
+		  r2.seqno = r1.seqno;
+		  sock->sendaddr = state[i].daddr;
+		  sock->Send (r2.ToPacket ());
+		  goto out;
+		}
+	      if (state[i].rno != r1.seqno)
+		{
+		  TRACEPRINTF (t, 8, this, "Wrong sequence %d<->%d",
+			       r1.seqno, state[i].rno);
+		  goto out;
+		}
+	      r2.channel = r1.channel;
+	      r2.seqno = r1.seqno;
+	      if (state[i].type == 2 && r1.CEMI () > 1)
+		{
+		  if (r1.CEMI[0] == 0xFC)
+		    {
+		      if (r1.CEMI () == 7)
+			{
+			  CArray res, CEMI;
+			  int obj = (r1.CEMI[1] << 8) | r1.CEMI[2];
+			  int objno = r1.CEMI[3];
+			  int prop = r1.CEMI[4];
+			  int count = (r1.CEMI[5] >> 4) & 0x0f;
+			  int start = (r1.CEMI[5] & 0x0f) | r1.CEMI[6];
+			  res.resize (1);
+			  res[0] = 0;
+			  if (obj == 0 && objno == 0)
+			    {
+			      if (prop == 0)
+				{
+				  res.resize (2);
+				  res[0] = 0;
+				  res[1] = 0;
+				  start = 0;
+				}
+			      else
+				count = 0;
+			    }
+			  else
+			    count = 0;
+			  CEMI.resize (6 + res ());
+			  CEMI[0] = 0xFB;
+			  CEMI[1] = (obj >> 8) & 0xff;
+			  CEMI[2] = obj & 0xff;
+			  CEMI[3] = objno;
+			  CEMI[4] = prop;
+			  CEMI[5] = ((count & 0x0f) << 4) | (start >> 8);
+			  CEMI[6] = start & 0xff;
+			  CEMI.setpart (res, 7);
+			  r2.status = 0x00;
+			  state[i].out.put (CEMI);
+			  pth_sem_inc (state[i].outsignal, 0);
+			}
+		      else
+			r2.status = 0x26;
+		    }
+		  else
+		    r2.status = 0x26;
+		}
+	      else
+		r2.status = 0x29;
+	      state[i].rno++;
+	      if (state[i].rno > 0xff)
+		state[i].rno = 0;
+	      sock->sendaddr = state[i].daddr;
+	      sock->Send (r2.ToPacket ());
+	    }
+	  if (p1->service == DEVICE_CONFIGURATION_ACK)
+	    {
+	      EIBnet_ConfigACK r1;
+	      if (parseEIBnet_ConfigACK (*p1, r1))
+		goto out;
+	      TRACEPRINTF (t, 8, this, "CONFIG_ACK");
+	      for (i = 0; i < state (); i++)
+		if (state[i].channel == r1.channel)
+		  goto reqf2;
+	      goto out;
+	    reqf2:
+	      if (!compareIPAddress (p1->src, state[i].daddr))
+		{
+		  TRACEPRINTF (t, 8, this, "Invalid data endpoint");
+		  goto out;
+		}
+	      if (state[i].sno != r1.seqno)
+		{
+		  TRACEPRINTF (t, 8, this, "Wrong sequence %d<->%d",
+			       r1.seqno, state[i].sno);
+		  goto out;
+		}
+	      if (r1.status != 0)
+		{
+		  TRACEPRINTF (t, 8, this, "Wrong status %d", r1.status);
+		  goto out;
+		}
+	      if (!state[i].state)
+		{
+		  TRACEPRINTF (t, 8, this, "Unexpected ACK");
+		  goto out;
+		}
+	      if (state[i].type != 2)
+		{
+		  TRACEPRINTF (t, 8, this, "Unexpected Connection Type");
+		  goto out;
+		}
 	      state[i].sno++;
 	      if (state[i].sno > 0xff)
 		state[i].sno = 0;
@@ -539,14 +700,27 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  state[i].state = 0;
 		  continue;
 		}
-	      EIBnet_TunnelRequest r;
-	      r.channel = state[i].channel;
-	      r.seqno = state[i].sno;
-	      r.CEMI = state[i].out.top ();
+	      EIBNetIPPacket p;
+	      if (state[i].type == 2)
+		{
+		  EIBnet_ConfigRequest r;
+		  r.channel = state[i].channel;
+		  r.seqno = state[i].sno;
+		  r.CEMI = state[i].out.top ();
+		  p = r.ToPacket ();
+		}
+	      else
+		{
+		  EIBnet_TunnelRequest r;
+		  r.channel = state[i].channel;
+		  r.seqno = state[i].sno;
+		  r.CEMI = state[i].out.top ();
+		  p = r.ToPacket ();
+		}
 	      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE,
 			 state[i].sendtimeout, pth_time (1, 0));
 	      sock->sendaddr = state[i].daddr;
-	      sock->Send (r.ToPacket ());
+	      sock->Send (p);
 	    }
 
 	}

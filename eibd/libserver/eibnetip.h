@@ -40,7 +40,7 @@
 #define TUNNEL_RESPONSE 0x0421
 
 #define DEVICE_CONFIGURATION_REQUEST 0x0310
-#define DEVICE_CONFIGURATION_RESPONSE 0x0311
+#define DEVICE_CONFIGURATION_ACK 0x0311
 
 #define ROUTING_INDICATION 0x0530
 
@@ -180,6 +180,31 @@ public:
 };
 
 int parseEIBnet_TunnelACK (const EIBNetIPPacket & p, EIBnet_TunnelACK & r);
+
+class EIBnet_ConfigRequest
+{
+public:
+  EIBnet_ConfigRequest ();
+  uchar channel;
+  uchar seqno;
+  CArray CEMI;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_ConfigRequest (const EIBNetIPPacket & p,
+			       EIBnet_ConfigRequest & r);
+
+class EIBnet_ConfigACK
+{
+public:
+  EIBnet_ConfigACK ();
+  uchar channel;
+  uchar seqno;
+  uchar status;
+  EIBNetIPPacket ToPacket () const;
+};
+
+int parseEIBnet_ConfigACK (const EIBNetIPPacket & p, EIBnet_ConfigACK & r);
 
 typedef struct
 {

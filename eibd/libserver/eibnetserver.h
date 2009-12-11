@@ -59,6 +59,7 @@ class EIBnetServer:public L_Data_CallBack, public L_Busmonitor_CallBack,
   void Get_L_Busmonitor (L_Busmonitor_PDU * l);
   void addBusmonitor ();
   void delBusmonitor ();
+  int addClient(int type, const EIBnet_ConnectRequest& r1);
 public:
     EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 		  bool Route, bool Discover, Layer3 * layer3, Trace * tr);
