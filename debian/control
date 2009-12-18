@@ -2,8 +2,8 @@ Source: bcusdk
 Section: devel
 Priority: extra
 Maintainer: Martin Koegler <mkoegler@auto.tuwien.ac.at>
-Build-Depends: debhelper (>= 4.1.0), cdbs, bzip2, bison, flex, m68hc05-gcc, libxml2-dev (>= 2.6.16), pthsem-dev (>=2.0.4), gcj, fastjar, indent
-Standards-Version: 3.6.1
+Build-Depends: debhelper (>= 7), cdbs, bzip2, bison, flex, m68hc05-gcc, libxml2-dev (>= 2.6.16), pthsem-dev (>=2.0.4), gcj, fastjar, indent
+Standards-Version: 3.8.3
 Homepage: http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcusdk
 Vcs-Git: http://www.auto.tuwien.ac.at/~mkoegler/git/bcusdk.git
 
@@ -27,6 +27,7 @@ Description: eibd clients
 
 Package: libeibclient-dev
 Architecture: any
+Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: eibd-server
 Description: eibd client library
@@ -42,7 +43,7 @@ Description: Sources of the eibd client programs
 
 Package: bcusdk-build
 Architecture: any
-Depends: ${shlibs:Depends}, m68hc05-gcc, xsltproc, m68hc05-runtime, libxml2-utils
+Depends: ${shlibs:Depends}, ${misc:Depends}, m68hc05-gcc, xsltproc, m68hc05-runtime, libxml2-utils
 Description: BCU SDK image building programs
  Contains all files and programs to build BCU images
 
@@ -50,7 +51,7 @@ Package: bcusdk
 Architecture: all
 Depends: ${misc:Depends}, eibd-server, eibd-clients, eibd-client-sources, libeibclient-dev, bcusdk-build
 Description: BCU SDK
- Installs the complete BCU SDK (meta package)
+ Installs the complete BCU SDK (metapackage)
 
 
 
