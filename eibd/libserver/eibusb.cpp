@@ -27,6 +27,7 @@ initUSBDriver (LowLevelDriverInterface * i, Trace * tr)
   CArray r1, *r = 0;
   LowLevelDriverInterface *iface;
   uchar emiver;
+  int cnt = 0;
   const uchar ask[64] = {
     0x01, 0x13, 0x09, 0x00, 0x08, 0x00, 0x01, 0x0f, 0x01, 0x00, 0x00, 0x01
   };
@@ -41,51 +42,58 @@ initUSBDriver (LowLevelDriverInterface * i, Trace * tr)
       return 0;
     }
 
-  i->Send_Packet (CArray (ask, sizeof (ask)));
   do
     {
-      r = i->Get_Packet (0);
-      if (r)
+      cnt++;
+      i->Send_Packet (CArray (ask, sizeof (ask)));
+      do
 	{
-	  r1 = *r;
-	  if (r1 () != 64)
-	    goto cont;
-	  if (r1[0] != 01)
-	    goto cont;
-	  if ((r1[1] & 0x0f) != 0x03)
-	    goto cont;
-	  if (r1[2] != 0x0b)
-	    goto cont;
-	  if (r1[3] != 0x00)
-	    goto cont;
-	  if (r1[4] != 0x08)
-	    goto cont;
-	  if (r1[5] != 0x00)
-	    goto cont;
-	  if (r1[6] != 0x03)
-	    goto cont;
-	  if (r1[7] != 0x0F)
-	    goto cont;
-	  if (r1[8] != 0x02)
-	    goto cont;
-	  if (r1[11] != 0x01)
-	    goto cont;
-	  break;
-	cont:
-	  delete r;
-	  r = 0;
+	  r = i->Get_Packet (0);
+	  if (r)
+	    {
+	      r1 = *r;
+	      if (r1 () != 64)
+		goto cont;
+	      if (r1[0] != 01)
+		goto cont;
+	      if ((r1[1] & 0x0f) != 0x03)
+		goto cont;
+	      if (r1[2] != 0x0b)
+		goto cont;
+	      if (r1[3] != 0x00)
+		goto cont;
+	      if (r1[4] != 0x08)
+		goto cont;
+	      if (r1[5] != 0x00)
+		goto cont;
+	      if (r1[6] != 0x03)
+		goto cont;
+	      if (r1[7] != 0x0F)
+		goto cont;
+	      if (r1[8] != 0x02)
+		goto cont;
+	      if (r1[11] != 0x01)
+		goto cont;
+	      break;
+	    cont:
+	      delete r;
+	      r = 0;
+	    }
 	}
+      while (!r);
+      delete r;
+      if (r1[13] & 0x2)
+	emiver = 2;
+      else if (r1[13] & 0x1)
+	emiver = 1;
+      else if (r1[13] & 0x4)
+	emiver = 3;
+      else
+	emiver = 0;
+      if (emiver == 0 && cnt < 5)
+	pth_sleep (5);
     }
-  while (!r);
-  delete r;
-  if (r1[13] & 0x2)
-    emiver = 2;
-  else if (r1[13] & 0x1)
-    emiver = 1;
-  else if (r1[13] & 0x4)
-    emiver = 3;
-  else
-    emiver = 0;
+  while (emiver == 0 && cnt < 5);
 
   switch (emiver)
     {
