@@ -38,6 +38,10 @@
 #include "libusbi.h"
 #include "linux_usbfs.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 int pthread_mutex_trylock(pthread_mutex_t *mutex)
 {
 	return 0;
