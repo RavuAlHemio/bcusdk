@@ -1,6 +1,6 @@
 /*
     knxtool - multi function eibd client
-    Copyright (C) 2005-2009 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2010 Martin Koegler <mkoegler@auto.tuwien.ac.at>
     
     First version by Jean-Francois Meessen <jef2000@ouaye.net>
     More applets ported by Marc Leeman
