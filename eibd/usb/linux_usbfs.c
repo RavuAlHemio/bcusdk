@@ -42,6 +42,10 @@
 #define PATH_MAX 4096
 #endif
 
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 1
+#endif
+
 int pthread_mutex_trylock(pthread_mutex_t *mutex)
 {
 	return 0;
