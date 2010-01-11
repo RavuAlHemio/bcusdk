@@ -40,6 +40,13 @@ typedef struct
   pth_event_t sendtimeout;
 } ConnState;
 
+typedef struct
+{
+  eibaddr_t src;
+  eibaddr_t dest;
+  pth_event_t timeout;
+} NATState;
+
 class EIBnetServer:public L_Data_CallBack, public L_Busmonitor_CallBack,
   private Thread
 {
@@ -53,13 +60,15 @@ class EIBnetServer:public L_Data_CallBack, public L_Busmonitor_CallBack,
   int busmoncount;
   struct sockaddr_in maddr;
     Array < ConnState > state;
+    Array < NATState > natstate;
 
   void Run (pth_sem_t * stop);
   void Get_L_Data (L_Data_PDU * l);
   void Get_L_Busmonitor (L_Busmonitor_PDU * l);
   void addBusmonitor ();
   void delBusmonitor ();
-  int addClient(int type, const EIBnet_ConnectRequest& r1);
+  int addClient (int type, const EIBnet_ConnectRequest & r1);
+  void addNAT (const L_Data_PDU & l);
 public:
     EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 		  bool Route, bool Discover, Layer3 * layer3, Trace * tr);

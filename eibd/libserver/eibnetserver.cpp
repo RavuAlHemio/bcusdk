@@ -104,6 +104,7 @@ EIBnetServer::EIBnetServer (const char *multicastaddr, int port, bool Tunnel,
 
 EIBnetServer::~EIBnetServer ()
 {
+  int i;
   TRACEPRINTF (t, 8, this, "Close");
   if (route || tunnel)
     {
@@ -114,6 +115,8 @@ EIBnetServer::~EIBnetServer ()
   if (busmoncount)
     l3->deregisterVBusmonitor (this);
   Stop ();
+  for (i = 0; i < natstate (); i++)
+    pth_event_free (natstate[i].timeout, PTH_FREE_THIS);
   if (sock)
     delete sock;
 }
@@ -154,8 +157,29 @@ EIBnetServer::Get_L_Data (L_Data_PDU * l)
       sock->sendaddr = maddr;
       EIBNetIPPacket p;
       p.service = ROUTING_INDICATION;
-      p.data = L_Data_ToCEMI (0x29, *l);
-      sock->Send (p);
+      if (l->dest == 0 && l->AddrType == IndividualAddress)
+	{
+	  int i, cnt = 0;
+	  for (i = 0; i < natstate (); i++)
+	    if (natstate[i].dest == l->source)
+	      {
+		l->dest = natstate[i].src;
+		p.data = L_Data_ToCEMI (0x29, *l);
+		sock->Send (p);
+		l->dest = 0;
+		cnt++;
+	      }
+	  if (!cnt)
+	    {
+	      p.data = L_Data_ToCEMI (0x29, *l);
+	      sock->Send (p);
+	    }
+	}
+      else
+	{
+	  p.data = L_Data_ToCEMI (0x29, *l);
+	  sock->Send (p);
+	}
     }
   for (int i = 0; i < state (); i++)
     {
@@ -221,6 +245,26 @@ rt:
 }
 
 void
+EIBnetServer::addNAT (const L_Data_PDU & l)
+{
+  int i;
+  if (l.AddrType != IndividualAddress)
+    return;
+  for (i = 0; i < natstate (); i++)
+    if (natstate[i].src == l.source && natstate[i].dest == l.dest)
+      {
+	pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE,
+		   natstate[i].timeout, pth_time (180, 0));
+	return;
+      }
+  i = natstate ();
+  natstate.resize (i + 1);
+  natstate[i].src = l.source;
+  natstate[i].dest = l.dest;
+  natstate[i].timeout = pth_event (PTH_EVENT_RTIME, pth_time (180, 0));
+}
+
+void
 EIBnetServer::Run (pth_sem_t * stop1)
 {
   EIBNetIPPacket *p1;
@@ -237,8 +281,9 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	    pth_event_concat (stop, state[i].sendtimeout, NULL);
 	  else
 	    pth_event_concat (stop, state[i].outwait, NULL);
-
 	}
+      for (i = 0; i < natstate (); i++)
+	pth_event_concat (stop, natstate[i].timeout, NULL);
       p1 = sock->Get (stop);
       for (i = 0; i < state (); i++)
 	{
@@ -246,6 +291,14 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	  pth_event_isolate (state[i].sendtimeout);
 	  pth_event_isolate (state[i].outwait);
 	}
+      for (i = 0; i < natstate (); i++)
+	pth_event_isolate (natstate[i].timeout);
+      for (i = 0; i < natstate (); i++)
+	if (pth_event_status (natstate[i].timeout) == PTH_STATUS_OCCURRED)
+	  {
+	    pth_event_free (natstate[i].timeout, PTH_FREE_THIS);
+	    natstate.deletepart (i, 1);
+	  }
       if (p1)
 	{
 	  if (p1->service == SEARCH_REQUEST && discover)
@@ -319,6 +372,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  if (c->hopcount)
 		    {
 		      c->hopcount--;
+		      addNAT (*c);
 		      l3->send_L_Data (c);
 		    }
 		  else
