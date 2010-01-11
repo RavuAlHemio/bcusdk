@@ -150,6 +150,11 @@ EIBnetServer::Get_L_Data (L_Data_PDU * l)
       delete l;
       return;
     }
+  if (l->object == this)
+    {
+      delete l;
+      return;
+    }
   l->hopcount--;
   if (route)
     {
@@ -373,6 +378,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		    {
 		      c->hopcount--;
 		      addNAT (*c);
+		      c->object = this;
 		      l3->send_L_Data (c);
 		    }
 		  else
@@ -525,6 +531,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 			      state[i].out.put (L_Data_ToCEMI (0x2E, *c));
 			      pth_sem_inc (state[i].outsignal, 0);
 			    }
+			  c->object = this;
 			  if (r1.CEMI[0] == 0x11 || r1.CEMI[0] == 0x29)
 			    l3->send_L_Data (c);
 			  else

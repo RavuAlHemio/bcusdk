@@ -47,6 +47,10 @@ LPDU_Type;
 class LPDU
 {
 public:
+  LPDU ()
+  {
+    object = 0;
+  }
   virtual ~ LPDU ()
   {
   }
@@ -60,6 +64,8 @@ public:
   virtual LPDU_Type getType () const = 0;
   /** converts a character array to a Layer 2 frame */
   static LPDU *fromPacket (const CArray & c);
+
+  void *object;
 };
 
 /* L_Unknown */
