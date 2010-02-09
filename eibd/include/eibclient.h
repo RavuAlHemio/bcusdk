@@ -27,8 +27,8 @@
 #ifndef EIBCLIENT_H
 #define EIBCLIENT_H
 
-#include "sys/cdefs.h"
-#include "stdint.h"
+#include <sys/cdefs.h>
+#include <stdint.h>
 
 __BEGIN_DECLS;
 
