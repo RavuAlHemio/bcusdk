@@ -31,7 +31,6 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 
-#include "eibclient.h"
 #include "eibclient-int.h"
 
 #include "config.h"
