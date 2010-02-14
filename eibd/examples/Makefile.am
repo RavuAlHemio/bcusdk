@@ -7,7 +7,7 @@ bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progm
 	msetkey grouplisten groupresponse groupsresponse groupsocketlisten groupsocketread mpropscanpoll \
 	vbusmonitor1poll groupreadresponse groupcacheenable groupcachedisable groupcacheclear groupcacheremove \
 	groupcachereadsync groupcacheread mwriteplain mrestart groupsocketwrite groupsocketswrite knxtool \
-	xpropread xpropwrite
+	xpropread xpropwrite groupcachelastupdates
 
 examplesdir=$(pkgdatadir)/examples
 dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c progmodestatus.c vbusmonitor2.c \
@@ -18,4 +18,4 @@ dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c p
 	groupsocketlisten.c groupsocketread.c mpropscanpoll.c vbusmonitor1poll.c groupreadresponse.c \
 	groupcacheenable.c groupcachedisable.c groupcacheclear.c groupcacheremove.c groupcachereadsync.c \
 	groupcacheread.c mwriteplain.c mrestart.c groupsocketwrite.c groupsocketswrite.c knxtool.c \
-	xpropread.c xpropwrite.c
+	xpropread.c xpropwrite.c groupcachelastupdates.c
