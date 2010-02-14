@@ -82,5 +82,6 @@
 #define EIB_CACHE_REMOVE                0x0073
 #define EIB_CACHE_READ                  0x0074
 #define EIB_CACHE_READ_NOWAIT           0x0075
+#define EIB_CACHE_LAST_UPDATES          0x0076
 
 #endif
