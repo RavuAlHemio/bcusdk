@@ -47,6 +47,8 @@ class GroupCache:public L_Data_CallBack
   bool enable;
   pth_mutex_t mutex;
   pth_cond_t cond;
+  uint16_t pos;
+  eibaddr_t updates[0x100];
 
   GroupCacheEntry *find (eibaddr_t dst);
   void add (GroupCacheEntry * entry);
@@ -62,6 +64,8 @@ public:
   void Stop ();
 
   GroupCacheEntry Read (eibaddr_t addr, unsigned timeout, uint16_t age);
+    Array < eibaddr_t > LastUpdates (uint16_t start, uint8_t timeout,
+				     uint16_t & end, pth_event_t stop);
   void remove (eibaddr_t addr);
 };
 

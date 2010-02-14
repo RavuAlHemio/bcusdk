@@ -27,6 +27,8 @@ GroupCache::GroupCache (Layer3 * l3, Trace * t)
   this->t = t;
   this->layer3 = l3;
   this->enable = 0;
+  pos = 0;
+  memset (updates, 0, sizeof (updates));
   pth_mutex_init (&mutex);
   pth_cond_init (&cond);
 }
@@ -109,6 +111,8 @@ GroupCache::Get_L_Data (L_Data_PDU * l)
 	      ((t1->data[1] & 0xC0) == 0x40 || (t1->data[1] & 0xC0) == 0x80))
 	    {
 	      c = find (l->dest);
+	      updates[pos & 0xff] = l->dest;
+	      pos++;
 	      if (c)
 		{
 		  c->data = t1->data;
@@ -206,7 +210,7 @@ GroupCacheEntry
   A_GroupValue_Read_PDU apdu;
   T_DATA_XXX_REQ_PDU tpdu;
   L_Data_PDU *l;
-  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (Timeout, 0));;
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (Timeout, 0));
 
   tpdu.data = apdu.ToPacket ();
   l = new L_Data_PDU;
@@ -257,6 +261,57 @@ GroupCacheEntry
       pth_mutex_acquire (&mutex, 0, 0);
       pth_cond_await (&cond, &mutex, timeout);
       pth_mutex_release (&mutex);
+    }
+  while (1);
+}
+
+Array < eibaddr_t > GroupCache::LastUpdates (uint16_t start, uint8_t Timeout,
+					     uint16_t & end, pth_event_t stop)
+{
+  Array < eibaddr_t > a;
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (Timeout, 0));
+
+  do
+    {
+      if (pos < 0x100)
+	{
+	  if (pos < start && start < ((pos - 0x100) & 0xffff))
+	    start = (pos - 0x100) & 0xffff;
+	}
+      else
+	{
+	  if (start < ((pos - 0x100) & 0xffff) || start > pos)
+	    start = (pos - 0x100) & 0xffff;
+	}
+      TRACEPRINTF (t, 8, this, "LastUpdates start: %d pos: %d", start, pos);
+      while (start != pos && !updates[start & 0xff])
+	start++;
+      if (start != pos)
+	{
+	  while (start != pos)
+	    {
+	      if (updates[start & 0xff])
+		{
+		  a.resize (a () + 1);
+		  a[a () - 1] = updates[start & 0xff];
+		}
+	      start++;
+	    }
+	  end = pos;
+	  pth_event_free (timeout, PTH_FREE_THIS);
+	  return a;
+	}
+      if (pth_event_status (timeout) == PTH_STATUS_OCCURRED)
+	{
+	  end = pos;
+	  pth_event_free (timeout, PTH_FREE_THIS);
+	  return a;
+	}
+      pth_event_concat (timeout, stop, NULL);
+      pth_mutex_acquire (&mutex, 0, 0);
+      pth_cond_await (&cond, &mutex, timeout);
+      pth_mutex_release (&mutex);
+      pth_event_isolate (timeout);
     }
   while (1);
 }

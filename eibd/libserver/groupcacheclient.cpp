@@ -111,6 +111,30 @@ GroupCacheRequest (Layer3 * l3, Trace * t, ClientConnection * c,
       c->sendmessage (erg (), erg.array (), stop);
       break;
 
+    case EIB_CACHE_LAST_UPDATES:
+      if (c->size < 5)
+	{
+	  c->sendreject (stop);
+	  return;
+	}
+      {
+	uint16_t end, start = (c->buf[2] << 8) | c->buf[3];
+	uint8_t timeout = c->buf[4];
+	Array < eibaddr_t > addrs =
+	  cache->LastUpdates (start, timeout, end, stop);
+	erg.resize (addrs () * 2 + 4);
+	EIBSETTYPE (erg, EIBTYPE (c->buf));
+	erg[2] = (end >> 8) & 0xff;
+	erg[3] = (end >> 0) & 0xff;
+	for (int i = 0; i < addrs (); i++)
+	  {
+	    erg[4 + i * 2] = (addrs[i] >> 8) & 0xff;
+	    erg[4 + i * 2 + 1] = (addrs[i]) & 0xff;
+	  }
+	c->sendmessage (erg (), erg.array (), stop);
+      }
+      break;
+
     default:
       c->sendreject (stop);
     }

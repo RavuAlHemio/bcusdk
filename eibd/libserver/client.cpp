@@ -163,6 +163,7 @@ ClientConnection::Run (pth_sem_t * stop1)
 	case EIB_CACHE_REMOVE:
 	case EIB_CACHE_READ:
 	case EIB_CACHE_READ_NOWAIT:
+	case EIB_CACHE_LAST_UPDATES:
 #ifdef HAVE_GROUPCACHE
 	  GroupCacheRequest (l3, t, this, stop);
 #else
