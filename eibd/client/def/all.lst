@@ -38,6 +38,7 @@ EIBC_LICENSE(
 #include "groupcacheread.inc"
 #include "groupcachereadsync.inc"
 #include "groupcacheremove.inc"
+#include "groupcachelastupdates.inc"
 #include "loadimage.inc"
 #include "mcauthorize.inc"
 #include "mcconnect.inc"
