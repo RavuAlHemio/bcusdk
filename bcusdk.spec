@@ -160,6 +160,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/groupcacheremove
 /usr/bin/groupcachereadsync
 /usr/bin/groupcacheread
+/usr/bin/groupcachelastupdates
 /usr/bin/mrestart
 /usr/bin/mwriteplain
 /usr/bin/knxtool
