@@ -1,6 +1,6 @@
 AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/common
 
-LDADD=common.o ../client/c/libeibclient.a
+LDADD=common.o ../client/c/libeibclient.la
 bin_PROGRAMS=busmonitor1 busmonitor2 readindividual progmodeon progmodeoff progmodetoggle progmodestatus maskver \
 	writeaddress vbusmonitor1 vbusmonitor2 mprogmodeon mprogmodeoff mprogmodetoggle mprogmodestatus mmaskver \
 	mpeitype madcread mread mwrite mpropread mpropwrite mpropdesc mpropscan groupread groupswrite groupwrite \
@@ -19,3 +19,4 @@ dist_examples_DATA=busmonitor1.c madcread.c mprogmodeoff.c mpropdesc.c mread.c p
 	groupcacheenable.c groupcachedisable.c groupcacheclear.c groupcacheremove.c groupcachereadsync.c \
 	groupcacheread.c mwriteplain.c mrestart.c groupsocketwrite.c groupsocketswrite.c knxtool.c \
 	xpropread.c xpropwrite.c groupcachelastupdates.c
+

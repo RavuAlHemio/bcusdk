@@ -1,5 +1,15 @@
 Makefile
 Makefile.in
 .deps
+.libs
 *.o
+*.lo
 *~
+m4/lt*.m4
+m4/libtool.m4
+autom4te.cache
+config.guess
+config.sub
+configure
+config.log
+config.status
