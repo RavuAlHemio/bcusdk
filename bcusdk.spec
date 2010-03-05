@@ -34,6 +34,13 @@ Group:         Development/Tools
 %description -n eibd-clients
 provides simple example programs to perform some management task on a EIB system.
 
+%package -n libeibclient0
+Summary: eibd client library
+Group:         Development/Tools
+
+%description -n libeibclient0
+provides a simple client library written in C to access the EIB bus over eibd.
+
 %package -n libeibclient-devel
 Summary: eibd client library
 Group:         Development/Tools
@@ -80,6 +87,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post   -n libeibclient0 -p /sbin/ldconfig
+
+%postun -n libeibclient0 -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
@@ -167,10 +177,16 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/xpropread
 /usr/bin/xpropwrite
 
+%files -n libeibclient0
+%defattr(-,root,root,-)
+%{_libdir}/libeibclient.so.*
+
 %files -n libeibclient-devel
 %defattr(-,root,root,-)
-/usr/include
+/usr/include/*
+%{_libdir}/libeibclient.la
 %{_libdir}/libeibclient.a
+%{_libdir}/libeibclient.so
 /usr/share/bcusdk/eibclient.php
 /usr/share/bcusdk/EIBConnection.cs
 /usr/share/bcusdk/EIBConnection.pm

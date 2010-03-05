@@ -24,6 +24,11 @@ Suggests: eibd-server
 Description: eibd clients
  Simple example programs to perform management tasks on a EIB system.
 
+Package: libeibclient0
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: eibd client library
+ A client library written in C to access the EIB bus over eibd. 
 
 Package: libeibclient-dev
 Architecture: any
