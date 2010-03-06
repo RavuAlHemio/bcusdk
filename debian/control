@@ -33,7 +33,7 @@ Description: eibd client library
 Package: libeibclient-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libeibclient0 (= ${binary:Version})
 Suggests: eibd-server
 Description: eibd client library
  A client library written in C to access the EIB bus over eibd. 
