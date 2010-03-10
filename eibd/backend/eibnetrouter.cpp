@@ -47,7 +47,7 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
       sock = 0;
       return;
     }
-  sock->recvall = 1;
+  sock->recvall = 2;
   if (GetHostIP (&sock->sendaddr, multicastaddr) == 0)
     {
       delete sock;
@@ -55,6 +55,9 @@ EIBNetIPRouter::EIBNetIPRouter (const char *multicastaddr, int port,
       return;
     }
   sock->sendaddr.sin_port = htons (port);
+  if (!GetSourceAddress (&sock->sendaddr, &sock->localaddr))
+    return;
+  sock->localaddr.sin_port = sock->sendaddr.sin_port;
 
   mcfg.imr_multiaddr = sock->sendaddr.sin_addr;
   mcfg.imr_interface.s_addr = htonl (INADDR_ANY);
