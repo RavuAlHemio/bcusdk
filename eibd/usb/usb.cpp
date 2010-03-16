@@ -17,6 +17,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <stdlib.h>
 #include "usb.h"
 
 USBLoop::USBLoop (libusb_context * c, Trace * tr)
@@ -33,7 +34,7 @@ USBLoop::Run (pth_sem_t * stop1)
   fd_set r, w, e;
   int rc, fds, i;
   struct timeval tv, tv1;
-  const struct libusb_pollfd **usbfd;
+  const struct libusb_pollfd **usbfd, **usbfd_orig;
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t event = pth_event (PTH_EVENT_SEM, stop1);
   pth_event_t timeout = pth_event (PTH_EVENT_SEM, stop1);
@@ -50,6 +51,7 @@ USBLoop::Run (pth_sem_t * stop1)
       rc = 0;
 
       usbfd = libusb_get_pollfds (context);
+      usbfd_orig = usbfd;
       if (usbfd)
 	while (*usbfd)
 	  {
@@ -61,6 +63,7 @@ USBLoop::Run (pth_sem_t * stop1)
 	      FD_SET ((*usbfd)->fd, &w);
 	    usbfd++;
 	  }
+      free (usbfd_orig);
 
       i = libusb_get_next_timeout (context, &tv);
       if (i < 0)
