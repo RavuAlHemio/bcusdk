@@ -39,6 +39,7 @@ AC_PROG_RANLIB
 
 GMP_PROG_CPP_FOR_BUILD
 GMP_PROG_EXEEXT_FOR_BUILD
+CC_FOR_BUILD_OPTS
 
 AC_COMPILER_OPTION(nortti,[-fno-rtti],[-fno-rtti],CXXFLAGS="$CXXFLAGS -fno-rtti")
 AC_COMPILER_OPTION(noexceptions,[-fno-exceptions],[-fno-exceptions],CXXFLAGS="$CXXFLAGS -fno-exceptions")

@@ -1,4 +1,8 @@
 CC = $(CC_FOR_BUILD)
+CPPFLAGS = $(CPPFLAGS_FOR_BUILD)
+CFLAGS = $(CFLAGS_FOR_BUILD)
+LDFLAGS = $(LDFLAGS_FOR_BUILD)
+LIBS = $(LIBS_FOR_BUILD)
 EXEEXT = $(EXEEXT_FOR_BUILD)
 
 AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client -I$(top_builddir)/eibd/client
