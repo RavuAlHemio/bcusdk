@@ -139,13 +139,21 @@ echo "unknown variant $VAR"
 error
 fi
 
+LDPATH="-lc -lm `$TGCC -print-libgcc-file-name`"
+IFS=:
+for a in `$TGCC --print-search-dirs |grep "libraries: ="|cut -d= -f2-`
+do 
+    LDPATH="$LDPATH -L $a"	
+done
+IFS=' '
+
 echo "#include \"c.h\"">"$TMP/c.c"
 echo "#include \"c.inc\"">>"$TMP/c.c"
 
 $TGCC -c -O3 -Os -Wall -Winline -gstabs -I$SINC -o "$TMP/c.o" "$TMP/c.c" || error
 $TAS -I$SINC -o "$TMP/p1.o" "$TMP/p1.s" || error
 
-$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p1.o" -\( -lc -lm `$TGCC -print-libgcc-file-name` "$LIB/lib$VAR.a" -\) || error
+$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p1.o" -\( $LDPATH "$LIB/lib$VAR.a" -\) || error
 $TLD -Map "$TMP/load.map" -T $LD/genload.link -o "$TMP/load" "$TMP/elf" || error
 
 

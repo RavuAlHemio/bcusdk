@@ -125,6 +125,14 @@ echo "unknown variant $VAR"
 error
 fi
 
+LDPATH="-lc -lm `$TGCC -print-libgcc-file-name`"
+IFS=:
+for a in `$TGCC --print-search-dirs |grep "libraries: ="|cut -d= -f2-`
+do 
+    LDPATH="$LDPATH -L $a"	
+done
+IFS=' '
+
 $TGCC -E $INC -I. -o "$TMP/c.inc" -x c "$TMP/c.i" || error
 
 echo "#include \"c.h\"">"$TMP/c.c"
@@ -143,7 +151,7 @@ popd >/dev/null || error
 
 cp "$TMP/ai.xml" "$OUT" || error
 
-$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p.o" "$TMP/p1.o" -\( -lc -lm `$TGCC -print-libgcc-file-name` "$LIB/lib$VAR.a" -\) || error
+$TLD -Map "$TMP/elf.map" -N -T "$LD/$VAR.link" --move-sections --relax -o "$TMP/elf" "$TMP/c.o" "$TMP/p.o" "$TMP/p1.o" -\( $LDPATH "$LIB/lib$VAR.a" -\) || error
 $TLD -Map "$TMP/load.map" -T $LD/genload.link -o "$TMP/load" "$TMP/elf" || error
 
 if [ "x$IMG" != "x" ]; then
