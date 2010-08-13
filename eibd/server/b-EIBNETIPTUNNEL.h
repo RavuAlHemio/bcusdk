@@ -31,7 +31,7 @@
 #define EIBNETIPTUNNEL_CLEANUP NULL
 
 inline Layer2Interface *
-eibnetiptunnel_Create (const char *dev, Trace * t)
+eibnetiptunnel_Create (const char *dev, int flags, Trace * t)
 {
   char *a = strdup (dev);
   char *b;

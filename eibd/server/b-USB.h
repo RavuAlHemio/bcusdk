@@ -31,7 +31,7 @@
 #define USB_CLEANUP USBEnd
 
 inline Layer2Interface *
-Usb_Create (const char *dev, Trace * t)
+Usb_Create (const char *dev, int flags, Trace * t)
 {
   if (!USBInit (t))
     return 0;

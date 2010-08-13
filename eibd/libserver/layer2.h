@@ -100,6 +100,7 @@ public:
  * @param t trace output
  * @return new Layer 2 interface
  */
-typedef Layer2Interface *(*Layer2_Create_Func) (const char *conf, Trace * t);
+typedef Layer2Interface *(*Layer2_Create_Func) (const char *conf, int flags,
+						Trace * t);
 
 #endif

@@ -38,13 +38,13 @@
 #define TPUART26_CLEANUP NULL
 
 inline Layer2Interface *
-tpuart24_Create (const char *dev, Trace * t)
+tpuart24_Create (const char *dev, int flags, Trace * t)
 {
   return new TPUARTLayer2Driver (0, dev, arg.addr, t);
 }
 
 inline Layer2Interface *
-tpuart26_Create (const char *dev, Trace * t)
+tpuart26_Create (const char *dev, int flags, Trace * t)
 {
   return new TPUARTLayer2Driver (1, dev, arg.addr, t);
 }

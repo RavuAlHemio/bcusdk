@@ -100,7 +100,7 @@ void (*Cleanup) ();
 
 /** determines the right backend for the url and creates it */
 Layer2Interface *
-Create (const char *url, Trace * t)
+Create (const char *url, int flags, Trace * t)
 {
   unsigned int p = 0;
   struct urldef *u = URLs;
@@ -113,7 +113,7 @@ Create (const char *url, Trace * t)
       if (strlen (u->prefix) == p && !memcmp (u->prefix, url, p))
 	{
 	  Cleanup = u->Cleanup;
-	  return u->Create (url + p + 1, t);
+	  return u->Create (url + p + 1, flags, t);
 	}
       u++;
     }
@@ -326,7 +326,7 @@ main (int ac, char *ag[])
 	fclose (pidf);
       }
 
-  l2 = Create (ag[index], &t);
+  l2 = Create (ag[index], 0, &t);
   if (!l2->init ())
     die ("initialisation of the backend failed");
   l3 = new Layer3 (l2, &t);
