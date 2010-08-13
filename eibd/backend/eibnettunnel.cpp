@@ -59,6 +59,7 @@ EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
   pth_sem_init (&insignal);
   pth_sem_init (&outsignal);
   getwait = pth_event (PTH_EVENT_SEM, &outsignal);
+  noqueue = flags & FLAG_B_TUNNEL_NOQUEUE;
   sock = 0;
   if (!GetHostIP (&caddr, dest))
     return;
@@ -261,7 +262,7 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
     {
       if (mod == 1)
 	pth_event_concat (stop, input, NULL);
-      if (mod == 2)
+      if (mod == 2 || mod == 3)
 	pth_event_concat (stop, timeout, NULL);
 
       pth_event_concat (stop, timeout1, NULL);
@@ -380,7 +381,11 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 	      sock->Send (p);
 	      //Confirmation
 	      if (treq.CEMI[0] == 0x2E)
-		break;
+		{
+		  if (mod == 3)
+		    mod = 1;
+		  break;
+		}
 	      if (treq.CEMI[0] == 0x2B)
 		{
 		  L_Busmonitor_PDU *l2 = CEMI_to_Busmonitor (treq.CEMI);
@@ -458,7 +463,14 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		    sno = 0;
 		  pth_sem_dec (&insignal);
 		  inqueue.get ();
-		  mod = 1;
+		  if (noqueue)
+		    {
+		      mod = 3;
+		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+				 pth_time (1, 0));
+		    }
+		  else
+		    mod = 1;
 		  retry = 0;
 		  drop = 0;
 		}
@@ -578,6 +590,8 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		}
 	    }
 	}
+      if (mod == 3 && pth_event_status (timeout) == PTH_STATUS_OCCURRED)
+	mod = 1;
       if (mod != 0 && pth_event_status (timeout1) == PTH_STATUS_OCCURRED)
 	{
 	  pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout1,

@@ -31,6 +31,8 @@
 #include "eibnetserver.h"
 #include "groupcacheclient.h"
 
+#define OPT_BACK_TUNNEL_NOQUEUE 1
+
 /** structure to store the arguments */
 struct arguments
 {
@@ -176,6 +178,10 @@ static struct argp_option options[] = {
   {"GroupCache", 'c', 0, 0,
    "enable caching of group communication network state"},
 #endif
+#ifdef HAVE_EIBNETIPTUNNEL
+  {"no-tunnel-client-queuing", OPT_BACK_TUNNEL_NOQUEUE, 0, 0,
+   "don't use the server queue in EIBnet/IP Tunneling backend"},
+#endif
   {0}
 };
 
@@ -221,6 +227,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
       break;
     case 'c':
       arguments->groupcache = 1;
+      break;
+    case OPT_BACK_TUNNEL_NOQUEUE:
+      arguments->backendflags |= FLAG_B_TUNNEL_NOQUEUE;
       break;
     default:
       return ARGP_ERR_UNKNOWN;
