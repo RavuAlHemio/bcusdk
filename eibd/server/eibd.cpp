@@ -53,6 +53,7 @@ struct arguments
   bool route;
   bool discover;
   bool groupcache;
+  int backendflags;
   const char *serverip;
 };
 /** storage for the arguments*/
@@ -326,7 +327,7 @@ main (int ac, char *ag[])
 	fclose (pidf);
       }
 
-  l2 = Create (ag[index], 0, &t);
+  l2 = Create (ag[index], arg.backendflags, &t);
   if (!l2->init ())
     die ("initialisation of the backend failed");
   l3 = new Layer3 (l2, &t);

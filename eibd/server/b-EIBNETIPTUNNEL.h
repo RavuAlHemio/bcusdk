@@ -80,7 +80,7 @@ eibnetiptunnel_Create (const char *dev, int flags, Trace * t)
   else
     dport = 3671;
 
-  iface = new EIBNetIPTunnel (a, dport, sport, d, dataport, t);
+  iface = new EIBNetIPTunnel (a, dport, sport, d, dataport, flags, t);
   free (a);
   return iface;
 }

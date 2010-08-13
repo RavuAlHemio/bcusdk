@@ -51,7 +51,8 @@ EIBNetIPTunnel::getDefaultAddr ()
 }
 
 EIBNetIPTunnel::EIBNetIPTunnel (const char *dest, int port, int sport,
-				const char *srcip, int Dataport, Trace * tr)
+				const char *srcip, int Dataport, int flags,
+				Trace * tr)
 {
   t = tr;
   TRACEPRINTF (t, 2, this, "Open");
