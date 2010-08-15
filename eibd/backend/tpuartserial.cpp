@@ -40,7 +40,8 @@ setstat (int fd, int s)
 
 
 TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
-						    eibaddr_t a, Trace * tr)
+						    eibaddr_t a, int flags,
+						    Trace * tr)
 {
   struct termios t1;
   t = tr;
@@ -48,6 +49,9 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
 
   pth_sem_init (&in_signal);
   pth_sem_init (&out_signal);
+
+  ackallgroup = flags & FLAG_B_TPUARTS_ACKGROUP;
+  ackallindividual = flags & FLAG_B_TPUARTS_ACKINDIVIDUAL;
 
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
@@ -415,15 +419,21 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  uchar c = 0x10;
 		  if ((in[5] & 0x80) == 0)
 		    {
-		      for (unsigned i = 0; i < indaddr (); i++)
-			if (indaddr[i] == (in[3] << 8) | in[4])
-			  c |= 0x1;
+		      if (ackallindividual)
+			c |= 0x1;
+		      else
+			for (unsigned i = 0; i < indaddr (); i++)
+			  if (indaddr[i] == ((in[3] << 8) | in[4]))
+			    c |= 0x1;
 		    }
 		  else
 		    {
-		      for (unsigned i = 0; i < groupaddr (); i++)
-			if (groupaddr[i] == (in[3] << 8) | in[4])
-			  c |= 0x1;
+		      if (ackallgroup)
+			c |= 0x1;
+		      else
+			for (unsigned i = 0; i < groupaddr (); i++)
+			  if (groupaddr[i] == ((in[3] << 8) | in[4]))
+			    c |= 0x1;
 		    }
 		  TRACEPRINTF (t, 0, this, "SendAck %02X", c);
 		  pth_write_ev (fd, &c, 1, stop);
@@ -470,15 +480,21 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
 		  uchar c = 0x10;
 		  if ((in[1] & 0x80) == 0)
 		    {
-		      for (unsigned i = 0; i < indaddr (); i++)
-			if (indaddr[i] == (in[4] << 8) | in[5])
-			  c |= 0x1;
+		      if (ackallindividual)
+			c |= 0x1;
+		      else
+			for (unsigned i = 0; i < indaddr (); i++)
+			  if (indaddr[i] == ((in[4] << 8) | in[5]))
+			    c |= 0x1;
 		    }
 		  else
 		    {
-		      for (unsigned i = 0; i < groupaddr (); i++)
-			if (groupaddr[i] == (in[4] << 8) | in[5])
-			  c |= 0x1;
+		      if (ackallgroup)
+			c |= 0x1;
+		      else
+			for (unsigned i = 0; i < groupaddr (); i++)
+			  if (groupaddr[i] == ((in[4] << 8) | in[5]))
+			    c |= 0x1;
 		    }
 		  TRACEPRINTF (t, 0, this, "SendAck %02X", c);
 		  pth_write_ev (fd, &c, 1, stop);

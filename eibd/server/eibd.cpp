@@ -32,6 +32,8 @@
 #include "groupcacheclient.h"
 
 #define OPT_BACK_TUNNEL_NOQUEUE 1
+#define OPT_BACK_TPUARTS_ACKGROUP 2
+#define OPT_BACK_TPUARTS_ACKINDIVIDUAL 3
 
 /** structure to store the arguments */
 struct arguments
@@ -182,6 +184,12 @@ static struct argp_option options[] = {
   {"no-tunnel-client-queuing", OPT_BACK_TUNNEL_NOQUEUE, 0, 0,
    "don't use the server queue in EIBnet/IP Tunneling backend"},
 #endif
+#ifdef HAVE_TPUARTs
+  {"tpuarts-ack-all-group", OPT_BACK_TPUARTS_ACKGROUP, 0, 0,
+   "tpuarts backend should generate L2 acks for all group telegrams"},
+  {"tpuarts-ack-all-individual", OPT_BACK_TPUARTS_ACKINDIVIDUAL, 0, 0,
+   "tpuarts backend should generate L2 acks for all individual telegrams"},
+#endif
   {0}
 };
 
@@ -230,6 +238,12 @@ parse_opt (int key, char *arg, struct argp_state *state)
       break;
     case OPT_BACK_TUNNEL_NOQUEUE:
       arguments->backendflags |= FLAG_B_TUNNEL_NOQUEUE;
+      break;
+    case OPT_BACK_TPUARTS_ACKGROUP:
+      arguments->backendflags |= FLAG_B_TPUARTS_ACKGROUP;
+      break;
+    case OPT_BACK_TPUARTS_ACKINDIVIDUAL:
+      arguments->backendflags |= FLAG_B_TPUARTS_ACKINDIVIDUAL;
       break;
     default:
       return ARGP_ERR_UNKNOWN;

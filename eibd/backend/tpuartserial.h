@@ -54,12 +54,15 @@ class TPUARTSerialLayer2Driver:public Layer2Interface, private Thread
     Array < eibaddr_t > indaddr;
     /** my group addresses */
     Array < eibaddr_t > groupaddr;
+  bool ackallgroup;
+  bool ackallindividual;
 
     /** process a recevied frame */
   void RecvLPDU (const uchar * data, int len);
   void Run (pth_sem_t * stop);
 public:
-    TPUARTSerialLayer2Driver (const char *dev, eibaddr_t addr, Trace * tr);
+    TPUARTSerialLayer2Driver (const char *dev, eibaddr_t addr, int flags,
+			      Trace * tr);
    ~TPUARTSerialLayer2Driver ();
   bool init ();
 

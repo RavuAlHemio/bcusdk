@@ -35,7 +35,7 @@
 inline Layer2Interface *
 tpuarts_Create (const char *dev, int flags, Trace * t)
 {
-  return new TPUARTSerialLayer2Driver (dev, arg.addr, t);
+  return new TPUARTSerialLayer2Driver (dev, arg.addr, flags, t);
 }
 
 #endif
