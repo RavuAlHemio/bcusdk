@@ -9,7 +9,7 @@ URL:            http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcusdk
 Source0:        bcusdk_%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  libxml2-devel, gcc-c++, make, flex, bison, pthsem-devel, m68hc05-gcc, gcc-java, indent
+BuildRequires:  libxml2-devel, gcc-c++, make, flex, bison, libpthsem-devel, m68hc05-gcc, gcc-java, indent
 %if 0%{?suse_version} > 910
 BuildRequires:  fastjar 
 %endif
