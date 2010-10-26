@@ -110,7 +110,7 @@ int
 A_Busmonitor::sendResponse (L_Busmonitor_PDU * p, pth_event_t stop)
 {
   CArray buf;
-  buf.resize (2);
+  buf.resize (2 + p->pdu ());
   EIBSETTYPE (buf, EIB_BUSMONITOR_PACKET);
   buf.setpart (p->pdu.array (), 2, p->pdu ());
   delete p;
