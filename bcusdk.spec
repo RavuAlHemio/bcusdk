@@ -43,6 +43,7 @@ provides a simple client library written in C to access the EIB bus over eibd.
 
 %package -n libeibclient-devel
 Summary: eibd client library
+Requires: libeibclient0
 Group:         Development/Tools
 
 %description -n libeibclient-devel
