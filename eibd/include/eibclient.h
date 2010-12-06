@@ -184,7 +184,7 @@ int EIBOpenT_Individual (EIBConnection * con, eibaddr_t dest, int write_only);
 
 /** Opens a connection of type T_Individual - asynchronous.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \param write_only if not null, no packets from the bus will be delivered
  * \return 0 if started, -1 if error
  */
@@ -421,28 +421,28 @@ int EIB_M_WriteIndividualAddress_async (EIBConnection * con, eibaddr_t dest);
 
 /** Opens a management connection.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \return 0 if successful, -1 if error
  */
 int EIB_MC_Connect (EIBConnection * con, eibaddr_t dest);
 
 /** Opens a management connection - asynchronous.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Connect_async (EIBConnection * con, eibaddr_t dest);
 
 /** Opens a connectionless management connection.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \return 0 if successful, -1 if error
  */
 int EIB_MC_Individual_Open (EIBConnection * con, eibaddr_t dest);
 
 /** Opens a connectionless management connection - asynchronous.
  * \param con eibd connection
- * \param dest destionation address
+ * \param dest destination address
  * \return 0 if started, -1 if error
  */
 int EIB_MC_Individual_Open_async (EIBConnection * con, eibaddr_t dest);
@@ -452,7 +452,7 @@ int EIB_MC_Individual_Open_async (EIBConnection * con, eibaddr_t dest);
  * \param addr memory address
  * \param len size to read
  * \param buf buffer
- * \return -1 if error, else read length
+ * \return -1 if error, else number of bytes read
  */
 int EIB_MC_Read (EIBConnection * con, uint16_t addr, int len, uint8_t * buf);
 
@@ -471,7 +471,7 @@ int EIB_MC_Read_async (EIBConnection * con, uint16_t addr, int len,
  * \param addr memory address
  * \param len size to read
  * \param buf buffer
- * \return -1 if error, else read length
+ * \return -1 if error, else number of bytes read
  */
 int EIB_MC_Write (EIBConnection * con, uint16_t addr, int len,
 		  const uint8_t * buf);
@@ -554,7 +554,7 @@ int EIB_MC_GetMaskVersion_async (EIBConnection * con);
  * \param nr_of_elem number of elements
  * \param max_len buffer size
  * \param buf buffer
- * \return -1 if error, else read length
+ * \return -1 if error, else number of bytes read
  */
 int EIB_MC_PropertyRead (EIBConnection * con, uint8_t obj, uint8_t property,
 			 uint16_t start, uint8_t nr_of_elem, int max_len,
@@ -731,7 +731,7 @@ int EIB_MC_Restart (EIBConnection * con);
  * \param addr memory address
  * \param len size to read
  * \param buf buffer
- * \return -1 if error, else read length
+ * \return -1 if error, else number of bytes read
  */
 int EIB_MC_Write_Plain (EIBConnection * con, uint16_t addr, int len,
 			const uint8_t * buf);
@@ -819,7 +819,7 @@ int EIB_Cache_Read (EIBConnection * con, eibaddr_t dest,
  * \param max_len buffer size
  * \param buf buffer for the returned group addresses (2 bytes per address) 
  * \param end position for the next request
- * \return -1 if error, else read bytes
+ * \return -1 if error, else number of bytes read
  */
 int EIB_Cache_LastUpdates (EIBConnection * con, uint16_t start,
 			   uint8_t timeout, int max_len, uint8_t * buf,
