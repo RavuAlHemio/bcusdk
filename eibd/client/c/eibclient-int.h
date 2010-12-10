@@ -64,6 +64,7 @@ struct _EIBConnection
     uint16_t *ptr4;
     eibaddr_t *ptr5;
     eibaddr_t *ptr6;
+    uint32_t *ptr7;
   } req;
 };
 
@@ -92,7 +93,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	  { \
 	    errno = error; \
 	    return -1; \
-	  } 
+	  }
 
 #define EIBC_RETURNERROR_UINT16(offset, error) \
 	if (!con->buf[offset] && !con->buf[offset+1]) \
@@ -158,6 +159,10 @@ int _EIB_GetRequest (EIBConnection * con);
 	if (con->req.ptr6) \
 	  *con->req.ptr6 = (con->buf[offset] << 8) | (con->buf[offset+1]);
 
+#define EIBC_RETURN_PTR7(offset) \
+	if (con->req.ptr7) \
+	  *con->req.ptr7 = (con->buf[offset] << 24) | (con->buf[offset+1] << 16) | (con->buf[offset+2] << 8) | (con->buf[offset+3]);
+
 #define EIBC_COMPLETE(name, body) \
 	static int \
 	name ## _complete (EIBConnection * con) \
@@ -180,7 +185,7 @@ int _EIB_GetRequest (EIBConnection * con);
 	  { \
 	    errno = EINVAL; \
 	    return -1; \
-	  } 
+	  }
 
 #define EIBC_SEND_BUF(name) EIBC_SEND_BUF_LEN (name, 0)
 
@@ -243,6 +248,9 @@ int _EIB_GetRequest (EIBConnection * con);
 #define EIBC_PTR6(name) \
 	con->req.ptr6 = name;
 
+#define EIBC_PTR7(name) \
+	con->req.ptr7 = name;
+
 #define EIBC_SETADDR(name, offset) \
 	EIBSETADDR (ibuf + offset, name);
 
@@ -298,6 +306,7 @@ int _EIB_GetRequest (EIBConnection * con);
 #define AGARG_OUTUINT8a(name, args) uint8_t *name KAG ## args
 #define AGARG_OUTUINT16(name, args) uint16_t *name KAG ## args
 #define AGARG_OUTINT16(name, args) int16_t *name KAG ## args
+#define AGARG_OUTUINT32(name, args) uint32_t *name KAG ## args
 #define AGARG_ADDR(name, args) eibaddr_t name KAG ## args
 #define AGARG_OUTADDR(name, args) eibaddr_t *name KAG ## args
 #define AGARG_OUTADDRa(name, args) eibaddr_t *name KAG ## args
@@ -316,6 +325,7 @@ int _EIB_GetRequest (EIBConnection * con);
 #define ALARG_OUTUINT8a(name, args) name KAL ## args
 #define ALARG_OUTUINT16(name, args) name KAL ## args
 #define ALARG_OUTINT16(name, args) name KAL ## args
+#define ALARG_OUTUINT32(name, args) name KAL ## args
 #define ALARG_ADDR(name, args) name KAL ## args
 #define ALARG_OUTADDR(name, args) name KAL ## args
 #define ALARG_OUTADDRa(name, args) name KAL ## args
