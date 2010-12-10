@@ -32,6 +32,7 @@
   private $ptr4;
   private $ptr5;
   private $ptr6;
+  private $ptr7;
   private $sendlen;
 
   private $complete;

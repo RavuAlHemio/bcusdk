@@ -46,6 +46,7 @@ EIBC_LICENSE(
 #define AGARG_OUTUINT8a(name, args) EIBInt8 PAR(name) KAG ## args
 #define AGARG_OUTUINT16(name, args) EIBInt16 PAR(name) KAG ## args
 #define AGARG_OUTINT16(name, args) EIBInt16 PAR(name) KAG ## args
+#define AGARG_OUTUINT32(name, args) EIBInt32 PAR(name) KAG ## args
 
 #define ALARG_NONE 
 #define ALARG_BOOL(name, args) PAR(name)  KAL ## args
@@ -64,3 +65,4 @@ EIBC_LICENSE(
 #define ALARG_OUTUINT8a(name, args) PAR(name) KAL ## args
 #define ALARG_OUTUINT16(name, args) PAR(name) KAL ## args
 #define ALARG_OUTINT16(name, args) PAR(name) KAL ## args
+#define ALARG_OUTUINT32(name, args) PAR(name) KAL ## args

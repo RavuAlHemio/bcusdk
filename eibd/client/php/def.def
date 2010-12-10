@@ -29,6 +29,7 @@
 
 #define BYTE2INT(val) (EIBConnection::upack (substr (val,0, 1), "C"))
 #define SHORT2INT(val) (EIBConnection::upack (substr (val,0, 2), "n"))
+#define SHORT2LONG(val) (EIBConnection::upack (substr (val,0, 4), "N"))
 
 #define EIBTYPE (SHORT2INT($this->data))
 
@@ -104,6 +105,10 @@
 	if ($this->ptr6 != null) \
 	  $this->ptr6->addr = SHORT2INT (substr ($this->data, offset));
 
+#define EIBC_RETURN_PTR7(offset) \
+	if ($this->ptr7 != null) \
+	  $this->ptr7->data = SHORT2LONG (substr ($this->data, offset));
+
 #define EIBC_COMPLETE(name, body) \
 	private function name##_complete () { \
 	  body \
@@ -160,6 +165,9 @@
 
 #define EIBC_PTR6(name) \
 	$this->ptr6 = PAR(name);
+
+#define EIBC_PTR7(name) \
+	$this->ptr7 = PAR(name);
 
 #define EIBC_SETADDR(name, offset) \
 	$ibuf[offset] = EIBConnection::packb((PAR(name)>>8)&0xff); \
