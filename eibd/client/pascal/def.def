@@ -29,6 +29,7 @@
 
 #define STR(A) #A
 #define SHORT2INT(h) "((recvdata[" #h "] shl 8) Or (recvdata[" #h "+1]))"
+#define SHORT2LONG(h) "((recvdata[" #h "] shl 24) Or (recvdata[" #h "+1] shl 16) Or (recvdata[" #h "+2] shl 8) Or (recvdata[" #h "+3]))"
 
 #define EIBTYPE (SHORT2INT(0))
 
@@ -118,6 +119,10 @@
 	printf("  If ptr6 <> Nil Then\n"); \
 	printf("    ptr6^ := %s;\n", SHORT2INT (offset));
 
+#define EIBC_RETURN_PTR7(offset) \
+	printf("  If ptr7 <> Nil Then\n"); \
+	printf("    ptr7^ := %s;\n", SHORT2LONG (offset));
+
 #define EIBC_COMPLETE(name, body) \
 	printf("Function EIBConnection.%s_Complete: Integer;\n", #name); \
         printf("Var i : Integer;\n"); \
@@ -180,6 +185,9 @@
 
 #define EIBC_PTR6(name) \
 	printf("  ptr6 := %s;\n", #name);
+
+#define EIBC_PTR7(name) \
+	printf("  ptr7 := %s;\n", #name);
 
 #define EIBC_SETADDR(name, offset) \
 	printf("  ibuf[%d] := ((%s shr 8) And $ff);\n", offset, #name); \

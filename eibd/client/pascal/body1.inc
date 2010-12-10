@@ -7,6 +7,7 @@
     Private ptr4 : PUINT16;
     Private ptr5 : PEIBAddr;
     Private ptr6 : PEIBAddr;
+    Private ptr7 : PUINT32;
     Private buffer : PByteArray;
     Private sendlen : Integer;
     Private readlen : Integer;

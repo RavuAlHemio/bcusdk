@@ -33,10 +33,12 @@ Interface
 Type 
   TEIBAddr = Word;
   TByteArray = Array Of Byte;
+  TUINT32 = Longword;
   TUINT16 = Word;
   TUINT8 = Byte;
   TEIBKey = Array[0..4] Of Byte;
   PEIBAddr = ^TEIBAddr;
+  PUINT32 = ^TUINT32;
   PUINT16 = ^TUINT16;
   PUINT8 = ^TUINT8;
   PByteArray = ^TByteArray;
