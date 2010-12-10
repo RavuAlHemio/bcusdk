@@ -30,6 +30,7 @@
 #define BYTE2INT(val) (((int)(val))&0xff)
 #define SHORT2INT(h,l) ((BYTE2INT(h)<<8)|(BYTE2INT(l)))
 #define SHORT2INT(h,l) ((BYTE2INT(h)<<8)|(BYTE2INT(l)))
+#define SHORT2LONG(h1,h2,h3,h4) ((BYTE2INT(h1)<<24)|(BYTE2INT(h2)<<16)|(BYTE2INT(h3)<<8)|(BYTE2INT(h4)))
 
 #define EIBTYPE (SHORT2INT(data[0],data[1]))
 
@@ -109,6 +110,10 @@
 	if (ptr6 != null) \
 	  ptr6.addr = (ushort)SHORT2INT (data[offset], data[offset+1]);
 
+#define EIBC_RETURN_PTR7(offset) \
+	if (ptr7 != null) \
+	  ptr7.addr = (uint)SHORT2LONG (data[offset], data[offset+1], data[offset+2], data[offset+3]);
+
 #define EIBC_COMPLETE(name, body) \
         private int name ## _complete () { \
 	  complete = null; \
@@ -165,6 +170,9 @@
 
 #define EIBC_PTR6(name) \
 	this.ptr6 = name;
+
+#define EIBC_PTR7(name) \
+	this.ptr7 = name;
 
 #define EIBC_SETADDR(name, offset) \
 	ibuf[offset] = (byte)((name>>8)&0xff); \

@@ -34,6 +34,7 @@
 #define AGARG_OUTUINT8(name, args) UInt8 name KAG ## args
 #define AGARG_OUTUINT8a(name, args) UInt8 name KAG ## args
 #define AGARG_OUTUINT16(name, args) UInt16 name KAG ## args
+#define AGARG_OUTUINT32(name, args) UInt32 name KAG ## args
 #define AGARG_OUTINT16(name, args) Int16 name KAG ## args
 #define AGARG_ADDR(name, args) ushort name KAG ## args
 #define AGARG_OUTADDR(name, args) EIBAddr name KAG ## args
@@ -53,6 +54,7 @@
 #define ALARG_OUTUINT8a(name, args) name KAL ## args
 #define ALARG_OUTUINT16(name, args) name KAL ## args
 #define ALARG_OUTINT16(name, args) name KAL ## args
+#define ALARG_OUTUINT32(name, args) name KAL ## args
 #define ALARG_ADDR(name, args) name KAL ## args
 #define ALARG_OUTADDR(name, args) name KAL ## args
 #define ALARG_OUTADDRa(name, args) name KAL ## args

@@ -32,6 +32,7 @@ private UInt8 ptr3;
 private UInt16 ptr4;
 private EIBAddr ptr5;
 private EIBAddr ptr6;
+private UInt32 ptr7;
 private int sendlen;
 
 private delegate int complete_t ();

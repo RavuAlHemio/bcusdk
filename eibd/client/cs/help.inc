@@ -98,3 +98,18 @@ public class UInt16
     data = value;
   }
 }
+
+public class UInt32
+{
+  public uint data;
+
+  public UInt32 ()
+  {
+    data = 0;
+  }
+
+  public UInt32 (ushort value)
+  {
+    data = value;
+  }
+}
