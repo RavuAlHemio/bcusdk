@@ -24,31 +24,19 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+package tuwien.auto.eibclient;
 
-  private Buffer buf;
-  private Int16 ptr1;
-  private Int8 ptr2;
-  private Int8 ptr3;
-  private Int16 ptr4;
-  private EIBAddr ptr5;
-  private EIBAddr ptr6;
-  private Int32 ptr7;
-  private int sendlen;
+public class Int32
+{
+  public int data;
 
-  private interface _complete
+    public Int32 ()
   {
-    int complete () throws IOException;
+    data = 0;
   }
 
-  private _complete complete = null;
-
-  public int EIBComplete () throws IOException
+  public Int32 (short val)
   {
-    if (complete == null)
-      {
-	errno = EINVAL;
-	return -1;
-      }
-    return complete.complete ();
+    data = val;
   }
-
+}

@@ -44,6 +44,7 @@ EIBC_LICENSE(
 #define AGARG_OUTUINT8a(name, args) Int8 name KAG ## args
 #define AGARG_OUTUINT16(name, args) Int16 name KAG ## args
 #define AGARG_OUTINT16(name, args) Int16 name KAG ## args
+#define AGARG_OUTUINT32(name, args) Int32 name KAG ## args
 
 #define ALARG_NONE 
 #define ALARG_BOOL(name, args) name  KAL ## args
@@ -62,3 +63,4 @@ EIBC_LICENSE(
 #define ALARG_OUTUINT8a(name, args) name KAL ## args
 #define ALARG_OUTUINT16(name, args) name KAL ## args
 #define ALARG_OUTINT16(name, args) name KAL ## args
+#define ALARG_OUTUINT32(name, args) name KAL ## args

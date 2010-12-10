@@ -5,6 +5,7 @@ AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/eibd/client -I$(top_bui
 java_SRC = tuwien/auto/eibclient/Buffer.java \
  tuwien/auto/eibclient/Int8.java \
  tuwien/auto/eibclient/Int16.java \
+ tuwien/auto/eibclient/Int32.java \
  tuwien/auto/eibclient/EIBAddr.java
 
 build_SRC = tuwien/auto/eibclient/EIBConnection.java
