@@ -44,3 +44,8 @@ sub EIBInt16 {
 	my $data = undef;
 	return \$data;
 }
+
+sub EIBInt32 {
+	my $data = undef;
+	return \$data;
+}
