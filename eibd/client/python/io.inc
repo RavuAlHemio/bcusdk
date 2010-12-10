@@ -44,6 +44,10 @@ class EIBInt16:
   def __init__(self, value = 0):
     self.data = value
 
+class EIBInt32:
+  def __init__(self, value = 0):
+    self.data = value
+
 class EIBConnection:
   def __init__(self):
     self.data = []

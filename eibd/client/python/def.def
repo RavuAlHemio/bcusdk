@@ -29,6 +29,7 @@
 
 #define STR(A) #A
 #define SHORT2INT(h) "(((self.data[" #h "])<<8)|(self.data[" #h "+1]))"
+#define SHORT2LONG(h) "(((self.data[" #h "])<<24)|((self.data[" #h "+1])<<16)|((self.data[" #h "+2])<<8)|(self.data[" #h "+3]))"
 
 #define EIBTYPE (SHORT2INT(0))
 
@@ -96,6 +97,10 @@
 	printf("    if self.ptr6 != None:\n"); \
 	printf("      self.ptr6.data = %s\n", SHORT2INT (offset));
 
+#define EIBC_RETURN_PTR7(offset) \
+	printf("    if self.ptr7 != None:\n"); \
+	printf("      self.ptr7.data = %s\n", SHORT2LONG (offset));
+
 #define EIBC_COMPLETE(name, body) \
 	printf("  def __%s_Complete(self):\n", #name); \
 	printf("    self.__complete = None;\n"); \
@@ -149,6 +154,9 @@
 
 #define EIBC_PTR6(name) \
 	printf("    self.ptr6 = %s\n", #name);
+
+#define EIBC_PTR7(name) \
+	printf("    self.ptr7 = %s\n", #name);
 
 #define EIBC_SETADDR(name, offset) \
 	printf("    ibuf[%d] = ((%s>>8)&0xff)\n", offset, #name); \
