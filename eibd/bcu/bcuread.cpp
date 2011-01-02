@@ -1,6 +1,6 @@
 /*
     EIBD eib bus access and management daemon
-    Copyright (C) 2005-2010 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2005-2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ const char *argp_program_version = "bcuread " VERSION;
 /** documentation */
 static char doc[] =
   "bcuread -- read BCU memory\n"
-  "(C) 2005-2010 Martin Koegler <mkoegler@auto.tuwien.ac.at>\n"
+  "(C) 2005-2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>\n"
   "supported URLs are:\n"
 #undef L2_NAME
 #define L2_NAME(a) a##_URL

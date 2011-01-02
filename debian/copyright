@@ -4,7 +4,7 @@ This is a debian pakcage of a free BCU SDK for EIB.
   http://www.auto.tuwien.ac.at/~mkoegler/index.php/bcus
 
 Copyright: GNU General Public License
-Copyright (C) 2005-2010 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+Copyright (C) 2005-2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>
 
 On Debian GNU/Linux systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL-2'.
