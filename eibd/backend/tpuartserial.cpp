@@ -52,6 +52,7 @@ TPUARTSerialLayer2Driver::TPUARTSerialLayer2Driver (const char *dev,
 
   ackallgroup = flags & FLAG_B_TPUARTS_ACKGROUP;
   ackallindividual = flags & FLAG_B_TPUARTS_ACKINDIVIDUAL;
+  dischreset = flags & FLAG_B_TPUARTS_DISCH_RESET;
 
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
 
@@ -543,6 +544,14 @@ TPUARTSerialLayer2Driver::Run (pth_sem_t * stop1)
       if (watch == 1 && pth_event_status (watchdog) == PTH_STATUS_OCCURRED
 	  && mode == 0)
 	{
+	  if (dischreset)
+	    {
+	      setstat (fd, (getstat (fd) & ~TIOCM_RTS) & ~TIOCM_DTR);
+	      pth_usleep (2000);
+	      setstat (fd, (getstat (fd) & ~TIOCM_RTS) | TIOCM_DTR);
+	      pth_usleep (1000);
+	    }
+
 	  uchar c = 0x01;
 	  t->TracePacket (2, this, "Watchdog Reset", 1, &c);
 	  write (fd, &c, 1);

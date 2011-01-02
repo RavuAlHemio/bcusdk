@@ -56,6 +56,7 @@ class TPUARTSerialLayer2Driver:public Layer2Interface, private Thread
     Array < eibaddr_t > groupaddr;
   bool ackallgroup;
   bool ackallindividual;
+  bool dischreset;
 
     /** process a recevied frame */
   void RecvLPDU (const uchar * data, int len);

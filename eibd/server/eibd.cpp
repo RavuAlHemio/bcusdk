@@ -34,6 +34,7 @@
 #define OPT_BACK_TUNNEL_NOQUEUE 1
 #define OPT_BACK_TPUARTS_ACKGROUP 2
 #define OPT_BACK_TPUARTS_ACKINDIVIDUAL 3
+#define OPT_BACK_TPUARTS_DISCH_RESET 4
 
 /** structure to store the arguments */
 struct arguments
@@ -189,6 +190,8 @@ static struct argp_option options[] = {
    "tpuarts backend should generate L2 acks for all group telegrams"},
   {"tpuarts-ack-all-individual", OPT_BACK_TPUARTS_ACKINDIVIDUAL, 0, 0,
    "tpuarts backend should generate L2 acks for all individual telegrams"},
+  {"tpuarts-disch-reset", OPT_BACK_TPUARTS_DISCH_RESET, 0, 0,
+   "tpuarts backend should should use a full interface reset (for Disch TPUART interfaces)"},
 #endif
   {0}
 };
@@ -244,6 +247,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
       break;
     case OPT_BACK_TPUARTS_ACKINDIVIDUAL:
       arguments->backendflags |= FLAG_B_TPUARTS_ACKINDIVIDUAL;
+      break;
+    case OPT_BACK_TPUARTS_DISCH_RESET:
+      arguments->backendflags |= FLAG_B_TPUARTS_DISCH_RESET;
       break;
     default:
       return ARGP_ERR_UNKNOWN;
