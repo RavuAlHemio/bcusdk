@@ -128,6 +128,20 @@ int EIBOpenBusmonitorText (EIBConnection * con);
  */
 int EIBOpenBusmonitorText_async (EIBConnection * con);
 
+/** Switches the connection to binary busmonitor mode.
+ * \param con eibd connection
+ * \param timebase if not null, tick length in ns is stored at this location - it is 0, if not provided by the interface
+ * \return 0 if successful, -1 if error
+ */
+int EIBOpenBusmonitorTS (EIBConnection * con, uint32_t * timebase);
+
+/** Switches the connection to binary busmonitor mode - asynchronous.
+ * \param con eibd connection
+ * \param timebase if not null, tick length in ns is stored at this location - it is 0, if not provided by the interface
+ * \return 0 if started, -1 if error
+ */
+int EIBOpenBusmonitorTS_async (EIBConnection * con, uint32_t * timebase);
+
 /** Switches the connection to binary vbusmonitor mode.
  * \param con eibd connection
  * \return 0 if successful, -1 if error
@@ -152,6 +166,20 @@ int EIBOpenVBusmonitorText (EIBConnection * con);
  */
 int EIBOpenVBusmonitorText_async (EIBConnection * con);
 
+/** Switches the connection to binary busmonitor mode.
+ * \param con eibd connection
+ * \param timebase if not null, tick length in ns is stored at this location - it is 0, if not provided by the interface
+ * \return 0 if successful, -1 if error
+ */
+int EIBOpenVBusmonitorTS (EIBConnection * con, uint32_t * timebase);
+
+/** Switches the connection to binary busmonitor mode - asynchronous.
+ * \param con eibd connection
+ * \param timebase if not null, tick length in ns is stored at this location - it is 0, if not provided by the interface
+ * \return 0 if started, -1 if error
+ */
+int EIBOpenVBusmonitorTS_async (EIBConnection * con, uint32_t * timebase);
+
 /** Receives a packet on a busmonitor connection.
  * \param con eibd connection
  * \param maxlen size of the buffer
@@ -159,6 +187,18 @@ int EIBOpenVBusmonitorText_async (EIBConnection * con);
  * \return -1 if error, else length of the packet
  */
 int EIBGetBusmonitorPacket (EIBConnection * con, int maxlen, uint8_t * buf);
+
+/** Receives a packet on a busmonitor connection.
+ * \param con eibd connection
+ * \param status stores KNX busmonitor status field
+ * \param timestamp stores relative timestamp
+ * \param maxlen size of the buffer
+ * \param buf buffer
+ * \return -1 if error, else length of the packet
+ */
+int EIBGetBusmonitorPacketTS (EIBConnection * con, uint8_t * status,
+			      uint32_t * timestamp, int maxlen,
+			      uint8_t * buf);
 
 /** Opens a connection of type T_Connection.
  * \param con eibd connection

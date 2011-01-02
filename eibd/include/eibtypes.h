@@ -38,6 +38,9 @@
 #define EIB_OPEN_VBUSMONITOR            0x0012
 #define EIB_OPEN_VBUSMONITOR_TEXT       0x0013
 #define EIB_BUSMONITOR_PACKET           0x0014
+#define EIB_BUSMONITOR_PACKET_TS        0x0015
+#define EIB_OPEN_BUSMONITOR_TS          0x0016
+#define EIB_OPEN_VBUSMONITOR_TS         0x0017
 
 #define EIB_OPEN_T_CONNECTION           0x0020
 #define EIB_OPEN_T_INDIVIDUAL           0x0021

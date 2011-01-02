@@ -336,6 +336,8 @@ EMI2Layer2Interface::Run (pth_sem_t * stop1)
       if (c->len () > 4 && (*c)[0] == 0x2B && mode == 1)
 	{
 	  L_Busmonitor_PDU *p = new L_Busmonitor_PDU;
+	  p->status = (*c)[1];
+	  p->timestamp = ((*c)[2] << 24) | ((*c)[3] << 16);
 	  p->pdu.set (c->array () + 4, c->len () - 4);
 	  delete c;
 	  TRACEPRINTF (t, 2, this, "Recv %s", p->Decode ()());

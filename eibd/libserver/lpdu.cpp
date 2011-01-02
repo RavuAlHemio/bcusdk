@@ -161,6 +161,8 @@ L_Unknown_PDU::Decode ()
 
 L_Busmonitor_PDU::L_Busmonitor_PDU ()
 {
+  timestamp = 0;
+  status = 0;
 }
 
 bool

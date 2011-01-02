@@ -32,6 +32,8 @@ class A_Busmonitor:public L_Busmonitor_CallBack, private Thread
     Queue < L_Busmonitor_PDU * >data;
     /** is virtual busmonitor */
   bool v;
+    /** should provide timestamps */
+  bool ts;
 
   void Run (pth_sem_t * stop);
 protected:
@@ -49,9 +51,10 @@ public:
    * @param tr debug output
    * @param l3 Layer 3
    * @param virt is virtual busmonitor
+   * @param ts provide timestamps
    */
     A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr, bool virt =
-		  0);
+		  false, bool ts = false);
     virtual ~ A_Busmonitor ();
   void Get_L_Busmonitor (L_Busmonitor_PDU * l);
 
@@ -72,7 +75,8 @@ public:
    * @param virt is virtual busmonitor
    */
   A_Text_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr, bool virt = 0):A_Busmonitor (c, l3, tr,
-		virt)
+		virt,
+		false)
   {
   }
 };

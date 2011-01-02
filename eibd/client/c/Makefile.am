@@ -13,7 +13,8 @@ FUNCS= \
   gen/groupcacheread.c       gen/mcprogmodestatus.c  gen/mcwrite.c          gen/openbusmonitortext.c        gen/sendapdu.c \
   gen/groupcachereadsync.c   gen/mcprogmodetoggle.c  gen/mcwriteplain.c     gen/opengroupsocket.c           gen/sendgroup.c \
   gen/groupcacheremove.c     gen/mcpropertydesc.c    gen/mgetmaskversion.c  gen/opentbroadcast.c            gen/sendtpdu.c \
-  gen/gettpdu.c gen/mcindividual.c gen/groupcachelastupdates.c
+  gen/gettpdu.c              gen/mcindividual.c      gen/groupcachelastupdates.c gen/openbusmonitorts.c     gen/openvbusmonitorts.c \
+  gen/getbusmonitorpacketts.c
 
 BUILT_SOURCES=$(FUNCS)
 CLEANFILES=$(FUNCS)

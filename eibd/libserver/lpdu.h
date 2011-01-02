@@ -125,8 +125,10 @@ class L_Busmonitor_PDU:public LPDU
 public:
   /** content of the TP1 frame */
   CArray pdu;
+  uint8_t status;
+  uint32_t timestamp;
 
-  L_Busmonitor_PDU ();
+    L_Busmonitor_PDU ();
 
   bool init (const CArray & c);
   CArray ToPacket ();

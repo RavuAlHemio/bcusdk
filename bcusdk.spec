@@ -129,9 +129,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 /usr/bin/busmonitor1
 /usr/bin/busmonitor2
+/usr/bin/busmonitor3
 /usr/bin/vbusmonitor1
 /usr/bin/vbusmonitor1poll
 /usr/bin/vbusmonitor2
+/usr/bin/vbusmonitor3
 /usr/bin/groupread
 /usr/bin/groupswrite
 /usr/bin/groupwrite

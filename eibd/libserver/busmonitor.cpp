@@ -34,13 +34,14 @@ A_Busmonitor::~A_Busmonitor ()
 }
 
 A_Busmonitor::A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr,
-			    bool virt)
+			    bool virt, bool TS)
 {
   TRACEPRINTF (tr, 7, this, "Open A_Busmonitor");
   this->l3 = l3;
   t = tr;
   con = c;
   v = virt;
+  ts = TS;
   pth_sem_init (&sem);
   Start ();
 }
@@ -55,6 +56,8 @@ A_Busmonitor::Get_L_Busmonitor (L_Busmonitor_PDU * l)
 void
 A_Busmonitor::Run (pth_sem_t * stop1)
 {
+  CArray resp;
+
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   if (v)
     {
@@ -72,8 +75,19 @@ A_Busmonitor::Run (pth_sem_t * stop1)
 	  return;
 	}
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  resp.setpart (con->buf, 0, 2);
+  if (ts)
+    {
+      resp.resize (6);
+      resp[2] = 0;
+      resp[3] = 0;
+      resp[4] = 0;
+      resp[5] = 0;
+    }
+
+  if (con->sendmessage (resp.len (), resp.array (), stop) == -1)
     return;
+
   pth_event_t sem_ev = pth_event (PTH_EVENT_SEM, &sem);
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
@@ -110,9 +124,23 @@ int
 A_Busmonitor::sendResponse (L_Busmonitor_PDU * p, pth_event_t stop)
 {
   CArray buf;
-  buf.resize (2 + p->pdu ());
-  EIBSETTYPE (buf, EIB_BUSMONITOR_PACKET);
-  buf.setpart (p->pdu.array (), 2, p->pdu ());
+  if (ts)
+    {
+      buf.resize (7 + p->pdu ());
+      EIBSETTYPE (buf, EIB_BUSMONITOR_PACKET_TS);
+      buf[2] = p->status;
+      buf[3] = (p->timestamp >> 24) & 0xff;
+      buf[4] = (p->timestamp >> 16) & 0xff;
+      buf[5] = (p->timestamp >> 8) & 0xff;
+      buf[6] = (p->timestamp) & 0xff;
+      buf.setpart (p->pdu.array (), 7, p->pdu ());
+    }
+  else
+    {
+      buf.resize (2 + p->pdu ());
+      EIBSETTYPE (buf, EIB_BUSMONITOR_PACKET);
+      buf.setpart (p->pdu.array (), 2, p->pdu ());
+    }
   delete p;
 
   return con->sendmessage (buf (), buf.array (), stop);

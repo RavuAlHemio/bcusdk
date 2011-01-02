@@ -61,28 +61,42 @@ ClientConnection::Run (pth_sem_t * stop1)
 	{
 	case EIB_OPEN_BUSMONITOR:
 	  {
-	    A_Busmonitor busmon (this, l3, t);
+	    A_Busmonitor busmon (this, l3, t, false, false);
 	    busmon.Do (stop);
 	  }
 	  break;
 
 	case EIB_OPEN_BUSMONITOR_TEXT:
 	  {
-	    A_Text_Busmonitor busmon (this, l3, t);
+	    A_Text_Busmonitor busmon (this, l3, t, false);
+	    busmon.Do (stop);
+	  }
+	  break;
+
+	case EIB_OPEN_BUSMONITOR_TS:
+	  {
+	    A_Busmonitor busmon (this, l3, t, false, true);
 	    busmon.Do (stop);
 	  }
 	  break;
 
 	case EIB_OPEN_VBUSMONITOR:
 	  {
-	    A_Busmonitor busmon (this, l3, t, 1);
+	    A_Busmonitor busmon (this, l3, t, true, false);
 	    busmon.Do (stop);
 	  }
 	  break;
 
 	case EIB_OPEN_VBUSMONITOR_TEXT:
 	  {
-	    A_Text_Busmonitor busmon (this, l3, t, 1);
+	    A_Text_Busmonitor busmon (this, l3, t, true);
+	    busmon.Do (stop);
+	  }
+	  break;
+
+	case EIB_OPEN_VBUSMONITOR_TS:
+	  {
+	    A_Busmonitor busmon (this, l3, t, true, true);
 	    busmon.Do (stop);
 	  }
 	  break;
