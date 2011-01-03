@@ -39,16 +39,16 @@ extern "C" {
  * \param x the host-endian value to convert
  * \returns the value in little-endian byte order
  */
-#define libusb_cpu_to_le16(x) ({ \
-	union { \
-		uint8_t  b8[2]; \
-		uint16_t b16; \
-	} _tmp; \
-	uint16_t _tmp2 = (uint16_t)(x); \
-	_tmp.b8[1] = _tmp2 >> 8; \
-	_tmp.b8[0] = _tmp2 & 0xff; \
-	_tmp.b16; \
-})
+static inline uint16_t libusb_cpu_to_le16(const uint16_t x)
+{
+	union {
+		uint8_t  b8[2];
+		uint16_t b16;
+	} _tmp;
+	_tmp.b8[1] = x >> 8;
+	_tmp.b8[0] = x & 0xff;
+	return _tmp.b16;
+}
 
 /** \def libusb_le16_to_cpu
  * \ingroup misc
@@ -593,6 +593,8 @@ typedef struct libusb_device_handle libusb_device_handle;
 /** \ingroup misc
  * Error codes. Most libusb functions return 0 on success or one of these
  * codes on failure.
+ * You can use libusb_strerror() to retrieve a short string description of
+ * a libusb_error enumeration value.
  */
 enum libusb_error {
 	/** Success (no error) */
@@ -636,6 +638,9 @@ enum libusb_error {
 
 	/** Other error */
 	LIBUSB_ERROR_OTHER = -99
+
+	/* IMPORTANT: when adding new values to this enum, remember to
+	   update the libusb_strerror() function implementation! */
 };
 
 /** \ingroup asyncio
@@ -774,6 +779,7 @@ struct libusb_transfer {
 int libusb_init(libusb_context **ctx);
 void libusb_exit(libusb_context *ctx);
 void libusb_set_debug(libusb_context *ctx, int level);
+const char *libusb_strerror(enum libusb_error errcode);
 
 ssize_t libusb_get_device_list(libusb_context *ctx,
 	libusb_device ***list);
@@ -801,8 +807,8 @@ void libusb_close(libusb_device_handle *dev_handle);
 libusb_device *libusb_get_device(libusb_device_handle *dev_handle);
 
 int libusb_set_configuration(libusb_device_handle *dev, int configuration);
-int libusb_claim_interface(libusb_device_handle *dev, int iface);
-int libusb_release_interface(libusb_device_handle *dev, int iface);
+int libusb_claim_interface(libusb_device_handle *dev, int interface_number);
+int libusb_release_interface(libusb_device_handle *dev, int interface_number);
 
 libusb_device_handle *libusb_open_device_with_vid_pid(libusb_context *ctx,
 	uint16_t vendor_id, uint16_t product_id);
@@ -812,9 +818,9 @@ int libusb_set_interface_alt_setting(libusb_device_handle *dev,
 int libusb_clear_halt(libusb_device_handle *dev, unsigned char endpoint);
 int libusb_reset_device(libusb_device_handle *dev);
 
-int libusb_kernel_driver_active(libusb_device_handle *dev, int interface);
-int libusb_detach_kernel_driver(libusb_device_handle *dev, int interface);
-int libusb_attach_kernel_driver(libusb_device_handle *dev, int interface);
+int libusb_kernel_driver_active(libusb_device_handle *dev, int interface_number);
+int libusb_detach_kernel_driver(libusb_device_handle *dev, int interface_number);
+int libusb_attach_kernel_driver(libusb_device_handle *dev, int interface_number);
 
 /* async I/O */
 
@@ -1147,7 +1153,7 @@ static inline int libusb_get_descriptor(libusb_device_handle *dev,
 {
 	return libusb_control_transfer(dev, LIBUSB_ENDPOINT_IN,
 		LIBUSB_REQUEST_GET_DESCRIPTOR, (desc_type << 8) | desc_index, 0, data,
-		length, 1000);
+		(uint16_t) length, 1000);
 }
 
 /** \ingroup desc
@@ -1169,7 +1175,7 @@ static inline int libusb_get_string_descriptor(libusb_device_handle *dev,
 {
 	return libusb_control_transfer(dev, LIBUSB_ENDPOINT_IN,
 		LIBUSB_REQUEST_GET_DESCRIPTOR, (LIBUSB_DT_STRING << 8) | desc_index,
-		langid, data, length, 1000);
+		langid, data, (uint16_t) length, 1000);
 }
 
 int libusb_get_string_descriptor_ascii(libusb_device_handle *dev,
