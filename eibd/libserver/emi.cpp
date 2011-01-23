@@ -172,7 +172,7 @@ EMI_to_L_Data (const CArray & data)
   L_Data_PDU c;
   unsigned len;
 
-  if (data () < 7)
+  if (data () < 8)
     return 0;
 
   c.source = (data[2] << 8) | (data[3]);
