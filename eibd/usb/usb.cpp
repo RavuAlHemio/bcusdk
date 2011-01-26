@@ -95,7 +95,7 @@ USBLoop::Run (pth_sem_t * stop1)
   pth_event_free (stop, PTH_FREE_THIS);
 }
 
-static libusb_context *context = 0;
+libusb_context *context = 0;
 static USBLoop *loop = 0;
 
 bool

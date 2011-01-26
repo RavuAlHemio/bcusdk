@@ -26,6 +26,8 @@
 #include "usbif.h"
 #include "usb.h"
 
+extern libusb_context *context;
+
 USBEndpoint
 parseUSBEndpoint (const char *addr)
 {
@@ -129,16 +131,14 @@ check_device (libusb_device * dev, USBEndpoint e, USBDevice & e2)
 		    {
 		      if (ep->bEndpointAddress & LIBUSB_ENDPOINT_IN)
 			{
-			  if ((ep->
-			       bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) ==
-			      LIBUSB_TRANSFER_TYPE_INTERRUPT)
+			  if ((ep->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK)
+			      == LIBUSB_TRANSFER_TYPE_INTERRUPT)
 			    in = ep->bEndpointAddress;
 			}
 		      else
 			{
-			  if ((ep->
-			       bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) ==
-			      LIBUSB_TRANSFER_TYPE_INTERRUPT)
+			  if ((ep->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK)
+			      == LIBUSB_TRANSFER_TYPE_INTERRUPT)
 			    out = ep->bEndpointAddress;
 			}
 		    }
@@ -175,7 +175,7 @@ detectUSBEndpoint (USBEndpoint e)
   int i, count;
   USBDevice e2;
   e2.dev = NULL;
-  count = libusb_get_device_list (NULL, &devs);
+  count = libusb_get_device_list (context, &devs);
 
   for (i = 0; i < count; i++)
     if (check_device (devs[i], e, e2))
@@ -375,20 +375,19 @@ USBLowLevelDriver::Run (pth_sem_t * stop1)
 	      t->TracePacket (0, this, "RecvUSB", res);
 	      outqueue.put (new CArray (res));
 	      pth_sem_inc (&out_signal, 1);
-	      if (recvbuf [0] == 0x01 &&
-		  recvbuf [1] == 0x13 &&
-		  recvbuf [2] == 0x0A &&
-		  recvbuf [3] == 0x00 &&
-		  recvbuf [4] == 0x08 &&
-		  recvbuf [5] == 0x00 &&
-		  recvbuf [6] == 0x02 &&
-		  recvbuf [7] == 0x0F &&
-		  recvbuf [8] == 0x04 &&
-		  recvbuf [9] == 0x00 &&
-		  recvbuf [10] == 0x00 &&
-		  recvbuf [11] == 0x03)
+	      if (recvbuf[0] == 0x01 &&
+		  recvbuf[1] == 0x13 &&
+		  recvbuf[2] == 0x0A &&
+		  recvbuf[3] == 0x00 &&
+		  recvbuf[4] == 0x08 &&
+		  recvbuf[5] == 0x00 &&
+		  recvbuf[6] == 0x02 &&
+		  recvbuf[7] == 0x0F &&
+		  recvbuf[8] == 0x04 &&
+		  recvbuf[9] == 0x00 &&
+		  recvbuf[10] == 0x00 && recvbuf[11] == 0x03)
 		{
-		  if (recvbuf [12] & 0x1)
+		  if (recvbuf[12] & 0x1)
 		    connection_state = true;
 		  else
 		    connection_state = false;

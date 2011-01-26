@@ -67,16 +67,14 @@ check_device (libusb_device * dev)
 		    {
 		      if (ep->bEndpointAddress & LIBUSB_ENDPOINT_IN)
 			{
-			  if ((ep->
-			       bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) ==
-			      LIBUSB_TRANSFER_TYPE_INTERRUPT)
+			  if ((ep->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK)
+			      == LIBUSB_TRANSFER_TYPE_INTERRUPT)
 			    in = ep->bEndpointAddress;
 			}
 		      else
 			{
-			  if ((ep->
-			       bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) ==
-			      LIBUSB_TRANSFER_TYPE_INTERRUPT)
+			  if ((ep->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK)
+			      == LIBUSB_TRANSFER_TYPE_INTERRUPT)
 			    out = ep->bEndpointAddress;
 			}
 		    }
@@ -127,7 +125,7 @@ main ()
     }
   libusb_set_debug (context, 0);
   printf ("Possible addresses for KNX USB devices:\n");
-  count = libusb_get_device_list (NULL, &devs);
+  count = libusb_get_device_list (context, &devs);
 
   for (i = 0; i < count; i++)
     {
