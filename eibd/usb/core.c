@@ -21,15 +21,14 @@
 #include <config.h>
 
 #include <errno.h>
-#include <poll.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 
-#include "libusb.h"
+#include "poll_posix.h"
+
 #include "libusbi.h"
 
 #if defined(OS_LINUX)
@@ -255,7 +254,7 @@ if (cfg != desired)
  * libusb v1.0.2, this information was lost (and for device-to-host transfers,
  * the corresponding data was discarded). As of libusb v1.0.3, this information
  * is kept (the data length of the transfer is updated) and, for device-to-host
- * transfesr, any surplus data was added to the buffer. Still, this is not
+ * transfers, any surplus data was added to the buffer. Still, this is not
  * a nice solution because it loses the information about the end of the short
  * packet, and the user probably wanted that surplus data to arrive in the next
  * logical transfer.
@@ -272,7 +271,7 @@ if (cfg != desired)
  * The subtransfers are submitted all at once so that the kernel can queue
  * them at the hardware level, therefore maximizing bus throughput.
  *
- * On legacy platforms, this caused problems when transfers completed early
+ * On legacy platforms, this caused problems when transfers completed early.
  * Upon this event, the kernel would terminate all further packets in that
  * subtransfer (but not any following ones). libusb would note this event and
  * immediately cancel any following subtransfers that had been queued,
@@ -846,6 +845,50 @@ API_EXPORTED void libusb_unref_device(libusb_device *dev)
 	}
 }
 
+/*
+ * Interrupt the iteration of the event handling thread, so that it picks
+ * up the new fd.
+ */
+void usbi_fd_notification(struct libusb_context *ctx)
+{
+	unsigned char dummy = 1;
+	ssize_t r;
+
+	if (ctx == NULL)
+		return;
+
+	/* record that we are messing with poll fds */
+	usbi_mutex_lock(&ctx->pollfd_modify_lock);
+	ctx->pollfd_modify++;
+	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
+
+	/* write some data on control pipe to interrupt event handlers */
+	r = usbi_write(ctx->ctrl_pipe[1], &dummy, sizeof(dummy));
+	if (r <= 0) {
+		usbi_warn(ctx, "internal signalling write failed");
+		usbi_mutex_lock(&ctx->pollfd_modify_lock);
+		ctx->pollfd_modify--;
+		usbi_mutex_unlock(&ctx->pollfd_modify_lock);
+		return;
+	}
+
+	/* take event handling lock */
+	libusb_lock_events(ctx);
+
+	/* read the dummy data */
+	r = usbi_read(ctx->ctrl_pipe[0], &dummy, sizeof(dummy));
+	if (r <= 0)
+		usbi_warn(ctx, "internal signalling read failed");
+
+	/* we're done with modifying poll fds */
+	usbi_mutex_lock(&ctx->pollfd_modify_lock);
+	ctx->pollfd_modify--;
+	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
+
+	/* Release event handling lock and wake up event waiters */
+	libusb_unlock_events(ctx);
+}
+
 /** \ingroup dev
  * Open a device and obtain a device handle. A handle allows you to perform
  * I/O on the device in question.
@@ -870,9 +913,7 @@ API_EXPORTED int libusb_open(libusb_device *dev, libusb_device_handle **handle)
 	struct libusb_context *ctx = DEVICE_CTX(dev);
 	struct libusb_device_handle *_handle;
 	size_t priv_size = usbi_backend->device_handle_priv_size;
-	unsigned char dummy = 1;
 	int r;
-	ssize_t tmp;
 	usbi_dbg("open %d.%d", dev->bus_number, dev->device_address);
 
 	_handle = malloc(sizeof(*_handle) + priv_size);
@@ -902,44 +943,13 @@ API_EXPORTED int libusb_open(libusb_device *dev, libusb_device_handle **handle)
 	usbi_mutex_unlock(&ctx->open_devs_lock);
 	*handle = _handle;
 
-
 	/* At this point, we want to interrupt any existing event handlers so
 	 * that they realise the addition of the new device's poll fd. One
 	 * example when this is desirable is if the user is running a separate
 	 * dedicated libusb events handling thread, which is running with a long
 	 * or infinite timeout. We want to interrupt that iteration of the loop,
 	 * so that it picks up the new fd, and then continues. */
-
-	/* record that we are messing with poll fds */
-	usbi_mutex_lock(&ctx->pollfd_modify_lock);
-	ctx->pollfd_modify++;
-	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
-
-	/* write some data on control pipe to interrupt event handlers */
-	tmp = write(ctx->ctrl_pipe[1], &dummy, sizeof(dummy));
-	if (tmp <= 0) {
-		usbi_warn(ctx, "internal signalling write failed");
-		usbi_mutex_lock(&ctx->pollfd_modify_lock);
-		ctx->pollfd_modify--;
-		usbi_mutex_unlock(&ctx->pollfd_modify_lock);
-		return 0;
-	}
-
-	/* take event handling lock */
-	libusb_lock_events(ctx);
-
-	/* read the dummy data */
-	tmp = read(ctx->ctrl_pipe[0], &dummy, sizeof(dummy));
-	if (tmp <= 0)
-		usbi_warn(ctx, "internal signalling read failed");
-
-	/* we're done with modifying poll fds */
-	usbi_mutex_lock(&ctx->pollfd_modify_lock);
-	ctx->pollfd_modify--;
-	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
-
-	/* Release event handling lock and wake up event waiters */
-	libusb_unlock_events(ctx);
+	usbi_fd_notification(ctx);
 
 	return 0;
 }
@@ -1043,7 +1053,7 @@ API_EXPORTED void libusb_close(libusb_device_handle *dev_handle)
 	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
 
 	/* write some data on control pipe to interrupt event handlers */
-	r = write(ctx->ctrl_pipe[1], &dummy, sizeof(dummy));
+	r = usbi_write(ctx->ctrl_pipe[1], &dummy, sizeof(dummy));
 	if (r <= 0) {
 		usbi_warn(ctx, "internal signalling write failed, closing anyway");
 		do_close(ctx, dev_handle);
@@ -1057,7 +1067,7 @@ API_EXPORTED void libusb_close(libusb_device_handle *dev_handle)
 	libusb_lock_events(ctx);
 
 	/* read the dummy data */
-	r = read(ctx->ctrl_pipe[0], &dummy, sizeof(dummy));
+	r = usbi_read(ctx->ctrl_pipe[0], &dummy, sizeof(dummy));
 	if (r <= 0)
 		usbi_warn(ctx, "internal signalling read failed, closing anyway");
 
@@ -1522,15 +1532,15 @@ API_EXPORTED int libusb_init(libusb_context **context)
 		goto err_destroy_mutex;
 	}
 
-	if (!usbi_default_context) {
+	if (context) {
+		*context = ctx;
+	} else if (!usbi_default_context) {
 		usbi_dbg("created default context");
 		usbi_default_context = ctx;
 		default_context_refcnt++;
 	}
 	usbi_mutex_static_unlock(&default_context_lock);
 
-	if (context)
-		*context = ctx;
 	return 0;
 
 err_destroy_mutex:

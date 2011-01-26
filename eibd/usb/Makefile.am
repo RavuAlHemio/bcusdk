@@ -9,7 +9,7 @@ TARGET =
 endif
 
 if HAVE_USB
-LIBUSB = $(EIBD_USB) libusb.h libusbi.h core.c descriptor.c io.c sync.c threads_posix.h $(TARGET)
+LIBUSB = $(EIBD_USB) libusb.h libusbi.h core.c descriptor.c io.c sync.c threads_posix.h poll_posix.h $(TARGET)
 PROG = findknxusb
 else
 LIBUSB =
