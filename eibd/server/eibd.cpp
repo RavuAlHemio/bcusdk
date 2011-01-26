@@ -183,7 +183,7 @@ static struct argp_option options[] = {
 #endif
 #ifdef HAVE_EIBNETIPTUNNEL
   {"no-tunnel-client-queuing", OPT_BACK_TUNNEL_NOQUEUE, 0, 0,
-   "don't use the server queue in EIBnet/IP Tunneling backend"},
+   "do not assume KNXnet/IP Tunneling bus interface can handle parallel cEMI requests"},
 #endif
 #ifdef HAVE_TPUARTs
   {"tpuarts-ack-all-group", OPT_BACK_TPUARTS_ACKGROUP, 0, 0,
