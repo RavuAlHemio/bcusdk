@@ -3,6 +3,7 @@ EXTRA_DIST=README COPYING
 EIBD_USB = usb.cpp usb.h
 
 if LINUX_API
+AM_CFLAGS = -DTHREADS_POSIX
 TARGET = linux_usbfs.c linux_usbfs.h
 else
 TARGET =
