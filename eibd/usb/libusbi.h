@@ -181,7 +181,7 @@ static inline void usbi_dbg(const char *format, ...)
 
 /* Internal abstraction for thread synchronization */
 #if defined(OS_LINUX) || defined(OS_DARWIN)
-#include <threads_posix.h>
+#include <os/threads_posix.h>
 #endif
 
 extern struct libusb_context *usbi_default_context;

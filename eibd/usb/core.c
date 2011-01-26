@@ -27,7 +27,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "poll_posix.h"
+#include "os/poll_posix.h"
 
 #include "libusbi.h"
 
