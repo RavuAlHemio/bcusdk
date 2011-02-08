@@ -300,16 +300,15 @@ EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
   a->sin_len = sizeof (*a);
 #endif
   a->sin_family = AF_INET;
-  if (port == 0 && ip == 0)
-    {
-      a->sin_port = src->sin_port;
-      a->sin_addr.s_addr = src->sin_addr.s_addr;
-    }
+  if (port == 0)
+    a->sin_port = src->sin_port;
   else
-    {
-      a->sin_port = htons (port);
-      a->sin_addr.s_addr = htonl (ip);
-    }
+    a->sin_port = htons (port);
+  if (ip == 0)
+    a->sin_addr.s_addr = src->sin_addr.s_addr;
+  else
+    a->sin_addr.s_addr = htonl (ip);
+
   return 0;
 }
 
