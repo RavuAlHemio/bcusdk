@@ -31,6 +31,7 @@ typedef struct
   int state;
   int type;
   int no;
+  bool nat;
   pth_event_t timeout;
     Queue < CArray > out;
   struct sockaddr_in daddr;

@@ -310,10 +310,13 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
 		}
 	      myaddr = (cresp.CRD[1] << 8) | cresp.CRD[2];
 	      daddr = cresp.daddr;
-	      if (NAT)
-		daddr.sin_addr = caddr.sin_addr;
-	      if (dataport != -1)
-		daddr.sin_port = htons (dataport);
+	      if (!cresp.nat)
+		{
+		  if (NAT)
+		    daddr.sin_addr = caddr.sin_addr;
+		  if (dataport != -1)
+		    daddr.sin_port = htons (dataport);
+		}
 	      channel = cresp.channel;
 	      mod = 1;
 	      sno = 0;

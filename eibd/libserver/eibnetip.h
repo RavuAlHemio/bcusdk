@@ -50,10 +50,10 @@ int GetHostIP (struct sockaddr_in *sock, const char *Name);
 int GetSourceAddress (const struct sockaddr_in *dest,
 		      struct sockaddr_in *src);
 /** convert a to EIBnet/IP format */
-CArray IPtoEIBNetIP (const struct sockaddr_in *a);
+CArray IPtoEIBNetIP (const struct sockaddr_in *a, bool nat);
 /** convert EIBnet/IP IP Address to a */
 int EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
-		const struct sockaddr_in *src);
+		const struct sockaddr_in *src, bool & nat);
 bool compareIPAddress (const struct sockaddr_in &a,
 		       const struct sockaddr_in &b);
 
@@ -87,6 +87,7 @@ public:
   struct sockaddr_in caddr;
   struct sockaddr_in daddr;
   CArray CRI;
+  bool nat;
   EIBNetIPPacket ToPacket () const;
 };
 
@@ -100,6 +101,7 @@ public:
   uchar channel;
   uchar status;
   struct sockaddr_in daddr;
+  bool nat;
   CArray CRD;
   EIBNetIPPacket ToPacket () const;
 };
@@ -114,6 +116,7 @@ public:
   uchar channel;
   uchar status;
   struct sockaddr_in caddr;
+  bool nat;
   EIBNetIPPacket ToPacket () const;
 };
 
@@ -138,6 +141,7 @@ public:
   EIBnet_DisconnectRequest ();
   struct sockaddr_in caddr;
   uchar channel;
+  bool nat;
   EIBNetIPPacket ToPacket () const;
 };
 
@@ -217,6 +221,7 @@ class EIBnet_DescriptionRequest
 public:
   EIBnet_DescriptionRequest ();
   struct sockaddr_in caddr;
+  bool nat;
   EIBNetIPPacket ToPacket () const;
 };
 
@@ -248,6 +253,7 @@ class EIBnet_SearchRequest
 public:
   EIBnet_SearchRequest ();
   struct sockaddr_in caddr;
+  bool nat;
   EIBNetIPPacket ToPacket () const;
 };
 
@@ -268,6 +274,7 @@ public:
   uchar MAC[6];
   uchar name[30];
   struct sockaddr_in caddr;
+  bool nat;
   EIBNetIPPacket ToPacket () const;
 };
 

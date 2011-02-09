@@ -245,6 +245,7 @@ rt:
       state[pos].rno = 0;
       state[pos].no = 1;
       state[pos].type = type;
+      state[pos].nat = r1.nat;
     }
   return id;
 }
@@ -481,6 +482,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 	      if (!GetSourceAddress (&r1.caddr, &r2.daddr))
 		goto out;
 	      r2.daddr.sin_port = Port;
+	      r2.nat = r1.nat;
 	      sock->sendaddr = r1.caddr;
 	      sock->Send (r2.ToPacket ());
 	    }
@@ -793,6 +795,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
       if (!GetSourceAddress (&state[i].caddr, &r.caddr))
 	continue;
       r.caddr.sin_port = Port;
+      r.nat = state[i].nat;
       sock->sendaddr = state[i].caddr;
       sock->Send (r.ToPacket ());
       pth_event_free (state[i].timeout, PTH_FREE_THIS);

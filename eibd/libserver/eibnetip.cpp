@@ -271,24 +271,36 @@ EIBNetIPPacket::ToPacket ()
 }
 
 CArray
-IPtoEIBNetIP (const struct sockaddr_in * a)
+IPtoEIBNetIP (const struct sockaddr_in * a, bool nat)
 {
   CArray buf;
   buf.resize (8);
   buf[0] = 0x08;
   buf[1] = 0x01;
-  buf[2] = (ntohl (a->sin_addr.s_addr) >> 24) & 0xff;
-  buf[3] = (ntohl (a->sin_addr.s_addr) >> 16) & 0xff;
-  buf[4] = (ntohl (a->sin_addr.s_addr) >> 8) & 0xff;
-  buf[5] = (ntohl (a->sin_addr.s_addr) >> 0) & 0xff;
-  buf[6] = (ntohs (a->sin_port) >> 8) & 0xff;
-  buf[7] = (ntohs (a->sin_port) >> 0) & 0xff;
+  if (nat)
+    {
+      buf[2] = 0;
+      buf[3] = 0;
+      buf[4] = 0;
+      buf[5] = 0;
+      buf[6] = 0;
+      buf[7] = 0;
+    }
+  else
+    {
+      buf[2] = (ntohl (a->sin_addr.s_addr) >> 24) & 0xff;
+      buf[3] = (ntohl (a->sin_addr.s_addr) >> 16) & 0xff;
+      buf[4] = (ntohl (a->sin_addr.s_addr) >> 8) & 0xff;
+      buf[5] = (ntohl (a->sin_addr.s_addr) >> 0) & 0xff;
+      buf[6] = (ntohs (a->sin_port) >> 8) & 0xff;
+      buf[7] = (ntohs (a->sin_port) >> 0) & 0xff;
+    }
   return buf;
 }
 
 int
 EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
-	    const struct sockaddr_in *src)
+	    const struct sockaddr_in *src, bool & nat)
 {
   int ip, port;
   memset (a, 0, sizeof (*a));
@@ -305,7 +317,10 @@ EIBnettoIP (const CArray & buf, struct sockaddr_in *a,
   else
     a->sin_port = htons (port);
   if (ip == 0)
-    a->sin_addr.s_addr = src->sin_addr.s_addr;
+    {
+      nat = true;
+      a->sin_addr.s_addr = src->sin_addr.s_addr;
+    }
   else
     a->sin_addr.s_addr = htonl (ip);
 
@@ -488,6 +503,7 @@ EIBnet_ConnectRequest::EIBnet_ConnectRequest ()
 {
   memset (&caddr, 0, sizeof (caddr));
   memset (&daddr, 0, sizeof (daddr));
+  nat = false;
 }
 
 EIBNetIPPacket EIBnet_ConnectRequest::ToPacket ()CONST
@@ -497,8 +513,8 @@ EIBNetIPPacket EIBnet_ConnectRequest::ToPacket ()CONST
   CArray
     ca,
     da;
-  ca = IPtoEIBNetIP (&caddr);
-  da = IPtoEIBNetIP (&daddr);
+  ca = IPtoEIBNetIP (&caddr, nat);
+  da = IPtoEIBNetIP (&daddr, nat);
   p.service = CONNECTION_REQUEST;
   p.data.resize (ca () + da () + 1 + CRI ());
   p.data.setpart (ca, 0);
@@ -516,9 +532,9 @@ parseEIBnet_ConnectRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () < 18)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array (), 8), &r.caddr, &p.src))
+  if (EIBnettoIP (CArray (p.data.array (), 8), &r.caddr, &p.src, r.nat))
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 8, 8), &r.daddr, &p.src))
+  if (EIBnettoIP (CArray (p.data.array () + 8, 8), &r.daddr, &p.src, r.nat))
     return 1;
   if (p.data () - 16 != p.data[16])
     return 1;
@@ -529,6 +545,7 @@ parseEIBnet_ConnectRequest (const EIBNetIPPacket & p,
 EIBnet_ConnectResponse::EIBnet_ConnectResponse ()
 {
   memset (&daddr, 0, sizeof (daddr));
+  nat = false;
   channel = 0;
   status = 0;
 }
@@ -538,7 +555,7 @@ EIBNetIPPacket EIBnet_ConnectResponse::ToPacket ()CONST
   EIBNetIPPacket
     p;
   CArray
-    da = IPtoEIBNetIP (&daddr);
+    da = IPtoEIBNetIP (&daddr, nat);
   p.service = CONNECTION_RESPONSE;
   if (status != 0)
     p.data.resize (2);
@@ -573,7 +590,7 @@ parseEIBnet_ConnectResponse (const EIBNetIPPacket & p,
     }
   if (p.data () < 12)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.daddr, &p.src))
+  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.daddr, &p.src, r.nat))
     return 1;
   if (p.data () - 10 != p.data[10])
     return 1;
@@ -586,6 +603,7 @@ parseEIBnet_ConnectResponse (const EIBNetIPPacket & p,
 EIBnet_ConnectionStateRequest::EIBnet_ConnectionStateRequest ()
 {
   memset (&caddr, 0, sizeof (caddr));
+  nat = false;
   channel = 0;
 }
 
@@ -594,7 +612,7 @@ EIBNetIPPacket EIBnet_ConnectionStateRequest::ToPacket ()CONST
   EIBNetIPPacket
     p;
   CArray
-    ca = IPtoEIBNetIP (&caddr);
+    ca = IPtoEIBNetIP (&caddr, nat);
   p.service = CONNECTIONSTATE_REQUEST;
   p.data.resize (ca () + 2);
   p.data[0] = channel;
@@ -611,7 +629,7 @@ parseEIBnet_ConnectionStateRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () != 10)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr, &p.src))
+  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr, &p.src, r.nat))
     return 1;
   r.channel = p.data[0];
   return 0;
@@ -650,6 +668,7 @@ parseEIBnet_ConnectionStateResponse (const EIBNetIPPacket & p,
 EIBnet_DisconnectRequest::EIBnet_DisconnectRequest ()
 {
   memset (&caddr, 0, sizeof (caddr));
+  nat = false;
   channel = 0;
 }
 
@@ -658,7 +677,7 @@ EIBNetIPPacket EIBnet_DisconnectRequest::ToPacket ()CONST
   EIBNetIPPacket
     p;
   CArray
-    ca = IPtoEIBNetIP (&caddr);
+    ca = IPtoEIBNetIP (&caddr, nat);
   p.service = DISCONNECT_REQUEST;
   p.data.resize (ca () + 2);
   p.data[0] = channel;
@@ -675,7 +694,7 @@ parseEIBnet_DisconnectRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () != 10)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr, &p.src))
+  if (EIBnettoIP (CArray (p.data.array () + 2, 8), &r.caddr, &p.src, r.nat))
     return 1;
   r.channel = p.data[0];
   return 0;
@@ -854,6 +873,7 @@ parseEIBnet_ConfigACK (const EIBNetIPPacket & p, EIBnet_ConfigACK & r)
 EIBnet_DescriptionRequest::EIBnet_DescriptionRequest ()
 {
   memset (&caddr, 0, sizeof (caddr));
+  nat = false;
 }
 
 EIBNetIPPacket EIBnet_DescriptionRequest::ToPacket ()CONST
@@ -861,7 +881,7 @@ EIBNetIPPacket EIBnet_DescriptionRequest::ToPacket ()CONST
   EIBNetIPPacket
     p;
   CArray
-    ca = IPtoEIBNetIP (&caddr);
+    ca = IPtoEIBNetIP (&caddr, nat);
   p.service = DESCRIPTION_REQUEST;
   p.data = ca;
   return p;
@@ -875,7 +895,7 @@ parseEIBnet_DescriptionRequest (const EIBNetIPPacket & p,
     return 1;
   if (p.data () != 8)
     return 1;
-  if (EIBnettoIP (p.data, &r.caddr, &p.src))
+  if (EIBnettoIP (p.data, &r.caddr, &p.src, r.nat))
     return 1;
   return 0;
 }
@@ -964,6 +984,7 @@ parseEIBnet_DescriptionResponse (const EIBNetIPPacket & p,
 EIBnet_SearchRequest::EIBnet_SearchRequest ()
 {
   memset (&caddr, 0, sizeof (caddr));
+  nat = false;
 }
 
 EIBNetIPPacket EIBnet_SearchRequest::ToPacket ()CONST
@@ -971,7 +992,7 @@ EIBNetIPPacket EIBnet_SearchRequest::ToPacket ()CONST
   EIBNetIPPacket
     p;
   CArray
-    ca = IPtoEIBNetIP (&caddr);
+    ca = IPtoEIBNetIP (&caddr, nat);
   p.service = SEARCH_REQUEST;
   p.data = ca;
   return p;
@@ -984,7 +1005,7 @@ parseEIBnet_SearchRequest (const EIBNetIPPacket & p, EIBnet_SearchRequest & r)
     return 1;
   if (p.data () != 8)
     return 1;
-  if (EIBnettoIP (p.data, &r.caddr, &p.src))
+  if (EIBnettoIP (p.data, &r.caddr, &p.src, r.nat))
     return 1;
   return 0;
 }
@@ -1007,7 +1028,7 @@ EIBNetIPPacket EIBnet_SearchResponse::ToPacket ()CONST
   EIBNetIPPacket
     p;
   CArray
-    ca = IPtoEIBNetIP (&caddr);
+    ca = IPtoEIBNetIP (&caddr, nat);
   p.service = SEARCH_RESPONSE;
   p.data.resize (64 + services () * 2);
   p.data.setpart (ca, 0);
@@ -1042,7 +1063,7 @@ parseEIBnet_SearchResponse (const EIBNetIPPacket & p,
     return 1;
   if (p.data () < 64)
     return 1;
-  if (EIBnettoIP (CArray (p.data.array () + 0, 8), &r.caddr, &p.src))
+  if (EIBnettoIP (CArray (p.data.array () + 0, 8), &r.caddr, &p.src, r.nat))
     return 1;
   if (p.data[8] != 54)
     return 1;
