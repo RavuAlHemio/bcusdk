@@ -344,6 +344,7 @@ main (int ac, char *ag[])
       close (0);
       dup2 (fd, 1);
       dup2 (fd, 2);
+      close (fd);
       setsid ();
     }
 
@@ -382,15 +383,39 @@ main (int ac, char *ag[])
     die ("initialisation of the group cache failed");
 #endif
 
-  sigset_t t1;
-  sigemptyset (&t1);
-  sigaddset (&t1, SIGINT);
-  sigaddset (&t1, SIGTERM);
   signal (SIGINT, SIG_IGN);
   signal (SIGTERM, SIG_IGN);
 
-  int x;
-  pth_sigwait (&t1, &x);
+  int sig;
+  do
+    {
+      sigset_t t1;
+      sigemptyset (&t1);
+      sigaddset (&t1, SIGINT);
+      sigaddset (&t1, SIGHUP);
+      sigaddset (&t1, SIGTERM);
+
+      pth_sigwait (&t1, &sig);
+
+      if (sig == SIGHUP && arg.daemon)
+	{
+	  int fd =
+	    open (arg.daemon, O_WRONLY | O_APPEND | O_CREAT, FILE_MODE);
+	  if (fd == -1)
+	    {
+	      ERRORPRINTF (&t, 0x27000002, 0, "can't open log file %s",
+			   arg.daemon);
+	      continue;
+	    }
+	  close (1);
+	  close (2);
+	  dup2 (fd, 1);
+	  dup2 (fd, 2);
+	  close (fd);
+	}
+
+    }
+  while (sig == SIGHUP);
 
   signal (SIGINT, SIG_DFL);
   signal (SIGTERM, SIG_DFL);
