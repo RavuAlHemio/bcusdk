@@ -93,7 +93,10 @@ all other eibd backends based on the serial driver, you need to grant
 only read and write access on /dev/ttySx. The EIBnet/IP backends
 require no privilege. The USB backend requires read and write access
 to the file representing the device in usbfs (normaly mounted at
-/proc/bus/usb).
+/proc/bus/usb) or in /dev managed by udev.
+
+contrib/linux/99-eib.rules contains a sample udev rules file, which shows 
+how to grant permissins with udev.
 
 KNXLive! (http://www.auto.tuwien.ac.at/knx/knxlive.html) contains
 since version 0.2 a EIBD setup wizard.
