@@ -51,9 +51,12 @@ main (int ac, char *ag[])
   int tracelevel;
   int sport;
   int dport;
+  bool shortlist = false;
   char *a, *b, *c;
   if (ac != 2 && ac != 3)
-    die ("Usage: %s ip[:dst-port[:src-port]] [tracelevel]", ag[0]);
+    die
+      ("Usage: %s [/]ip[:dst-port[:src-port]] [tracelevel]     use - as default ip",
+       ag[0]);
   struct sockaddr_in saddr;
   struct sockaddr_in caddr;
   EIBNetIPSocket *sock;
@@ -66,6 +69,11 @@ main (int ac, char *ag[])
   a = strdup (ag[1]);
   if (!a)
     die ("out of memory");
+  if (*a == '/')
+    {
+      a++;
+      shortlist = true;
+    }
   for (b = a; *b; b++)
     if (*b == ':')
       break;
@@ -91,7 +99,7 @@ main (int ac, char *ag[])
   if (!strcmp (a, "-"))
     a = (char *) "224.0.23.12";
 
-  printf ("Asking %s at port %d from port %d\n", a, dport, sport);
+  printf ("Asking %s at port %d from port %d\n\n", a, dport, sport);
 
   if (!GetHostIP (&caddr, a))
     die ("Host not found");
@@ -124,16 +132,27 @@ main (int ac, char *ag[])
 	  printf ("Answer from %s at port %d\n",
 		  inet_ntoa (resp.caddr.sin_addr),
 		  ntohs (resp.caddr.sin_port));
-	  printf ("Medium: %d\nState: %d\nAddr: %s\nInstallID: %d\nSerial:",
-		  resp.KNXmedium, resp.devicestatus,
-		  FormatEIBAddr (resp.individual_addr) (), resp.installid);
-	  HexDump (resp.serial, sizeof (resp.serial));
-	  printf ("Multicast-Addr: %s\nMAC:", inet_ntoa (resp.multicastaddr));
-	  HexDump (resp.MAC, sizeof (resp.MAC));
-	  printf ("Name: %s\n", resp.name);
-	  for (int i = 0; i < resp.services (); i++)
-	    printf ("Service %d Version %d\n", resp.services[i].family,
-		    resp.services[i].version);
+	  if (shortlist)
+	    {
+	      printf ("Addr: %s\n", FormatEIBAddr (resp.individual_addr) ());
+	      printf ("Name: %s\n", resp.name);
+	    }
+	  else
+	    {
+	      printf
+		("Medium: %d\nState: %d\nAddr: %s\nInstallID: %d\nSerial:",
+		 resp.KNXmedium, resp.devicestatus,
+		 FormatEIBAddr (resp.individual_addr) (), resp.installid);
+	      HexDump (resp.serial, sizeof (resp.serial));
+	      printf ("Multicast-Addr: %s\nMAC:",
+		      inet_ntoa (resp.multicastaddr));
+	      HexDump (resp.MAC, sizeof (resp.MAC));
+	      printf ("Name: %s\n", resp.name);
+	      for (int i = 0; i < resp.services (); i++)
+		printf ("Service %d Version %d\n", resp.services[i].family,
+			resp.services[i].version);
+	    }
+	  printf ("\n");
 	}
     }
   while (p1);
