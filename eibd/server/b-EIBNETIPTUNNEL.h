@@ -30,6 +30,14 @@
 #define EIBNETIPTUNNEL_CREATE eibnetiptunnel_Create
 #define EIBNETIPTUNNEL_CLEANUP NULL
 
+#define EIBNETIPTUNNELNAT_URL "iptn:router-ip[:dest-port[:src-port]]\n"
+#define EIBNETIPTUNNELNAT_DOC "iptn connects with the EIBnet/IP Tunneling protocol over an EIBnet/IP gateway using the NAT mode\n\n"
+
+#define EIBNETIPTUNNELNAT_PREFIX "iptn"
+#define EIBNETIPTUNNELNAT_CREATE eibnetiptunnelnat_Create
+#define EIBNETIPTUNNELNAT_CLEANUP NULL
+
+
 inline Layer2Interface *
 eibnetiptunnel_Create (const char *dev, int flags, Trace * t)
 {
@@ -81,6 +89,42 @@ eibnetiptunnel_Create (const char *dev, int flags, Trace * t)
     dport = 3671;
 
   iface = new EIBNetIPTunnel (a, dport, sport, d, dataport, flags, t);
+  free (a);
+  return iface;
+}
+
+inline Layer2Interface *
+eibnetiptunnelnat_Create (const char *dev, int flags, Trace * t)
+{
+  char *a = strdup (dev);
+  char *b;
+  char *c;
+  int dport;
+  int sport;
+  Layer2Interface *iface;
+  if (!a)
+    die ("out of memory");
+  for (b = a; *b; b++)
+    if (*b == ':')
+      break;
+  sport = 3672;
+  if (*b == ':')
+    {
+      *b = 0;
+      for (c = b + 1; *c; c++)
+	if (*c == ':')
+	  break;
+      if (*c == ':')
+	{
+	  *c = 0;
+	  sport = atoi (c + 1);
+	}
+      dport = atoi (b + 1);
+    }
+  else
+    dport = 3671;
+
+  iface = new EIBNetIPTunnel (a, dport, sport, "0.0.0.0", -1, flags, t);
   free (a);
   return iface;
 }

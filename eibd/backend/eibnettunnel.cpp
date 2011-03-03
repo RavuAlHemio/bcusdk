@@ -241,12 +241,15 @@ EIBNetIPTunnel::Run (pth_sem_t * stop1)
   EIBNetIPPacket p;
   EIBNetIPPacket *p1;
   EIBnet_ConnectRequest creq;
+  creq.nat = saddr.sin_addr.s_addr == 0;
   EIBnet_ConnectResponse cresp;
   EIBnet_ConnectionStateRequest csreq;
+  csreq.nat = saddr.sin_addr.s_addr == 0;
   EIBnet_ConnectionStateResponse csresp;
   EIBnet_TunnelRequest treq;
   EIBnet_TunnelACK tresp;
   EIBnet_DisconnectRequest dreq;
+  dreq.nat = saddr.sin_addr.s_addr == 0;
   EIBnet_DisconnectResponse dresp;
   creq.caddr = saddr;
   creq.daddr = saddr;
