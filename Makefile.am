@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=1.9
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST=bcusdk.spec
+EXTRA_DIST=bcusdk.spec SubmittingPatches .gitignore
 
 if HAVE_ONLYEIBD
 BUILDDIRS = 
