@@ -81,7 +81,7 @@ AM_CONDITIONAL(HAVE_ONLYEIBD, test x$onlyeibd = xtrue)
 
 if test x$onlyeibd = xfalse ; then
 
-AM_PATH_XML2(2.6.16,,[AC_MSG_ERROR([limxml2 not found])])
+PKG_CHECK_MODULES(XML, libxml-2.0 >= 2.6.16)
 AC_PATH_PROG(TAS,[m68hc05-as],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TLD,[m68hc05-ld],,[$PATH:$bindir:$prefix/bin])
 AC_PATH_PROG(TAR,[m68hc05-ar],,[$PATH:$bindir:$prefix/bin])
