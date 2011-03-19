@@ -33,7 +33,10 @@ cat >conftest.$ac_ext <<EOF
 int main() { return 0; }
 EOF
 ${CXX} -c $CFLAGS $CPPFLAGS $3 conftest.$ac_ext 1>conftest.out 2>conftest.err
-if test $? -ne 0 -o -s conftest.err; then
+ac_status=$?
+echo "Try: ${CXX} -c $CFLAGS $CPPFLAGS $3" >&AS_MESSAGE_LOG_FD
+cat conftest.out conftest.err >&AS_MESSAGE_LOG_FD
+if test $ac_status -ne 0 -o -s conftest.err; then
      ac_cv_compiler_option_$1=no
 else
      ac_cv_compiler_option_$1=yes
