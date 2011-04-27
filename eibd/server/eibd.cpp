@@ -358,7 +358,7 @@ main (int ac, char *ag[])
       }
 
   l2 = Create (ag[index], arg.backendflags, &t);
-  if (!l2->init ())
+  if (!l2 || !l2->init ())
     die ("initialisation of the backend failed");
   l3 = new Layer3 (l2, &t);
   if (arg.port)
