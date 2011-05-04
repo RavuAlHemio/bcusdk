@@ -38,7 +38,7 @@
 	printf("      return -1;\n");
 
 #define EIBC_RETURNERROR(msg, error) \
-	printf("    if %s != %d:\n", EIBTYPE, msg); \
+	printf("    if %s == %d:\n", EIBTYPE, msg); \
 	printf("      self.errno = errno.%s\n", #error); \
 	printf("      return -1\n");
 
