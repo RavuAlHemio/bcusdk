@@ -279,6 +279,7 @@ GenCommonHeader (FILE * f, Device & d)
 
   if (UsePEI (d))
     {
+      fprintf (f, "extern volatile uint1 __tmp_space[4];\n");
       fprintf (f,
 	       "NOSAVE(void _PEI_Handler_stub())\n{\nuchar event=__tmp_space[0];\n");
       if (d.on_pei_init ())
@@ -308,7 +309,7 @@ GenCommonHeader (FILE * f, Device & d)
       if (d.on_pei_icb ())
 	fprintf (f, "if (event==PM_ICB) %s();\n", d.on_pei_icb ());
       if (d.on_pei_user ())
-	fprintf (f, "%s(uchar event);\n", d.on_pei_user ());
+	fprintf (f, "%s(event);\n", d.on_pei_user ());
       fprintf (f, "}\n\n");
     }
 
