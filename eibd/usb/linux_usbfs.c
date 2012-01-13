@@ -52,7 +52,8 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex)
 	return 0;
 }
 
-int clock_gettime(clockid_t clk_id, struct timespec *tp)
+#define clock_gettime(A,B) xclock_gettime(A, B)
+int xclock_gettime(clockid_t clk_id, struct timespec *tp)
 {
 	pth_int_time (tp);
 	return 0;
