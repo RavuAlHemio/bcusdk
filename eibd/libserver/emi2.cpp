@@ -71,14 +71,16 @@ EMI2Layer2Interface::closeVBusmonitor ()
 }
 
 EMI2Layer2Interface::EMI2Layer2Interface (LowLevelDriverInterface * i,
-					  Trace * tr)
+					  Trace * tr, int flags)
 {
   TRACEPRINTF (tr, 2, this, "Open");
   iface = i;
   t = tr;
   mode = 0;
   vmode = 0;
+  noqueue = flags & FLAG_B_EMI_NOQUEUE;
   pth_sem_init (&out_signal);
+  pth_sem_init (&in_signal);
   getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   if (!iface->init ())
     {
@@ -198,7 +200,7 @@ EMI2Layer2Interface::Close ()
 bool
 EMI2Layer2Interface::Send_Queue_Empty ()
 {
-  return iface->Send_Queue_Empty ();
+  return iface->Send_Queue_Empty () && inqueue.isempty();
 }
 
 
@@ -218,6 +220,16 @@ EMI2Layer2Interface::Send_L_Data (LPDU * l)
     return;
   assert (l1->data () <= 0x10);
   assert ((l1->hopcount & 0xf8) == 0);
+
+  inqueue.put (l);
+  pth_sem_inc (&in_signal, 1);
+}
+
+void
+EMI2Layer2Interface::Send (LPDU * l)
+{
+  TRACEPRINTF (t, 1, this, "Send %s", l->Decode ()());
+  L_Data_PDU *l1 = (L_Data_PDU *) l;
 
   CArray pdu = L_Data_ToEMI (0x11, *l1);
   iface->Send_Packet (pdu);
@@ -258,9 +270,32 @@ void
 EMI2Layer2Interface::Run (pth_sem_t * stop1)
 {
   pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
+  pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
+  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 0));
+  sendmode = 0;
   while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
     {
+      if (sendmode == 0)
+	pth_event_concat (stop, input, NULL);
+      if (sendmode == 1)
+	pth_event_concat (stop, timeout, NULL);
       CArray *c = iface->Get_Packet (stop);
+      pth_event_isolate(input);
+      pth_event_isolate(timeout);
+      if (!inqueue.isempty() && sendmode == 0)
+	{
+	  Send(inqueue.get());
+	  if (noqueue)
+	    {
+	      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
+			 pth_time (1, 0));
+	      sendmode = 1;
+	    }
+	  else
+	    sendmode = 0;
+	}
+      if (sendmode == 1 && pth_event_status(timeout) == PTH_STATUS_OCCURRED)
+	sendmode = 0;
       if (!c)
 	continue;
       if (c->len () == 1 && (*c)[0] == 0xA0 && mode == 2)
@@ -275,6 +310,8 @@ EMI2Layer2Interface::Run (pth_sem_t * stop1)
 	  mode = 0;
 	  enterBusmonitor ();
 	}
+      if (c->len () && (*c)[0] == 0x2E)
+	sendmode = 0;
       if (c->len () && (*c)[0] == 0x29 && mode == 2)
 	{
 	  L_Data_PDU *p = EMI_to_L_Data (*c);
@@ -309,4 +346,6 @@ EMI2Layer2Interface::Run (pth_sem_t * stop1)
       delete c;
     }
   pth_event_free (stop, PTH_FREE_THIS);
+  pth_event_free (input, PTH_FREE_THIS);
+  pth_event_free (timeout, PTH_FREE_THIS);
 }

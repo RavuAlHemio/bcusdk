@@ -33,7 +33,7 @@
 inline Layer2Interface *
 PEI16_Create (const char *dev, int flags, Trace * t)
 {
-  return new EMI1Layer2Interface (new BCU1DriverLowLevelDriver (dev, t), t);
+  return new EMI1Layer2Interface (new BCU1DriverLowLevelDriver (dev, t), t, flags);
 }
 
 #endif

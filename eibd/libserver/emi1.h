@@ -38,14 +38,21 @@ class EMI1Layer2Interface:public Layer2Interface, private Thread
   int vmode;
   /** semaphore for outqueue */
   pth_sem_t out_signal;
+  /** semaphore for inqueue */
+  pth_sem_t in_signal;
   /** output queue */
     Queue < LPDU * >outqueue;
+  /** input queue */
+    Queue < LPDU * >inqueue;
     /** event for outqueue*/
   pth_event_t getwait;
+  bool noqueue;
+  int sendmode;
 
+  void Send (LPDU * l);
   void Run (pth_sem_t * stop);
 public:
-    EMI1Layer2Interface (LowLevelDriverInterface * i, Trace * tr);
+  EMI1Layer2Interface (LowLevelDriverInterface * i, Trace * tr, int flags);
    ~EMI1Layer2Interface ();
   bool init ();
 

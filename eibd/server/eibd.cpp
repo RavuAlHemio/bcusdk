@@ -35,6 +35,7 @@
 #define OPT_BACK_TPUARTS_ACKGROUP 2
 #define OPT_BACK_TPUARTS_ACKINDIVIDUAL 3
 #define OPT_BACK_TPUARTS_DISCH_RESET 4
+#define OPT_BACK_EMI_NOQUEUE 5
 
 /** structure to store the arguments */
 struct arguments
@@ -193,6 +194,8 @@ static struct argp_option options[] = {
   {"tpuarts-disch-reset", OPT_BACK_TPUARTS_DISCH_RESET, 0, 0,
    "tpuarts backend should should use a full interface reset (for Disch TPUART interfaces)"},
 #endif
+  {"no-emi-send-queuing", OPT_BACK_EMI_NOQUEUE, 0, 0,
+   "wait for L_Data_ind while sending (for all EMI based backends)"},
   {0}
 };
 
@@ -250,6 +253,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
       break;
     case OPT_BACK_TPUARTS_DISCH_RESET:
       arguments->backendflags |= FLAG_B_TPUARTS_DISCH_RESET;
+      break;
+    case OPT_BACK_EMI_NOQUEUE:
+      arguments->backendflags |= FLAG_B_EMI_NOQUEUE;
       break;
     default:
       return ARGP_ERR_UNKNOWN;

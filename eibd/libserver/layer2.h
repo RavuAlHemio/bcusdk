@@ -107,5 +107,6 @@ typedef Layer2Interface *(*Layer2_Create_Func) (const char *conf, int flags,
 #define FLAG_B_TPUARTS_ACKGROUP (1<<1)
 #define FLAG_B_TPUARTS_ACKINDIVIDUAL (1<<2)
 #define FLAG_B_TPUARTS_DISCH_RESET (1<<3)
+#define FLAG_B_EMI_NOQUEUE (1<<4)
 
 #endif

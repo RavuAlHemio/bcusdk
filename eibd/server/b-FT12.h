@@ -32,7 +32,7 @@
 inline Layer2Interface *
 ft12_Create (const char *dev, int flags, Trace * t)
 {
-  return new EMI2Layer2Interface (new FT12LowLevelDriver (dev, t), t);
+  return new EMI2Layer2Interface (new FT12LowLevelDriver (dev, t), t, flags);
 }
 
 #endif

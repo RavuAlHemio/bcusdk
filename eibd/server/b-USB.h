@@ -35,7 +35,7 @@ Usb_Create (const char *dev, int flags, Trace * t)
 {
   if (!USBInit (t))
     return 0;
-  return new USBLayer2Interface (new USBLowLevelDriver (dev, t), t);
+  return new USBLayer2Interface (new USBLowLevelDriver (dev, t), t, flags);
 }
 
 #endif
