@@ -104,6 +104,8 @@ USBInit (Trace * tr)
   if (libusb_init (&context))
     return false;
   loop = new USBLoop (context, tr);
+
+  return true;
 }
 
 void
