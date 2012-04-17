@@ -163,7 +163,7 @@ typedef struct
 static int
 SA_SIZE (struct sockaddr *sa)
 {
-  int align = sizeof (long);
+  int align = sizeof (int);
   int len = (sa->sa_len ? sa->sa_len : align);
   if (len & (align - 1))
     {
