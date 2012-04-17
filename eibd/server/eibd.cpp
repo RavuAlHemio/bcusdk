@@ -140,7 +140,7 @@ readaddr (const char *addr)
 const char *argp_program_version = "eibd " VERSION;
 /** documentation */
 static char doc[] =
-  "eibd -- a commonication stack for EIB\n"
+  "eibd -- a commonication stack for EIB/KNX\n"
   "(C) 2005-2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>\n"
   "supported URLs are:\n"
 #undef L2_NAME
