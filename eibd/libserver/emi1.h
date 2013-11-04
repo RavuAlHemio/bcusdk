@@ -32,8 +32,6 @@ class EMI1Layer2Interface:public Layer2Interface, private Thread
   Trace *t;
   /** state */
   int mode;
-  /** default address */
-  eibaddr_t def;
   /** vbusmonitor */
   int vmode;
   /** semaphore for outqueue */

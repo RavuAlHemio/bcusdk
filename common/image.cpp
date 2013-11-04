@@ -231,7 +231,6 @@ STR_Code::decode ()
 {
   char buf[200];
   String s;
-  int i;
   sprintf (buf, "Code:\n");
   s = buf;
   return s + HexDump (code);

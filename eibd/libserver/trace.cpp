@@ -51,7 +51,6 @@ void
 Trace::ErrorPrintfUncond (unsigned int msgid, const char *msg, ...)
 {
   va_list ap;
-  int t = time (0);
   char c;
   switch ((msgid >> 28) & 0x0f)
     {

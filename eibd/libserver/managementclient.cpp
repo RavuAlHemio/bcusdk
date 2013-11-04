@@ -519,11 +519,7 @@ ManagementIndividual (Layer3 * l3, Trace * t, ClientConnection * c,
 		      pth_event_t stop)
 {
   eibaddr_t dest;
-  uint16_t maskver;
-  int16_t val;
-  uchar buf[10];
   int i;
-  eibkey_type key;
 
   if (c->size < 4)
     {
