@@ -26,7 +26,7 @@ dnl ##    SUCH DAMAGE.
 AC_PREREQ(2.59)
 
 AC_INIT(bcusdk, 0.0.5)
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_CANONICAL_HOST
 AC_PROG_CC
