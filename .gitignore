@@ -13,3 +13,11 @@ config.sub
 configure
 config.log
 config.status
+aclocal.m4
+compile
+config.h.in
+depcomp
+install-sh
+ltmain.sh
+missing
+ylwrap
