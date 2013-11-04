@@ -201,7 +201,7 @@ USBConverterInterface::Get_Packet (pth_event_t stop)
       CArray res = *res1;
       if (res () != 64)
 	goto out;
-      if (res[0] = !0x01)
+      if (res[0] != 0x01)
 	goto out;
       if ((res[1] & 0x0f) != 3)
 	goto out;
