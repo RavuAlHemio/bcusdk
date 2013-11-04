@@ -503,7 +503,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  TRACEPRINTF (t, 8, this, "Invalid data endpoint");
 		  goto out;
 		}
-	      if (state[i].rno == (r1.seqno + 1) & 0xff)
+	      if (state[i].rno == ((r1.seqno + 1) & 0xff))
 		{
 		  r2.channel = r1.channel;
 		  r2.seqno = r1.seqno;
@@ -617,7 +617,7 @@ EIBnetServer::Run (pth_sem_t * stop1)
 		  TRACEPRINTF (t, 8, this, "Invalid data endpoint");
 		  goto out;
 		}
-	      if (state[i].rno == (r1.seqno + 1) & 0xff)
+	      if (state[i].rno == ((r1.seqno + 1) & 0xff))
 		{
 		  r2.channel = r1.channel;
 		  r2.seqno = r1.seqno;
