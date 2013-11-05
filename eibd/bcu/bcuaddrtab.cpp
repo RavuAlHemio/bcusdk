@@ -25,7 +25,7 @@
 #include "lowlevelconf.h"
 
 /** aborts program with a printf like message */
-void
+void _Noreturn
 die (const char *msg, ...)
 {
   va_list ap;

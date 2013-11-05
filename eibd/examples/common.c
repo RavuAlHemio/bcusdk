@@ -29,7 +29,7 @@ printHex (int len, uchar * data)
     printf ("%02X ", data[i]);
 }
 
-void
+void _Noreturn
 die (const char *msg, ...)
 {
   va_list ap;

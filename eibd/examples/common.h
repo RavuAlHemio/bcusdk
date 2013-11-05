@@ -33,7 +33,7 @@ void printHex (int len, uchar * data);
 /** aborts the program and prints message
  * \param msg Message (printf like)
  */
-void die (const char *msg, ...);
+void _Noreturn die (const char *msg, ...);
 /** parses a EIB address
  * \param addr string with the EIB address
  * \return EIB address
