@@ -209,9 +209,9 @@ main (int ac, char *ag[])
 	      if (len == 2)
 		{
 		  if (buf[1] & 0x3F)
-		    printf (ag[3]);
+		    fputs (ag[3], stdout);
 		  else if (ac == 5)
-		    printf (ag[4]);
+		    fputs (ag[4], stdout);
 		}
 	      else
 		printf ("ERR");
