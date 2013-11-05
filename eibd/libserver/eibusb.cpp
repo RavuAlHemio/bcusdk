@@ -188,6 +188,8 @@ USBConverterInterface::Send_Packet (CArray l)
     case vCEMI:
       out[8] = 0x03;
       break;
+    default:
+      assert(0);
     }
   i->Send_Packet (out);
 }
