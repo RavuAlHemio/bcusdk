@@ -181,6 +181,8 @@ int _EIB_GetRequest (EIBConnection * con);
 	unsigned int ilen = length; \
 	int dyn = 0; \
 	int i; \
+	(void)ilen; \
+	(void)i; \
 	if (!con) \
 	  { \
 	    errno = EINVAL; \
