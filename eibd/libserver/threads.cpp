@@ -19,25 +19,21 @@
 
 #include "types.h"
 #include "threads.h"
+#include "event.h"
 
 void *
 Thread::ThreadWrapper (void *arg)
 {
-  ((Thread *) arg)->Run (&((Thread *) arg)->should_stop);
-  if (((Thread *) arg)->autodel)
-    delete ((Thread *) arg);
-  pth_exit (0);
-  return 0;
+  Thread *thd = (Thread *) arg;
+  thd->Run (thd->should_stop.get_future ().share ());
+  thd->is_done.store (true);
+  return NULL;
 }
 
-Thread::Thread (int Priority, Runable * o, THREADENTRY t)
+Thread::Thread (Runable * o, THREADENTRY t)
+  : thread (NULL), obj (o), entry (t), should_stop (),
+    is_done ()
 {
-  autodel = false;
-  obj = o;
-  entry = t;
-  pth_sem_init (&should_stop);
-  prio = Priority;
-  tid = 0;
 }
 
 Thread::~Thread ()
@@ -48,47 +44,42 @@ Thread::~Thread ()
 void
 Thread::Stop ()
 {
-  if (!tid)
+  if (thread == NULL)
     return;
-  pth_sem_inc (&should_stop, TRUE);
+  should_stop.set_value ();
 
-  if (pth_join (tid, 0))
-    tid = 0;
+  if (thread->joinable ())
+    thread->join ();
+  delete thread;
+  thread = NULL;
 }
 
 void
 Thread::StopDelete ()
 {
-  autodel = true;
-  pth_sem_inc (&should_stop, FALSE);
-  if (!tid)
+  should_stop.set_value ();
+
+  if (thread == NULL)
     return;
-  pth_attr_t at = pth_attr_of (tid);
-  pth_attr_set (at, PTH_ATTR_JOINABLE, FALSE);
-  pth_attr_destroy (at);
+  thread->detach ();
+  delete thread;
+  thread = NULL;
 }
 
 void
 Thread::Start ()
 {
-  if (tid)
+  if (thread != NULL)
     {
-      pth_attr_t a = pth_attr_of (tid);
-      int state;
-      pth_attr_get (a, PTH_ATTR_STATE, &state);
-      pth_attr_destroy (a);
-      if (state != PTH_STATE_DEAD)
+      if (!is_done)
 	return;
       Stop ();
     }
-  pth_attr_t attr = pth_attr_new ();
-  pth_attr_set (attr, PTH_ATTR_PRIO, prio);
-  tid = pth_spawn (attr, &ThreadWrapper, this);
-  pth_attr_destroy (attr);
+  thread = new std::thread (ThreadWrapper, this);
 }
 
 void
-Thread::Run (pth_sem_t * stop)
+Thread::Run (std::shared_future<void> stop)
 {
   (obj->*entry) (stop);
 }

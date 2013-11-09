@@ -20,7 +20,11 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-#include <pthsem.h>
+#include <memory>
+#include <thread>
+#include <future>
+
+class Event;
 
 /** interface for a class started by a thread */
 class Runable
@@ -31,38 +35,36 @@ public:
 /** pointer to an thread entry point in Runable
  * the thread should exit, if stopcond can be deceremented
  */
-typedef void (Runable::*THREADENTRY) (pth_sem_t * stopcond);
+typedef void (Runable::*THREADENTRY) (std::shared_future<void> stop);
 
 /** implements a Thread */
 class Thread
 {
-  /** delete at stop */
-  bool autodel;
   /** C entry point for the threads */
   static void *ThreadWrapper (void *arg);
-  /** thread id */
-  pth_t tid;
+  /** the thread */
+  std::thread * thread;
   /** object to run */
   Runable *obj;
   /** entry point */
   THREADENTRY entry;
   /** stop condition */
-  pth_sem_t should_stop;
-  /** priority */
-  int prio;
+  std::promise<void> should_stop;
+  /** is done */
+  std::atomic<bool> is_done;
 
 protected:
   /** main function of the thread
    * @param stop if stop can be decemented, the routine should exit
    */
-    virtual void Run (pth_sem_t * stop);
+    virtual void Run (std::shared_future<void> stop);
 public:
     /** create a thread
      * if o and t are not present, Run is runned, which has to be replaced
      * @param o Object to run
      * @param t Entry point
      */
-    Thread (int Priority = PTH_PRIO_STD, Runable * o = 0, THREADENTRY t = 0);
+    Thread (Runable * o = NULL, THREADENTRY t = NULL);
     virtual ~ Thread ();
 
     /** starts the thread*/
