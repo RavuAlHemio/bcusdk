@@ -1,6 +1,6 @@
 /*
     EIBD eib bus access and management daemon
-    Copyright (C) 2005-2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>
+    Copyright (C) 2013 Ondrej Hosek <ondra.hosek@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,37 +17,31 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef EIBD_NONBLOCKIO_H
+#define EIBD_NONBLOCKIO_H
 
-#include "common.h"
-#include "layer3.h"
+#include "threads.h"
 
-class ClientConnection;
-/** implements the frontend (but opens no connection) */
-class Server:protected Thread
+#include <sys/socket.h>
+
+/** Flagpole-timeout I/O functions. */
+class FlagpoleIO
 {
-  /** Layer 3 interface */
-  Layer3 *l3;
-  /** open client connections*/
-    Array < ClientConnection * >connections;
-
-  void Run (FlagpolePtr stop);
-protected:
-  /** debug output */
-    Trace * t;
-    /** server socket */
-  int fd;
-
-  virtual void setupConnection (int cfd);
-
-    Server (Layer3 * l3, Trace * tr);
 public:
-    virtual ~ Server ();
+  /** A guard to make a file descriptor temporarily non-blocking. */
+  class NonBlockGuard
+  {
+  private:
+    int m_fd;  /**< The file descriptor. */
+    int m_oldflags;  /**< The flags before the guard came into effect. */
+  public:
+    NonBlockGuard (int fd);
+    ~NonBlockGuard ();
+  };
 
-  virtual bool init () = 0;
-    /** deregister client connection */
-  bool deregister (ClientConnection * con);
+  static int accept (FlagpolePtr fp, int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+  static ssize_t read (FlagpolePtr fp, int fd, void *buf, size_t count);
+  static ssize_t write (FlagpolePtr fp, int fd, const void *buf, size_t count);
 };
 
 #endif

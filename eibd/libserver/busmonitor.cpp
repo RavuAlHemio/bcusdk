@@ -18,6 +18,7 @@
 */
 
 #include "busmonitor.h"
+#include "flagpole.h"
 
 A_Busmonitor::~A_Busmonitor ()
 {
@@ -34,7 +35,7 @@ A_Busmonitor::~A_Busmonitor ()
 }
 
 A_Busmonitor::A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr,
-			    bool virt, bool TS)
+                            bool virt, bool TS)
 {
   TRACEPRINTF (tr, 7, this, "Open A_Busmonitor");
   this->l3 = l3;
@@ -42,7 +43,6 @@ A_Busmonitor::A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr,
   con = c;
   v = virt;
   ts = TS;
-  pth_sem_init (&sem);
   Start ();
 }
 
@@ -50,20 +50,19 @@ void
 A_Busmonitor::Get_L_Busmonitor (L_Busmonitor_PDU * l)
 {
   data.put (l);
-  pth_sem_inc (&sem, 0);
+  flagpole->raise (Flag_DataReady);
 }
 
 void
-A_Busmonitor::Run (pth_sem_t * stop1)
+A_Busmonitor::Run (FlagpolePtr pole)
 {
   CArray resp;
 
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   if (v)
     {
       if (!l3->registerVBusmonitor (this))
 	{
-	  con->sendreject (stop, EIB_CONNECTION_INUSE);
+	  con->sendreject (pole, EIB_CONNECTION_INUSE);
 	  return;
 	}
     }
@@ -71,7 +70,7 @@ A_Busmonitor::Run (pth_sem_t * stop1)
     {
       if (!l3->registerBusmonitor (this))
 	{
-	  con->sendreject (stop, EIB_CONNECTION_INUSE);
+	  con->sendreject (pole, EIB_CONNECTION_INUSE);
 	  return;
 	}
     }
@@ -85,31 +84,32 @@ A_Busmonitor::Run (pth_sem_t * stop1)
       resp[5] = 0;
     }
 
-  if (con->sendmessage (resp.len (), resp.array (), stop) == -1)
+  if (con->sendmessage (resp.len (), resp.array (), pole) == -1)
     return;
 
-  pth_event_t sem_ev = pth_event (PTH_EVENT_SEM, &sem);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  for (;;)
     {
-      pth_event_concat (sem_ev, stop, NULL);
-      pth_wait (sem_ev);
-      pth_event_isolate (sem_ev);
-
-      if (pth_event_status (sem_ev) == PTH_STATUS_OCCURRED)
-	{
-	  pth_sem_dec (&sem);
+      while (!pole->raised (Flag_Stop) && !pole->raised (Flag_DataReady))
+        {
+          pole->wait ();
+        }
+      if (pole->raised (Flag_Stop))
+        {
+          break;
+        }
+      if (pole->raised (Flag_DataReady))
+        {
+          pole->drop (Flag_DataReady);
 	  TRACEPRINTF (t, 7, this, "Send Busmonitor-Packet");
-	  if (sendResponse (data.get (), stop) == -1)
+	  if (sendResponse (data.get (), pole) == -1)
 	    break;
-	}
+        }
     }
-  pth_event_free (sem_ev, PTH_FREE_THIS);
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 
 void
-A_Busmonitor::Do (pth_event_t stop)
+A_Busmonitor::Do (FlagpolePtr stop)
 {
   while (1)
     {
@@ -121,7 +121,7 @@ A_Busmonitor::Do (pth_event_t stop)
 }
 
 int
-A_Busmonitor::sendResponse (L_Busmonitor_PDU * p, pth_event_t stop)
+A_Busmonitor::sendResponse (L_Busmonitor_PDU * p, FlagpolePtr pole)
 {
   CArray buf;
   if (ts)
@@ -143,11 +143,11 @@ A_Busmonitor::sendResponse (L_Busmonitor_PDU * p, pth_event_t stop)
     }
   delete p;
 
-  return con->sendmessage (buf (), buf.array (), stop);
+  return con->sendmessage (buf (), buf.array (), pole);
 }
 
 int
-A_Text_Busmonitor::sendResponse (L_Busmonitor_PDU * p, pth_event_t stop)
+A_Text_Busmonitor::sendResponse (L_Busmonitor_PDU * p, FlagpolePtr pole)
 {
   CArray buf;
   String s = p->Decode ();
@@ -157,5 +157,5 @@ A_Text_Busmonitor::sendResponse (L_Busmonitor_PDU * p, pth_event_t stop)
   buf[buf () - 1] = 0;
   delete p;
 
-  return con->sendmessage (buf (), buf.array (), stop);
+  return con->sendmessage (buf (), buf.array (), pole);
 }

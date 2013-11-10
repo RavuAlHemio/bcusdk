@@ -91,7 +91,7 @@ class Layer3:private Thread
     /** individual callbacks */
     Array < Individual_Info > individual;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr pole);
 public:
     Layer3 (Layer2Interface * l2, Trace * tr);
     virtual ~ Layer3 ();

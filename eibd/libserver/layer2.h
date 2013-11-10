@@ -37,7 +37,7 @@ public:
    * @param stop return NULL, if stop occurs
    * @return returns frame or NULL
    */
-  virtual LPDU *Get_L_Data (pth_event_t stop) = 0;
+  virtual LPDU *Get_L_Data (FlagpolePtr stop) = 0;
 
   /** try to add the individual address addr to the device, return true if successful */
   virtual bool addAddress (eibaddr_t addr) = 0;

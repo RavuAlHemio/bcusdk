@@ -41,8 +41,8 @@ class Management_Connection:public Layer7_Connection
 {
   Trace *t;
 public:
-    Management_Connection (Layer3 * l3, Trace * tr,
-			   eibaddr_t dest):Layer7_Connection (l3, tr, dest)
+    Management_Connection (Layer3 * l3, Trace * tr, FlagpolePtr flagpole,
+			   eibaddr_t dest):Layer7_Connection (l3, tr, flagpole, dest)
   {
     t = tr;
   }
@@ -65,8 +65,8 @@ class Management_Individual:public Layer7_Individual
 {
   Trace *t;
 public:
-    Management_Individual (Layer3 * l3, Trace * tr,
-			   eibaddr_t dest):Layer7_Individual (l3, tr, dest)
+    Management_Individual (Layer3 * l3, Trace * tr, FlagpolePtr flagpole,
+			   eibaddr_t dest):Layer7_Individual (l3, tr, flagpole, dest)
   {
     t = tr;
   }

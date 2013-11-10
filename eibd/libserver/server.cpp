@@ -20,7 +20,8 @@
 #include <unistd.h>
 #include "server.h"
 #include "client.h"
-
+#include "flagpole.h"
+#include "nonblockio.h"
 
 Server::~Server ()
 {
@@ -29,7 +30,7 @@ Server::~Server ()
   for (int i = 0; i < connections (); i++)
     connections[i]->StopDelete ();
   while (connections () != 0)
-    pth_yield (0);
+    std::this_thread::yield ();
 
   if (fd != -1)
     close (fd);
@@ -56,13 +57,12 @@ Server::Server (Layer3 * layer3, Trace * tr)
 }
 
 void
-Server::Run (pth_sem_t * stop1)
+Server::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
       int cfd;
-      cfd = pth_accept_ev (fd, 0, 0, stop);
+      cfd = FlagpoleIO::accept (pole, fd, 0, 0);
       if (cfd != -1)
 	{
 	  TRACEPRINTF (t, 8, this, "New Connection");
@@ -72,7 +72,6 @@ Server::Run (pth_sem_t * stop1)
 	  c->Start ();
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 void

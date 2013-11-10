@@ -31,13 +31,13 @@ class A_Broadcast:private Thread
   ClientConnection *con;
   T_Broadcast *c;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     A_Broadcast (Layer3 * l3, Trace * tr, ClientConnection * cc);
    ~A_Broadcast ();
 
    /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 /** implements client interface to a group connection */
@@ -48,13 +48,13 @@ class A_Group:private Thread
   ClientConnection *con;
   T_Group *c;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     A_Group (Layer3 * l3, Trace * tr, ClientConnection * cc);
    ~A_Group ();
 
    /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 /** implements client interface to a raw connection */
@@ -65,13 +65,13 @@ class A_TPDU:private Thread
   ClientConnection *con;
   T_TPDU *c;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     A_TPDU (Layer3 * l3, Trace * tr, ClientConnection * cc);
    ~A_TPDU ();
 
    /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 /** implements client interface to a T_Indivdual connection */
@@ -82,13 +82,13 @@ class A_Individual:private Thread
   ClientConnection *con;
   T_Individual *c;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     A_Individual (Layer3 * l3, Trace * tr, ClientConnection * cc);
    ~A_Individual ();
 
    /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 /** implements client interface to a T_Connection connection */
@@ -99,13 +99,13 @@ class A_Connection:private Thread
   ClientConnection *con;
   T_Connection *c;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     A_Connection (Layer3 * l3, Trace * tr, ClientConnection * cc);
    ~A_Connection ();
 
    /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 /** implements client interface to a group socket */
@@ -116,13 +116,13 @@ class A_GroupSocket:private Thread
   ClientConnection *con;
   GroupSocket *c;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     A_GroupSocket (Layer3 * l3, Trace * tr, ClientConnection * cc);
    ~A_GroupSocket ();
 
    /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 #endif

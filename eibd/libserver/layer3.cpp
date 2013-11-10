@@ -18,6 +18,7 @@
 */
 
 #include "layer3.h"
+#include "flagpole.h"
 
 Layer3::Layer3 (Layer2Interface * l2, Trace * tr)
 {
@@ -275,14 +276,13 @@ bool
 }
 
 void
-Layer3::Run (pth_sem_t * stop1)
+Layer3::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
   unsigned i;
 
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      LPDU *l = layer2->Get_L_Data (stop);
+      LPDU *l = layer2->Get_L_Data (pole);
       if (!l)
 	continue;
       if (l->getType () == L_Busmonitor)
@@ -358,5 +358,4 @@ Layer3::Run (pth_sem_t * stop1)
       delete l;
 
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }

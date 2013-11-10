@@ -38,13 +38,13 @@ public:
   virtual void Send_Packet (CArray l) = 0;
   /** all frames sent ? */
   virtual bool Send_Queue_Empty () = 0;
-  /** returns semaphore, which becomes 1, if all frames are sent */
-  virtual pth_sem_t *Send_Queue_Empty_Cond () = 0;
+  /** waits until all frames are sent */
+  virtual void Wait_Send_Queue_Empty () = 0;
   /** waits for the next EMI frame
    * @param stop return NULL, if stop occurs
    * @return returns EMI frame or NULL
    */
-  virtual CArray *Get_Packet (pth_event_t stop) = 0;
+  virtual CArray *Get_Packet (FlagpolePtr stop) = 0;
 
   /** resets the connection */
   virtual void SendReset () = 0;

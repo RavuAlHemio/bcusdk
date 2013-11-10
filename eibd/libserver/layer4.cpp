@@ -19,14 +19,15 @@
 
 #include "layer4.h"
 #include "tpdu.h"
+#include "flagpole.h"
 
-T_Broadcast::T_Broadcast (Layer3 * l3, Trace * tr, int write_only)
+T_Broadcast::T_Broadcast (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, int write_only)
 {
   TRACEPRINTF (tr, 4, this, "OpenBroadcast %s", write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
-  pth_sem_init (&sem);
   init_ok = false;
+  this->flagpole = flagpole;
   if (!write_only)
     if (!layer3->registerBroadcastCallBack (this))
       return;
@@ -55,7 +56,7 @@ T_Broadcast::Get_L_Data (L_Data_PDU * l)
       c.data = t1->data;
       c.src = l->source;
       outqueue.put (c);
-      pth_sem_inc (&sem, 0);
+      flagpole->raise (Flag_DataReady);
     }
   delete t;
   delete l;
@@ -77,35 +78,37 @@ T_Broadcast::Send (const CArray & c)
 }
 
 BroadcastComm *
-T_Broadcast::Get (pth_event_t stop)
+T_Broadcast::Get (FlagpolePtr pole)
 {
-  pth_event_t s = pth_event (PTH_EVENT_SEM, &sem);
+  assert (pole == flagpole);
 
-  pth_event_concat (s, stop, NULL);
-  pth_wait (s);
-  pth_event_isolate (s);
-
-  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_DataReady))
     {
-      pth_sem_dec (&sem);
-      BroadcastComm *c = new BroadcastComm (outqueue.get ());
+      pole->wait ();
+    }
 
-      pth_event_free (s, PTH_FREE_THIS);
+  if (pole->raised (Flag_DataReady))
+    {
+      BroadcastComm *c = new BroadcastComm (outqueue.get ());
+      if (outqueue.isempty ())
+        {
+          pole->drop (Flag_DataReady);
+        }
+
       t->TracePacket (4, this, "Recv Broadcast", c->data);
       return c;
     }
-  pth_event_free (s, PTH_FREE_THIS);
-  return 0;
+  return NULL;
 }
 
-T_Group::T_Group (Layer3 * l3, Trace * tr, eibaddr_t group, int write_only)
+T_Group::T_Group (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, eibaddr_t group, int write_only)
 {
   TRACEPRINTF (tr, 4, this, "OpenGroup %d/%d/%d %s", (group >> 11) & 0x1f,
-	       (group >> 8) & 0x07, (group) & 0xff, write_only ? "WO" : "RW");
+               (group >> 8) & 0x07, (group) & 0xff, write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
+  this->flagpole = flagpole;
   groupaddr = group;
-  pth_sem_init (&sem);
   init_ok = false;
   if (group == 0)
     return;
@@ -132,7 +135,7 @@ T_Group::Get_L_Data (L_Data_PDU * l)
       c.data = t1->data;
       c.src = l->source;
       outqueue.put (c);
-      pth_sem_inc (&sem, 0);
+      flagpole->raise (Flag_DataReady);
     }
   delete t;
   delete l;
@@ -160,35 +163,37 @@ T_Group::~T_Group ()
 }
 
 GroupComm *
-T_Group::Get (pth_event_t stop)
+T_Group::Get (FlagpolePtr pole)
 {
-  pth_event_t s = pth_event (PTH_EVENT_SEM, &sem);
+  assert (pole == flagpole);
 
-  pth_event_concat (s, stop, NULL);
-  pth_wait (s);
-  pth_event_isolate (s);
-
-  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_DataReady))
     {
-      pth_sem_dec (&sem);
-      GroupComm *c = new GroupComm (outqueue.get ());
+      pole->wait ();
+    }
 
-      pth_event_free (s, PTH_FREE_THIS);
+  if (pole->raised (Flag_DataReady))
+    {
+      GroupComm *c = new GroupComm (outqueue.get ());
+      if (outqueue.isempty ())
+        {
+          pole->drop (Flag_DataReady);
+        }
+
       t->TracePacket (4, this, "Recv Group", c->data);
       return c;
     }
-  pth_event_free (s, PTH_FREE_THIS);
-  return 0;
+  return NULL;
 }
 
-T_TPDU::T_TPDU (Layer3 * l3, Trace * tr, eibaddr_t d)
+T_TPDU::T_TPDU (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, eibaddr_t d)
 {
   TRACEPRINTF (tr, 4, this, "OpenTPDU %d.%d.%d", (d >> 12) & 0x0f,
-	       (d >> 8) & 0x0f, (d) & 0xff);
+               (d >> 8) & 0x0f, (d) & 0xff);
   layer3 = l3;
   t = tr;
   src = d;
-  pth_sem_init (&sem);
+  this->flagpole = flagpole;
   init_ok = false;
   if (!layer3->registerIndividualCallBack
       (this, Individual_Lock_None, 0, src))
@@ -208,7 +213,7 @@ T_TPDU::Get_L_Data (L_Data_PDU * l)
   t.data = l->data;
   t.addr = l->source;
   outqueue.put (t);
-  pth_sem_inc (&sem, 0);
+  flagpole->raise (Flag_DataReady);
   delete l;
 }
 
@@ -231,40 +236,42 @@ T_TPDU::~T_TPDU ()
 }
 
 TpduComm *
-T_TPDU::Get (pth_event_t stop)
+T_TPDU::Get (FlagpolePtr pole)
 {
-  pth_event_t s = pth_event (PTH_EVENT_SEM, &sem);
+  assert (pole == flagpole);
 
-  pth_event_concat (s, stop, NULL);
-  pth_wait (s);
-  pth_event_isolate (s);
-
-  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_DataReady))
     {
-      pth_sem_dec (&sem);
-      TpduComm *c = new TpduComm (outqueue.get ());
+      pole->wait ();
+    }
 
-      pth_event_free (s, PTH_FREE_THIS);
+  if (pole->raised (Flag_DataReady))
+    {
+      TpduComm *c = new TpduComm (outqueue.get ());
+      if (outqueue.isempty ())
+        {
+          pole->drop (Flag_DataReady);
+        }
+
       t->TracePacket (4, this, "Recv TPDU", c->data);
       return c;
     }
-  pth_event_free (s, PTH_FREE_THIS);
-  return 0;
+  return NULL;
 }
 
-T_Individual::T_Individual (Layer3 * l3, Trace * tr, eibaddr_t d,
-			    int write_only)
+T_Individual::T_Individual (Layer3 * l3, Trace * tr, FlagpolePtr flagpole,
+                            eibaddr_t d, int write_only)
 {
   TRACEPRINTF (tr, 4, this, "OpenIndividual %d.%d.%d %s", (d >> 12) & 0x0f,
-	       (d >> 8) & 0x0f, (d) & 0xff, write_only ? "WO" : "RW");
+               (d >> 8) & 0x0f, (d) & 0xff, write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
   dest = d;
-  pth_sem_init (&sem);
+  this->flagpole = flagpole;
   init_ok = false;
   if (!write_only)
     if (!layer3->registerIndividualCallBack
-	(this, Individual_Lock_None, dest))
+        (this, Individual_Lock_None, dest))
       return;
   init_ok = true;
 }
@@ -284,7 +291,7 @@ T_Individual::Get_L_Data (L_Data_PDU * l)
       T_DATA_XXX_REQ_PDU *t1 = (T_DATA_XXX_REQ_PDU *) t;
       c = t1->data;
       outqueue.put (c);
-      pth_sem_inc (&sem, 0);
+      flagpole->raise (Flag_DataReady);
     }
   delete t;
   delete l;
@@ -312,37 +319,37 @@ T_Individual::~T_Individual ()
 }
 
 CArray *
-T_Individual::Get (pth_event_t stop)
+T_Individual::Get (FlagpolePtr pole)
 {
-  pth_event_t s = pth_event (PTH_EVENT_SEM, &sem);
+  assert (pole == flagpole);
 
-  pth_event_concat (s, stop, NULL);
-  pth_wait (s);
-  pth_event_isolate (s);
-
-  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_DataReady))
     {
-      pth_sem_dec (&sem);
-      CArray *c = new CArray (outqueue.get ());
+      pole->wait ();
+    }
 
-      pth_event_free (s, PTH_FREE_THIS);
+  if (pole->raised (Flag_DataReady))
+    {
+      CArray *c = new CArray (outqueue.get ());
+      if (outqueue.isempty ())
+        {
+          pole->drop (Flag_DataReady);
+        }
+
       t->TracePacket (4, this, "Recv Individual", *c);
       return c;
     }
-  pth_event_free (s, PTH_FREE_THIS);
-  return 0;
+  return NULL;
 }
 
-T_Connection::T_Connection (Layer3 * l3, Trace * tr, eibaddr_t d)
+T_Connection::T_Connection (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, eibaddr_t d)
 {
   TRACEPRINTF (tr, 4, this, "OpenConnection %d.%d.%d", (d >> 12) & 0x0f,
-	       (d >> 8) & 0x0f, (d) & 0xff);
+               (d >> 8) & 0x0f, (d) & 0xff);
   layer3 = l3;
   t = tr;
   dest = d;
-  pth_sem_init (&insem);
-  pth_sem_init (&outsem);
-  pth_sem_init (&bufsem);
+  this->flagpole = flagpole;
   recvno = 0;
   sendno = 0;
   mode = 0;
@@ -372,7 +379,7 @@ void
 T_Connection::Get_L_Data (L_Data_PDU * l)
 {
   buf.put (l);
-  pth_sem_inc (&bufsem, 0);
+  flagpole->raise (Flag_BufReady);
 }
 
 void
@@ -380,29 +387,31 @@ T_Connection::Send (const CArray & c)
 {
   t->TracePacket (4, this, "Send", c);
   in.put (c);
-  pth_sem_inc (&insem, 1);
+  flagpole->raise (Flag_InReady);
 }
 
 CArray *
-T_Connection::Get (pth_event_t stop)
+T_Connection::Get (FlagpolePtr pole)
 {
-  pth_event_t s = pth_event (PTH_EVENT_SEM, &outsem);
+  assert (pole == flagpole);
 
-  pth_event_concat (s, stop, NULL);
-  pth_wait (s);
-  pth_event_isolate (s);
-
-  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_OutReady))
     {
-      pth_sem_dec (&outsem);
-      CArray *c = new CArray (out.get ());
+      pole->wait ();
+    }
 
-      pth_event_free (s, PTH_FREE_THIS);
+  if (pole->raised (Flag_OutReady))
+    {
+      CArray *c = new CArray (out.get ());
+      if (out.isempty ())
+        {
+          pole->drop (Flag_OutReady);
+        }
+
       t->TracePacket (4, this, "RecvConnection", *c);
       return c;
     }
-  pth_event_free (s, PTH_FREE_THIS);
-  return 0;
+  return NULL;
 }
 
 void
@@ -471,16 +480,14 @@ T_Connection::SendData (int serno, const CArray & c)
 */
 
 void
-T_Connection::Run (pth_sem_t * stop1)
+T_Connection::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  pth_event_t inev = pth_event (PTH_EVENT_SEM, &insem);
-  pth_event_t bufev = pth_event (PTH_EVENT_SEM, &bufsem);
+  assert (pole == flagpole);
 
   while (!buf.isempty ())
     delete buf.get ();
 
-  pth_sem_set_value (&bufsem, 0);
+  pole->drop (Flag_BufReady);
 
   mode = 0;
   SendConnect ();
@@ -488,137 +495,114 @@ T_Connection::Run (pth_sem_t * stop1)
   sendno = 0;
   recvno = 0;
   repcount = 0;
-  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (6, 0));
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED && mode != 0)
+  std::chrono::seconds timeout (6);
+  while (!pole->raised (Flag_Stop) && mode != 0)
     {
-      pth_event_concat (bufev, stop, timeout, NULL);
-      if (mode == 1)
-	pth_event_concat (bufev, inev, NULL);
+      if (pole->wait_for (timeout) == std::cv_status::timeout)
+        {
+          if (mode == 2 && repcount < 3)
+            {
+              repcount++;
+              SendData (sendno, in.top ());
+              timeout = std::chrono::seconds (3);
+            }
+          else
+            mode = 0;
+        }
+      else if (flagpole->raised (Flag_BufReady))
+        {
+          flagpole->drop (Flag_BufReady);
+          L_Data_PDU *l = buf.get ();
+          TPDU *t = TPDU::fromPacket (l->data);
+          switch (t->getType ())
+            {
+            case T_DISCONNECT_REQ:
+              mode = 0;
+              break;
+            case T_CONNECT_REQ:
+              mode = 0;
+              break;
+            case T_DATA_CONNECTED_REQ:
+              {
+                T_DATA_CONNECTED_REQ_PDU *t1 = (T_DATA_CONNECTED_REQ_PDU *) t;
+                if (t1->serno != recvno && t1->serno != ((recvno - 1) & 0x0f))
+                  mode = 0;
+                else if (t1->serno == recvno)
+                  {
+                    t1->data[0] = t1->data[0] & 0x03;
+                    out.put (t1->data);
+                    flagpole->raise (Flag_OutReady);
+                    SendAck (recvno);
+                    recvno = (recvno + 1) & 0x0f;
+                  }
+                else if (t1->serno == ((recvno - 1) & 0x0f))
+                  SendAck (t1->serno);
 
-      pth_wait (bufev);
-
-      pth_event_isolate (bufev);
-      pth_event_isolate (inev);
-      pth_event_isolate (timeout);
-      if (pth_event_status (bufev) == PTH_STATUS_OCCURRED)
-	{
-	  pth_sem_dec (&bufsem);
-	  L_Data_PDU *l = buf.get ();
-	  TPDU *t = TPDU::fromPacket (l->data);
-	  switch (t->getType ())
-	    {
-	    case T_DISCONNECT_REQ:
-	      mode = 0;
-	      break;
-	    case T_CONNECT_REQ:
-	      mode = 0;
-	      break;
-	    case T_DATA_CONNECTED_REQ:
-	      {
-		T_DATA_CONNECTED_REQ_PDU *t1 = (T_DATA_CONNECTED_REQ_PDU *) t;
-		if (t1->serno != recvno && t1->serno != ((recvno - 1) & 0x0f))
-		  mode = 0;
-		else if (t1->serno == recvno)
-		  {
-		    t1->data[0] = t1->data[0] & 0x03;
-		    out.put (t1->data);
-		    pth_sem_inc (&outsem, 0);
-		    SendAck (recvno);
-		    recvno = (recvno + 1) & 0x0f;
-		  }
-		else if (t1->serno == ((recvno - 1) & 0x0f))
-		  SendAck (t1->serno);
-
-		if (mode == 1)
-		  timeout =
-		    pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
-			       pth_time (6, 0));
-	      }
-	      break;
-	    case T_NACK:
-	      {
-		T_NACK_PDU *t1 = (T_NACK_PDU *) t;
-		if (t1->serno != sendno)
-		  mode = 0;
-		else if (in.isempty ())
-		  mode = 0;
-		else if (repcount >= 3 || mode != 2)
-		  mode = 0;
-		else
-		  {
-		    repcount++;
-		    SendData (sendno, in.top ());
-		    timeout =
-		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
-				 pth_time (3, 0));
-		  }
-	      }
-	      break;
-	    case T_ACK:
-	      {
-		T_ACK_PDU *t1 = (T_ACK_PDU *) t;
-		if (t1->serno != sendno)
-		  mode = 0;
-		else if (mode != 2)
-		  mode = 0;
-		else
-		  {
-		    timeout =
-		      pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
-				 pth_time (6, 0));
-		    mode = 1;
-		    in.get ();
-		    sendno = (sendno + 1) & 0x0f;
-		  }
-	      }
-	      break;
-	    default:
-	      /* ignore */ ;
-	    }
-	  delete t;
-	  delete l;
-	}
-      else if (pth_event_status (inev) == PTH_STATUS_OCCURRED && mode == 1)
-	{
-	  repcount = 0;
-	  pth_sem_dec (&insem);
-	  SendData (sendno, in.top ());
-	  mode = 2;
-	  timeout =
-	    pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
-		       pth_time (3, 0));
-	}
-      else if (pth_event_status (timeout) == PTH_STATUS_OCCURRED)
-	{
-	  if (mode == 2 && repcount < 3)
-	    {
-	      repcount++;
-	      SendData (sendno, in.top ());
-	      timeout =
-		pth_event (PTH_EVENT_RTIME | PTH_MODE_REUSE, timeout,
-			   pth_time (3, 0));
-	    }
-	  else
-	    mode = 0;
-	}
+                if (mode == 1)
+                  timeout = std::chrono::seconds (6);
+              }
+              break;
+            case T_NACK:
+              {
+                T_NACK_PDU *t1 = (T_NACK_PDU *) t;
+                if (t1->serno != sendno)
+                  mode = 0;
+                else if (in.isempty ())
+                  mode = 0;
+                else if (repcount >= 3 || mode != 2)
+                  mode = 0;
+                else
+                  {
+                    repcount++;
+                    SendData (sendno, in.top ());
+                    timeout = std::chrono::seconds (3);
+                  }
+              }
+              break;
+            case T_ACK:
+              {
+                T_ACK_PDU *t1 = (T_ACK_PDU *) t;
+                if (t1->serno != sendno)
+                  mode = 0;
+                else if (mode != 2)
+                  mode = 0;
+                else
+                  {
+                    timeout = std::chrono::seconds (6);
+                    mode = 1;
+                    in.get ();
+                    sendno = (sendno + 1) & 0x0f;
+                  }
+              }
+              break;
+            default:
+              /* ignore */ ;
+            }
+          delete t;
+          delete l;
+        }
+      else if (mode == 1 && flagpole->raised (Flag_InReady))
+        {
+          repcount = 0;
+          flagpole->drop (Flag_InReady);
+          SendData (sendno, in.top ());
+          mode = 2;
+          timeout = std::chrono::seconds (3);
+        }
     }
-  pth_event_free (stop, PTH_FREE_THIS);
-  pth_event_free (inev, PTH_FREE_THIS);
-  pth_event_free (bufev, PTH_FREE_THIS);
-  pth_event_free (timeout, PTH_FREE_THIS);
   SendDisconnect ();
   mode = 0;
   layer3->deregisterIndividualCallBack (this, dest);
   out.put (CArray ());
-  pth_sem_inc (&outsem, 0);
+  flagpole->raise (Flag_OutReady);
 }
 
-GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, int write_only)
+GroupSocket::GroupSocket (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, int write_only)
 {
   TRACEPRINTF (tr, 4, this, "OpenGroupSocket %s", write_only ? "WO" : "RW");
   layer3 = l3;
   t = tr;
-  pth_sem_init (&sem);
+  this->flagpole = flagpole;
   init_ok = false;
   if (!write_only)
     if (!layer3->registerGroupCallBack (this, 0))
@@ -649,7 +633,7 @@ GroupSocket::Get_L_Data (L_Data_PDU * l)
       c.src = l->source;
       c.dst = l->dest;
       outqueue.put (c);
-      pth_sem_inc (&sem, 0);
+      flagpole->raise (Flag_DataReady);
     }
   delete t;
   delete l;
@@ -671,23 +655,25 @@ GroupSocket::Send (const GroupAPDU & c)
 }
 
 GroupAPDU *
-GroupSocket::Get (pth_event_t stop)
+GroupSocket::Get (FlagpolePtr pole)
 {
-  pth_event_t s = pth_event (PTH_EVENT_SEM, &sem);
+  assert (pole == flagpole);
 
-  pth_event_concat (s, stop, NULL);
-  pth_wait (s);
-  pth_event_isolate (s);
-
-  if (pth_event_status (s) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_DataReady))
     {
-      pth_sem_dec (&sem);
-      GroupAPDU *c = new GroupAPDU (outqueue.get ());
+      pole->wait ();
+    }
 
-      pth_event_free (s, PTH_FREE_THIS);
+  if (pole->raised (Flag_DataReady))
+    {
+      GroupAPDU *c = new GroupAPDU (outqueue.get ());
+      if (outqueue.isempty ())
+        {
+          pole->drop (Flag_DataReady);
+        }
+
       t->TracePacket (4, this, "Recv GroupSocket", c->data);
       return c;
     }
-  pth_event_free (s, PTH_FREE_THIS);
-  return 0;
+  return NULL;
 }

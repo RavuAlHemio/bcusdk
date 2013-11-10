@@ -19,6 +19,9 @@
 
 #include "emi1.h"
 #include "emi.h"
+#include "flagpole.h"
+
+#include <unistd.h>
 
 bool
 EMI1Layer2Interface::addAddress (eibaddr_t addr)
@@ -79,9 +82,6 @@ EMI1Layer2Interface::EMI1Layer2Interface (LowLevelDriverInterface * i,
   mode = 0;
   vmode = 0;
   noqueue = flags & FLAG_B_EMI_NOQUEUE;
-  pth_sem_init (&out_signal);
-  pth_sem_init (&in_signal);
-  getwait = pth_event (PTH_EVENT_SEM, &out_signal);
   if (!iface->init ())
     {
       delete iface;
@@ -102,7 +102,6 @@ EMI1Layer2Interface::~EMI1Layer2Interface ()
 {
   TRACEPRINTF (t, 2, this, "Destroy");
   Stop ();
-  pth_event_free (getwait, PTH_FREE_THIS);
   while (!outqueue.isempty ())
     delete outqueue.get ();
   while (!inqueue.isempty ())
@@ -119,16 +118,9 @@ EMI1Layer2Interface::enterBusmonitor ()
   if (mode != 0)
     return 0;
   iface->SendReset ();
-  pth_usleep (1000000);
+  usleep (1000000);
   iface->Send_Packet (CArray (t1, sizeof (t1)));
-
-  if (!iface->Send_Queue_Empty ())
-    {
-      pth_event_t
-	e = pth_event (PTH_EVENT_SEM, iface->Send_Queue_Empty_Cond ());
-      pth_wait (e);
-      pth_event_free (e, PTH_FREE_THIS);
-    }
+  iface->Wait_Send_Queue_Empty ();
   mode = 1;
   return 1;
 }
@@ -143,15 +135,9 @@ EMI1Layer2Interface::leaveBusmonitor ()
   {
   0x46, 0x01, 0x00, 0x60, 0xc0};
   iface->Send_Packet (CArray (t, sizeof (t)));
-  while (!iface->Send_Queue_Empty ())
-    {
-      pth_event_t
-	e = pth_event (PTH_EVENT_SEM, iface->Send_Queue_Empty_Cond ());
-      pth_wait (e);
-      pth_event_free (e, PTH_FREE_THIS);
-    }
+  iface->Wait_Send_Queue_Empty ();
   mode = 0;
-  pth_usleep (1000000);
+  usleep (1000000);
   return 1;
 }
 
@@ -164,14 +150,7 @@ EMI1Layer2Interface::Open ()
     return 0;
   iface->SendReset ();
   iface->Send_Packet (CArray (t1, sizeof (t1)));
-
-  while (!iface->Send_Queue_Empty ())
-    {
-      pth_event_t
-	e = pth_event (PTH_EVENT_SEM, iface->Send_Queue_Empty_Cond ());
-      pth_wait (e);
-      pth_event_free (e, PTH_FREE_THIS);
-    }
+  iface->Wait_Send_Queue_Empty ();
   mode = 2;
   return 1;
 }
@@ -186,13 +165,7 @@ EMI1Layer2Interface::Close ()
   {
   0x46, 0x01, 0x00, 0x60, 0xc0};
   iface->Send_Packet (CArray (t, sizeof (t)));
-  if (!iface->Send_Queue_Empty ())
-    {
-      pth_event_t
-	e = pth_event (PTH_EVENT_SEM, iface->Send_Queue_Empty_Cond ());
-      pth_wait (e);
-      pth_event_free (e, PTH_FREE_THIS);
-    }
+  iface->Wait_Send_Queue_Empty ();
   mode = 0;
   return 1;
 }
@@ -221,7 +194,7 @@ EMI1Layer2Interface::Send_L_Data (LPDU * l)
   assert ((l1->hopcount & 0xf8) == 0);
 
   inqueue.put (l);
-  pth_sem_inc (&in_signal, 1);
+  flagpole->raise (Flag_InReady);
 }
 
 void
@@ -237,48 +210,42 @@ EMI1Layer2Interface::Send (LPDU * l)
       L_Busmonitor_PDU *l2 = new L_Busmonitor_PDU;
       l2->pdu.set (l->ToPacket ());
       outqueue.put (l2);
-      pth_sem_inc (&out_signal, 1);
+      flagpole->raise (Flag_OutReady);
     }
   outqueue.put (l);
-  pth_sem_inc (&out_signal, 1);
+  flagpole->raise (Flag_InReady);
 }
 
 LPDU *
-EMI1Layer2Interface::Get_L_Data (pth_event_t stop)
+EMI1Layer2Interface::Get_L_Data (FlagpolePtr pole)
 {
-  if (stop != NULL)
-    pth_event_concat (getwait, stop, NULL);
-
-  pth_wait (getwait);
-
-  if (stop)
-    pth_event_isolate (getwait);
-
-  if (pth_event_status (getwait) == PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop) && !pole->raised (Flag_OutReady))
     {
-      pth_sem_dec (&out_signal);
+      pole->wait ();
+    }
+
+  if (pole->raised (Flag_OutReady))
+    {
+      pole->drop (Flag_OutReady);
       LPDU *l = outqueue.get ();
       TRACEPRINTF (t, 2, this, "Recv %s", l->Decode ()());
       return l;
     }
   else
-    return 0;
+    return NULL;
 }
 
 void
-EMI1Layer2Interface::Run (pth_sem_t * stop1)
+EMI1Layer2Interface::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  pth_event_t input = pth_event (PTH_EVENT_SEM, &in_signal);
-  pth_event_t timeout = pth_event (PTH_EVENT_RTIME, pth_time (0, 0));
   sendmode = 0;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
       if (sendmode == 0)
 	pth_event_concat (stop, input, NULL);
       if (sendmode == 1)
 	pth_event_concat (stop, timeout, NULL);
-      CArray *c = iface->Get_Packet (stop);
+      CArray *c = iface->Get_Packet (pole);
       pth_event_isolate(input);
       pth_event_isolate(timeout);
       if (!inqueue.isempty() && sendmode == 0)

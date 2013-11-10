@@ -29,7 +29,7 @@
  * @param stop if occurs, function should abort
  */
 void ReadIndividualAddresses (Layer3 * l3, Trace * t, ClientConnection * c,
-			      pth_event_t stop);
+			      FlagpolePtr stop);
 /** change programming mode of a device
  * @param l3 Layer 3 interface
  * @param t debug output
@@ -37,7 +37,7 @@ void ReadIndividualAddresses (Layer3 * l3, Trace * t, ClientConnection * c,
  * @param stop if occurs, function should abort
  */
 void ChangeProgMode (Layer3 * l3, Trace * t, ClientConnection * c,
-		     pth_event_t stop);
+		     FlagpolePtr stop);
 
 /** read the mask version of a device
  * @param l3 Layer 3 interface
@@ -46,7 +46,7 @@ void ChangeProgMode (Layer3 * l3, Trace * t, ClientConnection * c,
  * @param stop if occurs, function should abort
  */
 void GetMaskVersion (Layer3 * l3, Trace * t, ClientConnection * c,
-		     pth_event_t stop);
+		     FlagpolePtr stop);
 
 /** write a individual address 
  * @param l3 Layer 3 interface
@@ -55,7 +55,7 @@ void GetMaskVersion (Layer3 * l3, Trace * t, ClientConnection * c,
  * @param stop if occurs, function should abort
  */
 void WriteIndividualAddress (Layer3 * l3, Trace * t, ClientConnection * c,
-			     pth_event_t stop);
+			     FlagpolePtr stop);
 
 /** opens and handles a management connection
  * @param l3 Layer 3 interface
@@ -64,7 +64,7 @@ void WriteIndividualAddress (Layer3 * l3, Trace * t, ClientConnection * c,
  * @param stop if occurs, function should abort
  */
 void ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
-			   pth_event_t stop);
+			   FlagpolePtr stop);
 
 /** Loads an image in a BCU
  * @param l3 Layer 3 interface
@@ -73,7 +73,7 @@ void ManagementConnection (Layer3 * l3, Trace * t, ClientConnection * c,
  * @param stop if occurs, function should abort
  */
 void LoadImage (Layer3 * l3, Trace * t, ClientConnection * c,
-		pth_event_t stop);
+		FlagpolePtr stop);
 
 /** opens and handles a individual connection
  * @param l3 Layer 3 interface
@@ -82,6 +82,6 @@ void LoadImage (Layer3 * l3, Trace * t, ClientConnection * c,
  * @param stop if occurs, function should abort
  */
 void ManagementIndividual (Layer3 * l3, Trace * t, ClientConnection * c,
-			   pth_event_t stop);
+			   FlagpolePtr stop);
 
 #endif

@@ -29,9 +29,10 @@ class Layer7_Broadcast
 {
   Trace *t;
   T_Broadcast *l4;
+  FlagpolePtr flagpole;
 
 public:
-    Layer7_Broadcast (Layer3 * l3, Trace * tr);
+    Layer7_Broadcast (Layer3 * l3, Trace * tr, FlagpolePtr flagpole);
     virtual ~ Layer7_Broadcast ();
   bool init ();
 
@@ -46,13 +47,14 @@ class Layer7_Connection
 {
   Trace *t;
   T_Connection *l4;
+  FlagpolePtr flagpole;
   /** destination address */
   eibaddr_t dest;
 
   /** sends APDU and waits for respone; return NULL, if it fails */
   APDU *Request_Response (APDU * r);
 public:
-    Layer7_Connection (Layer3 * l3, Trace * tr, eibaddr_t dest);
+    Layer7_Connection (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, eibaddr_t dest);
     virtual ~ Layer7_Connection ();
   bool init ();
 
@@ -100,13 +102,14 @@ class Layer7_Individual
 {
   Trace *t;
   T_Individual *l4;
+  FlagpolePtr flagpole;
   /** destination address */
   eibaddr_t dest;
 
   /** sends APDU and waits for respone; return NULL, if it fails */
   APDU *Request_Response (APDU * r);
 public:
-    Layer7_Individual (Layer3 * l3, Trace * tr, eibaddr_t dest);
+    Layer7_Individual (Layer3 * l3, Trace * tr, FlagpolePtr flagpole, eibaddr_t dest);
     virtual ~ Layer7_Individual ();
   bool init ();
 

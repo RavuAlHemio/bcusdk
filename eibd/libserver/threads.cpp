@@ -19,20 +19,19 @@
 
 #include "types.h"
 #include "threads.h"
-#include "event.h"
+#include "flagpole.h"
 
 void *
 Thread::ThreadWrapper (void *arg)
 {
   Thread *thd = (Thread *) arg;
-  thd->Run (thd->should_stop.get_future ().share ());
+  thd->Run (thd->flagpole);
   thd->is_done.store (true);
   return NULL;
 }
 
 Thread::Thread (Runable * o, THREADENTRY t)
-  : thread (NULL), obj (o), entry (t), should_stop (),
-    is_done ()
+  : thread (NULL), obj (o), entry (t), is_done (), flagpole (new Flagpole ())
 {
 }
 
@@ -46,7 +45,7 @@ Thread::Stop ()
 {
   if (thread == NULL)
     return;
-  should_stop.set_value ();
+  flagpole->raise (Flag_Stop);
 
   if (thread->joinable ())
     thread->join ();
@@ -57,7 +56,7 @@ Thread::Stop ()
 void
 Thread::StopDelete ()
 {
-  should_stop.set_value ();
+  flagpole->raise (Flag_Stop);
 
   if (thread == NULL)
     return;
@@ -79,7 +78,7 @@ Thread::Start ()
 }
 
 void
-Thread::Run (std::shared_future<void> stop)
+Thread::Run (FlagpolePtr pole)
 {
-  (obj->*entry) (stop);
+  (obj->*entry) (pole);
 }

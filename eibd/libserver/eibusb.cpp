@@ -263,10 +263,10 @@ LowLevelDriverInterface::EMIVer USBConverterInterface::getEMIVer ()
   return v;
 }
 
-pth_sem_t *
-USBConverterInterface::Send_Queue_Empty_Cond ()
+void
+USBConverterInterface::Wait_Send_Queue_Empty ()
 {
-  return i->Send_Queue_Empty_Cond ();
+  return i->Wait_Send_Queue_Empty ();
 }
 
 bool

@@ -1,7 +1,7 @@
 noinst_LIBRARIES = libeibstack.a
 AM_CPPFLAGS=-I$(top_srcdir)/eibd/include -I$(top_srcdir)/common $(PTHSEM_CFLAGS)
 
-COMMON=exception.h queue.h common.h common.cpp threads.h threads.cpp trace.h trace.cpp 
+COMMON=exception.h queue.h common.h common.cpp threads.h threads.cpp trace.h trace.cpp flagpole.h flagpole.cpp nonblockio.h nonblockio.cpp
 PDUs=lpdu.h lpdu.cpp tpdu.h tpdu.cpp apdu.h apdu.cpp 
 CORE=lowlevel.h layer2.h layer3.h layer3.cpp layer4.h layer4.cpp layer7.h layer7.cpp 
 CACHE=groupcache.h groupcache.cpp groupcacheclient.h groupcacheclient.cpp 

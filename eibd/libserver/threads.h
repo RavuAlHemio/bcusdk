@@ -21,10 +21,17 @@
 #define THREADS_H
 
 #include <memory>
+#include <atomic>
 #include <thread>
-#include <future>
 
-class Event;
+class Flagpole;
+
+typedef std::shared_ptr<Flagpole> FlagpolePtr;
+
+enum
+{
+  Flag_Stop = 0
+};
 
 /** interface for a class started by a thread */
 class Runable
@@ -35,7 +42,7 @@ public:
 /** pointer to an thread entry point in Runable
  * the thread should exit, if stopcond can be deceremented
  */
-typedef void (Runable::*THREADENTRY) (std::shared_future<void> stop);
+typedef void (Runable::*THREADENTRY) (FlagpolePtr pole);
 
 /** implements a Thread */
 class Thread
@@ -48,26 +55,26 @@ class Thread
   Runable *obj;
   /** entry point */
   THREADENTRY entry;
-  /** stop condition */
-  std::promise<void> should_stop;
   /** is done */
   std::atomic<bool> is_done;
 
 protected:
   /** main function of the thread
-   * @param stop if stop can be decemented, the routine should exit
+   * @param stop if stop has been triggered, the routine should exit
    */
-    virtual void Run (std::shared_future<void> stop);
+  virtual void Run (FlagpolePtr pole);
+  /** flagpole for this thread */
+  FlagpolePtr flagpole;
 public:
-    /** create a thread
-     * if o and t are not present, Run is runned, which has to be replaced
-     * @param o Object to run
-     * @param t Entry point
-     */
-    Thread (Runable * o = NULL, THREADENTRY t = NULL);
-    virtual ~ Thread ();
+  /** create a thread
+   * if o and t are not present, Run is runned, which has to be replaced
+   * @param o Object to run
+   * @param t Entry point
+   */
+  Thread (Runable * o = NULL, THREADENTRY t = NULL);
+  virtual ~Thread ();
 
-    /** starts the thread*/
+  /** starts the thread*/
   void Start ();
   /** stops the thread, if it is running */
   void Stop ();

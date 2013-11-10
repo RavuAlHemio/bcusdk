@@ -44,18 +44,18 @@ class ClientConnection:public Thread
   /** buffer length*/
   unsigned buflen;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
     ClientConnection (Server * s, Layer3 * l3, Trace * tr, int fd);
     virtual ~ ClientConnection ();
     /** reads a message and stores it in buf; aborts if stop occurs */
-  int readmessage (pth_event_t stop);
+  int readmessage (FlagpolePtr stop);
   /** send a message and aborts if stop occurs */
-  int sendmessage (int size, const uchar * msg, pth_event_t stop);
+  int sendmessage (int size, const uchar * msg, FlagpolePtr stop);
   /** send a reject; aborts if stop occurs */
-  int sendreject (pth_event_t stop);
+  int sendreject (FlagpolePtr stop);
   /** sends a reject with the code code; aborts, if stop occurs */
-  int sendreject (pth_event_t stop, int code);
+  int sendreject (FlagpolePtr stop, int code);
 
 
   /** buffer*/

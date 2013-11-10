@@ -70,18 +70,23 @@ class T_Broadcast:public L_Data_CallBack
   /** output queue */
     Queue < BroadcastComm > outqueue;
     /** semaphore for output queue */
-  pth_sem_t sem;
+  FlagpolePtr flagpole;
   bool init_ok;
 
 public:
-    T_Broadcast (Layer3 * l3, Trace * t, int write_only);
+  enum
+  {
+    Flag_DataReady = 1
+  };
+
+    T_Broadcast (Layer3 * l3, Trace * t, FlagpolePtr flagpole, int write_only);
     virtual ~ T_Broadcast ();
   bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
   /** receives APDU of a broadcast; aborts with NULL if stop occurs */
-  BroadcastComm *Get (pth_event_t stop);
+  BroadcastComm *Get (FlagpolePtr stop);
   /** send APDU c */
   void Send (const CArray & c);
 };
@@ -96,18 +101,23 @@ class GroupSocket:public L_Data_CallBack
   /** output queue */
     Queue < GroupAPDU > outqueue;
     /** semaphore for output queue */
-  pth_sem_t sem;
+  FlagpolePtr flagpole;
   bool init_ok;
 
 public:
-    GroupSocket (Layer3 * l3, Trace * t, int write_only);
+  enum
+  {
+    Flag_DataReady = 1
+  };
+
+    GroupSocket (Layer3 * l3, Trace * t, FlagpolePtr flagpole, int write_only);
     virtual ~ GroupSocket ();
   bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
   /** receives APDU of a broadcast; aborts with NULL if stop occurs */
-  GroupAPDU *Get (pth_event_t stop);
+  GroupAPDU *Get (FlagpolePtr pole);
   /** send APDU c */
   void Send (const GroupAPDU & c);
 };
@@ -122,20 +132,25 @@ class T_Group:public L_Data_CallBack
   /** output queue */
     Queue < GroupComm > outqueue;
     /** semaphore for output queue */
-  pth_sem_t sem;
+  FlagpolePtr flagpole;
   /** group address */
   eibaddr_t groupaddr;
   bool init_ok;
 
 public:
-    T_Group (Layer3 * l3, Trace * t, eibaddr_t dest, int write_only);
+  enum
+  {
+    Flag_DataReady = 1
+  };
+
+    T_Group (Layer3 * l3, Trace * t, FlagpolePtr flagpole, eibaddr_t dest, int write_only);
     virtual ~ T_Group ();
   bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
   /** receives APDU of a group telegram; aborts with NULL if stop occurs */
-  GroupComm *Get (pth_event_t stop);
+  GroupComm *Get (FlagpolePtr stop);
   /** send APDU c */
   void Send (const CArray & c);
 };
@@ -150,20 +165,25 @@ class T_TPDU:public L_Data_CallBack
   /** output queue */
     Queue < TpduComm > outqueue;
     /** semaphore for output queue */
-  pth_sem_t sem;
+  FlagpolePtr flagpole;
   /** source address to use */
   eibaddr_t src;
   bool init_ok;
 
 public:
-    T_TPDU (Layer3 * l3, Trace * t, eibaddr_t src);
+  enum
+  {
+    Flag_DataReady = 1
+  };
+
+    T_TPDU (Layer3 * l3, Trace * t, FlagpolePtr flagpole, eibaddr_t src);
     virtual ~ T_TPDU ();
   bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
   /** receives TPDU of a telegram; aborts with NULL if stop occurs */
-  TpduComm *Get (pth_event_t stop);
+  TpduComm *Get (FlagpolePtr stop);
   /** send APDU c */
   void Send (const TpduComm & c);
 };
@@ -178,20 +198,25 @@ class T_Individual:public L_Data_CallBack
   /** output queue */
     Queue < CArray > outqueue;
     /** semaphore for output queue */
-  pth_sem_t sem;
+  FlagpolePtr flagpole;
   /** destination address */
   eibaddr_t dest;
   bool init_ok;
 
 public:
-    T_Individual (Layer3 * l3, Trace * t, eibaddr_t dest, int write_only);
+  enum
+  {
+    Flag_DataReady = 1
+  };
+
+    T_Individual (Layer3 * l3, Trace * t, FlagpolePtr flagpole, eibaddr_t dest, int write_only);
     virtual ~ T_Individual ();
   bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
   /** receives APDU of a telegram; aborts with NULL if stop occurs */
-  CArray *Get (pth_event_t stop);
+  CArray *Get (FlagpolePtr stop);
   /** send APDU c */
   void Send (const CArray & c);
 };
@@ -218,12 +243,8 @@ class T_Connection:public L_Data_CallBack, private Thread
   /** repeat count of the transmitting frame */
   int repcount;
   eibaddr_t dest;
-  /** semaphore for input queue */
-  pth_sem_t insem;
-  /** semaphre for buffer queue */
-  pth_sem_t bufsem;
-    /** semaphore for output queue */
-  pth_sem_t outsem;
+  /** queue semaphore */
+  FlagpolePtr flagpole;
   bool init_ok;
 
   /** sends T_Connect */
@@ -234,16 +255,23 @@ class T_Connection:public L_Data_CallBack, private Thread
   void SendAck (int serno);
   /** Sends T_DataConnected */
   void SendData (int serno, const CArray & c);
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr stop);
 public:
-    T_Connection (Layer3 * l3, Trace * t, eibaddr_t dest);
+  enum
+  {
+    Flag_InReady = 1,
+    Flag_OutReady = 2,
+    Flag_BufReady = 3
+  };
+
+    T_Connection (Layer3 * l3, Trace * t, FlagpolePtr flagpole, eibaddr_t dest);
    ~T_Connection ();
   bool init ();
 
   void Get_L_Data (L_Data_PDU * l);
 
   /** receives APDU of a telegram; aborts with NULL if stop occurs */
-  CArray *Get (pth_event_t stop);
+  CArray *Get (FlagpolePtr stop);
   /** send APDU c */
   void Send (const CArray & c);
 };

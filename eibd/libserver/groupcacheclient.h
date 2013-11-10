@@ -28,6 +28,6 @@ bool CreateGroupCache (Layer3 * l3, Trace * t, bool enable);
 void DeleteGroupCache ();
 
 void GroupCacheRequest (Layer3 * l3, Trace * t, ClientConnection * c,
-			pth_event_t stop);
+			FlagpolePtr stop);
 
 #endif

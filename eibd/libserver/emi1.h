@@ -34,28 +34,27 @@ class EMI1Layer2Interface:public Layer2Interface, private Thread
   int mode;
   /** vbusmonitor */
   int vmode;
-  /** semaphore for outqueue */
-  pth_sem_t out_signal;
-  /** semaphore for inqueue */
-  pth_sem_t in_signal;
   /** output queue */
     Queue < LPDU * >outqueue;
   /** input queue */
     Queue < LPDU * >inqueue;
-    /** event for outqueue*/
-  pth_event_t getwait;
   bool noqueue;
   int sendmode;
 
   void Send (LPDU * l);
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr pole);
 public:
+  enum
+  {
+    Flag_OutReady = 1,
+    Flag_InReady = 2
+  };
   EMI1Layer2Interface (LowLevelDriverInterface * i, Trace * tr, int flags);
    ~EMI1Layer2Interface ();
   bool init ();
 
   void Send_L_Data (LPDU * l);
-  LPDU *Get_L_Data (pth_event_t stop);
+  LPDU *Get_L_Data (FlagpolePtr pole);
 
   bool addAddress (eibaddr_t addr);
   bool addGroupAddress (eibaddr_t addr);

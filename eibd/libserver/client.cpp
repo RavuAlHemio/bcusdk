@@ -26,6 +26,8 @@
 #include "managementclient.h"
 #include "groupcacheclient.h"
 #include "config.h"
+#include "flagpole.h"
+#include "nonblockio.h"
 
 ClientConnection::ClientConnection (Server * s, Layer3 * l3, Trace * tr,
 				    int fd)
@@ -49,12 +51,11 @@ ClientConnection::~ClientConnection ()
 }
 
 void
-ClientConnection::Run (pth_sem_t * stop1)
+ClientConnection::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (readmessage (stop) == -1)
+      if (readmessage (pole) == -1)
 	break;
       int msg = EIBTYPE (buf);
       switch (msg)
@@ -62,113 +63,113 @@ ClientConnection::Run (pth_sem_t * stop1)
 	case EIB_OPEN_BUSMONITOR:
 	  {
 	    A_Busmonitor busmon (this, l3, t, false, false);
-	    busmon.Do (stop);
+	    busmon.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_BUSMONITOR_TEXT:
 	  {
 	    A_Text_Busmonitor busmon (this, l3, t, false);
-	    busmon.Do (stop);
+	    busmon.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_BUSMONITOR_TS:
 	  {
 	    A_Busmonitor busmon (this, l3, t, false, true);
-	    busmon.Do (stop);
+	    busmon.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_VBUSMONITOR:
 	  {
 	    A_Busmonitor busmon (this, l3, t, true, false);
-	    busmon.Do (stop);
+	    busmon.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_VBUSMONITOR_TEXT:
 	  {
 	    A_Text_Busmonitor busmon (this, l3, t, true);
-	    busmon.Do (stop);
+	    busmon.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_VBUSMONITOR_TS:
 	  {
 	    A_Busmonitor busmon (this, l3, t, true, true);
-	    busmon.Do (stop);
+	    busmon.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_T_BROADCAST:
 	  {
 	    A_Broadcast cl (l3, t, this);
-	    cl.Do (stop);
+	    cl.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_T_GROUP:
 	  {
 	    A_Group cl (l3, t, this);
-	    cl.Do (stop);
+	    cl.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_T_INDIVIDUAL:
 	  {
 	    A_Individual cl (l3, t, this);
-	    cl.Do (stop);
+	    cl.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_T_TPDU:
 	  {
 	    A_TPDU cl (l3, t, this);
-	    cl.Do (stop);
+	    cl.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_T_CONNECTION:
 	  {
 	    A_Connection cl (l3, t, this);
-	    cl.Do (stop);
+	    cl.Do (pole);
 	  }
 	  break;
 
 	case EIB_OPEN_GROUPCON:
 	  {
 	    A_GroupSocket cl (l3, t, this);
-	    cl.Do (stop);
+	    cl.Do (pole);
 	  }
 	  break;
 
 	case EIB_M_INDIVIDUAL_ADDRESS_READ:
-	  ReadIndividualAddresses (l3, t, this, stop);
+	  ReadIndividualAddresses (l3, t, this, pole);
 	  break;
 
 	case EIB_PROG_MODE:
-	  ChangeProgMode (l3, t, this, stop);
+	  ChangeProgMode (l3, t, this, pole);
 	  break;
 
 	case EIB_MASK_VERSION:
-	  GetMaskVersion (l3, t, this, stop);
+	  GetMaskVersion (l3, t, this, pole);
 	  break;
 
 	case EIB_M_INDIVIDUAL_ADDRESS_WRITE:
-	  WriteIndividualAddress (l3, t, this, stop);
+	  WriteIndividualAddress (l3, t, this, pole);
 	  break;
 
 	case EIB_MC_CONNECTION:
-	  ManagementConnection (l3, t, this, stop);
+	  ManagementConnection (l3, t, this, pole);
 	  break;
 
 	case EIB_MC_INDIVIDUAL:
-	  ManagementIndividual (l3, t, this, stop);
+	  ManagementIndividual (l3, t, this, pole);
 	  break;
 
 	case EIB_LOAD_IMAGE:
-	  LoadImage (l3, t, this, stop);
+	  LoadImage (l3, t, this, pole);
 	  break;
 
 	case EIB_CACHE_ENABLE:
@@ -179,45 +180,44 @@ ClientConnection::Run (pth_sem_t * stop1)
 	case EIB_CACHE_READ_NOWAIT:
 	case EIB_CACHE_LAST_UPDATES:
 #ifdef HAVE_GROUPCACHE
-	  GroupCacheRequest (l3, t, this, stop);
+	  GroupCacheRequest (l3, t, this, pole);
 #else
-	  sendreject (stop);
+	  sendreject (pole);
 #endif
 	  break;
 
 	case EIB_RESET_CONNECTION:
-	  sendreject (stop, EIB_RESET_CONNECTION);
+	  sendreject (pole, EIB_RESET_CONNECTION);
 	  EIBSETTYPE (buf, EIB_INVALID_REQUEST);
 	  break;
 
 	default:
-	  sendreject (stop);
+	  sendreject (pole);
 	}
       if (EIBTYPE (buf) == EIB_RESET_CONNECTION)
-	sendreject (stop, EIB_RESET_CONNECTION);
+	sendreject (pole, EIB_RESET_CONNECTION);
     }
-  pth_event_free (stop, PTH_FREE_THIS);
   StopDelete ();
 }
 
 int
-ClientConnection::sendreject (pth_event_t stop)
+ClientConnection::sendreject (FlagpolePtr pole)
 {
   uchar buf[2];
   EIBSETTYPE (buf, EIB_INVALID_REQUEST);
-  return sendmessage (2, buf, stop);
+  return sendmessage (2, buf, pole);
 }
 
 int
-ClientConnection::sendreject (pth_event_t stop, int type)
+ClientConnection::sendreject (FlagpolePtr pole, int type)
 {
   uchar buf[2];
   EIBSETTYPE (buf, type);
-  return sendmessage (2, buf, stop);
+  return sendmessage (2, buf, pole);
 }
 
 int
-ClientConnection::sendmessage (int size, const uchar * msg, pth_event_t stop)
+ClientConnection::sendmessage (int size, const uchar * msg, FlagpolePtr pole)
 {
   int i;
   int start;
@@ -228,13 +228,13 @@ ClientConnection::sendmessage (int size, const uchar * msg, pth_event_t stop)
   head[0] = (size >> 8) & 0xff;
   head[1] = (size) & 0xff;
 
-  i = pth_write_ev (fd, head, 2, stop);
+  i = FlagpoleIO::write (pole, fd, head, 2);
   if (i != 2)
     return -1;
 
   start = 0;
 lp:
-  i = pth_write_ev (fd, msg + start, size - start, stop);
+  i = FlagpoleIO::write (pole, fd, msg + start, size - start);
   if (i <= 0)
     return -1;
   start += i;
@@ -244,13 +244,13 @@ lp:
 }
 
 int
-ClientConnection::readmessage (pth_event_t stop)
+ClientConnection::readmessage (FlagpolePtr pole)
 {
   uchar head[2];
   int i;
   unsigned start;
 
-  i = pth_read_ev (fd, &head, 2, stop);
+  i = FlagpoleIO::read (pole, fd, &head, 2);
   if (i != 2)
     return -1;
 
@@ -268,7 +268,7 @@ ClientConnection::readmessage (pth_event_t stop)
 
   start = 0;
 lp:
-  i = pth_read_ev (fd, buf + start, size - start, stop);
+  i = FlagpoleIO::read (pole, fd, buf + start, size - start);
   if (i <= 0)
     return -1;
   start += i;

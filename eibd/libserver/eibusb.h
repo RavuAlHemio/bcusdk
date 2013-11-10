@@ -37,7 +37,7 @@ public:
 
   void Send_Packet (CArray l);
   bool Send_Queue_Empty ();
-  pth_sem_t *Send_Queue_Empty_Cond ();
+  void Wait_Send_Queue_Empty ();
   CArray *Get_Packet (pth_event_t stop);
 
   void SendReset ();

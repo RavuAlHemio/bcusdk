@@ -18,6 +18,7 @@
 */
 
 #include "connection.h"
+#include "flagpole.h"
 
 A_Broadcast::A_Broadcast (Layer3 * l3, Trace * tr, ClientConnection * cc)
 {
@@ -28,7 +29,7 @@ A_Broadcast::A_Broadcast (Layer3 * l3, Trace * tr, ClientConnection * cc)
   c = 0;
   if (con->size != 5)
     return;
-  c = new T_Broadcast (layer3, t, con->buf[4] != 0 ? 1 : 0);
+  c = new T_Broadcast (layer3, t, flagpole, con->buf[4] != 0 ? 1 : 0);
   if (!c->init ())
     {
       delete c;
@@ -48,7 +49,7 @@ A_Group::A_Group (Layer3 * l3, Trace * tr, ClientConnection * cc)
   if (con->size != 5)
     return;
   c =
-    new T_Group (layer3, t, (con->buf[2] << 8) | (con->buf[3]),
+    new T_Group (layer3, t, flagpole, (con->buf[2] << 8) | (con->buf[3]),
 		 con->buf[4] != 0 ? 1 : 0);
   if (!c->init ())
     {
@@ -68,7 +69,7 @@ A_TPDU::A_TPDU (Layer3 * l3, Trace * tr, ClientConnection * cc)
   c = 0;
   if (con->size != 5)
     return;
-  c = new T_TPDU (layer3, t, (con->buf[2] << 8) | (con->buf[3]));
+  c = new T_TPDU (layer3, t, flagpole, (con->buf[2] << 8) | (con->buf[3]));
   if (!c->init ())
     {
       delete c;
@@ -88,7 +89,7 @@ A_Individual::A_Individual (Layer3 * l3, Trace * tr, ClientConnection * cc)
   if (con->size != 5)
     return;
   c =
-    new T_Individual (layer3, t, (con->buf[2] << 8) | (con->buf[3]),
+    new T_Individual (layer3, t, flagpole, (con->buf[2] << 8) | (con->buf[3]),
 		      con->buf[4] != 0 ? 1 : 0);
   if (!c->init ())
     {
@@ -108,7 +109,7 @@ A_Connection::A_Connection (Layer3 * l3, Trace * tr, ClientConnection * cc)
   c = 0;
   if (con->size != 5)
     return;
-  c = new T_Connection (layer3, t, (con->buf[2] << 8) | (con->buf[3]));
+  c = new T_Connection (layer3, t, flagpole, (con->buf[2] << 8) | (con->buf[3]));
   if (!c->init ())
     {
       delete c;
@@ -127,7 +128,7 @@ A_GroupSocket::A_GroupSocket (Layer3 * l3, Trace * tr, ClientConnection * cc)
   c = 0;
   if (con->size != 5)
     return;
-  c = new GroupSocket (layer3, t, con->buf[4] != 0 ? 1 : 0);
+  c = new GroupSocket (layer3, t, flagpole, con->buf[4] != 0 ? 1 : 0);
   if (!c->init ())
     {
       delete c;
@@ -186,18 +187,18 @@ A_GroupSocket::~A_GroupSocket ()
 }
 
 void
-A_Broadcast::Do (pth_event_t stop)
+A_Broadcast::Do (FlagpolePtr pole)
 {
   if (!c)
     {
-      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      con->sendreject (pole, EIB_PROCESSING_ERROR);
       return;
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  if (con->sendmessage (2, con->buf, pole) == -1)
     return;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (con->readmessage (stop) == -1)
+      if (con->readmessage (pole) == -1)
 	break;
       if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
@@ -212,18 +213,18 @@ A_Broadcast::Do (pth_event_t stop)
 }
 
 void
-A_Group::Do (pth_event_t stop)
+A_Group::Do (FlagpolePtr pole)
 {
   if (!c)
     {
-      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      con->sendreject (pole, EIB_PROCESSING_ERROR);
       return;
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  if (con->sendmessage (2, con->buf, pole) == -1)
     return;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (con->readmessage (stop) == -1)
+      if (con->readmessage (pole) == -1)
 	break;
       if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
@@ -238,18 +239,18 @@ A_Group::Do (pth_event_t stop)
 }
 
 void
-A_TPDU::Do (pth_event_t stop)
+A_TPDU::Do (FlagpolePtr pole)
 {
   if (!c)
     {
-      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      con->sendreject (pole, EIB_PROCESSING_ERROR);
       return;
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  if (con->sendmessage (2, con->buf, pole) == -1)
     return;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (con->readmessage (stop) == -1)
+      if (con->readmessage (pole) == -1)
 	break;
       if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
@@ -267,18 +268,18 @@ A_TPDU::Do (pth_event_t stop)
 }
 
 void
-A_Individual::Do (pth_event_t stop)
+A_Individual::Do (FlagpolePtr pole)
 {
   if (!c)
     {
-      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      con->sendreject (pole, EIB_PROCESSING_ERROR);
       return;
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  if (con->sendmessage (2, con->buf, pole) == -1)
     return;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (con->readmessage (stop) == -1)
+      if (con->readmessage (pole) == -1)
 	break;
       if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
@@ -293,18 +294,18 @@ A_Individual::Do (pth_event_t stop)
 }
 
 void
-A_Connection::Do (pth_event_t stop)
+A_Connection::Do (FlagpolePtr pole)
 {
   if (!c)
     {
-      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      con->sendreject (pole, EIB_PROCESSING_ERROR);
       return;
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  if (con->sendmessage (2, con->buf, pole) == -1)
     return;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (con->readmessage (stop) == -1)
+      if (con->readmessage (pole) == -1)
 	break;
       if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
@@ -319,18 +320,18 @@ A_Connection::Do (pth_event_t stop)
 }
 
 void
-A_GroupSocket::Do (pth_event_t stop)
+A_GroupSocket::Do (FlagpolePtr pole)
 {
   if (!c)
     {
-      con->sendreject (stop, EIB_PROCESSING_ERROR);
+      con->sendreject (pole, EIB_PROCESSING_ERROR);
       return;
     }
-  if (con->sendmessage (2, con->buf, stop) == -1)
+  if (con->sendmessage (2, con->buf, pole) == -1)
     return;
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      if (con->readmessage (stop) == -1)
+      if (con->readmessage (pole) == -1)
 	break;
       if (EIBTYPE (con->buf) == EIB_RESET_CONNECTION)
 	break;
@@ -348,12 +349,11 @@ A_GroupSocket::Do (pth_event_t stop)
 }
 
 void
-A_Broadcast::Run (pth_sem_t * stop1)
+A_Broadcast::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      BroadcastComm *e = c->Get (stop);
+      BroadcastComm *e = c->Get (pole);
       if (e)
 	{
 	  CArray res;
@@ -363,20 +363,18 @@ A_Broadcast::Run (pth_sem_t * stop1)
 	  res[3] = (e->src) & 0xff;
 	  res.setpart (e->data.array (), 4, e->data ());
 	  t->TracePacket (7, this, "Recv", e->data);
-	  con->sendmessage (res (), res.array (), stop);
+	  con->sendmessage (res (), res.array (), pole);
 	  delete e;
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 void
-A_Group::Run (pth_sem_t * stop1)
+A_Group::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      GroupComm *e = c->Get (stop);
+      GroupComm *e = c->Get (pole);
       if (e)
 	{
 	  CArray res;
@@ -386,20 +384,18 @@ A_Group::Run (pth_sem_t * stop1)
 	  res[3] = (e->src) & 0xff;
 	  res.setpart (e->data.array (), 4, e->data ());
 	  t->TracePacket (7, this, "Recv", e->data);
-	  con->sendmessage (res (), res.array (), stop);
+	  con->sendmessage (res (), res.array (), pole);
 	  delete e;
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 void
-A_TPDU::Run (pth_sem_t * stop1)
+A_TPDU::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      TpduComm *e = c->Get (stop);
+      TpduComm *e = c->Get (pole);
       if (e)
 	{
 	  CArray res;
@@ -409,20 +405,18 @@ A_TPDU::Run (pth_sem_t * stop1)
 	  res[3] = (e->addr) & 0xff;
 	  res.setpart (e->data.array (), 4, e->data ());
 	  t->TracePacket (7, this, "Recv", e->data);
-	  con->sendmessage (res (), res.array (), stop);
+	  con->sendmessage (res (), res.array (), pole);
 	  delete e;
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 void
-A_Individual::Run (pth_sem_t * stop1)
+A_Individual::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      CArray *e = c->Get (stop);
+      CArray *e = c->Get (pole);
       if (e)
 	{
 	  CArray res;
@@ -430,20 +424,18 @@ A_Individual::Run (pth_sem_t * stop1)
 	  EIBSETTYPE (res, EIB_APDU_PACKET);
 	  res.setpart (e->array (), 2, e->len ());
 	  t->TracePacket (7, this, "Recv", *e);
-	  con->sendmessage (res (), res.array (), stop);
+	  con->sendmessage (res (), res.array (), pole);
 	  delete e;
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 void
-A_Connection::Run (pth_sem_t * stop1)
+A_Connection::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      CArray *e = c->Get (stop);
+      CArray *e = c->Get (pole);
       if (e)
 	{
 	  CArray res;
@@ -451,20 +443,18 @@ A_Connection::Run (pth_sem_t * stop1)
 	  EIBSETTYPE (res, EIB_APDU_PACKET);
 	  res.setpart (e->array (), 2, e->len ());
 	  t->TracePacket (7, this, "Recv", *e);
-	  con->sendmessage (res (), res.array (), stop);
+	  con->sendmessage (res (), res.array (), pole);
 	  delete e;
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }
 
 void
-A_GroupSocket::Run (pth_sem_t * stop1)
+A_GroupSocket::Run (FlagpolePtr pole)
 {
-  pth_event_t stop = pth_event (PTH_EVENT_SEM, stop1);
-  while (pth_event_status (stop) != PTH_STATUS_OCCURRED)
+  while (!pole->raised (Flag_Stop))
     {
-      GroupAPDU *e = c->Get (stop);
+      GroupAPDU *e = c->Get (pole);
       if (e)
 	{
 	  CArray res;
@@ -476,9 +466,8 @@ A_GroupSocket::Run (pth_sem_t * stop1)
 	  res[5] = (e->dst) & 0xff;
 	  res.setpart (e->data.array (), 6, e->data ());
 	  t->TracePacket (7, this, "Recv", e->data);
-	  con->sendmessage (res (), res.array (), stop);
+	  con->sendmessage (res (), res.array (), pole);
 	  delete e;
 	}
     }
-  pth_event_free (stop, PTH_FREE_THIS);
 }

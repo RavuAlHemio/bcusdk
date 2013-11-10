@@ -26,8 +26,11 @@
 /** implements busmonitor functions for a client */
 class A_Busmonitor:public L_Busmonitor_CallBack, private Thread
 {
-  /** semaphore for the input queue */
-  pth_sem_t sem;
+  enum
+  {
+    Flag_DataReady = 1
+  };
+
   /** input queue */
     Queue < L_Busmonitor_PDU * >data;
     /** is virtual busmonitor */
@@ -35,7 +38,7 @@ class A_Busmonitor:public L_Busmonitor_CallBack, private Thread
     /** should provide timestamps */
   bool ts;
 
-  void Run (pth_sem_t * stop);
+  void Run (FlagpolePtr pole);
 protected:
   /** Layer 3 Interface*/
     Layer3 * l3;
@@ -44,7 +47,7 @@ protected:
   /** debug output */
   Trace *t;
   /** turns a busmonitor LPDU into a eibd packet and sends it */
-  virtual int sendResponse (L_Busmonitor_PDU * p, pth_event_t stop);
+  virtual int sendResponse (L_Busmonitor_PDU * p, FlagpolePtr pole);
 public:
   /** initializes busmonitor
    * @param c client connection
@@ -53,20 +56,20 @@ public:
    * @param virt is virtual busmonitor
    * @param ts provide timestamps
    */
-    A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr, bool virt =
-		  false, bool ts = false);
+    A_Busmonitor (ClientConnection * c, Layer3 * l3, Trace * tr,
+                  bool virt = false, bool ts = false);
     virtual ~ A_Busmonitor ();
   void Get_L_Busmonitor (L_Busmonitor_PDU * l);
 
   /** start processing */
-  void Do (pth_event_t stop);
+  void Do (FlagpolePtr stop);
 };
 
 /** implements text busmonitor functions for a client */
 class A_Text_Busmonitor:public A_Busmonitor
 {
 protected:
-  int sendResponse (L_Busmonitor_PDU * p, pth_event_t stop);
+  int sendResponse (L_Busmonitor_PDU * p, FlagpolePtr pole);
 public:
   /** initializes busmonitor
    * @param c client connection
